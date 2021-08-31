@@ -10,14 +10,14 @@
 #ifndef __SYSCALLS_M68K_H
 #define __SYSCALLS_M68K_H
 
-/*
- * Set an exception handler
- *
- * Inputs:
- * number = the number of the 68000 exception vector
- * handler = pointer to the handler (must be coded as an interrupt handler)
- */
-extern long setexc(unsigned short number, void (* handler)());
+// /*
+//  * Set an exception handler
+//  *
+//  * Inputs:
+//  * number = the number of the 68000 exception vector
+//  * handler = pointer to the handler (must be coded as an interrupt handler)
+//  */
+// extern int setexc(unsigned short number, void (* handler)());
 
 /*
  * Print a character to the text screen

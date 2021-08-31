@@ -5,6 +5,13 @@
 	cnop	0,4
 _main
 	movem.l	l6,-(a7)
+	move.l	#65,-(a7)
+	jsr	_bconout
+	move.l	#66,-(a7)
+	jsr	_bconout
+	move.l	#67,-(a7)
+	jsr	_bconout
+	add.w	#12,a7
 l3
 	bra	l3
 l5
@@ -13,4 +20,4 @@ l1
 l6	reg
 l8	equ	0
 	rts
-; stacksize=0
+	public	_bconout
