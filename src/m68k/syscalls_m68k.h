@@ -10,6 +10,8 @@
 #ifndef __SYSCALLS_M68K_H
 #define __SYSCALLS_M68K_H
 
+#include "types.h"
+
 // /*
 //  * Set an exception handler
 //  *
@@ -25,6 +27,6 @@
  * Inputs:
  * c = character to print
  */
-extern int bconout(char c);
+extern int32_t bconout(char c);
 
 #endif

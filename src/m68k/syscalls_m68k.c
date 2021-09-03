@@ -2,12 +2,13 @@
  * Definitions for calling into the Foenix/MCP BIOS on the 68000 series
  */
 
+#include "types.h"
 #include "syscalls_m68k.h"
 
 /*
  * Call into the BIOS by issuing a TRAP #13
  */
-extern int bios(int function, ...);
+extern int32_t bios(int32_t function, ...);
 
 // /*
 //  * Set an exception handler
@@ -31,6 +32,6 @@ extern int bios(int function, ...);
  * Inputs:
  * c = character to print
  */
-int bconout(char c) {
+int32_t bconout(char c) {
   return bios(1, c);
 }

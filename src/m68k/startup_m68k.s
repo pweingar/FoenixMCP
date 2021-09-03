@@ -1,5 +1,6 @@
-            xref ___exit
             xref ___main
+            xdef _bios
+            xdef ___exit
 
             code
 
@@ -25,10 +26,10 @@ ___exit:
 
 ;
 ; Function to make a BIOS system call based on the number of the BIOS function:
-; int bios(int number, int p0, int p1, int p2, int p3, int p4, int p5)
+; int32_t bios(int32_t number, int32_t p0, int32_t p1, int32_t p2, int32_t p3, int32_t p4, int32_t p5)
 ;
-_bios::     movem.l d1-d7,-(sp)
-
+_bios:
+            movem.l d1-d7,-(sp)
             move.l (18,sp),d7           ; Parameter 5 to D7
             move.l (22,sp),d6           ; Parameter 4 to D6
             move.l (26,sp),d5           ; Parameter 3 to D5
@@ -55,4 +56,3 @@ h_trap_13:
             addq.l #8,a7
 
             rte                         ; Return to the caller
-

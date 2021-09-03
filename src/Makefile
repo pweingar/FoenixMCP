@@ -1,18 +1,30 @@
-AS=vasmm68k_mot
-CC=vc
-CFLAGS=+../vbcc/config/m68k-foenix -I. -Iinclude -k
-DEPS=syscalls_m68k.h
+export AS = vasmm68k_mot
+export ASFLAGS = -quiet -Fvobj -nowarn=62
+export CC = vc
+export CFLAGS = +../vbcc/config/m68k-foenix -I. -Iinclude
+export RM = cmd /C del /Q /F
 
-foenixmcp.s68: foenixmcp.o bios_m68k.o syscalls_m68k.o startup_m68k.o
-	$(CC) $(CFLAGS) -o foenixmcp.s68 foenixmcp.o bios_m68k.o syscalls_m68k.o
+cpu = m68k
+cpu_assembly_src := $(wildcard $(cpu)/*.s)
+cpu_c_src := $(wildcard $(cpu)/*.c)
+cpu_assembly_obj := $(subst .s,.o,$(cpu_assembly_src))
+cpu_c_obj := $(subst .c,.o,$(cpu_c_src))
 
-startup_m68k.o: startup_m68k.s
-	$(AS) -Fvobj -o $@ $<
+.PHONY: all $(cpu)
+
+all: foenixmcp.s68 $(cpu)
+
+$(cpu):
+	$(MAKE) --directory=$@
+
+foenixmcp.s68: foenixmcp.o $(cpu)
+	$(CC) $(CFLAGS) -o foenixmcp.s68 foenixmcp.o $(cpu_c_obj)
 
 %.o: %.c $(DEPS)
 	$(CC) -S -c -o $@ $< $(CFLAGS)
 
-PHONEY: clean
+.PHONEY: clean
 
 clean:
-	del *.o
+	$(RM) *.s68 *.o
+	$(MAKE) --directory=$(cpu) clean

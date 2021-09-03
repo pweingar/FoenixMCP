@@ -2,7 +2,7 @@
  * Startup file for the Foenix/MCP
  */
 
-#include "syscalls_m68k.h"
+#include "m68k/syscalls_m68k.h"
 
 int main(int argc, char * argv[]) {
   bconout('A');

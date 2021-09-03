@@ -1,10 +1,20 @@
-AS=vasmm68k_mot
-CC=vc
-CFLAGS=+../../vbcc/config/m68k-foenix -I. -I../include
-DEPS=syscalls_m68k.h
+override CFLAGS = +../../vbcc/config/m68k-foenix -I. -I../include
 
-startup.o: startup.s
-	$(AS) -o $@ $<
+asources = startup_m68k.s
+aobjects = $(subst .s,.o,$(asources))
+csources = bios_m68k.c syscalls_m68k.c
+cobjects = $(subst .c,.o,$(csources))
 
-%.o: %.c $(DEPS)
+.PHONY: all
+all: $(aobjects) $(cobjects)
+
+%.o: $.s
+	$(AS) $(ASFLAGS) -o $@ $<
+
+%.o: %.c
 	$(CC) -c -o $@ $< $(CFLAGS)
+
+.PHONY: clean
+
+clean:
+	$(RM) $(aobjects) $(cobjects)

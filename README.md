@@ -31,6 +31,22 @@ Please refer to processor specific building instructions that will be included.
 For the 65816 and 68000 computers, the project will be built using the VBCC
 compiler.
 
+### Building for the M68000 CPU
+
+Building this project requires the [VBCC](http://www.compilers.de/vbcc.html) compiler and the
+```MAKE``` utility. Using your command line, go into the ```src``` directory and type:
+
+```
+make all
+```
+to build the kernel.
+
+To remove binaries and intermediate files:
+
+```
+make clean
+```
+
 ## License
 
 Most of the source code for this kernel is made available under the open source
