@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "*.s": "assembly",
+        "*.forth": "forth",
+        "syscalls_m68k.h": "c"
+    }
+}

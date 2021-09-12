@@ -1,0 +1,23 @@
+assign CS_BEATRIX_Config_o        = ( iBUS_A_i[16:8] == 9'b0_0000_0000) & iBUS_CS_BEATRIX_i;                        // $00C20000..$00C200FF    - Control Registers
+// PSG
+assign CS_Ext_PSG_o                = ( iBUS_A_i[16:4] == 9'b0_0000_0001_0000) & iBUS_CS_BEATRIX_i;                // $00C20100..$00C2010F    - Extern PSG
+assign CS_Int_L_PSG_o            = ( iBUS_A_i[16:4] == 9'b0_0000_0001_0001) & iBUS_CS_BEATRIX_i;                // $00C20110..$00C2011F    - Internal PSG - L Channel
+assign CS_Int_R_PSG_o            = ( iBUS_A_i[16:4] == 9'b0_0000_0001_0010) & iBUS_CS_BEATRIX_i;                // $00C20120..$00C2012F    - Internal PSG - R Channel
+assign CS_Int_S_PSG_o            = ( iBUS_A_i[16:4] == 9'b0_0000_0001_0011) & iBUS_CS_BEATRIX_i;                // $00C20130..$00C2013F    - Internal PSG - S Channel 
+// External Devices
+assign CS_OPL3_o                    = ( iBUS_A_i[16:9] == 8'b0_0000_001) & iBUS_CS_BEATRIX_i;                        // $00C20200..$00C203FF - Extern OPL3
+assign CS_Ext_OPN2_o                = ( iBUS_A_i[16:9] == 8'b0_0000_010) & iBUS_CS_BEATRIX_i;                        // $00C20400..$00C205FF - Extern OPN2
+assign CS_Ext_OPM_o                = ( iBUS_A_i[16:9] == 8'b0_0000_011) & iBUS_CS_BEATRIX_i;                        // $00C20600..$00C207FF - Extern OPM
+assign CS_Ext_L_SID_o            = ( iBUS_A_i[16:8] == 9'b0_0000_1000) & iBUS_CS_BEATRIX_i;                        // $00C20800..$00C208FF - Extern Left SID
+assign CS_Ext_R_SID_o            = ( iBUS_A_i[16:8] == 9'b0_0000_1001) & iBUS_CS_BEATRIX_i;                        // $00C20900..$00C209FF - Extern Right SID
+// Internal Devices
+assign CS_Int_OPN2_o                = ( iBUS_A_i[16:9] == 8'b0_0000_101) & iBUS_CS_BEATRIX_i;                        // $00C20A00..$00C20BFF - Internal OPN2
+assign CS_Int_OPM_o                = ( iBUS_A_i[16:9] == 8'b0_0000_110) & iBUS_CS_BEATRIX_i;                        // $00C20C00..$00C20DFF - Internal OPM
+assign CS_CODEC_o                    = ( iBUS_A_i[16:9] == 8'b0_0000_111) & iBUS_CS_BEATRIX_i;                        // $00C20E00..$00C20FFF - CODEC
+
+assign CS_Int_L_SID_o            = ( iBUS_A_i[16:9] == 8'b0_0001_000) & iBUS_CS_BEATRIX_i;                        // $00C21000..$00C211FF - Internal SID Left
+assign CS_Int_R_SID_o            = ( iBUS_A_i[16:9] == 8'b0_0001_001) & iBUS_CS_BEATRIX_i;                        // $00C21200..$00C213FF - Internal SID Right
+assign CS_Int_S_SID_o            = ( iBUS_A_i[16:9] == 8'b0_0001_010) & iBUS_CS_BEATRIX_i;                        // $00C21400..$00C215FF - Internal SID Stereo
+
+assign CS_CPU_2_DAC48_o            = ( iBUS_A_i[16:8] == 9'b0_0010_0000) & iBUS_CS_BEATRIX_i;                        // $00C20000..$00C000FF    - CPU 2 DAC - 48Khz
+assign CS_CPU_2_DAC44_o            = ( iBUS_A_i[16:8] == 9'b0_0010_0001) & iBUS_CS_BEATRIX_i;                        // $00C20100..$00C001FF    - CPU 2 DAC - 44Khz

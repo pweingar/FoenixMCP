@@ -1,7 +1,7 @@
 export AS = vasmm68k_mot
 export ASFLAGS = -quiet -Fvobj -nowarn=62
 export CC = vc
-export CFLAGS = +../vbcc/config/m68k-foenix -I. -Iinclude
+export CFLAGS = +../vbcc/config/m68k-foenix -I. -Iinclude -DCPU=32 -DSYSTEM=4
 export RM = cmd /C del /Q /F
 
 cpu = m68k
@@ -17,8 +17,8 @@ all: foenixmcp.s68 $(cpu)
 $(cpu):
 	$(MAKE) --directory=$@
 
-foenixmcp.s68: foenixmcp.o $(cpu)
-	$(CC) $(CFLAGS) -o foenixmcp.s68 foenixmcp.o $(cpu_c_obj)
+foenixmcp.s68: foenixmcp.o text_screen.o $(cpu)
+	$(CC) $(CFLAGS) -o foenixmcp.s68 foenixmcp.o text_screen.o $(cpu_c_obj)
 
 %.o: %.c $(DEPS)
 	$(CC) -S -c -o $@ $< $(CFLAGS)

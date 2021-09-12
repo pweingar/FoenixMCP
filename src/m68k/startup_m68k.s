@@ -2,6 +2,11 @@
             xdef _bios
             xdef ___exit
 
+            section "vectors",code
+
+            dc.l ___STACK           ; Initial stack pointer
+            dc.l coldboot           ; Initial PC
+
             code
 
 coldboot:   lea ___STACK,sp

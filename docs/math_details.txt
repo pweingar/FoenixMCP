@@ -1,0 +1,35 @@
+5'b00000: iBUS_D_FixedMATH_o = UnsignedMult[1];
+        5'b00001: iBUS_D_FixedMATH_o = UnsignedMult[0];
+        5'b00010: iBUS_D_FixedMATH_o = UnsignedMult[3];
+        5'b00011: iBUS_D_FixedMATH_o = UnsignedMult[2];
+        5'b00100: iBUS_D_FixedMATH_o = UnsignedMultOutput[31:16]; 
+        5'b00101: iBUS_D_FixedMATH_o = UnsignedMultOutput[15:0];
+        5'b00110: iBUS_D_FixedMATH_o = UnsignedMultOutput[63:48];
+        5'b00111: iBUS_D_FixedMATH_o = UnsignedMultOutput[47:32];
+        // Signed Mult
+        5'b01000: iBUS_D_FixedMATH_o = SignedMult[1];
+        5'b01001: iBUS_D_FixedMATH_o = SignedMult[0];
+        5'b01010: iBUS_D_FixedMATH_o = SignedMult[3];
+        5'b01011: iBUS_D_FixedMATH_o = SignedMult[2];
+        5'b01100: iBUS_D_FixedMATH_o = SignedMultOutput[31:16];
+        5'b01101: iBUS_D_FixedMATH_o = SignedMultOutput[15:0];
+        5'b01110: iBUS_D_FixedMATH_o = SignedMultOutput[63:48];
+        5'b01111: iBUS_D_FixedMATH_o = SignedMultOutput[47:32];
+        // Unsigned Div
+        5'b10000: iBUS_D_FixedMATH_o = UnsignedDiv[1];
+        5'b10001: iBUS_D_FixedMATH_o = UnsignedDiv[0];
+        5'b10010: iBUS_D_FixedMATH_o = UnsignedDiv[3];
+        5'b10011: iBUS_D_FixedMATH_o = UnsignedDiv[2];
+        5'b10100: iBUS_D_FixedMATH_o = UnsignedDivisionQuotient[31:16];
+        5'b10101: iBUS_D_FixedMATH_o = UnsignedDivisionQuotient[15:0];
+        5'b10110: iBUS_D_FixedMATH_o = UnsignedDivisionremain[31:16];
+        5'b10111: iBUS_D_FixedMATH_o = UnsignedDivisionremain[15:0];
+        // Signed Div
+        5'b11000: iBUS_D_FixedMATH_o = SignedDiv[1];
+        5'b11001: iBUS_D_FixedMATH_o = SignedDiv[0];
+        5'b11010: iBUS_D_FixedMATH_o = SignedDiv[3];
+        5'b11011: iBUS_D_FixedMATH_o = SignedDiv[2];
+        5'b11100: iBUS_D_FixedMATH_o = SignedDivisionQuotient[31:16];
+        5'b11101: iBUS_D_FixedMATH_o = SignedDivisionQuotient[15:0];
+        5'b11110: iBUS_D_FixedMATH_o = SignedDivisionremain[31:16];
+        5'b11111: iBUS_D_FixedMATH_o = SignedDivisionremain[15:0];

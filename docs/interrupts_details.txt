@@ -1,0 +1,26 @@
+lirq0 <= {  DAC0_Playback_Done_IRQ_i, 1'b0, DAC1_Playback_Done_IRQ_i, 1'b0, BTX_IRQ_i[3:0], 2'b00, OPL3_EXT_IRQ_i, OPN2_EXT_IRQ_i, OPM_IXT_IRQ_i, SD_IRQ_i, SD_Card_Insert_i, IDE_IRQ_i,
+
+
+RTC_IRQ_i, 2'b00, ~Timer4_i, ~Timer3_i, ~Timer2_i, ~Timer1_i, ~Timer0_i, !MPU_401_int_PulSe[3], !FDC_int_PulSe[3], !LPT1_int_PulSe[3], !COM2_int_PulSe[3], !COM1_int_PulSe[3], !Mouse_int_PulSe[3], A2560K_Keyboard_IRQ_i , !Keyboard_int_PulSe[3], //16bits
+
+
+
+VID_B_HP_INT1n_i, 1'b0, VKY_III_Channel_B_IRQ_i, VID_A_HP_INT1n_i, 1'b0, VKY_III_Channel_A_IRQ_i }; //16bits
+case(CPU_A_i[4:1])
+            4'b0000: begin pending[15:0]     <= (pending[15:0]  & ~CPU_D_i); end
+            4'b0001: begin pending[31:16]    <= (pending[31:16] & ~CPU_D_i); end
+            4'b0010: begin pending[47:32]    <= (pending[47:32] & ~CPU_D_i); end
+            4'b0011: begin Temp_Reg_Unused[0] <= CPU_D_i; end
+            4'b0100: begin pol[15:0]     <= CPU_D_i; end
+            4'b0101: begin pol[31:16]     <= CPU_D_i; end
+            4'b0110: begin pol[47:32]     <= CPU_D_i; end
+            4'b0111: begin Temp_Reg_Unused[1] <= CPU_D_i; end
+            4'b1000: begin edgen[15:0] <= CPU_D_i; end
+            4'b1001: begin edgen[31:16]<= CPU_D_i; end
+            4'b1010: begin edgen[47:32]<= CPU_D_i; end
+            4'b1011: begin Temp_Reg_Unused[2] <= CPU_D_i; end
+            4'b1100: begin mask[15:0]     <= CPU_D_i; end
+            4'b1101: begin mask[31:16] <= CPU_D_i; end
+            4'b1110: begin mask[47:32] <= CPU_D_i; end
+            4'b1111: begin Temp_Reg_Unused[3] <= CPU_D_i; end
+            default: begin end

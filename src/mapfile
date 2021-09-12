@@ -1,0 +1,170 @@
+..\vbcc\targets\m68k-foenix\lib\libvc.a (_main.o) needed due to ___main
+
+Files:
+  startup_m68k.o:  vectors 0(8), CODE 10000(62) hex
+  ..\vbcc\targets\m68k-foenix\lib\libvc.a (_main.o):  CODE 10064(be), DATA 105c8(4), BSS 105d0(4) hex
+  foenixmcp.o:  CODE 10124(95) hex
+  text_screen.o:  CODE 101bc(39a), BSS 105d4(44) hex
+  bios_m68k.o:  CODE 10558(40), DATA 105cc(4) hex
+  syscalls_m68k.o:  CODE 10598(1e) hex
+  INITEXIT:  .dtors 105b6(8), .ctors 105be(8) hex
+
+
+Section mapping (numbers in hex):
+------------------------------
+  00000000 vectors  (size 8)
+           00000000 - 00000008 startup_m68k.o(vectors)
+------------------------------
+  00010000 text  (size 5b6)
+           00010000 - 00010062 startup_m68k.o(CODE)
+           00010064 - 00010122 _main.o(CODE)
+           00010124 - 000101b9 foenixmcp.o(CODE)
+           000101bc - 00010556 text_screen.o(CODE)
+           00010558 - 00010598 bios_m68k.o(CODE)
+           00010598 - 000105b6 syscalls_m68k.o(CODE)
+------------------------------
+  000105b6 .dtors  (size 8, allocated 0)
+           000105b6 - 000105be INITEXIT(.dtors)
+------------------------------
+  000105be .ctors  (size 8, allocated 0)
+           000105be - 000105c6 INITEXIT(.ctors)
+------------------------------
+  000105c8 data  (size 8, allocated 4)
+           000105c8 - 000105cc _main.o(DATA)
+           000105cc - 000105d0 bios_m68k.o(DATA)
+------------------------------
+  000105d0 bss  (size 48, allocated 0)
+           000105d0 - 000105d4 _main.o(BSS)
+           000105d4 - 00010618 text_screen.o(BSS)
+
+
+Symbols of text:
+  0x00000000 l17: local abs, size 0
+  0x00000000 l5: local abs, size 0
+  0x00000000 l57: local abs, size 0
+  0x00000000 l3: local abs, size 0
+  0x00000000 l59: local abs, size 0
+  0x00000000 l19: local abs, size 0
+  0x00000004 l3: local abs, size 0
+  0x00000004 l5: local abs, size 0
+  0x00000008 l31: local abs, size 0
+  0x00000008 l6: local abs, size 0
+  0x00000008 l13: local abs, size 0
+  0x00000008 l43: local abs, size 0
+  0x0000000c l27: local abs, size 0
+  0x0000000c l18: local abs, size 0
+  0x0000000c l9: local abs, size 0
+  0x0000000c l11: local abs, size 0
+  0x00000014 l34: local abs, size 0
+  0x00000014 l45: local abs, size 0
+  0x00000018 l13: local abs, size 0
+  0x00000018 l52: local abs, size 0
+  0x00000018 l20: local abs, size 0
+  0x0000001c l25: local abs, size 0
+  0x0000007c l32: local abs, size 0
+  0x000000fc l11: local abs, size 0
+  0x0000040c l7: local abs, size 0
+  0x0000043c l43: local abs, size 0
+  0x0000047c l18: local abs, size 0
+  0x00000c00 l29: local abs, size 0
+  0x00000c00 l4: local abs, size 0
+  0x00000c00 l41: local abs, size 0
+  0x00000c04 l16: local abs, size 0
+  0x00000c3c l50: local abs, size 0
+  0x00010000 coldboot: local reloc, size 0
+  0x00010014 clrloop: local reloc, size 0
+  0x00010024 callmain: local reloc, size 0
+  0x0001002a ___exit: global reloc, size 0
+  0x0001002c _bios: global reloc, size 0
+  0x00010054 h_trap_13: local reloc, size 0
+  0x00010064 __Exit: global reloc, size 0
+  0x0001007e l12: local reloc, size 0
+  0x0001008a l14: local reloc, size 0
+  0x0001008e l13: local reloc, size 0
+  0x0001009c l15: local reloc, size 0
+  0x000100b0 _exit: global reloc, size 0
+  0x000100ce l27: local reloc, size 0
+  0x000100da l28: local reloc, size 0
+  0x000100e2 l23: local reloc, size 0
+  0x000100e8 ___main: global reloc, size 0
+  0x000100fe l39: local reloc, size 0
+  0x00010106 l40: local reloc, size 0
+  0x00010124 _print: global reloc, size 0
+  0x00010134 l3: local reloc, size 0
+  0x0001014e l6: local reloc, size 0
+  0x00010150 l4: local reloc, size 0
+  0x00010160 l1: local reloc, size 0
+  0x00010160 l5: local reloc, size 0
+  0x00010168 _main: global reloc, size 0
+  0x00010184 l14: local reloc, size 0
+  0x00010186 l16: local reloc, size 0
+  0x00010188 l10: local reloc, size 0
+  0x0001018c l12: local reloc, size 0
+  0x000101a4 l13: local reloc, size 0
+  0x000101bc _text_init: global reloc, size 0
+  0x0001025a l2: local reloc, size 0
+  0x00010260 _text_set_cursor: global reloc, size 0
+  0x0001027e l9: local reloc, size 0
+  0x000102f2 l10: local reloc, size 0
+  0x000102f2 l7: local reloc, size 0
+  0x000102f8 _text_set_xy: global reloc, size 0
+  0x00010310 l16: local reloc, size 0
+  0x000103b0 l17: local reloc, size 0
+  0x000103b0 l14: local reloc, size 0
+  0x000103b8 _text_setsizes: global reloc, size 0
+  0x000103c6 l23: local reloc, size 0
+  0x000103f8 l21: local reloc, size 0
+  0x000103f8 l24: local reloc, size 0
+  0x00010400 _text_set_color: global reloc, size 0
+  0x00010416 l30: local reloc, size 0
+  0x0001045e l28: local reloc, size 0
+  0x0001045e l31: local reloc, size 0
+  0x00010464 _text_clear: global reloc, size 0
+  0x00010472 l37: local reloc, size 0
+  0x0001049c l39: local reloc, size 0
+  0x000104ae l42: local reloc, size 0
+  0x000104b0 l40: local reloc, size 0
+  0x000104d6 l35: local reloc, size 0
+  0x000104d6 l38: local reloc, size 0
+  0x000104d6 l41: local reloc, size 0
+  0x000104dc _text_put_raw: global reloc, size 0
+  0x000104ee l48: local reloc, size 0
+  0x0001054a l46: local reloc, size 0
+  0x0001054a l49: local reloc, size 0
+  0x00010550 _text_put_ansi: global reloc, size 0
+  0x00010554 l53: local reloc, size 0
+  0x00010554 l55: local reloc, size 0
+  0x00010554 l56: local reloc, size 0
+  0x00010558 _impl_bconout: global reloc, size 0
+  0x00010572 l1: local reloc, size 0
+  0x00010574 _bios_dispatch: global reloc, size 0
+  0x00010588 l9: local reloc, size 0
+  0x00010590 l10: local reloc, size 0
+  0x00010592 l6: local reloc, size 0
+  0x00010592 l8: local reloc, size 0
+  0x00010598 _bconout: global reloc, size 0
+  0x000105b2 l1: local reloc, size 0
+
+Symbols of .dtors:
+  0x000105b6 ___DTOR_LIST__: global reloc object, size 8
+
+Symbols of .ctors:
+  0x000105be ___CTOR_LIST__: global reloc object, size 8
+
+Symbols of data:
+  0x000105c8 l21: local reloc, size 0
+  0x000105cc _text_cursor_0: global reloc, size 0
+
+Symbols of bss:
+  0x000105d0 ___firstexit: global reloc, size 0
+  0x000105d4 l1: local reloc, size 0
+
+Linker symbols:
+  0x00010000 RAMSTART: global abs, size 0
+  0x00010000 RAMSIZE: global abs, size 0
+  0x00000400 STACKLEN: global abs, size 0
+  0x00010618 ___heap: global abs, size 0
+  0x0001fc00 ___heapend: global abs, size 0
+  0x000105d0 ___BSSSTART: global abs, size 0
+  0x00000048 ___BSSSIZE: global abs, size 0
+  0x00020000 ___STACK: global abs, size 0

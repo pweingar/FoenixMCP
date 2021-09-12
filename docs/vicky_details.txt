@@ -1,0 +1,101 @@
+MasterControl[0] = Text Mode Enable
+MasterControl[1] = Text Mode overlay
+MasterControl[2] = Graphic Mode Enable
+MasterControl[9:8] = resolution - 00: 640x480, 01:800x600, 10: 1024x768 (doesn't work yet), 11: 640x400 (I didn't try yet)
+MasterControl[10] = Doubling Pixel
+MasterControl[16] = GAMMA Enable
+MasterControl[17] = Enable Manual GAMMA Enable
+MasterControl[18] = Turn OFF sync (to monitor in sleep mode)
+it is 32 bits Register and always should be treated as such
+Mimiru Miru — Today at 7:01 PM
+Do you also have this for the border and cursor control registers?
+c256foenix — Today at 7:01 PM
+BorderControlReg0 and BorderControlReg1 are a 32bits Register
+BorderControlReg[0] = Border Enable
+BorderControlReg[6:4] = X Scroll
+BorderControlReg[13:8] = X Size
+BorderControlReg[21:16] = Y Size
+Dude, chill out!
+Mimiru Miru — Today at 7:01 PM
+Sorry!
+c256foenix — Today at 7:01 PM
+I am decyphering my own Verilog Code
+Mimiru Miru — Today at 7:01 PM
+ah ok
+c256foenix — Today at 7:02 PM
+BorderControl2 and BoardControl3 are 1x 32 bit register
+BorderControlColor[23:0] = RGB;
+Cursor Control Register is made out of MasterControl[8] and MasterControl[9]
+CursorControl[0] = Cursor Enable
+CursorControl[2:1] = Flash Rate = 00: 1 per Sec, 01: 2 per sec, 10: 4 per sec, 11: 5 per sec
+CursorControl[15:8] = Reg Rext Pointer Offset (not sure if we still use that)
+CursorControl[23:16] = Cursor Character
+CursorControl[31:24] = Cursor Color
+Cursor Control Register Position is made out of MasterControl[10] and MasterControl[11]
+Cursor Control Position[15:0] = X Position
+Cursor Control Position[31:16] = Y Position
+
+
+assign CS_VICKY_REG_A_o            = ( iBUS_A_i[16:7] == 10'b0_0000_0000_0) & iBUS_CS_VICKY_A_i;                    // $00C40000..$00C4007F    - Control Registers
+
+assign CS_Mouse_Ptr_A_Graphics_o        = ( iBUS_A_i[16:10] == 7'b0_0000_01) & iBUS_CS_VICKY_A_i;                // $00C40400..$00C80BFF    - Mouser Pointer graphics 16x16 ARGB x2
+assign CS_Mouse_Ptr_A_Registers_o    = ( iBUS_A_i[16:8] ==  9'b0_0000_1100) & iBUS_CS_VICKY_A_i;                // $00C40C00..$00C80CFF    - Mouser Pointer Registers
+
+
+
+
+
+assign CS_GAMMA_B_A_o             = ( iBUS_A_i[16:8] ==  9'b0_0100_0000) & iBUS_CS_VICKY_A_i;                        // $00C44000..$00C440FF    - GAMMA Blue
+assign CS_GAMMA_G_A_o             = ( iBUS_A_i[16:8] ==  9'b0_0100_0001) & iBUS_CS_VICKY_A_i;                        // $00C44100..$00C441FF    - GAMMA Green
+assign CS_GAMMA_R_A_o             = ( iBUS_A_i[16:8] ==  9'b0_0100_0010) & iBUS_CS_VICKY_A_i;                        // $00C44200..$00C442FF    - GAMMA Red
+
+
+
+// Channel A TEXT MEM 
+assign CS_TextMemory_A_o         = (iBUS_A_i[16:14] == 3'b0_00) & iBUS_CS_VICKY_MEM_A_i;                     //$C60000 - $C63FFF
+assign CS_ColorMemory_A_o         = (iBUS_A_i[16:14] == 3'b0_10) & iBUS_CS_VICKY_MEM_A_i;                    //$C68000 - $C6BFFF
+assign CS_BF_CLUT_A_o            = (iBUS_A_i[16:06] == 11'b0_1100_0100_00) & iBUS_CS_VICKY_MEM_A_i;      //$C6C400 - $C6C43F
+assign CS_BG_CLUT_A_o          = (iBUS_A_i[16:06] == 11'b0_1100_0100_01) & iBUS_CS_VICKY_MEM_A_i;     //$C6C440 - $C6C47F
+assign CS_VICKY_REG_B_o                    = ( iBUS_A_i[16:7] == 10'b0_0000_0000_0) & iBUS_CS_VICKY_B_i;                    // $00C80000..$00C8007F    - Control Registers
+assign CS_Bitmap_B_Registers_o         = ( iBUS_A_i[16:8] ==  9'b0_0000_0001) & iBUS_CS_VICKY_B_i;                        // $00C80100..$00C801FF    - Bitmap Control Registers
+assign CS_Tile0_B_Registers_o         = ( iBUS_A_i[16:7] == 10'b0_0000_0010_0) & iBUS_CS_VICKY_B_i;                    // $00C80200..$00C8027F    - TileMap Control Registers
+assign CS_Tile1_B_Registers_o         = ( iBUS_A_i[16:7] == 10'b0_0000_0010_1) & iBUS_CS_VICKY_B_i;                    // $00C80280..$00C802FF    - TileSet Control Registers
+assign CS_Collisions_B_Registers_o     = ( iBUS_A_i[16:8] ==  9'b0_0000_0011) & iBUS_CS_VICKY_B_i;                        // $00C80300..$00C803FF    - Collision Control Registers
+assign CS_Mouse_Ptr_B_Graphics_o        = ( iBUS_A_i[16:10] == 7'b0_0000_01) & iBUS_CS_VICKY_B_i;                        // $00C80400..$00C80BFF    - Mouser Pointer graphics 16x16 ARGB x2
+assign CS_Mouse_Ptr_B_Registers_o    = ( iBUS_A_i[16:8] ==  9'b0_0000_1100) & iBUS_CS_VICKY_B_i;                        // $00C80C00..$00C80CFF    - Mouser Pointer Registers
+
+assign CS_Sprites_B_Registers_o         = ( iBUS_A_i[16:12] == 5'b0_0001) & iBUS_CS_VICKY_B_i;                            // $00C81000..$00C81FFF    - Sprites Registers
+assign CS_LUT0_B_o                         = ( iBUS_A_i[16:13] == 4'b0_001) & iBUS_CS_VICKY_B_i;                                // $00C82000..$00C83FFF    - LUT
+assign CS_GAMMA_B_B_o                     = ( iBUS_A_i[16:8] ==  9'b0_0100_0000) & iBUS_CS_VICKY_B_i;                        // $00C84000..$00C840FF    - GAMMA Blue
+assign CS_GAMMA_G_B_o                     = ( iBUS_A_i[16:8] ==  9'b0_0100_0001) & iBUS_CS_VICKY_B_i;                        // $00C84100..$00C841FF    - GAMMA Green
+assign CS_GAMMA_R_B_o                     = ( iBUS_A_i[16:8] ==  9'b0_0100_0010) & iBUS_CS_VICKY_B_i;                        // $00C84200..$00C842FF    - GAMMA Red
+
+//    $00CA_0000 - $00CB_FFFF - VICKY TEXT MODE Internal Memory and CLUT
+// Channel B
+assign CS_TextMemory_B_o         = (iBUS_A_i[16:14] == 3'b000) & iBUS_CS_VICKY_MEM_B_i;    //$CA0000 - $CA3FFF
+assign CS_ColorMemory_B_o         = (iBUS_A_i[16:14] == 3'b010) & iBUS_CS_VICKY_MEM_B_i;   //$CA8000 - $CABFFF
+assign CS_BF_CLUT_B_o            = (iBUS_A_i[16:06] == 11'b0_1100_0100_00) & iBUS_CS_VICKY_MEM_B_i;      //$CAC400 - $CAC43F
+assign CS_BG_CLUT_B_o          = (iBUS_A_i[16:06] == 11'b0_1100_0100_01) & iBUS_CS_VICKY_MEM_B_i;     //$CAC440 - $CAC47F
+ SYSTEM
+
+assign    CS0                 = ( Internal_Address[23:21] == 3'b000 ) & ( UserData | UserProgram | SuperData | SuperProgram ); //$00 (2M)
+assign     CS1                 = ( Internal_Address[23:21] == 3'b001 ) & ( UserData | UserProgram | SuperData | SuperProgram ); //$02 (2M)
+// System RAM
+assign   CS_MERA        = ( Internal_Address[23:22] == 2'b01 )  & ( UserData  | SuperData ); //$040000 - $07FFFF (4M) (out of 64Meg)
+
+// Video RAM
+assign     CS_VRAM_A          = ( Internal_Address[23:21] == 3'b100 )  & ( UserData  | SuperData ); //$080000 - 09FFFF (2M) (out of 8M)
+assign     CS_VRAM_B          = ( Internal_Address[23:21] == 3'b101 )  & ( UserData  | SuperData ); //$0A0000 - 0BFFFF (2M) (out of 8M)
+
+assign     CS_GABE            = ( Internal_Address[23:17] == 7'b1100_000 ) & ( UserData  | SuperData ); //$C0
+assign     CS_BEATRIX         = ( Internal_Address[23:17] == 7'b1100_001 ) & ( UserData  | SuperData ); //$C2
+// Vicky Channel A
+assign     CS_VICKY_A         = ( Internal_Address[23:17] == 7'b1100_010 ) & ( UserData  | SuperData ); //$C4
+assign     CS_VICKY_MEM_A    = ( Internal_Address[23:17] == 7'b1100_011 ) & ( UserData  | SuperData ); //$C6
+//$00C6_8000 - $00C9_FFFF - Reserved
+// Vicky Channel B
+assign     CS_VICKY_B         = ( Internal_Address[23:17] == 7'b1100_100 ) & ( UserData  | SuperData ); //$C8
+assign   CS_VICKY_MEM_B = ( Internal_Address[23:17] == 7'b1100_101 ) & ( UserData  | SuperData ); //$CA
+
+assign     FLASH0    = ( Internal_Address[23:21] == 3'b111 ) & ( SuperData | SuperProgram );    //$E0_0000
+assign     FLASH1    = 1'b0;
