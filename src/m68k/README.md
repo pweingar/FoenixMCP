@@ -17,4 +17,5 @@ VBCC ABI, and then issuing a ``TRAP`` instruction.
 
 ## BIOS
 
-All BIOS calls are issued through a ``TRAP #13`` instruction. The first argument (last pushed to the stack) will be the 16-bit function number describing which particular call to make.
+All BIOS calls are issued through a ``TRAP #13`` instruction. Register D0 contains the number of the system call to make.
+

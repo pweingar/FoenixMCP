@@ -1,5 +1,5 @@
-#ifndef __TEXT_SCREEN_H
-#define __TEXT_SCREEN_H
+#ifndef __TEXT_SCREEN_III_H
+#define __TEXT_SCREEN_III_H
 
 /*
  * Driver for VICKY III text screens, both channel A and channel B

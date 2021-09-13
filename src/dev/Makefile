@@ -1,15 +1,10 @@
 override CFLAGS = +../../vbcc/config/m68k-foenix -I. -I.. -I../include
 
-asources = startup_m68k.s
-aobjects = $(subst .s,.o,$(asources))
-csources = bios_m68k.c
+csources = $(wildcard *.c)
 cobjects = $(subst .c,.o,$(csources))
 
 .PHONY: all
-all: $(aobjects) $(cobjects)
-
-%.o: $.s
-	$(AS) $(ASFLAGS) -o $@ $<
+all: $(cobjects)
 
 %.o: %.c
 	$(CC) -c -o $@ $< $(CFLAGS)

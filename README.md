@@ -56,4 +56,10 @@ kernel currently uses the FatFS embedded file system, which is covered under
 separate license. Please see the [src/fatfs](src/fatfs) directory for license
 details.
 
+## Features
+
+See the [features list](FEATURES.md) for the features intended for this kernel
+and the status of implementation.
+
+
 # //END-OF-LINE

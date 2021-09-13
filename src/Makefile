@@ -9,16 +9,21 @@ cpu_assembly_src := $(wildcard $(cpu)/*.s)
 cpu_c_src := $(wildcard $(cpu)/*.c)
 cpu_assembly_obj := $(subst .s,.o,$(cpu_assembly_src))
 cpu_c_obj := $(subst .c,.o,$(cpu_c_src))
+dev_c_src := $(wildcard dev/*.c)
+dev_c_obj := $(subst .c,.o,$(dev_c_src))
 
-.PHONY: all $(cpu)
+.PHONY: all $(cpu) dev
 
-all: foenixmcp.s68 $(cpu)
+all: foenixmcp.s68 $(cpu) dev
 
 $(cpu):
 	$(MAKE) --directory=$@
 
-foenixmcp.s68: foenixmcp.o text_screen.o $(cpu)
-	$(CC) $(CFLAGS) -o foenixmcp.s68 foenixmcp.o text_screen.o $(cpu_c_obj)
+dev:
+	$(MAKE) --directory=dev
+
+foenixmcp.s68: foenixmcp.o log.o $(cpu) dev
+	$(CC) $(CFLAGS) -o foenixmcp.s68 foenixmcp.o log.o $(cpu_c_obj) $(dev_c_obj)
 
 %.o: %.c $(DEPS)
 	$(CC) -S -c -o $@ $< $(CFLAGS)
@@ -28,3 +33,4 @@ foenixmcp.s68: foenixmcp.o text_screen.o $(cpu)
 clean:
 	$(RM) *.s68 *.o
 	$(MAKE) --directory=$(cpu) clean
+	$(MAKE) --directory=dev clean

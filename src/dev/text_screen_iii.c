@@ -2,8 +2,9 @@
  * Driver for VICKY III text screens, both channel A and channel B
  */
 
+#include "constants.h"
 #include "vicky_general.h"
-#include "text_screen.h"
+#include "text_screen_iii.h"
 
 #define MAX_TEXT_CHANNELS 2
 
@@ -42,7 +43,7 @@ int text_init() {
     chan_a->cursor_settings = CursorControlReg_L_A;
     chan_a->cursor_position = CursorControlReg_H_A;
     text_setsizes(0);
-    text_set_color(0, 1, 0);
+    text_set_color(0, 15, 0);
     text_clear(0);
     text_set_xy(0, 0, 0);
 
@@ -51,7 +52,7 @@ int text_init() {
     chan_b->cursor_settings = CursorControlReg_L_B;
     chan_b->cursor_position = CursorControlReg_H_B;
     text_setsizes(1);
-    text_set_color(1, 4, 0);
+    text_set_color(1, 15, 0);
     text_clear(1);
     text_set_xy(1, 0, 0);
 
@@ -109,8 +110,8 @@ void text_setsizes(short screen) {
     if (screen < MAX_TEXT_CHANNELS) {
         /* TODO: compute sizes based on master control register settings */
         p_text_channel chan = &text_channel[screen];
-        chan->rows = (short)((480 - 32) / 8);
-        chan->columns = (short)((640 - 32) / 8);
+        chan->rows = (short)480/8;
+        chan->columns = 80;
     }
 }
 
@@ -156,9 +157,21 @@ void text_clear(short screen) {
 void text_put_raw(short screen, char c) {
     if (screen < MAX_TEXT_CHANNELS) {
         p_text_channel chan = &text_channel[screen];
-        *chan->text_cursor_ptr++ = c;
-        *chan->color_cursor_ptr++ = chan->current_color;
-        text_set_xy(screen, chan->x + 1, chan->y);
+
+        switch (c) {
+        case CHAR_NL:
+            text_set_xy(screen, 0, chan->y + 1);
+            break;
+
+        case CHAR_CR:
+            break;
+
+        default:
+            *chan->text_cursor_ptr++ = c;
+            *chan->color_cursor_ptr++ = chan->current_color;
+            text_set_xy(screen, chan->x + 1, chan->y);
+            break;
+        }           
     }
 }
 
