@@ -15,15 +15,8 @@ BorderControlReg[0] = Border Enable
 BorderControlReg[6:4] = X Scroll
 BorderControlReg[13:8] = X Size
 BorderControlReg[21:16] = Y Size
-Dude, chill out!
-Mimiru Miru — Today at 7:01 PM
-Sorry!
-c256foenix — Today at 7:01 PM
-I am decyphering my own Verilog Code
-Mimiru Miru — Today at 7:01 PM
-ah ok
-c256foenix — Today at 7:02 PM
-BorderControl2 and BoardControl3 are 1x 32 bit register
+
+are 1x 32 bit register
 BorderControlColor[23:0] = RGB;
 Cursor Control Register is made out of MasterControl[8] and MasterControl[9]
 CursorControl[0] = Cursor Enable

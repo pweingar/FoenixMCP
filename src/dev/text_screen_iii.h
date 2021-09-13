@@ -80,4 +80,11 @@ extern void text_set_color(short screen, short foreground, short background);
  */
 extern void text_clear(short screen);
 
+/*
+ * Scroll the text screen up one row
+ * Inputs:
+ * screen = the screen number 0 for channel A, 1 for channel B
+ */
+extern void text_scroll(short screen);
+
 #endif

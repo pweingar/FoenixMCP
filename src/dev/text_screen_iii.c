@@ -12,13 +12,18 @@
  * Structure to hold pointers to the text channel's registers and memory
  */
 typedef struct s_text_channel {
+    volatile uint32_t * master_control;
     volatile char * text_cells;
     volatile uint8_t * color_cells;
     volatile uint32_t * cursor_settings;
     volatile uint32_t * cursor_position;
+    volatile uint32_t * border_control;
 
-    short columns;
-    short rows;
+    short columns_max;
+    short rows_max;
+    short columns_visible;
+    short rows_visible;
+
     short x;
     short y;
     volatile char * text_cursor_ptr;
@@ -38,19 +43,31 @@ int text_init() {
 
     /* TODO: initialize everything... only do a screen if it's present */
 
+    chan_a->master_control = MasterControlReg_A;
     chan_a->text_cells = ScreenText_A;
     chan_a->color_cells = ColorText_A;
     chan_a->cursor_settings = CursorControlReg_L_A;
     chan_a->cursor_position = CursorControlReg_H_A;
+    chan_a->border_control = BorderControlReg_L_A;
+
+    *chan_a->master_control = VKY3_MCR_TEXT_EN;     /* Set to text only mode: 640x480 */
+    *chan_a->border_control = 0;                    /* Set to no border */
+
     text_setsizes(0);
     text_set_color(0, 15, 0);
     text_clear(0);
     text_set_xy(0, 0, 0);
 
+    chan_b->master_control = MasterControlReg_B;
     chan_b->text_cells = ScreenText_B;
     chan_b->color_cells = ColorText_B;
     chan_b->cursor_settings = CursorControlReg_L_B;
     chan_b->cursor_position = CursorControlReg_H_B;
+    chan_b->border_control = BorderControlReg_L_B;
+
+    *chan_b->master_control = VKY3_MCR_TEXT_EN;     /* Set to text only mode: 640x480 */
+    *chan_b->border_control = 0;                    /* Set to no border */
+
     text_setsizes(1);
     text_set_color(1, 15, 0);
     text_clear(1);
@@ -91,11 +108,23 @@ void text_set_xy(short screen, unsigned short x, unsigned short y) {
     if (screen < MAX_TEXT_CHANNELS) {
         /* TODO: add in wrapping and scrolling */
         p_text_channel chan = &text_channel[screen];
+
+        if (x >= chan->columns_visible) {
+            x = 0;
+            y++;
+        }
+
+        if (y >= chan->rows_visible) {
+            y = chan->rows_visible - 1;
+            text_scroll(screen);
+        }
+
         chan->x = x;
         chan->y = y;
         *(chan->cursor_position) = y << 16 | x;
-        chan->text_cursor_ptr = &chan->text_cells[y * chan->columns + x];
-        chan->color_cursor_ptr = &chan->color_cells[y * chan->columns + x];
+        short offset = y * chan->columns_max + x;
+        chan->text_cursor_ptr = &chan->text_cells[offset];
+        chan->color_cursor_ptr = &chan->color_cells[offset];
     }
 }
 
@@ -108,10 +137,67 @@ void text_set_xy(short screen, unsigned short x, unsigned short y) {
  */
 void text_setsizes(short screen) {
     if (screen < MAX_TEXT_CHANNELS) {
-        /* TODO: compute sizes based on master control register settings */
+        uint32_t border = 0;
+        short pixel_double = 0;
+        short resolution = 0;
         p_text_channel chan = &text_channel[screen];
-        chan->rows = (short)480/8;
-        chan->columns = 80;
+
+        border = *chan->border_control;
+        pixel_double = *chan->master_control & VKY3_MCR_DOUBLE_EN;
+        resolution = (*chan->master_control & VKY3_MCR_RESOLUTION_MASK) >> 8;
+
+        /* Set number of maximum rows and columns based on the base resolution */
+        switch (resolution) {
+            case 0: /* 640x480 */
+                chan->columns_max = 80;
+                chan->rows_max = 60;
+                break;
+
+            case 1: /* 800x600 */
+                chan->columns_max = 100;
+                chan->rows_max = 75;
+                break;
+
+            case 2: /* 1024x768 */
+                chan->columns_max = 128;
+                chan->rows_max = 96;
+                break;
+
+            case 3: /* 640x400 */
+                chan->columns_max = 80;
+                chan->rows_max = 50;
+                break;
+
+            default:
+                break;
+        }
+
+        /* If we are pixel doubling, characters are twice as big */
+        if (pixel_double) {
+            chan->columns_max /= 2;
+            chan->rows_max /= 2;
+        }
+
+        /* Calculate visible rows and columns assuming no border */
+        chan->rows_visible = chan->rows_max;
+        chan->columns_visible = chan->columns_max;
+
+        /* If the border is enabled, subtract it from the visible rows and columns */
+        if (border & VKY3_BRDR_EN) {
+            short border_width = (border & VKY3_X_SIZE_MASK) >> 8;
+            short border_height = (border & VKY3_Y_SIZE_MASK) >> 16;
+
+            short columns_reduction = border_width / 4;
+            short rows_reduction = border_height / 4;
+
+            if (pixel_double) {
+                columns_reduction /= 2;
+                rows_reduction /= 2;
+            }
+
+            chan->columns_visible -= columns_reduction;
+            chan->rows_visible -= rows_reduction;
+        }
     }
 }
 
@@ -140,9 +226,44 @@ void text_clear(short screen) {
     if (screen < MAX_TEXT_CHANNELS) {
         int i;
         p_text_channel chan = &text_channel[screen];
-        for (i = 0; i < chan->columns * chan->rows; i++) {
+        for (i = 0; i < chan->columns_max * chan->rows_max; i++) {
             chan->text_cells[i] = ' ';
             chan->color_cells[i] = chan->current_color;
+        }
+    }
+}
+
+/*
+ * Scroll the text screen up one row
+ * Inputs:
+ * screen = the screen number 0 for channel A, 1 for channel B
+ */
+void text_scroll(short screen) {
+    if (screen < MAX_TEXT_CHANNELS) {
+        short row, column;
+        p_text_channel chan = &text_channel[screen];
+
+        for (row = 0; row < chan->rows_visible - 1; row++) {
+            short offset1 = row * chan->columns_max;
+            short offset2 = (row + 1) * chan->columns_max;
+            volatile char * text_dest = &chan->text_cells[offset1];
+            volatile char * color_dest = &chan->color_cells[offset1];
+            volatile char * text_src = &chan->text_cells[offset2];
+            volatile char * color_src = &chan->color_cells[offset2];
+
+            for (column = 0; column < chan->columns_max; column++) {
+                *text_dest++ = *text_src++;
+                *color_dest++ = *color_src++;
+            }
+        }
+
+        short offset3 = (chan->rows_visible - 1) * chan->columns_max;
+        volatile char * text_dest = &chan->text_cells[offset3];
+        volatile char * color_dest = &chan->color_cells[offset3];
+        uint8_t color = chan->current_color;
+        for (column = 0; column < chan->columns_max; column++) {
+            *text_dest++ = ' ';
+            *color_dest++ = color;
         }
     }
 }
@@ -171,7 +292,7 @@ void text_put_raw(short screen, char c) {
             *chan->color_cursor_ptr++ = chan->current_color;
             text_set_xy(screen, chan->x + 1, chan->y);
             break;
-        }           
+        }
     }
 }
 
