@@ -10,4 +10,6 @@
  */
 extern void DEBUG(char * message);
 
+#define TRACE(msg) DEBUG(msg);
+
 #endif

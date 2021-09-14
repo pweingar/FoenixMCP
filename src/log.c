@@ -2,6 +2,7 @@
  * A logging utility
  */
 
+#include <string.h>
 #include "log.h"
 #include "dev/text_screen_iii.h"
 
@@ -13,4 +14,5 @@ void DEBUG(char * message) {
     for (i = 0; i < strlen(message); i++) {
         text_put_raw(0, message[i]);
     }
+    text_put_raw(0, '\n');
 }
