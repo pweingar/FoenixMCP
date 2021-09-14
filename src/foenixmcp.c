@@ -12,6 +12,7 @@
 #include "dev/pata.h"
 #include "dev/ps2.h"
 #include "dev/sdc.h"
+#include "fatfs/ff.h"
 #include "log.h"
 
 /*
@@ -74,6 +75,54 @@ void print_hex(short channel, unsigned short x) {
     print(channel, number);
 }
 
+DIR my_dir;
+FILINFO my_file;
+FATFS my_fs;
+char line[255];
+
+short dos_cmd_dir(short screen) {
+    FRESULT fres;
+
+    TRACE("dos_cmd_dir");
+
+    fres = f_mount(&my_fs, "0:", 0);
+    TRACE("f_mount");
+    if (fres == FR_OK) {
+        fres = f_opendir(&my_dir, "/");
+        TRACE("f_opendir");
+        if (fres == FR_OK) {
+            do {
+                fres = f_readdir(&my_dir, &my_file);
+                TRACE("f_readdir");
+                if ((fres == FR_OK) && (my_file.fname[0] != 0)) {
+                    if ((my_file.fattrib & AM_HID) == 0) {
+                        chan_write(screen, my_file.fname, strlen(my_file.fname));
+                        if (my_file.fattrib & AM_DIR) {
+                            chan_write_b(screen, '/');
+                        }
+                        chan_write_b(screen, '\n');
+                    }
+                } else {
+                    break;
+                }
+            } while(1);
+
+            f_closedir(&my_dir);
+        } else {
+            char * err = "Could not open directory.\r";
+            chan_write(screen, err, strlen(err));
+        }
+
+        f_mount(0, "", 0);
+    } else {
+        char * err = "Could not mount drive.\r";
+        chan_write(screen, err, strlen(err));
+    }
+
+    return 0;
+}
+
+
 void repl(short screen) {
     print(screen, "> ");
     while (1) {
@@ -100,22 +149,25 @@ int main(int argc, char * argv[]) {
     print(CDEV_CONSOLE, "Hello from Screen A!\n");
     print(CDEV_EVID, "Hello from Screen B!\n");
 
-    print(1, "Hard drive sector 0:\n");
-    result = bdev_read(BDEV_SDC, 0, buffer, 512);
-    if (result > 0) {
-        for (x = 0; x < result; x++) {
-            if (x % 16 == 0) {
-                print(1, "\n");
-            }
-            print_hex(1, buffer[x]);
-            print(1, " ");
-        }
-        print(1, "\n");
-    } else if (result < 0) {
-        DEBUG("IDE returned an error.");
-    } else {
-        DEBUG("IDE returned nothing.");
-    }
+    // print(1, "Hard drive sector 0:\n");
+    // result = bdev_read(BDEV_SDC, 0, buffer, 512);
+    // if (result > 0) {
+    //     for (x = 0; x < result; x++) {
+    //         if (x % 16 == 0) {
+    //             print(1, "\n");
+    //         }
+    //         print_hex(1, buffer[x]);
+    //         print(1, " ");
+    //     }
+    //     print(1, "\n");
+    // } else if (result < 0) {
+    //     DEBUG("IDE returned an error.");
+    // } else {
+    //     DEBUG("IDE returned nothing.");
+    // }
+
+    print(1, "\nSDC directory:\n");
+    dos_cmd_dir(1);
 
     repl(1);
 

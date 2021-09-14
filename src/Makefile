@@ -11,8 +11,10 @@ cpu_assembly_obj := $(subst .s,.o,$(cpu_assembly_src))
 cpu_c_obj := $(subst .c,.o,$(cpu_c_src))
 dev_c_src := $(wildcard dev/*.c)
 dev_c_obj := $(subst .c,.o,$(dev_c_src))
+fat_c_src := $(wildcard fatfs/*.c)
+fat_c_obj := $(subst .c,.o,$(fat_c_src))
 
-.PHONY: all $(cpu) dev
+.PHONY: all $(cpu) dev fatfs
 
 all: foenixmcp.s68 $(cpu) dev
 
@@ -22,8 +24,11 @@ $(cpu):
 dev:
 	$(MAKE) --directory=dev
 
-foenixmcp.s68: foenixmcp.o log.o ring_buffer.o $(cpu) dev
-	$(CC) $(CFLAGS) -o foenixmcp.s68 foenixmcp.o log.o ring_buffer.o $(cpu_c_obj) $(dev_c_obj)
+fatfs:
+	$(MAKE) --directory=fatfs
+
+foenixmcp.s68: foenixmcp.o log.o ring_buffer.o $(cpu) dev fatfs
+	$(CC) $(CFLAGS) -o foenixmcp.s68 foenixmcp.o log.o ring_buffer.o $(cpu_c_obj) $(dev_c_obj) $(fat_c_obj)
 
 %.o: %.c $(DEPS)
 	$(CC) -S -c -o $@ $< $(CFLAGS)
