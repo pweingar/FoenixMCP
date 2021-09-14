@@ -7,7 +7,7 @@
 #include "errors.h"
 #include "constants.h"
 // #include "fatfs/ff.h"
-// #include "dev/block.h"
+#include "dev/block.h"
 #include "dev/pata.h"
 #include "dev/text_screen_iii.h"
 #include "pata_reg.h"
@@ -226,7 +226,7 @@ short pata_init() {
 // Returns:
 //  number of chars read, any negative number is an error code
 //
-short pata_read(long lba, char * buffer, short size) {
+short pata_read(long lba, unsigned char * buffer, short size) {
     short i;
     unsigned short *wptr;
     TRACE("pata_read");
@@ -272,7 +272,7 @@ short pata_read(long lba, char * buffer, short size) {
 // Returns:
 //  number of chars written, any negative number is an error code
 //
-short pata_write(long lba, const char * buffer, short size) {
+short pata_write(long lba, const unsigned char * buffer, short size) {
     short i;
     unsigned short *wptr;
     TRACE("pata_write");
@@ -351,7 +351,7 @@ short pata_flush() {
 // Returns:
 //  0 on success, any negative number is an error code
 //
-short pata_ioctrl(short command, char * buffer, short size) {
+short pata_ioctrl(short command, unsigned char * buffer, short size) {
     short result;
     long *p_long;
     unsigned short *p_word;
@@ -406,29 +406,28 @@ short pata_ioctrl(short command, char * buffer, short size) {
 //  0 on success, any negative number is an error code
 //
 short pata_install() {
-    // t_dev_block bdev;
-    //
-    // TRACE("pata_install");
-    //
-    // g_pata_error = 0;
-    // g_pata_status = PATA_STAT_NOINIT;
-    //
-    // // Check if drive is installed
+    t_dev_block bdev;
+
+    TRACE("pata_install");
+
+    g_pata_error = 0;
+    g_pata_status = PATA_STAT_NOINIT;
+
+    // Check if drive is installed
     // if ((*DIP_BOOTMODE & HD_INSTALLED) == 0) {
-    //     bdev.number = BDEV_HDC;
-    //     bdev.name = "HDD";
-    //     bdev.init = pata_init;
-    //     bdev.read = pata_read;
-    //     bdev.write = pata_write;
-    //     bdev.status = pata_status;
-    //     bdev.flush = pata_flush;
-    //     bdev.ioctrl = pata_ioctrl;
-    //
-    //     g_pata_status = PATA_STAT_PRESENT & PATA_STAT_NOINIT;
-    //
-    //     return bdev_register(&bdev);
+        bdev.number = BDEV_HDC;
+        bdev.name = "HDD";
+        bdev.init = pata_init;
+        bdev.read = pata_read;
+        bdev.write = pata_write;
+        bdev.status = pata_status;
+        bdev.flush = pata_flush;
+        bdev.ioctrl = pata_ioctrl;
+
+        g_pata_status = PATA_STAT_PRESENT & PATA_STAT_NOINIT;
+
+        return bdev_register(&bdev);
     // } else {
     //     return 0;
     // }
-    return 0;
 }

@@ -63,7 +63,7 @@ extern short pata_init();
 // Returns:
 //  number of chars read, any negative number is an error code
 //
-extern short pata_read(long lba, char * buffer, short size);
+extern short pata_read(long lba, unsigned char * buffer, short size);
 
 //
 // Write a block to the PATA hard drive
@@ -76,7 +76,7 @@ extern short pata_read(long lba, char * buffer, short size);
 // Returns:
 //  number of chars written, any negative number is an error code
 //
-extern short pata_write(long lba, const char * buffer, short size);
+extern short pata_write(long lba, const unsigned char * buffer, short size);
 
 //
 // Return the status of the PATA hard drive
@@ -113,6 +113,6 @@ extern short pata_flush();
 // Returns:
 //  0 on success, any negative number is an error code
 //
-extern short pata_ioctrl(short command, char * buffer, short size);
+extern short pata_ioctrl(short command, unsigned char * buffer, short size);
 
 #endif

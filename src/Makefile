@@ -22,8 +22,8 @@ $(cpu):
 dev:
 	$(MAKE) --directory=dev
 
-foenixmcp.s68: foenixmcp.o log.o $(cpu) dev
-	$(CC) $(CFLAGS) -o foenixmcp.s68 foenixmcp.o log.o $(cpu_c_obj) $(dev_c_obj)
+foenixmcp.s68: foenixmcp.o log.o ring_buffer.o $(cpu) dev
+	$(CC) $(CFLAGS) -o foenixmcp.s68 foenixmcp.o log.o ring_buffer.o $(cpu_c_obj) $(dev_c_obj)
 
 %.o: %.c $(DEPS)
 	$(CC) -S -c -o $@ $< $(CFLAGS)

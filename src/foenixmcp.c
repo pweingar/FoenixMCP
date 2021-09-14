@@ -5,10 +5,12 @@
 #include <string.h>
 #include "sys_general.h"
 #include "syscalls.h"
+#include "dev/block.h"
 #include "dev/channel.h"
 #include "dev/console.h"
 #include "dev/text_screen_iii.h"
 #include "dev/pata.h"
+#include "dev/ps2.h"
 #include "dev/sdc.h"
 #include "log.h"
 
@@ -16,25 +18,40 @@
  * Initialize the kernel systems.
  */
 void initialize() {
-  text_init();          // Initialize the text channels
-  DEBUG("Foenix/MCP starting up...");
-  cdev_init_system();   // Initialize the channel device system
-  DEBUG("Channel device system ready.");
-  if (con_install()) {
-    DEBUG("FAILED: Console installation.");
-  } else {
-    DEBUG("Console installed.");
-  }
+    text_init();          // Initialize the text channels
+    DEBUG("Foenix/MCP starting up...");
 
-  // At this point, we should be able to call into to console to print to the screens
+    cdev_init_system();   // Initialize the channel device system
+    DEBUG("Channel device system ready.");
 
-  // if (pata_init()) {
-  //     DEBUG("Error initializing the PATA drive.");
-  // }
+    bdev_init_system();   // Initialize the channel device system
+    DEBUG("Block device system ready.");
 
-  if (sdc_init()) {
-      DEBUG("Error initializing the PATA drive.");
-  }
+    if (con_install()) {
+        DEBUG("FAILED: Console installation.");
+    } else {
+        DEBUG("Console installed.");
+    }
+
+    if (sdc_install()) {
+        DEBUG("FAILED: SDC driver installation.");
+    } else {
+        DEBUG("SDC driver installed.");
+    }
+
+    // At this point, we should be able to call into to console to print to the screens
+
+    if (ps2_init()) {
+        DEBUG("FAILED: PS/2 initialization.");
+    } else {
+        DEBUG("PS/2 initialized.");
+    }
+
+    if (bdev_init(BDEV_SDC)) {
+        DEBUG("Unable to initialize the SDC!");
+    } else {
+        DEBUG("SDC initialized.");
+    }
 }
 
 void print(short channel, char * message) {
@@ -57,6 +74,19 @@ void print_hex(short channel, unsigned short x) {
     print(channel, number);
 }
 
+void repl(short screen) {
+    print(screen, "> ");
+    while (1) {
+        char c = kbd_getc_poll();
+        if (c) {
+            char buffer[2];
+            buffer[0] = c;
+            buffer[1] = 0;
+            print(screen, buffer);
+        }
+    }
+}
+
 int main(int argc, char * argv[]) {
     short x;
     short result;
@@ -70,8 +100,8 @@ int main(int argc, char * argv[]) {
     print(CDEV_CONSOLE, "Hello from Screen A!\n");
     print(CDEV_EVID, "Hello from Screen B!\n");
 
-    print(1, "Hard drive sector 0:\n")
-    result = sdc_read(0L, buffer, 512);
+    print(1, "Hard drive sector 0:\n");
+    result = bdev_read(BDEV_SDC, 0, buffer, 512);
     if (result > 0) {
         for (x = 0; x < result; x++) {
             if (x % 16 == 0) {
@@ -86,6 +116,8 @@ int main(int argc, char * argv[]) {
     } else {
         DEBUG("IDE returned nothing.");
     }
+
+    repl(1);
 
     DEBUG("Stopping.");
 

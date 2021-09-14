@@ -6,7 +6,7 @@
 // #include "fatfs/ff.h"
 #include "constants.h"
 #include "errors.h"
-// #include "dev/block/block.h"
+#include "dev/block.h"
 #include "sdc_reg.h"
 #include "dev/sdc.h"
 #include "dev/text_screen_iii.h"
@@ -367,22 +367,20 @@ short sdc_ioctrl(short command, unsigned char * buffer, short size) {
 // Install the SDC driver
 //
 short sdc_install() {
-    // t_dev_block dev;                    // bdev_register copies the data, so we'll allocate this on the stack
-    //
-    // TRACE("sdc_install");
-    //
-    // sdc_reset();
-    //
-    // dev.number = BDEV_SDC;
-    // dev.name = "SDC";
-    // dev.init = sdc_init;
-    // dev.read = sdc_read;
-    // dev.write = sdc_write;
-    // dev.flush = sdc_flush;
-    // dev.status = sdc_status;
-    // dev.ioctrl = sdc_ioctrl;
-    //
-    // return bdev_register(&dev);
+    t_dev_block dev;                    // bdev_register copies the data, so we'll allocate this on the stack
 
-    return 0;
+    TRACE("sdc_install");
+
+    sdc_reset();
+
+    dev.number = BDEV_SDC;
+    dev.name = "SDC";
+    dev.init = sdc_init;
+    dev.read = sdc_read;
+    dev.write = sdc_write;
+    dev.flush = sdc_flush;
+    dev.status = sdc_status;
+    dev.ioctrl = sdc_ioctrl;
+
+    return bdev_register(&dev);
 }

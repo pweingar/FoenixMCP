@@ -1,8 +1,8 @@
 /**
  * Definitions support low level channel device drivers
- * 
+ *
  * A channel or stream is a sequence of bytes that may be read or written to.
- * 
+ *
  * Examples include: console, serial port, an open file, etc.
  */
 
@@ -49,7 +49,6 @@ typedef struct s_channel {
     uint8_t data[CHAN_DATA_SIZE];   // A block of state data that the channel code can use for its own purposes
 } t_channel, *p_channel;
 
-typedef short (*FUNC_V_2_S)();
 typedef short (*FUNC_CBS_2_S)(p_channel, uint8_t *, short);
 typedef short (*FUNC_C_2_S)(p_channel);
 typedef short (*FUNC_CcBS_2_S)(p_channel, const uint8_t *, short);
@@ -133,7 +132,7 @@ extern short cdev_init(short dev);
  * Inputs:
  *  channel = the number of the channel
  *  buffer = the buffer into which to copy the channel data
- *  size = the size of the buffer. 
+ *  size = the size of the buffer.
  *
  * Returns:
  *  number of bytes read, any negative number is an error code
@@ -146,7 +145,7 @@ extern short chan_read(short channel, uint8_t * buffer, short size);
  * Inputs:
  *  channel = the number of the channel
  *  buffer = the buffer into which to copy the channel data
- *  size = the size of the buffer. 
+ *  size = the size of the buffer.
  *
  * Returns:
  *  number of bytes read, any negative number is an error code
@@ -170,7 +169,7 @@ extern short chan_read_b(short channel);
  * Inputs:
  *  channel = the number of the channel
  *  buffer = the buffer containing the data to write
- *  size = the size of the buffer. 
+ *  size = the size of the buffer.
  *
  * Returns:
  *  number of bytes written, any negative number is an error code
