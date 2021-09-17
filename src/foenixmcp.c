@@ -4,6 +4,8 @@
 
 #include <string.h>
 #include "sys_general.h"
+#include "gabe_reg.h"
+#include "superio.h"
 #include "syscalls.h"
 #include "dev/block.h"
 #include "dev/channel.h"
@@ -13,8 +15,63 @@
 #include "dev/ps2.h"
 #include "dev/sdc.h"
 #include "dev/uart.h"
+#include "snd/codec.h"
+#include "snd/sid.h"
 #include "fatfs/ff.h"
 #include "log.h"
+
+/*
+ * Initialize the SuperIO registers
+ */
+ void init_superio(void) {
+    *GP10_REG = 0x01;
+    *GP11_REG = 0x01;
+    *GP12_REG = 0x01;
+    *GP13_REG = 0x01;
+    *GP14_REG = 0x05;
+    *GP15_REG = 0x05;
+    *GP16_REG = 0x05;
+    *GP17_REG = 0x05;
+
+ 	*GP20_REG = 0x00;
+ 	*GP24_REG = 0x01;
+ 	*GP25_REG = 0x05;
+ 	*GP24_REG = 0x84;
+
+ 	*GP30_REG = 0x01;
+ 	*GP31_REG = 0x01;
+ 	*GP32_REG = 0x01;
+ 	*GP33_REG = 0x01;
+ 	*GP34_REG = 0x01;
+ 	*GP35_REG = 0x01;
+ 	*GP36_REG = 0x01;
+ 	*GP37_REG = 0x01;
+
+ 	*GP42_REG = 0x01;
+ 	*GP43_REG = 0x01;
+
+ 	*GP50_REG = 0x05;
+ 	*GP51_REG = 0x05;
+ 	*GP52_REG = 0x05;
+ 	*GP53_REG = 0x04;
+ 	*GP54_REG = 0x05;
+ 	*GP55_REG = 0x04;
+ 	*GP56_REG = 0x05;
+ 	*GP57_REG = 0x04;
+
+ 	*GP60_REG = 0x84;
+ 	*GP61_REG = 0x84;
+
+ 	*GP1_REG = 0x00;
+ 	*GP2_REG = 0x01;
+ 	*GP3_REG = 0x00;
+ 	*GP4_REG = 0x00;
+ 	*GP5_REG = 0x00;
+ 	*GP6_REG = 0x00;
+
+ 	*LED1_REG = 0x01;
+ 	*LED2_REG = 0x02;
+ }
 
 /*
  * Initialize the kernel systems.
@@ -22,6 +79,25 @@
 void initialize() {
     text_init();          // Initialize the text channels
     DEBUG("Foenix/MCP starting up...");
+
+    /* Set the power LED to purple */
+    *RGB_LED_L = 0x00FF;
+    *RGB_LED_H = 0x00FF;
+
+    /* Initialize the SuperIO chip */
+    init_superio();
+
+    /* Mute the PSG */
+    psg_mute_all();
+
+    /* Initialize the CODEC */
+    init_codec();
+
+    /* Initialize the SID chips */
+    sid_init();
+
+    /* Play the SID test bong on the Gideon SID implementation */
+    sid_test_internal();
 
     cdev_init_system();   // Initialize the channel device system
     DEBUG("Channel device system ready.");
@@ -266,22 +342,6 @@ int main(int argc, char * argv[]) {
     // } else {
     //     print(CDEV_CONSOLE, "\nPrinting success.\n");
     // }
-
-    uart_init(0);
-    uart_init(1);
-
-    while (1) {
-        int i;
-        char c;
-        uart_put(0, 'a');
-        for (i = 0; i < 16000; i++) {
-            ;
-        }
-        c = uart_get(1);
-        text_put_raw(0, c);
-    }
-
-    // uart_send(0, "This is a test of the UART.");
 
     DEBUG("Stopping.");
 
