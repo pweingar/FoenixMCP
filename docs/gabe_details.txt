@@ -10,10 +10,18 @@ assign CS_Joystick_o                = ( iBUS_A_i[16:8] == 9'b0_0000_0101) & iBUS
 
 assign CS_NIC_o                    = ( iBUS_A_i[16:9] == 8'b0_0000_011) & iBUS_CS_GABE_i;                        // $00C00600..$00C007FF - NIC
 // LPC Block
-assign CS_LPC_o               = (iBUS_A_i[16:10] == 7'b0_0010_00) & iBUS_CS_GABE_i;                            // $00C02000..$00C023FF - LPC 
+assign CS_LPC_o               = (iBUS_A_i[16:10] == 7'b0_0010_00) & iBUS_CS_GABE_i;                            // $00C02000..$00C023FF - LPC
 // Math Block
-assign CS_UNSIGNED_MULT_o        = ( iBUS_A_i[16:5] == 12'b0_0011_0000_000) & iBUS_CS_GABE_i;                // $00C03000..$00C0301F    - 32 x 32 Unsigned 
+assign CS_UNSIGNED_MULT_o        = ( iBUS_A_i[16:5] == 12'b0_0011_0000_000) & iBUS_CS_GABE_i;                // $00C03000..$00C0301F    - 32 x 32 Unsigned
 assign CS_SIGNED_MULT_o         = ( iBUS_A_i[16:5] == 12'b0_0011_0000_001) & iBUS_CS_GABE_i;                // $00C03020..$00C0303F - 32 x 32 Signed
 assign CS_UNSIGNED_DIV_o         = ( iBUS_A_i[16:5] == 12'b0_0011_0000_010) & iBUS_CS_GABE_i;                // $00C03040..$00C0305F - 32 x 32 Unsigned
 assign CS_SIGNED_DIV_o             = ( iBUS_A_i[16:5] == 12'b0_0011_0000_011) & iBUS_CS_GABE_i;                // $00C03060..$00C0307F - 32 x 32 Signed
 assign CS_MATH_FLOAT_o          = ( iBUS_A_i[16:7] == 8'b0_0100_000) & iBUS_CS_GABE_i;                         // $00C04000..$00C041FF - Float Module
+
+MO!
+
+assign CS_A2560K_KB_o            = ( iBUS_A_i[16:6] == 11'b0_0000_0000_01) & iBUS_CS_GABE_i;                        // $00C00040..$00C0007F    - Control Registers
+2'b00: begin iBUS_Keyboard_D_o = KeyboardCodeFIFO_o; end
+    2'b01: begin iBUS_Keyboard_D_o = { empty_sig, full_sig, 6'b00_0000, usedw_sig}; end
+
+Interrupt is at 65

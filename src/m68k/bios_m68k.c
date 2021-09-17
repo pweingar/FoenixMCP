@@ -14,10 +14,10 @@
  */
 int32_t syscall_dispatch(int32_t function, int32_t param0, int32_t param1, int32_t param2, int32_t param3, int32_t param4, int32_t param5) {
     switch (function) {
-        case SYS_CHAN_WRITE_B:
+        case KFN_CHAN_WRITE_B:
             return chan_write_b((short)param0, (uint8_t)param1);
 
-        case SYS_CHAN_WRITE:
+        case KFN_CHAN_WRITE:
             return chan_write((short)param0, (const uint8_t *)param1, (short)param2);
 
         default:

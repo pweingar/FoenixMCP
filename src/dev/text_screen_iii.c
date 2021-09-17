@@ -51,7 +51,7 @@ int text_init() {
     chan_a->border_control = BorderControlReg_L_A;
 
     *chan_a->master_control = VKY3_MCR_TEXT_EN;     /* Set to text only mode: 640x480 */
-    *chan_a->border_control = 0;                    /* Set to no border */
+    // *chan_a->border_control = 0;                    /* Set to no border */
 
     text_setsizes(0);
     text_set_color(0, 15, 0);
@@ -66,7 +66,7 @@ int text_init() {
     chan_b->border_control = BorderControlReg_L_B;
 
     *chan_b->master_control = VKY3_MCR_TEXT_EN;     /* Set to text only mode: 640x480 */
-    *chan_b->border_control = 0;                    /* Set to no border */
+    // *chan_b->border_control = 0;                    /* Set to no border */
 
     text_setsizes(1);
     text_set_color(1, 15, 0);
@@ -246,22 +246,22 @@ void text_scroll(short screen) {
         for (row = 0; row < chan->rows_visible - 1; row++) {
             short offset1 = row * chan->columns_max;
             short offset2 = (row + 1) * chan->columns_max;
-            volatile char * text_dest = &chan->text_cells[offset1];
-            volatile char * color_dest = &chan->color_cells[offset1];
-            volatile char * text_src = &chan->text_cells[offset2];
-            volatile char * color_src = &chan->color_cells[offset2];
+            volatile short * text_dest = &chan->text_cells[offset1];
+            volatile short * color_dest = &chan->color_cells[offset1];
+            volatile short * text_src = &chan->text_cells[offset2];
+            volatile short * color_src = &chan->color_cells[offset2];
 
-            for (column = 0; column < chan->columns_max; column++) {
+            for (column = 0; column < chan->columns_max; column += 2) {
                 *text_dest++ = *text_src++;
                 *color_dest++ = *color_src++;
             }
         }
 
         short offset3 = (chan->rows_visible - 1) * chan->columns_max;
-        volatile char * text_dest = &chan->text_cells[offset3];
-        volatile char * color_dest = &chan->color_cells[offset3];
+        volatile short * text_dest = &chan->text_cells[offset3];
+        volatile short * color_dest = &chan->color_cells[offset3];
         uint8_t color = chan->current_color;
-        for (column = 0; column < chan->columns_max; column++) {
+        for (column = 0; column < chan->columns_max; column += 2) {
             *text_dest++ = ' ';
             *color_dest++ = color;
         }
