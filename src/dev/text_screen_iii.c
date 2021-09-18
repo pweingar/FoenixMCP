@@ -33,13 +33,62 @@ typedef struct s_text_channel {
 
 static t_text_channel text_channel[MAX_TEXT_CHANNELS];
 
+
+//  0xHHLL, 0xHHLL
+//  0xGGBB, 0xAARR
+const unsigned short fg_color_lut [32] = {
+	0x0000, 0xFF00,	// Black (transparent)
+	0x0000, 0xFF80, // Mid-Tone Red
+	0x8000, 0xFF00, // Mid-Tone Green
+	0x0080, 0xFF00, // Mid-Tone Blue
+	0x8000, 0xFF80, // Mid-Tone Yellow
+	0x8080, 0xFF00, // Mid-Tone Cian
+	0x0080, 0xFF80, // Mid-Tone Purple
+	0x8080, 0xFF80, // 50% Grey
+	0x4500, 0xFFFF, // Orange? Brown?
+	0x4513, 0xFF8B, // Orange? Brown?
+	0x0000, 0xFF20, // 12.5% Red
+	0x2000, 0xFF00, // 12.5% Green
+	0x0020, 0xFF00, // 12.5% Blue
+	0x2020, 0xFF20, // 12.5% Grey
+	0x4040, 0xFF40, // 25% Grey
+	0xFFFF, 0xFFFF 	// 100% Grey = White
+};
+
+const unsigned short bg_color_lut [32] = {
+	0x0000, 0xFF00,	// Black (transparent)
+	0x0000, 0xFF80, // Mid-Tone Red
+	0x8000, 0xFF00, // Mid-Tone Green
+	0x0080, 0xFF00, // Mid-Tone Blue
+	0x2000, 0xFF20, // 12.5% Yellow
+	0x2020, 0xFF00, // 12.5% Cian
+	0x0020, 0xFF20, // 12.5% Purple
+	0x2020, 0xFF20, // 12.5% Grey
+	0x691E, 0xFFD2, // Orange? Brown?
+	0x4513, 0xFF8B, // Orange? Brown?
+	0x0000, 0xFF20, // 12.5% Red
+	0x2000, 0xFF00, // 12.5% Green
+	0x0020, 0xFF00, // 12.5% Blue
+	0x1010, 0xFF10, // 6.25% Grey
+	0x4040, 0xFF40, // 25% Grey
+	0xFFFF, 0xFFFF 	// 100% Grey = White
+};
+
 /*
  * Initialize the text screen driver
  */
 int text_init() {
-    int x;
+    int i, x;
     p_text_channel chan_a = &text_channel[0];
     p_text_channel chan_b = &text_channel[1];
+
+	// Init CLUT for the Color Memory
+	for (i = 0; i<32; i++) {
+		FG_CLUT_A[i] = fg_color_lut[i];
+		FG_CLUT_B[i] = fg_color_lut[i];
+		BG_CLUT_A[i] = bg_color_lut[i];
+		BG_CLUT_B[i] = bg_color_lut[i];
+	}
 
     /* TODO: initialize everything... only do a screen if it's present */
 
@@ -50,8 +99,11 @@ int text_init() {
     chan_a->cursor_position = CursorControlReg_H_A;
     chan_a->border_control = BorderControlReg_L_A;
 
-    *chan_a->master_control = VKY3_MCR_TEXT_EN;     /* Set to text only mode: 640x480 */
+    *chan_a->master_control = 1;     /* Set to text only mode: 640x480 */
     // *chan_a->border_control = 0;                    /* Set to no border */
+
+	chan_a->border_control[0] = 0x00102001;	// Enable
+	chan_a->border_control[1] = 0x00000040;	//Dark Blue
 
     text_setsizes(0);
     text_set_color(0, 15, 0);
@@ -65,8 +117,10 @@ int text_init() {
     chan_b->cursor_position = CursorControlReg_H_B;
     chan_b->border_control = BorderControlReg_L_B;
 
-    *chan_b->master_control = VKY3_MCR_TEXT_EN;     /* Set to text only mode: 640x480 */
-    // *chan_b->border_control = 0;                    /* Set to no border */
+    *chan_b->master_control = 1;     /* Set to text only mode: 640x480 */
+
+    chan_b->border_control[0] = 0x00102000;	// Enable
+	chan_b->border_control[1] = 0x00400000;	//Dark Red
 
     text_setsizes(1);
     text_set_color(1, 15, 0);

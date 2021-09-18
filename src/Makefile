@@ -30,10 +30,10 @@ fatfs:
 	$(MAKE) --directory=fatfs
 
 snd:
-		$(MAKE) --directory=snd
+	$(MAKE) --directory=snd
 
-foenixmcp.s68: foenixmcp.o log.o ring_buffer.o $(cpu) dev fatfs snd
-	$(CC) $(CFLAGS) -o foenixmcp.s68 foenixmcp.o log.o ring_buffer.o $(cpu_c_obj) $(dev_c_obj) $(fat_c_obj) $(snd_c_obj)
+foenixmcp.s68: foenixmcp.o log.o ring_buffer.o interrupt.o $(cpu) dev fatfs snd
+	$(CC) $(CFLAGS) -o foenixmcp.s68 foenixmcp.o log.o ring_buffer.o interrupt.o $(cpu_c_obj) $(dev_c_obj) $(fat_c_obj) $(snd_c_obj)
 
 %.o: %.c $(DEPS)
 	$(CC) -S -c -o $@ $< $(CFLAGS)
@@ -41,6 +41,6 @@ foenixmcp.s68: foenixmcp.o log.o ring_buffer.o $(cpu) dev fatfs snd
 .PHONEY: clean
 
 clean:
-	$(RM) *.s68 *.o
+	$(RM) *.s68 *.o *.asm
 	$(MAKE) --directory=$(cpu) clean
 	$(MAKE) --directory=dev clean

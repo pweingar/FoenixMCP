@@ -129,7 +129,7 @@ _uart_init
 	addq.w	#8,a7
 	move.l	a2,d0
 	beq	l29
-	move.l	#12,-(a7)
+	move.l	#1,-(a7)
 	move.w	d2,d0
 	ext.l	d0
 	move.l	d0,-(a7)

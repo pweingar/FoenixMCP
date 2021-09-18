@@ -66,7 +66,7 @@ void uart_init(short uart) {
     DEBUG("uart_init");
     if (uart_base) {
         /* Default to 9600 bps */
-        uart_setbps(uart, UART_9600);
+        uart_setbps(uart, UART_115200);
 
         /* Set: no parity, 1 stop bit, 8 data bits */
         uart_setlcr(uart,  LCR_PARITY_NONE | LCR_STOPBIT_1 | LCR_DATABITS_8);

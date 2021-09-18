@@ -4,6 +4,7 @@
 
 #include <string.h>
 #include "sys_general.h"
+#include "interrupt.h"
 #include "gabe_reg.h"
 #include "superio.h"
 #include "syscalls.h"
@@ -16,6 +17,7 @@
 #include "dev/sdc.h"
 #include "dev/uart.h"
 #include "snd/codec.h"
+#include "snd/psg.h"
 #include "snd/sid.h"
 #include "fatfs/ff.h"
 #include "log.h"
@@ -80,6 +82,9 @@ void initialize() {
     text_init();          // Initialize the text channels
     DEBUG("Foenix/MCP starting up...");
 
+    /* Initialize the interrupt system */
+    int_init();
+
     /* Set the power LED to purple */
     *RGB_LED_L = 0x00FF;
     *RGB_LED_H = 0x00FF;
@@ -94,7 +99,7 @@ void initialize() {
     init_codec();
 
     /* Initialize the SID chips */
-    sid_init();
+    sid_init_all();
 
     /* Play the SID test bong on the Gideon SID implementation */
     sid_test_internal();
@@ -142,6 +147,9 @@ void initialize() {
     } else {
         DEBUG("SDC initialized.");
     }
+
+    /* Enable all interrupts */
+    int_enable_all();
 }
 
 void print(short channel, char * message) {
@@ -225,12 +233,12 @@ FILINFO my_file;
 FATFS my_fs;
 char line[255];
 
-short dos_cmd_dir(short screen) {
+short dos_cmd_dir(short screen, char * path) {
     FRESULT fres;
 
     TRACE("dos_cmd_dir");
 
-    fres = f_mount(&my_fs, "0:", 0);
+    fres = f_mount(&my_fs, path, 0);
     TRACE("f_mount");
     if (fres == FR_OK) {
         fres = f_opendir(&my_dir, "/");
@@ -317,6 +325,36 @@ void uart_send(short uart, char * message) {
     }
 }
 
+void uart_test_send(short uart) {
+    while (1) {
+        uart_send(uart, 'a');
+    }
+}
+
+static long g_sof_counter = 0;
+
+/*
+ * Interrupt handler for Channel A's Start of Frame
+ */
+void int_sof_a() {
+    g_sof_counter++;
+
+    long counter_mod = g_sof_counter % 60;
+
+    if (counter_mod == 0) {
+        /* Set the power LED to red */
+        *RGB_LED_L = 0x00FF;
+        *RGB_LED_H = 0x0000;
+    } else if (counter_mod == 30) {
+        /* Set the power LED to blue */
+        *RGB_LED_L = 0x0000;
+        *RGB_LED_H = 0x00FF;
+    }
+
+    /* Acknowledge the interrupt before leaving */
+    int_ack(SOF_A_INT00);
+}
+
 int main(int argc, char * argv[]) {
     short result;
 
@@ -325,23 +363,20 @@ int main(int argc, char * argv[]) {
     print(CDEV_CONSOLE, "Foenix/MCP\n\nText Channel A\n");
     print(CDEV_EVID, "Foenix/MCP\n\nText Channel B\n");
 
-    // Try to get the MBR of the HDD
-    // test_get_mbr(CDEV_EVID, BDEV_HDD);
+    // uart_test_send(0);
 
-    // print(1, "\nSDC directory:\n");
-    // dos_cmd_dir(1);
+    /* Register a handler for the SOF interrupt and enable it */
+    int_register(0x00, int_sof_a);
+    int_enable(0x00);
 
-    // Try the A2560K built in keybaord
-    // try_mo(1);
+    // dos_cmd_dir(0, "2:");
 
-    // lpt_initialize();
-    //
-    // result = lpt_write((p_channel)0, "Hello\n", 5);
-    // if (result) {
-    //     print(CDEV_CONSOLE, "\nError printing.\n");
-    // } else {
-    //     print(CDEV_CONSOLE, "\nPrinting success.\n");
+    // while (1) {
+    //     text_set_xy(0, 40, 0);
+    //     print_hex_16(0, g_sof_counter);
     // }
+
+    try_mo(0);
 
     DEBUG("Stopping.");
 

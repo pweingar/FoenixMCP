@@ -1,6 +1,8 @@
             xref ___main
             xdef _syscall
             xdef ___exit
+            xdef _int_enable_all
+            xdef _int_disable_all
 
             section "vectors",code
 
@@ -29,8 +31,8 @@
             dc.l not_impl           ; 22 - Reserved
             dc.l not_impl           ; 23 - Reserved
             dc.l not_impl           ; 24 - Spurious Interrupt
-            dc.l not_impl           ; 25 - Level 1 Interrupt Autovector
-            dc.l not_impl           ; 26 - Level 2 Interrupt Autovector
+            dc.l autovec1           ; 25 - Level 1 Interrupt Autovector
+            dc.l autovec2           ; 26 - Level 2 Interrupt Autovector
             dc.l not_impl           ; 27 - Level 3 Interrupt Autovector
             dc.l not_impl           ; 28 - Level 4 Interrupt Autovector
             dc.l not_impl           ; 29 - Level 5 Interrupt Autovector
@@ -52,12 +54,14 @@
             dc.l h_trap_13          ; 45 - TRAP #13
             dc.l not_impl           ; 46 - TRAP #14
             dc.l not_impl           ; 47 - TRAP #15
-            
+
             ; TODO: make room for reserved and User Interrupt Vectors
 
             code
 
 coldboot:   lea ___STACK,sp
+            bsr _int_disable_all
+
             lea	___BSSSTART,a0
             move.l #___BSSSIZE,d0
             beq	callmain
@@ -78,9 +82,37 @@ ___exit:
             bra	___exit
 
 ;
+; Autovector #1: Used by VICKY III Channel B interrupts
+;
+autovec1:   movem.l d0-d7/a0-a6,-(a7)
+            jsr _int_vicky_channel_b        ; Call the dispatcher for Channel B interrupts
+            movem.l (a7)+,d0-d7/a0-a6
+            rte
+
+;
+; Autovector #1: Used by VICKY III Channel A interrupts
+;
+autovec2:   movem.l d0-d7/a0-a6,-(a7)
+            jsr _int_vicky_channel_a        ; Call the dispatcher for Channel A interrupts
+            movem.l (a7)+,d0-d7/a0-a6
+            rte
+
+;
 ; Unimplemented Exception Handler -- just return
 ;
 not_impl:   rte
+
+;
+; Enable all interrupts
+;
+_int_enable_all:    andi.w #$F8FF,SR
+                    rts
+
+;
+; Disable all interrupts
+;
+_int_disable_all:   ori.w #$0700,SR
+                    rts
 
 ;
 ; Function to make a system call based on the number of the system function:
@@ -105,7 +137,7 @@ _syscall:
 ;
 ; TRAP#13 handler... transfer control to the C dispatcher
 ;
-h_trap_13:  
+h_trap_13:
             move.l d7,-(sp)             ; Push the parameters to the stack for the C call
             move.l d6,-(sp)
             move.l d5,-(sp)
