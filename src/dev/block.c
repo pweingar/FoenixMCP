@@ -2,6 +2,7 @@
  * Implementation of block device routines
  */
 
+#include "log.h"
 #include "block.h"
 
 t_dev_block g_block_devs[BDEV_DEVICES_MAX];
@@ -11,6 +12,9 @@ t_dev_block g_block_devs[BDEV_DEVICES_MAX];
 //
 void bdev_init_system() {
     int i;
+
+    TRACE("bdev_init_system");
+
     for (i = 0; i < BDEV_DEVICES_MAX; i++) {
         g_block_devs[i].number = 0;
         g_block_devs[i].name = 0;
@@ -22,6 +26,8 @@ void bdev_init_system() {
 //
 short bdev_register(p_dev_block device) {
     short dev;
+
+    TRACE("bdev_register");
 
     dev = device->number;
     if (dev < BDEV_DEVICES_MAX) {
@@ -52,6 +58,9 @@ short bdev_register(p_dev_block device) {
 //  0 on success, any negative number is an error code
 //
 short bdev_init(short dev)  {
+
+    TRACE("bdev_init");
+
     if (dev < BDEV_DEVICES_MAX) {
         p_dev_block bdev = &g_block_devs[dev];
         if (bdev->number == dev) {
@@ -75,6 +84,8 @@ short bdev_init(short dev)  {
 //  number of bytes read, any negative number is an error code
 //
 short bdev_read(short dev, long lba, unsigned char * buffer, short size) {
+    TRACE("bdev_read");
+
     if (dev < BDEV_DEVICES_MAX) {
         p_dev_block bdev = &g_block_devs[dev];
         if (bdev->number == dev) {
@@ -98,6 +109,8 @@ short bdev_read(short dev, long lba, unsigned char * buffer, short size) {
 //  number of bytes written, any negative number is an error code
 //
 short bdev_write(short dev, long lba, const unsigned char * buffer, short size) {
+    TRACE("bdev_write");
+
     if (dev < BDEV_DEVICES_MAX) {
         p_dev_block bdev = &g_block_devs[dev];
         if (bdev->number == dev) {
@@ -118,6 +131,8 @@ short bdev_write(short dev, long lba, const unsigned char * buffer, short size) 
 //  the status of the device
 //
 short bdev_status(short dev) {
+    TRACE("bdev_status");
+
     if (dev < BDEV_DEVICES_MAX) {
         p_dev_block bdev = &g_block_devs[dev];
         if (bdev->number == dev) {
@@ -138,6 +153,8 @@ short bdev_status(short dev) {
 //  0 on success, any negative number is an error code
 //
 short bdev_flush(short dev) {
+    TRACE("bdev_flush");
+
     if (dev < BDEV_DEVICES_MAX) {
         p_dev_block bdev = &g_block_devs[dev];
         if (bdev->number == dev) {
@@ -161,6 +178,8 @@ short bdev_flush(short dev) {
 //  0 on success, any negative number is an error code
 //
 short bdev_ioctrl(short dev, short command, unsigned char * buffer, short size) {
+    TRACE("bdev_ioctrl");
+
     if (dev < BDEV_DEVICES_MAX) {
         p_dev_block bdev = &g_block_devs[dev];
         if (bdev->number == dev) {

@@ -106,8 +106,9 @@ int text_init() {
 	chan_a->border_control[1] = 0x00000040;	//Dark Blue
 
     text_setsizes(0);
-    text_set_color(0, 15, 0);
+    text_set_color(0, 15, 3);
     text_clear(0);
+    text_set_cursor(0, 0xF3, 0xB1, 1, 1);
     text_set_xy(0, 0, 0);
 
     chan_b->master_control = MasterControlReg_B;
@@ -123,8 +124,9 @@ int text_init() {
 	chan_b->border_control[1] = 0x00400000;	//Dark Red
 
     text_setsizes(1);
-    text_set_color(1, 15, 0);
+    text_set_color(1, 15, 3);
     text_clear(1);
+    text_set_cursor(1, 0xF3, 0xB1, 1, 1);
     text_set_xy(1, 0, 0);
 
     return 0;
@@ -317,7 +319,7 @@ void text_scroll(short screen) {
         uint8_t color = chan->current_color;
         for (column = 0; column < chan->columns_max; column += 2) {
             *text_dest++ = ' ';
-            *color_dest++ = color;
+            *color_dest++ = color << 8 | color;
         }
     }
 }
@@ -339,6 +341,13 @@ void text_put_raw(short screen, char c) {
             break;
 
         case CHAR_CR:
+            break;
+
+        case CHAR_BS:
+            if (chan->x > 0) {
+                text_set_xy(screen, chan->x - 1, chan->y);
+                *chan->text_cursor_ptr++ = ' ';
+            }
             break;
 
         default:

@@ -3,10 +3,11 @@
  */
 
 #include "interrupt.h"
+#include "dev/text_screen_iii.h"
 
 #define MAX_HANDLERS 48
 
-static p_int_handler g_int_handler[MAX_HANDLERS];
+p_int_handler g_int_handler[MAX_HANDLERS];
 
 /*
  * Return the group number for the interrupt number
@@ -62,9 +63,10 @@ void int_disable(unsigned short n) {
 
 	/* Find the mask for the interrupt */
 	unsigned short mask = int_mask(n);
+	unsigned short new_mask = MASK_GRP0[group] | mask;
 
 	/* Set the mask bit for the interrupt in the correct MASK register */
-	MASK_GRP0[group] |= mask;
+	MASK_GRP0[group] = new_mask;
 }
 
 /*
@@ -83,9 +85,10 @@ void int_enable(unsigned short n) {
 
 	/* Find the mask for the interrupt */
 	unsigned short mask = int_mask(n);
+	unsigned short new_mask = MASK_GRP0[group] & ~mask;
 
 	/* Clear the mask bit for the interrupt in the correct MASK register */
-	MASK_GRP0[group] &= ~mask;
+	MASK_GRP0[group] = new_mask;
 }
 
 /*
@@ -134,15 +137,16 @@ short int_pending(unsigned short n) {
  * Inputs:
  * n = the number of the interrupt: n[7..4] = group number, n[3..0] = individual number.
  */
-void int_ack(unsigned short n) {
+void int_clear(unsigned short n) {
 	/* Find the group (the relevant interrupt mask register) for the interrupt */
 	unsigned short group = int_group(n);
 
 	/* Find the mask for the interrupt */
 	unsigned short mask = int_mask(n);
+	unsigned short new_mask = PENDING_GRP0[group] | mask;
 
-	/* Set the mask bit for the interrupt in the correct MASK register */
-	PENDING_GRP0[group] |= mask;
+	/* Set the bit for the interrupt to mark it as cleared */
+	PENDING_GRP0[group] = new_mask;
 }
 
 /*
@@ -162,7 +166,7 @@ void int_vicky_channel_a() {
 					handler();
 
 					/* And acknowledge the interrupt */
-					int_ack(n);
+					int_clear(n);
 				}
 			}
 
@@ -189,7 +193,7 @@ void int_vicky_channel_b() {
 					handler();
 
 					/* And acknowledge the interrupt */
-					int_ack(n);
+					int_clear(n);
 				}
 			}
 

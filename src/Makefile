@@ -15,10 +15,12 @@ snd_c_src := $(wildcard snd/*.c)
 snd_c_obj := $(subst .c,.o,$(snd_c_src))
 fat_c_src := $(wildcard fatfs/*.c)
 fat_c_obj := $(subst .c,.o,$(fat_c_src))
+cli_c_src := $(wildcard cli/*.c)
+cli_c_obj := $(subst .c,.o,$(cli_c_src))
 
-.PHONY: all $(cpu) dev fatfs snd
+.PHONY: all $(cpu) dev fatfs snd cli
 
-all: foenixmcp.s68 $(cpu) dev snd
+all: foenixmcp.s68 $(cpu) dev snd cli
 
 $(cpu):
 	$(MAKE) --directory=$@
@@ -32,8 +34,11 @@ fatfs:
 snd:
 	$(MAKE) --directory=snd
 
-foenixmcp.s68: foenixmcp.o log.o ring_buffer.o interrupt.o $(cpu) dev fatfs snd
-	$(CC) $(CFLAGS) -o foenixmcp.s68 foenixmcp.o log.o ring_buffer.o interrupt.o $(cpu_c_obj) $(dev_c_obj) $(fat_c_obj) $(snd_c_obj)
+cli:
+	$(MAKE) --directory=cli
+
+foenixmcp.s68: foenixmcp.o log.o ring_buffer.o interrupt.o syscalls.o $(cpu) dev fatfs snd cli
+	$(CC) $(CFLAGS) -o foenixmcp.s68 foenixmcp.o log.o ring_buffer.o interrupt.o syscalls.o $(cpu_c_obj) $(dev_c_obj) $(fat_c_obj) $(snd_c_obj) $(cli_c_obj)
 
 %.o: %.c $(DEPS)
 	$(CC) -S -c -o $@ $< $(CFLAGS)
@@ -44,3 +49,6 @@ clean:
 	$(RM) *.s68 *.o *.asm
 	$(MAKE) --directory=$(cpu) clean
 	$(MAKE) --directory=dev clean
+	$(MAKE) --directory=fatfs clean
+	$(MAKE) --directory=snd clean
+	$(MAKE) --directory=cli clean

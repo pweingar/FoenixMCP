@@ -10,6 +10,10 @@
  */
 extern void DEBUG(char * message);
 
-#define TRACE(msg) DEBUG(msg);
+extern void logc(char c);
+
+#define TRACE(msg) /*DEBUG(msg);*/
+
+#define TRACEC(c) logc(c);
 
 #endif

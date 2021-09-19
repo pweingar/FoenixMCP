@@ -54,6 +54,55 @@
             dc.l h_trap_13          ; 45 - TRAP #13
             dc.l not_impl           ; 46 - TRAP #14
             dc.l not_impl           ; 47 - TRAP #15
+            dc.l not_impl           ; 48 - Reserved
+            dc.l not_impl           ; 49 - Reserved
+            dc.l not_impl           ; 50 - Reserved
+            dc.l not_impl           ; 51 - Reserved
+            dc.l not_impl           ; 52 - Reserved
+            dc.l not_impl           ; 53 - Reserved
+            dc.l not_impl           ; 54 - Reserved
+            dc.l not_impl           ; 55 - Reserved
+            dc.l not_impl           ; 56 - Reserved
+            dc.l not_impl           ; 57 - Reserved
+            dc.l not_impl           ; 58 - Reserved
+            dc.l not_impl           ; 59 - Reserved
+            dc.l not_impl           ; 60 - Reserved
+            dc.l not_impl           ; 61 - Reserved
+            dc.l not_impl           ; 62 - Reserved
+            dc.l not_impl           ; 63 - Reserved
+            dc.l interrupt_x10      ; 64 - Interrupt 0x10 - SuperIO - PS/2 Keyboard
+            dc.l interrupt_x11      ; 65 - Interrupt 0x11 - A2560K Built-in Keyboard (Mo)
+            ; dc.l interrupt_x12      ; 66 - Interrupt 0x12 - SuperIO - PS/2 Mouse
+            ; dc.l interrupt_x13      ; 67 - Interrupt 0x13 - SuperIO - COM1
+            ; dc.l interrupt_x14      ; 68 - Interrupt 0x14 - SuperIO - COM2
+            ; dc.l interrupt_x15      ; 69 - Interrupt 0x15 - SuperIO - LPT1
+            ; dc.l interrupt_x16      ; 70 - Interrupt 0x16 - SuperIO - Floppy Disk Controller
+            ; dc.l interrupt_x17      ; 71 - Interrupt 0x17 - SuperIO - MIDI
+            ; dc.l interrupt_x18      ; 72 - Interrupt 0x18 - Timer 0
+            ; dc.l interrupt_x19      ; 73 - Interrupt 0x19 - Timer 1
+            ; dc.l interrupt_x1A      ; 74 - Interrupt 0x1A - Timer 2
+            ; dc.l interrupt_x1B      ; 76 - Interrupt 0x1B - Timer 3
+            ; dc.l interrupt_x1C      ; 75 - Interrupt 0x1C - Timer 4
+            ; dc.l not_impl           ; 77 - Interrupt 0x1D - Reserved
+            ; dc.l not_impl           ; 78 - Interrupt 0x1E - Reserved
+            ; dc.l interrupt_x1F      ; 79 - Interrupt 0x1F - Real Time Clock
+
+            ; dc.l interrupt_x20      ; 80 - Interrupt 0x20 - IDE HDD Generated Interrupt
+            ; dc.l interrupt_x21      ; 81 - Interrupt 0x21 - SDCard Insert
+            ; dc.l interrupt_x22      ; 82 - Interrupt 0x22 - SDCard Controller
+            ; dc.l interrupt_x23      ; 83 - Interrupt 0x23 - Internal OPM
+            ; dc.l interrupt_x24      ; 84 - Interrupt 0x24 - External OPN2
+            ; dc.l interrupt_x25      ; 85 - Interrupt 0x25 - External OPL3
+            ; dc.l interrupt_x26      ; 86 - Interrupt 0x26 - Reserved
+            ; dc.l interrupt_x27      ; 87 - Interrupt 0x27 - Reserved
+            ; dc.l interrupt_x28      ; 88 - Interrupt 0x28 - Beatrix Interrupt 0
+            ; dc.l interrupt_x29      ; 89 - Interrupt 0x29 - Beatrix Interrupt 1
+            ; dc.l interrupt_x2A      ; 90 - Interrupt 0x2A - Beatrix Interrupt 2
+            ; dc.l interrupt_x2B      ; 91 - Interrupt 0x2B - Beatrix Interrupt 3
+            ; dc.l interrupt_x2C      ; 92 - Interrupt 0x2C - Reserved
+            ; dc.l interrupt_x2D      ; 93 - Interrupt 0x2D - DAC1 Playback Done Interrupt (48K)
+            ; dc.l interrupt_x2E      ; 94 - Interrupt 0x2E - Reserved
+            ; dc.l interrupt_x2F      ; 95 - Interrupt 0x2F - DAC0 Playback Done Interrupt (44.1K)
 
             ; TODO: make room for reserved and User Interrupt Vectors
 
@@ -87,6 +136,51 @@ ___exit:
 autovec1:   movem.l d0-d7/a0-a6,-(a7)
             jsr _int_vicky_channel_b        ; Call the dispatcher for Channel B interrupts
             movem.l (a7)+,d0-d7/a0-a6
+            rte
+
+;
+; Interrupt Vector 0x10 -- SuperIO Keyboard
+;
+interrupt_x10:
+            movem.l d0-d7/a0-a6,-(a7)       ; Save all the registers
+            ;lea _g_int_handler,a0           ; Look in the interrupt handler table
+            ;move.w #($10<<2),d0             ; Offset to interrupt #16
+            ;movea.l (0,a0,d0),a1            ; Get the address of the handler
+            ;beq done_intx10                 ; If there isn't one, just return
+
+            ; moveq #0,d2
+            ; moveq #'!',d3
+            ; moveq #$14,d1
+            ; trap #13
+
+            jsr _kbd_handle_irq             ; If there is, call it.
+
+done_intx10 movem.l (a7)+,d0-d7/a0-a6       ; Restore the registers
+            rte
+
+;
+; Interrupt Vector 0x11 -- SuperIO Keyboard
+;
+interrupt_x11:
+            movem.l d0-d7/a0-a6,-(a7)       ; Save all the registers
+;             ; lea _g_int_handler,a0           ; Look in the interrupt handler table
+;             ; move.w #($11<<2),d0             ; Offset to interrupt #16
+;             ; movea.l (0,a0,d0),a1            ; Get the address of the handler
+;             ; beq done_intx10                 ; If there isn't one, just return
+;
+;             moveq #0,d2
+;             moveq #'@',d3
+;             moveq #$14,d1
+;             trap #13
+;
+;             ; jsr (a1)                        ; If there is, call it.
+
+            ; moveq #0,d2
+            ; moveq #'!',d3
+            ; moveq #$14,d1
+            ; trap #13
+
+done_intx11 movem.l (a7)+,d0-d7/a0-a6       ; Restore the registers
             rte
 
 ;

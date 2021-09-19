@@ -12,4 +12,4 @@ all: $(cobjects)
 .PHONY: clean
 
 clean:
-	$(RM) $(aobjects) $(cobjects)
+	$(RM) $(aobjects) $(cobjects) *.asm

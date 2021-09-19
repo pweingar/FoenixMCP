@@ -20,8 +20,18 @@ int32_t syscall_dispatch(int32_t function, int32_t param0, int32_t param1, int32
         case KFN_CHAN_WRITE:
             return chan_write((short)param0, (const uint8_t *)param1, (short)param2);
 
+        case KFN_CHAN_READ_B:
+            return chan_read_b((short)param0);
+
+        case KFN_CHAN_READ:
+            return chan_read((short)param0, (const uint8_t *)param1, (short)param2);
+
+        case KFN_CHAN_READ_LINE:
+            return chan_readline((short)param0, (const uint8_t *)param1, (short)param2);
+
         default:
             DEBUG("syscall unknown function\n");
+            do {} while (1);
             return -1;
     }
 }

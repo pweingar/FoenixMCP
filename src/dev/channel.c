@@ -1,8 +1,8 @@
 /**
  * Implmentation of support low level channel device drivers
- * 
+ *
  * A channel or stream is a sequence of bytes that may be read or written to.
- * 
+ *
  * Examples include: console, serial port, an open file, etc.
  */
 
@@ -169,7 +169,7 @@ short chan_get_records(short channel, p_channel * chan, p_dev_chan * cdev) {
 // Inputs:
 //  channel = the number of the channel
 //  buffer = the buffer into which to copy the channel data
-//  size = the size of the buffer. 
+//  size = the size of the buffer.
 //
 // Returns:
 //  number of bytes read, any negative number is an error code
@@ -178,7 +178,7 @@ short chan_read(short channel, uint8_t * buffer, short size) {
     p_channel chan;
     p_dev_chan cdev;
     short res;
-    
+
     res = chan_get_records(channel, &chan, &cdev);
     if (res == 0) {
         return cdev->read(chan, buffer, size);
@@ -193,7 +193,7 @@ short chan_read(short channel, uint8_t * buffer, short size) {
 // Inputs:
 //  channel = the number of the channel
 //  buffer = the buffer into which to copy the channel data
-//  size = the size of the buffer. 
+//  size = the size of the buffer.
 //
 // Returns:
 //  number of bytes read, any negative number is an error code
@@ -202,7 +202,7 @@ short chan_readline(short channel, uint8_t * buffer, short size) {
     p_channel chan;
     p_dev_chan cdev;
     short res;
-    
+
     res = chan_get_records(channel, &chan, &cdev);
     if (res == 0) {
         return cdev->readline(chan, buffer, size);
@@ -225,7 +225,7 @@ short chan_read_b(short channel) {
     p_channel chan;
     p_dev_chan cdev;
     short res;
-    
+
     res = chan_get_records(channel, &chan, &cdev);
     if (res == 0) {
         return cdev->read_b(chan);
@@ -240,7 +240,7 @@ short chan_read_b(short channel) {
 // Inputs:
 //  channel = the number of the channel
 //  buffer = the buffer containing the data to write
-//  size = the size of the buffer. 
+//  size = the size of the buffer.
 //
 // Returns:
 //  number of bytes written, any negative number is an error code
@@ -249,7 +249,7 @@ short chan_write(short channel, const uint8_t * buffer, short size) {
     p_channel chan;
     p_dev_chan cdev;
     short res;
-    
+
     res = chan_get_records(channel, &chan, &cdev);
     if (res == 0) {
         return cdev->write(chan, buffer, size);
@@ -273,13 +273,13 @@ short chan_write_b(short channel, uint8_t b) {
     p_channel chan;
     p_dev_chan cdev;
     short res;
-    
+
     res = chan_get_records(channel, &chan, &cdev);
     if (res == 0) {
         return cdev->write_b(chan, b);
     } else {
         return res;
-    }  
+    }
 }
 
 
@@ -296,13 +296,13 @@ short chan_status(short channel) {
     p_channel chan;
     p_dev_chan cdev;
     short res;
-    
+
     res = chan_get_records(channel, &chan, &cdev);
     if (res == 0) {
         return cdev->status(chan);
     } else {
         return res;
-    }  
+    }
 }
 
 //
@@ -318,13 +318,13 @@ short chan_flush(short channel) {
     p_channel chan;
     p_dev_chan cdev;
     short res;
-    
+
     res = chan_get_records(channel, &chan, &cdev);
     if (res == 0) {
         return cdev->flush(chan);
     } else {
         return res;
-    }  
+    }
 }
 
 //
@@ -342,13 +342,13 @@ short chan_seek(short channel, long position, short base) {
     p_channel chan;
     p_dev_chan cdev;
     short res;
-    
+
     res = chan_get_records(channel, &chan, &cdev);
     if (res == 0) {
         return cdev->seek(chan, position, base);
     } else {
         return res;
-    }  
+    }
 }
 
 //
@@ -367,11 +367,11 @@ short chan_ioctrl(short channel, short command, uint8_t * buffer, short size) {
     p_channel chan;
     p_dev_chan cdev;
     short res;
-    
+
     res = chan_get_records(channel, &chan, &cdev);
     if (res == 0) {
         return cdev->ioctrl(chan, command, buffer, size);
     } else {
         return res;
-    }  
+    }
 }

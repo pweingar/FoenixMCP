@@ -79,4 +79,66 @@
  */
 extern int32_t syscall(int32_t function, ...);
 
+/*
+ * Read a single byte from the channel
+ *
+ * Inputs:
+ *  channel = the number of the channel
+ *
+ * Returns:
+ *  the value read (if negative, error)
+ */
+extern short sys_chan_read_b(short channel);
+
+/*
+ * Read bytes from the channel
+ *
+ * Inputs:
+ *  channel = the number of the channel
+ *  buffer = the buffer into which to copy the channel data
+ *  size = the size of the buffer.
+ *
+ * Returns:
+ *  number of bytes read, any negative number is an error code
+ */
+extern short sys_chan_read(short channel, unsigned char * buffer, short size);
+
+/*
+ * Read a line of text from the channel
+ *
+ * Inputs:
+ *  channel = the number of the channel
+ *  buffer = the buffer into which to copy the channel data
+ *  size = the size of the buffer
+ *
+ * Returns:
+ *  number of bytes read, any negative number is an error code
+ */
+extern short sys_chan_readline(short channel, unsigned char * buffer, short size);
+
+ /*
+  * Write a single byte to the device
+  *
+  * Inputs:
+  *  channel = the number of the channel
+  *  b = the byte to write
+  *
+  * Returns:
+  *  0 on success, a negative value on error
+  */
+extern short sys_chan_write_b(short channel, unsigned char b);
+
+/*
+ * Write a byte to the channel
+ *
+ * Inputs:
+ *  channel = the number of the channel
+ *  b = the byte to write
+ *
+ * Returns:
+ *  number of bytes written, any negative number is an error code
+ */
+extern short sys_chan_write(short channel, unsigned char * buffer, short size);
+
+
 #endif

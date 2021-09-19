@@ -1,7 +1,7 @@
 assign CS_GABE_Config_o            = ( iBUS_A_i[16:6] == 11'b0_0000_0000_00) & iBUS_CS_GABE_i;                        // $00C00000..$00C0003F    - Control Registers
 assign CS_A2560K_KB_o            = ( iBUS_A_i[16:6] == 11'b0_0000_0000_01) & iBUS_CS_GABE_i;                        // $00C00040..$00C0007F    - Control Registers
 
-assign CS_RTC_o                    = ( iBUS_A_i[16:7] == 10'b0_0000_0000_1) & iBUS_CS_GABE_i;                        // $00C00000..$00C0008F    - Control Registers
+assign CS_RTC_o                    = ( iBUS_A_i[16:7] == 10'b0_0000_0000_1) & iBUS_CS_GABE_i;                        // $00C00080..$00C0008F    - Control Registers
 assign CS_Interrupt_Ctrl_o        = ( iBUS_A_i[16:8] == 9'b0_0000_0001) & iBUS_CS_GABE_i;                        // $00C00100..$00C001FF - Interrupt Controllers
 assign CS_Timer_o                    = ( iBUS_A_i[16:8] == 9'b0_0000_0010) & iBUS_CS_GABE_i;                        // $00C00200..$00C002FF - Timer Block
 assign CS_SDCard_o                = ( iBUS_A_i[16:8] == 9'b0_0000_0011) & iBUS_CS_GABE_i;                        // $00C00300..$00C003FF - SD Card Controller

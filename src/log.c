@@ -16,3 +16,10 @@ void DEBUG(char * message) {
     }
     text_put_raw(0, '\n');
 }
+
+/*
+ * Send a single character to the debugging channel
+ */
+void logc(c) {
+    text_put_raw(0, c);
+}

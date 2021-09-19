@@ -1,14 +1,15 @@
 /**
  * Implementation of the console channel device
- * 
+ *
  * The console maps to the main screen and keyboard.
- * 
+ *
  */
 
 #include "types.h"
 #include "constants.h"
 #include "dev/channel.h"
 #include "dev/console.h"
+#include "dev/ps2.h"
 #include "dev/text_screen_iii.h"
 
 
@@ -31,17 +32,15 @@ short con_write_b(p_channel chan, uint8_t b) {
 // Attempt to read from the keyboard.
 //
 short con_read_b(p_channel chan) {
-    // char c;
-    // do {
-    //     c = kbd_getc();
-    // } while (c == 0);
+    char c;
+    do {
+        c = kbd_getc_poll();
+    } while (c == 0);
 
-    // // Echo the character to the screen
-    // con_write_b(chan, c);
+    // Echo the character to the screen
+    con_write_b(chan, c);
 
-    // return c;
-
-    return 0;
+    return c;
 }
 
 
@@ -84,6 +83,11 @@ short con_readline(p_channel chan, uint8_t * buffer, short size) {
 
             switch (c) {
                 case CHAR_NL:
+                    // Newline character, end the string and return the size of the string
+                    buffer[i] = 0;
+                    return i;
+
+                case CHAR_CR:
                     // Newline character, end the string and return the size of the string
                     buffer[i] = 0;
                     return i;

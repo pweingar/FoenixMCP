@@ -14,13 +14,17 @@
 #include "dev/text_screen_iii.h"
 #include "dev/pata.h"
 #include "dev/ps2.h"
+// #include "dev/kbd_mo.h"
 #include "dev/sdc.h"
 #include "dev/uart.h"
 #include "snd/codec.h"
 #include "snd/psg.h"
 #include "snd/sid.h"
 #include "fatfs/ff.h"
+// #include "cli/cli.h"
 #include "log.h"
+
+const char* VolumeStr[FF_VOLUMES] = { "@S", "@F", "@H" };
 
 /*
  * Initialize the SuperIO registers
@@ -75,10 +79,60 @@
  	*LED2_REG = 0x02;
  }
 
+ void print(short channel, char * message) {
+     sys_chan_write(channel, message, strlen(message));
+ }
+
+ unsigned char number[5];
+ unsigned char hex_digits[] = "0123456789ABCDEF";
+
+ void print_hex(short channel, unsigned short x) {
+     short digit;
+
+     digit = (x & 0xf0) >> 4;
+     number[0] = hex_digits[digit];
+
+     digit = (x & 0x0f);
+     number[1] = hex_digits[digit];
+
+     number[2] = 0;
+
+     print(channel, number);
+ }
+
+ void print_hex_16(short channel, unsigned short x) {
+     short digit;
+
+     digit = (x >> 12) & 0x000f;
+     number[0] = hex_digits[digit];
+
+     digit = (x >> 8) & 0x000f;
+     number[1] = hex_digits[digit];
+
+     digit = (x >> 4) & 0x000f;
+     number[2] = hex_digits[digit];
+
+     digit = x & 0x000f;
+     number[3] = hex_digits[digit];
+
+     number[4] = 0;
+
+     print(channel, number);
+ }
+
+ void print_error(short channel, char * message, short code) {
+     print(channel, message);
+     print(channel, ": ");
+     print_hex_16(channel, code);
+     print(channel, "\n");
+ }
+
 /*
  * Initialize the kernel systems.
  */
 void initialize() {
+    short res;
+
     text_init();          // Initialize the text channels
     DEBUG("Foenix/MCP starting up...");
 
@@ -110,224 +164,111 @@ void initialize() {
     bdev_init_system();   // Initialize the channel device system
     DEBUG("Block device system ready.");
 
-    if (con_install()) {
-        DEBUG("FAILED: Console installation.");
+    if (res = con_install()) {
+        print_error(0, "FAILED: Console installation", res);
     } else {
         DEBUG("Console installed.");
     }
 
-    if (pata_install()) {
-        DEBUG("FAILED: PATA driver installation.");
+    if (res = pata_install()) {
+        print_error(0, "FAILED: PATA driver installation", res);
     } else {
         DEBUG("PATA driver installed.");
     }
 
-    if (sdc_install()) {
-        DEBUG("FAILED: SDC driver installation.");
+    if (res = sdc_install()) {
+        print_error(0, "FAILED: SDC driver installation", res);
     } else {
         DEBUG("SDC driver installed.");
     }
 
     // At this point, we should be able to call into to console to print to the screens
 
-    if (ps2_init()) {
-        DEBUG("FAILED: PS/2 initialization.");
+    if (res = ps2_init()) {
+        print_error(0, "FAILED: PS/2 keyboard initialization", res);
     } else {
-        DEBUG("PS/2 initialized.");
+        DEBUG("PS/2 keyboard initialized.");
     }
 
-    if (bdev_init(BDEV_HDC)) {
-        DEBUG("Unable to initialize the PATA!");
-    } else {
-        DEBUG("PATA initialized.");
-    }
+    // if (res = kbdmo_init()) {
+    //     print_error(0, "FAILED: A2560K built-in keyboard initialization", res);
+    // } else {
+    //     DEBUG("A2560K built-in keyboard initialized.");
+    // }
 
-    if (bdev_init(BDEV_SDC)) {
-        DEBUG("Unable to initialize the SDC!");
-    } else {
-        DEBUG("SDC initialized.");
-    }
+    // if (res = cli_init()) {
+    //     print_error(0, "FAILED: CLI initialization", res);
+    // } else {
+    //     DEBUG("CLI initialized.");
+    // }
+
+    print(0, "MASK_GRP1: ");
+    unsigned short grp1 = *MASK_GRP1;
+    print_hex_16(0, grp1);
+    print(0, "\n");
 
     /* Enable all interrupts */
-    int_enable_all();
+    // int_enable_all();
 }
 
-void print(short channel, char * message) {
-    //syscall(KFN_CHAN_WRITE, channel, message, strlen(message));
-    char * c;
-    for (c = message; *c; c++) {
-        text_put_raw(channel, *c);
-    }
-}
+// void try_mo_scancodes(short screen) {
+//     // volatile unsigned short * kbd_mo_data = ((volatile unsigned short *)0x00C00040);
+//     // volatile unsigned short * kbd_mo_stat = ((volatile unsigned short *)0x00C00042);
+//
+//     print(screen, "mo> ");
+//
+//     do {
+//         // unsigned short status = *kbd_mo_stat;
+//         // if ((status & KBD_MO_STAT_EMPTY) != KBD_MO_STAT_EMPTY) {
+//         //     unsigned short data = *kbd_mo_data;
+//         //     print(screen, "[");
+//         //     print_hex_16(screen, status);
+//         //     print(screen, "]: {");
+//         //
+//         //     print_hex_16(screen, data);
+//         //     print(screen, "}\n ");
+//         // // }
+//         // }
+//
+//         unsigned short scancode = kbdmo_get_scancode_poll();
+//         if (scancode != 0) {
+//             print(screen, "[");
+//             print_hex_16(screen, scancode);
+//             print(screen, "]\n");
+//         }
+//
+//     } while (1);
+// }
 
-unsigned char number[5];
-unsigned char hex_digits[] = "0123456789ABCDEF";
-
-void print_hex(short channel, unsigned short x) {
-    short digit;
-
-    digit = (x & 0xf0) >> 4;
-    number[0] = hex_digits[digit];
-
-    digit = (x & 0x0f);
-    number[1] = hex_digits[digit];
-
-    number[2] = 0;
-
-    print(channel, number);
-}
-
-void print_hex_16(short channel, unsigned short x) {
-    short digit;
-
-    digit = (x >> 12) & 0x000f;
-    number[0] = hex_digits[digit];
-
-    digit = (x >> 8) & 0x000f;
-    number[1] = hex_digits[digit];
-
-    digit = (x >> 4) & 0x000f;
-    number[2] = hex_digits[digit];
-
-    digit = x & 0x000f;
-    number[3] = hex_digits[digit];
-
-    number[4] = 0;
-
-    print(channel, number);
-}
-
-#define KBD_MO_STAT_FULL    0x4000
-#define KBD_MO_STAT_EMPTY   0x8000
-
-void try_mo(short screen) {
-    volatile unsigned short * kbd_mo_data = ((volatile unsigned short *)0x00C00040);
-    volatile unsigned short * kbd_mo_stat = ((volatile unsigned short *)0x00C00042);
-
-    print(screen, "mo> ");
-
-    do {
-        unsigned short status = *kbd_mo_stat;
-        if ((status & KBD_MO_STAT_EMPTY) != KBD_MO_STAT_EMPTY) {
-            unsigned short data = *kbd_mo_data;
-            print(screen, "[");
-            print_hex_16(screen, status);
-            print(screen, "]: {");
-
-            print_hex_16(screen, data);
-            print(screen, "}\n ");
-        // }
-        }
-
-        // unsigned short data = *kbd_mo_data;
-        // if (data != 0) {
-        //     print(screen, "{");
-        //     print_hex_16(screen, data);
-        //     print(screen, "}\n ");
-        // }
-    } while (1);
-}
-
-DIR my_dir;
-FILINFO my_file;
-FATFS my_fs;
-char line[255];
-
-short dos_cmd_dir(short screen, char * path) {
-    FRESULT fres;
-
-    TRACE("dos_cmd_dir");
-
-    fres = f_mount(&my_fs, path, 0);
-    TRACE("f_mount");
-    if (fres == FR_OK) {
-        fres = f_opendir(&my_dir, "/");
-        TRACE("f_opendir");
-        if (fres == FR_OK) {
-            do {
-                fres = f_readdir(&my_dir, &my_file);
-                TRACE("f_readdir");
-                if ((fres == FR_OK) && (my_file.fname[0] != 0)) {
-                    if ((my_file.fattrib & AM_HID) == 0) {
-                        chan_write(screen, my_file.fname, strlen(my_file.fname));
-                        if (my_file.fattrib & AM_DIR) {
-                            chan_write_b(screen, '/');
-                        }
-                        chan_write_b(screen, '\n');
-                    }
-                } else {
-                    break;
-                }
-            } while(1);
-
-            f_closedir(&my_dir);
-        } else {
-            char * err = "Could not open directory.\r";
-            chan_write(screen, err, strlen(err));
-        }
-
-        f_mount(0, "", 0);
-    } else {
-        char * err = "Could not mount drive.\r";
-        chan_write(screen, err, strlen(err));
-    }
-
-    return 0;
-}
-
-
-void repl(short screen) {
-    print(screen, "> ");
-    while (1) {
-        char c = kbd_getc_poll();
-        if (c) {
-            char buffer[2];
-            buffer[0] = c;
-            buffer[1] = 0;
-            print(screen, buffer);
-        }
-    }
-}
-
-void test_get_mbr(short screen, short device) {
-    short x;
-    short result;
-    char buffer[512];
-
-    for (x = 0; x < 512; x++) {
-        buffer[x] = 0;
-    }
-
-    print(1, "Master Boot Record:\n");
-    result = bdev_read(device, 0, buffer, 512);
-    if (result > 0) {
-        for (x = 0; x < result; x++) {
-            if (x % 16 == 0) {
-                print(screen, "\n");
-            }
-            print_hex(screen, buffer[x]);
-            print(screen, " ");
-        }
-        print(screen, "\n");
-    } else if (result < 0) {
-        DEBUG("IDE returned an error.");
-    } else {
-        DEBUG("IDE returned nothing.");
-    }
-}
+// void try_mo_chars(short screen) {
+//     char buffer[2];
+//     buffer[1] = 0;
+//
+//     print(screen, "mo> ");
+//
+//     while (1) {
+//         unsigned char c = kbdmo_getc_poll();
+//         if (c) {
+//             // text_put_raw(screen, c);
+//             return;
+//         }
+//     }
+// }
 
 void uart_send(short uart, char * message) {
-    int i;
+    int i, j;
 
-    uart_init(uart);
     for (i = 0; i < strlen(message); i++) {
         uart_put(uart, message[i]);
+
     }
 }
 
 void uart_test_send(short uart) {
     while (1) {
-        uart_send(uart, 'a');
+        int j;
+        uart_put(uart, 'a');
+        for (j = 1; j < 10000; j++) ;
     }
 }
 
@@ -352,7 +293,108 @@ void int_sof_a() {
     }
 
     /* Acknowledge the interrupt before leaving */
-    int_ack(SOF_A_INT00);
+    int_clear(SOF_A_INT00);
+}
+
+void try_format(short screen, char * path) {
+    FATFS fs;           /* Filesystem object */
+    FIL fil;            /* File object */
+    FRESULT res;        /* API result code */
+    UINT bw;            /* Bytes written */
+    BYTE work[FF_MAX_SS]; /* Work area (larger is better for processing time) */
+
+    /* Format the HDD with default parameters */
+    res = f_mkfs(path, 0, work, sizeof work);
+    if (res) {
+        print(screen, "Could not format drive.\n");
+        return;
+    }
+
+    /* Give a work area to the default drive */
+    f_mount(&fs, path, 0);
+
+    /* Create a file as new */
+    res = f_open(&fil, "hello.txt", FA_CREATE_NEW | FA_WRITE);
+    if (res) {
+        print(screen, "Could not create hello.txt.\n");
+        return;
+    }
+
+    /* Write a message */
+    f_write(&fil, "Hello, World!\r\n", 15, &bw);
+    if (bw != 15) {
+        print(screen, "Error writing file.\n");
+        return;
+    }
+
+    /* Close the file */
+    f_close(&fil);
+
+    /* Unregister work area */
+    f_mount(0, "", 0);
+}
+
+void try_write(short screen, char * path) {
+    FATFS fs;           /* Filesystem object */
+    FIL fil;            /* File object */
+    FRESULT res;        /* API result code */
+    UINT bw;            /* Bytes written */
+
+    /* Give a work area to the default drive */
+    f_mount(&fs, path, 0);
+
+    /* Create a file as new */
+    res = f_open(&fil, "hello.txt", FA_CREATE_NEW | FA_WRITE);
+    if (res) {
+        print(screen, "Could not create hello.txt: ");
+        print_hex_16(screen, res);
+        print(screen, "\n");
+        return;
+    }
+
+    /* Write a message */
+    f_write(&fil, "Hello, World!\r\n", 15, &bw);
+    if (bw != 15) {
+        print(screen, "Error writing file.\n");
+        return;
+    }
+
+    /* Close the file */
+    f_close(&fil);
+
+    /* Unregister work area */
+    f_mount(0, "", 0);
+}
+
+unsigned char test_block_1[512];
+unsigned char test_block_2[512];
+
+void try_bdev_getput(short screen, short dev) {
+    int i;
+    for (i = 0; i < 512; i++) {
+        test_block_1[i] = (unsigned short)i & 0xff;
+    }
+
+    short n = bdev_write(dev, 0x010000, test_block_1, 512);
+    if (n != 512) {
+        print(screen, "Could not write block.\n");
+        return;
+    }
+
+    n = bdev_read(dev, 0x010000, test_block_2, 512);
+    if (n != 512) {
+        print(screen, "Could not read block.\n");
+        return;
+    }
+
+    for (i = 0; i < 512; i++) {
+        if (test_block_1[i] != test_block_2[i]) {
+            print(screen, "Block did not verify.\n");
+            return;
+        }
+    }
+
+    print(screen, "BDEV read/write success.\n");
 }
 
 int main(int argc, char * argv[]) {
@@ -360,8 +402,8 @@ int main(int argc, char * argv[]) {
 
     initialize();
 
-    print(CDEV_CONSOLE, "Foenix/MCP\n\nText Channel A\n");
-    print(CDEV_EVID, "Foenix/MCP\n\nText Channel B\n");
+    print(CDEV_CONSOLE, "Text Channel A\n");
+    print(CDEV_EVID, "Text Channel B\n");
 
     // uart_test_send(0);
 
@@ -369,14 +411,17 @@ int main(int argc, char * argv[]) {
     int_register(0x00, int_sof_a);
     int_enable(0x00);
 
-    // dos_cmd_dir(0, "2:");
+    // uart_init(0);
+    // uart_test_send(0);
 
-    // while (1) {
-    //     text_set_xy(0, 40, 0);
-    //     print_hex_16(0, g_sof_counter);
-    // }
+    // test_get_mbr(0, BDEV_SDC);
+    // try_write(0, "0:");
+    // dos_cmd_dir(0, "0:");
+    // try_mo(0);
+    // try_mo_scancodes(0);
+    // try_bdev_getput(0, BDEV_SDC);
 
-    try_mo(0);
+    cli_repl(0);
 
     DEBUG("Stopping.");
 

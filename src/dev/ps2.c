@@ -2,11 +2,12 @@
  * Definitions for the PS/2 interface devices... mouse and keyboard
  */
 
+#include "log.h"
 #include "types.h"
 #include "ring_buffer.h"
 #include "dev/ps2.h"
 #include "dev/text_screen_iii.h"
-// #include "interrupt.h"
+#include "interrupt.h"
 
 #define PS2_RETRY_MAX 1000
 
@@ -751,8 +752,8 @@ short ps2_init() {
 
     // Disable the PS/2 interrupts...
 
-    // irq_disable(IRQ07_MOUSE);   // Disable mouse interrupts
-    // irq_disable(IRQ08_KBD);     // Disable keyboar interrupts
+    int_disable(INT_MOUSE);     /* Disable mouse interrupts */
+    int_disable(INT_KBD_PS2);   /* Disable keyboar interrupts */
 
     // Prevent the keyboard and mouse from sending events
     ps2_controller_cmd(PS2_CTRL_DISABLE_1);
@@ -761,15 +762,15 @@ short ps2_init() {
     // Read and clear out the controller's output buffer
     ps2_flush_out();
 
-    // Controller selftest...
-    if (ps2_controller_cmd(PS2_CTRL_SELFTEST) != PS2_RESP_OK) {
-        return PS2_FAIL_SELFTEST;
-    }
-
-    // Keyboard test
-    if (ps2_controller_cmd(PS2_CTRL_KBDTEST) != 0) {
-        return PS2_FAIL_KBDTEST;
-    }
+    // // Controller selftest...
+    // if (ps2_controller_cmd(PS2_CTRL_SELFTEST) != PS2_RESP_OK) {
+    //     ; // return PS2_FAIL_SELFTEST;
+    // }
+    //
+    // // Keyboard test
+    // if (ps2_controller_cmd(PS2_CTRL_KBDTEST) != 0) {
+    //     ; // return PS2_FAIL_KBDTEST;
+    // }
 
     // Set scancode translation to set1, enable interrupts on mouse and keyboard
     ps2_controller_cmd_param(PS2_CTRL_WRITECMD, 0x43);
@@ -789,14 +790,14 @@ short ps2_init() {
     // Make sure everything is read
     ps2_flush_out();
 
-    // // Register the interrupt handler for the keyboard
-    // irq_register(IRQ08_KBD, kbd_handle_irq);
-    //
-    // // Clear any pending keyboard interrupts
-    // irq_clear(IRQ08_KBD);
-    //
-    // // Enable the keyboard interrupt
-    // irq_enable(IRQ08_KBD);
+    // Register the interrupt handler for the keyboard
+    int_register(INT_KBD_PS2, kbd_handle_irq);
+
+    // Clear any pending keyboard interrupts
+    int_clear(INT_KBD_PS2);
+
+    // Enable the keyboard interrupt
+    int_enable(INT_KBD_PS2);
 
     return(0);
 }

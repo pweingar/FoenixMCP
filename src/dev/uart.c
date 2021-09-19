@@ -26,14 +26,14 @@ void uart_setbps(short uart, unsigned short bps_code) {
     unsigned char lcr;
     if (uart_base) {
         /* Enable divisor latch */
-        uart_base[UART_LCR] |= 0x80;
+        uart_base[UART_LCR] = uart_base[UART_LCR] | 0x80;
 
         /* Set the divisor */
         uart_base[UART_TRHB] = bps_code & 0xff;
         uart_base[UART_TRHB+1] = (bps_code >> 8) & 0xff;
 
         /* Disable divisor latch */
-        uart_base[UART_LCR] &= 0x7F;
+        uart_base[UART_LCR] = uart_base[UART_LCR] & 0x7F;
     }
 }
 
@@ -66,7 +66,7 @@ void uart_init(short uart) {
     DEBUG("uart_init");
     if (uart_base) {
         /* Default to 9600 bps */
-        uart_setbps(uart, UART_115200);
+        uart_setbps(uart, UART_9600);
 
         /* Set: no parity, 1 stop bit, 8 data bits */
         uart_setlcr(uart,  LCR_PARITY_NONE | LCR_STOPBIT_1 | LCR_DATABITS_8);

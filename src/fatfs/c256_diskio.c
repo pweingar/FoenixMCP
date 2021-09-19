@@ -15,6 +15,7 @@
 
 /* Definitions of physical drive number for each drive */
 #define DEV_SDC		0	/* Example: Map Ramdisk to physical drive 0 */
+#define DEV_FDC		1
 #define DEV_HDC 	2
 
 
