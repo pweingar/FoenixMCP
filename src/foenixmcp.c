@@ -421,7 +421,7 @@ int main(int argc, char * argv[]) {
     // try_mo_scancodes(0);
     // try_bdev_getput(0, BDEV_SDC);
 
-    cli_repl(0);
+    cli_repl(1);
 
     DEBUG("Stopping.");
 

@@ -752,9 +752,9 @@ Symbols of text:
   0x00010b50 l143: local reloc, size 0
   0x00010b68 l144: local reloc, size 0
   0x00010b84 _main: global reloc, size 0
-  0x00010bc8 l153: local reloc, size 0
-  0x00010bca l155: local reloc, size 0
-  0x00010bcc l148: local reloc, size 0
+  0x00010bca l153: local reloc, size 0
+  0x00010bcc l155: local reloc, size 0
+  0x00010bce l148: local reloc, size 0
   0x00010bd0 l150: local reloc, size 0
   0x00010be0 l151: local reloc, size 0
   0x00010bf0 l152: local reloc, size 0
