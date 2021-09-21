@@ -7,6 +7,8 @@
  */
 
 #include <string.h>
+#include "log.h"
+#include "syscalls.h"
 #include "fsys.h"
 #include "fatfs/ff.h"
 #include "dev/channel.h"
@@ -448,6 +450,34 @@ short fchan_ioctrl(t_channel * chan, short command, unsigned char * buffer, shor
     return 0;
 }
 
+/*
+ * Mount, or remount the block device
+ *
+ * For the hard drive, this need be called only once, but for removable
+ * devices, this should be called whenever the media has changed.
+ *
+ * Inputs:
+ * bdev = the number of the block device to mount or re-mount
+ *
+ * Returns:
+ * 0 on success, any other number is an error
+ */
+short fsys_mount(short bdev) {
+    FRESULT fres;
+    char drive[3];
+    drive[0] = '0' + (char)bdev;
+    drive[1] = ':';
+    drive[2] = 0;
+
+    fres = f_mount(&g_drive[bdev], drive, 0);
+    if (fres != FR_OK) {
+        DEBUG("Unable to mount drive:");
+        DEBUG(drive);
+        return fres;
+    } else {
+        return 0;
+    }
+}
 
 /**
  * Initialize the file system
@@ -468,7 +498,14 @@ short fsys_init() {
         g_fil_state[i] = 0;
     }
 
-    /* TODO: Mount all logical drives that are present */
+    /* Mount all logical drives that are present */
+
+    for (i = 0; i < MAX_DRIVES; i++) {
+        short res = sys_bdev_status((short)i);
+        if (res >= 0) {
+            fsys_mount(i);
+        }
+    }
 
     /* Register the channel driver for files. */
 
@@ -486,4 +523,6 @@ short fsys_init() {
     g_file_dev.flush = fchan_flush;
 
     cdev_register(&g_file_dev);
+
+    return 0;
 }

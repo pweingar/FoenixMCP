@@ -7,10 +7,14 @@
  *
  */
 
-#ifndef __SYSCALLS_M68K_H
-#define __SYSCALLS_M68K_H
+#ifndef __SYSCALLS_H
+#define __SYSCALLS_H
 
 #include "types.h"
+#include "interrupt.h"
+#include "dev/channel.h"
+#include "dev/block.h"
+#include "dev/fsys.h"
 
 /*
  * Syscall function numbers
@@ -20,8 +24,13 @@
 
 #define KFN_EXIT                0x00    /* Quick the current program and return to the command line */
 #define KFN_WARMBOOT            0x01    /* Do a soft re-initialization */
-#define KFN_SETHANDLER          0x02    /* Set a handler for an exception / interrupt */
-#define KFN_SETINTERRUPT        0x03    /* Enable / Disable an interrupt */
+#define KFN_INT_REGISTER        0x02    /* Set a handler for an exception / interrupt */
+#define KFN_INT_ENABLE          0x03    /* Enable an interrupt */
+#define KFN_INT_DISABLE         0x04    /* Disable an interrupt */
+#define KFN_INT_ENABLE_ALL      0x05    /* Enable all interrupts */
+#define KFN_INT_DISABLE_ALL     0x06    /* Disable all interrupts */
+#define KFN_INT_CLEAR           0x05    /* Clear (acknowledge) an interrupt */
+#define KFN_INT_PENDING         0x06    /* Return true if the interrupt is pending */
 
 /* Channel system calls */
 
@@ -60,24 +69,90 @@
 #define KFN_MKDIR               0x39    /* Create a directory */
 #define KFN_LOAD                0x3A    /* Load a file into memory */
 #define KFN_SAVE                0x3B    /* Save a block of memory to a file */
-
-/* Process system calls */
-
-#define KFN_RUN                 0x40    /* Load an execute a binary file */
-#define KFN_LOAD_REGISTER       0x41    /* Register a file type handler for executable binaries */
+#define KFN_RUN                 0x3C    /* Load an execute a binary file */
+#define KFN_LOAD_REGISTER       0x3D    /* Register a file type handler for executable binaries */
 
 /* Timer calls */
 
-#define KFN_DELAY               0x50    /* Block for a certain amount of time */
-#define KFN_SET_ALARM           0x51    /* Set an alarm for a certain amount of time */
-#define KFN_GET_TIMECODE        0x52    /* Gets the current time code (increments since boot) */
-#define KFN_SET_DATETIME        0x53    /* Set the real time clock date-time */
-#define KFN_GET_DATETIME        0x54    /* Get the real time clock date-time */
+#define KFN_DELAY               0x40    /* Block for a certain amount of time */
+#define KFN_SET_ALARM           0x41    /* Set an alarm for a certain amount of time */
+#define KFN_GET_TIMECODE        0x42    /* Gets the current time code (increments since boot) */
+#define KFN_SET_DATETIME        0x43    /* Set the real time clock date-time */
+#define KFN_GET_DATETIME        0x44    /* Get the real time clock date-time */
 
 /*
  * Call into the kernel (provided by assembly)
  */
 extern int32_t syscall(int32_t function, ...);
+
+/***
+ *** Core system calls
+ ***/
+
+/*
+ * Enable all interrupts
+ *
+ * NOTE: this is actually provided in the low level assembly
+ */
+extern void sys_int_enable_all();
+
+/*
+ * Disable all interrupts
+ *
+ * NOTE: this is actually provided in the low level assembly
+ */
+extern void sys_int_disable_all();
+
+/*
+ * Disable an interrupt by masking it
+ *
+ * Inputs:
+ * n = the number of the interrupt: n[7..4] = group number, n[3..0] = individual number.
+ */
+extern void sys_int_disable(unsigned short n);
+
+/*
+ * Enable an interrupt
+ *
+ * Inputs:
+ * n = the number of the interrupt
+ */
+extern void sys_int_enable(unsigned short n);
+
+/*
+ * Register a handler for a given interrupt.
+ *
+ * Inputs:
+ * n = the number of the interrupt
+ * handler = pointer to the interrupt handler to register
+ *
+ * Returns:
+ * the pointer to the previous interrupt handler
+ */
+extern p_int_handler sys_int_register(unsigned short n, p_int_handler handler);
+
+/*
+ * Return true (non-zero) if an interrupt is pending for the given interrupt
+ *
+ * Inputs:
+ * n = the number of the interrupt: n[7..4] = group number, n[3..0] = individual number.
+ *
+ * Returns:
+ * non-zero if interrupt n is pending, 0 if not
+ */
+extern short sys_int_pending(unsigned short n);
+
+/*
+ * Acknowledge an interrupt (clear out its pending flag)
+ *
+ * Inputs:
+ * n = the number of the interrupt: n[7..4] = group number, n[3..0] = individual number.
+ */
+extern void sys_int_clear(unsigned short n);
+
+/***
+ *** Channel system calls
+ ***/
 
 /*
  * Read a single byte from the channel
@@ -116,16 +191,16 @@ extern short sys_chan_read(short channel, unsigned char * buffer, short size);
  */
 extern short sys_chan_readline(short channel, unsigned char * buffer, short size);
 
- /*
-  * Write a single byte to the device
-  *
-  * Inputs:
-  *  channel = the number of the channel
-  *  b = the byte to write
-  *
-  * Returns:
-  *  0 on success, a negative value on error
-  */
+/*
+ * Write a single byte to the device
+ *
+ * Inputs:
+ *  channel = the number of the channel
+ *  b = the byte to write
+ *
+ * Returns:
+ *  0 on success, a negative value on error
+ */
 extern short sys_chan_write_b(short channel, unsigned char b);
 
 /*
@@ -140,5 +215,126 @@ extern short sys_chan_write_b(short channel, unsigned char b);
  */
 extern short sys_chan_write(short channel, unsigned char * buffer, short size);
 
+/*
+ * Return the status of the channel device
+ *
+ * Inputs:
+ *  channel = the number of the channel
+ *
+ * Returns:
+ *  the status of the device
+ */
+extern short sys_chan_status(short channel);
+
+/*
+ * Ensure that any pending writes to teh device have been completed
+ *
+ * Inputs:
+ *  channel = the number of the channel
+ *
+ * Returns:
+ *  0 on success, any negative number is an error code
+ */
+extern short sys_chan_flush(short channel);
+
+/*
+ * Attempt to set the position of the channel cursor (if supported)
+ *
+ * Inputs:
+ *  channel = the number of the channel
+ *  position = the position of the cursor
+ *  base = whether the position is absolute or relative to the current position
+ *
+ * Returns:
+ *  0 = success, a negative number is an error.
+ */
+extern short sys_chan_seek(short channel, long position, short base);
+
+/*
+ * Issue a control command to the device
+ *
+ * Inputs:
+ *  channel = the number of the channel
+ *  command = the number of the command to send
+ *  buffer = pointer to bytes of additional data for the command
+ *  size = the size of the buffer
+ *
+ * Returns:
+ *  0 on success, any negative number is an error code
+ */
+extern short sys_chan_ioctrl(short channel, short command, uint8_t * buffer, short size);
+
+/***
+ *** Block device system calls
+ ***/
+
+//
+// Register a block device driver
+//
+extern short sys_bdev_register(p_dev_block device);
+
+//
+// Read a block from the device
+//
+// Inputs:
+//  dev = the number of the device
+//  lba = the logical block address of the block to read
+//  buffer = the buffer into which to copy the block data
+//  size = the size of the buffer.
+//
+// Returns:
+//  number of bytes read, any negative number is an error code
+//
+extern short sys_bdev_read(short dev, long lba, unsigned char * buffer, short size);
+
+//
+// Write a block from the device
+//
+// Inputs:
+//  dev = the number of the device
+//  lba = the logical block address of the block to write
+//  buffer = the buffer containing the data to write
+//  size = the size of the buffer.
+//
+// Returns:
+//  number of bytes written, any negative number is an error code
+//
+extern short sys_bdev_write(short dev, long lba, const unsigned char * buffer, short size);
+
+//
+// Return the status of the block device
+//
+// Inputs:
+//  dev = the number of the device
+//
+// Returns:
+//  the status of the device
+//
+extern short sys_bdev_status(short dev);
+
+//
+// Ensure that any pending writes to teh device have been completed
+//
+// Inputs:
+//  dev = the number of the device
+//
+// Returns:
+//  0 on success, any negative number is an error code
+//
+extern short sys_bdev_flush(short dev);
+
+//
+// Issue a control command to the device
+//
+// Inputs:
+//  dev = the number of the device
+//  command = the number of the command to send
+//  buffer = pointer to bytes of additional data for the command
+//  size = the size of the buffer
+//
+// Returns:
+//  0 on success, any negative number is an error code
+//
+extern short sys_bdev_ioctrl(short dev, short command, unsigned char * buffer, short size);
 
 #endif

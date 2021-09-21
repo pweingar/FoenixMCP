@@ -26,7 +26,7 @@ typedef struct s_file_info {
  * Returns:
  * 0 on success, negative number on failure.
  */
-short fsys_init();
+extern short fsys_init();
 
 /**
  * Attempt to open a file given the path to the file and the mode.

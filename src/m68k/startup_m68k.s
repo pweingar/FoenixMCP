@@ -51,9 +51,9 @@
             dc.l not_impl           ; 42 - TRAP #10
             dc.l not_impl           ; 43 - TRAP #11
             dc.l not_impl           ; 44 - TRAP #12
-            dc.l h_trap_13          ; 45 - TRAP #13
+            dc.l not_impl           ; 45 - TRAP #13
             dc.l not_impl           ; 46 - TRAP #14
-            dc.l not_impl           ; 47 - TRAP #15
+            dc.l h_trap_15          ; 47 - TRAP #15
             dc.l not_impl           ; 48 - Reserved
             dc.l not_impl           ; 49 - Reserved
             dc.l not_impl           ; 50 - Reserved
@@ -120,7 +120,7 @@ clrloop:    clr.l (a0)+
             bne	clrloop
 
             ; Set TRAP #13 vector handler
-            lea h_trap_13,a0        ; Address of the handler
+            lea h_trap_15,a0        ; Address of the handler
             move.l #(13+32)<<2,a1   ; TRAP#13 vector address
             move.l a0,(a1)          ; Set the vector
 
@@ -214,31 +214,31 @@ _int_disable_all:   ori.w #$0700,SR
 ;
 _syscall:
             movem.l d1-d7,-(sp)         ; Save caller's registers
-            move.l (56,sp),d7           ; Parameter 5 to D7
-            move.l (52,sp),d6           ; Parameter 4 to D6
-            move.l (48,sp),d5           ; Parameter 3 to D5
-            move.l (44,sp),d4           ; Parameter 2 to D4
-            move.l (40,sp),d3           ; Parameter 1 to D3
-            move.l (36,sp),d2           ; Parameter 0 to D2
-            move.l (32,sp),d1           ; Function number to D1
+            move.l (56,sp),d6           ; Parameter 5 to D6
+            move.l (52,sp),d5           ; Parameter 4 to D5
+            move.l (48,sp),d4           ; Parameter 3 to D4
+            move.l (44,sp),d3           ; Parameter 2 to D3
+            move.l (40,sp),d2           ; Parameter 1 to D2
+            move.l (36,sp),d1           ; Parameter 0 to D1
+            move.l (32,sp),d0           ; Function number to D0
 
-            TRAP #13                    ; Call into the kernel
+            TRAP #15                    ; Call into the kernel
 
             movem.l (sp)+,d1-d7         ; Restore caller's registers
             rts
 
 
 ;
-; TRAP#13 handler... transfer control to the C dispatcher
+; TRAP#15 handler... transfer control to the C dispatcher
 ;
-h_trap_13:
-            move.l d7,-(sp)             ; Push the parameters to the stack for the C call
-            move.l d6,-(sp)
+h_trap_15:
+            move.l d6,-(sp)             ; Push the parameters to the stack for the C call
             move.l d5,-(sp)
             move.l d4,-(sp)
             move.l d3,-(sp)
             move.l d2,-(sp)
             move.l d1,-(sp)
+            move.l d0,-(sp)
 
             jsr _syscall_dispatch       ; Call the C routine to do the dispatch
                                         ; Note: the C routine depends upon the register push order

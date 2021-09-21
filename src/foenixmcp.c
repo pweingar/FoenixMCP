@@ -14,14 +14,14 @@
 #include "dev/text_screen_iii.h"
 #include "dev/pata.h"
 #include "dev/ps2.h"
-// #include "dev/kbd_mo.h"
+#include "dev/kbd_mo.h"
 #include "dev/sdc.h"
 #include "dev/uart.h"
 #include "snd/codec.h"
 #include "snd/psg.h"
 #include "snd/sid.h"
 #include "fatfs/ff.h"
-// #include "cli/cli.h"
+#include "cli/cli.h"
 #include "log.h"
 
 const char* VolumeStr[FF_VOLUMES] = { "@S", "@F", "@H" };
@@ -190,22 +190,23 @@ void initialize() {
         DEBUG("PS/2 keyboard initialized.");
     }
 
-    // if (res = kbdmo_init()) {
-    //     print_error(0, "FAILED: A2560K built-in keyboard initialization", res);
-    // } else {
-    //     DEBUG("A2560K built-in keyboard initialized.");
-    // }
+    if (res = kbdmo_init()) {
+        print_error(0, "FAILED: A2560K built-in keyboard initialization", res);
+    } else {
+        DEBUG("A2560K built-in keyboard initialized.");
+    }
 
-    // if (res = cli_init()) {
-    //     print_error(0, "FAILED: CLI initialization", res);
-    // } else {
-    //     DEBUG("CLI initialized.");
-    // }
+    if (res = cli_init()) {
+        print_error(0, "FAILED: CLI initialization", res);
+    } else {
+        DEBUG("CLI initialized.");
+    }
 
-    print(0, "MASK_GRP1: ");
-    unsigned short grp1 = *MASK_GRP1;
-    print_hex_16(0, grp1);
-    print(0, "\n");
+    if (res = fsys_init()) {
+        print_error(0, "FAILED: file system initialization", res);
+    } else {
+        DEBUG("File system initialized.");
+    }
 
     /* Enable all interrupts */
     // int_enable_all();
@@ -421,7 +422,16 @@ int main(int argc, char * argv[]) {
     // try_mo_scancodes(0);
     // try_bdev_getput(0, BDEV_SDC);
 
-    cli_repl(1);
+    // print(0, "Watching for MIDI signals:\n");
+    // while (1) {
+    //     midi_byte = midi_get_poll();
+    //     if (midi_byte && (midi_byte != 0xFE) && (midi_byte != 0xF8)) {
+    //         print_hex(0, midi_byte);
+    //         print(0, "\n");
+    //     }
+    // }
+
+    cli_repl(0);
 
     DEBUG("Stopping.");
 

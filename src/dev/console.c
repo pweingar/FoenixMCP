@@ -10,6 +10,7 @@
 #include "dev/channel.h"
 #include "dev/console.h"
 #include "dev/ps2.h"
+#include "dev/kbd_mo.h"
 #include "dev/text_screen_iii.h"
 
 
