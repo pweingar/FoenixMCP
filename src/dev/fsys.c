@@ -139,7 +139,32 @@ short fsys_close(short c) {
  * the handle to the directory if >= 0. An error if < 0
  */
 short fsys_opendir(const char * path) {
-    return -1;
+    short i;
+    short dir = -1;
+    FRESULT fres;
+
+    /* Allocate a directory handle */
+    for (i = 0; i < MAX_DIRECTORIES; i++) {
+        if (g_dir_state[i] == 0) {
+            dir = i;
+            break;
+        }
+    }
+
+    if (dir < 0) {
+        return ERR_OUT_OF_HANDLES;
+    } else {
+        /* Try to open the directory */
+        fres = f_opendir(&g_directory[dir], path);
+        if (fres != FR_OK) {
+            /* If there was a problem, return an error number */
+            return fatfs_to_foenix(fres);
+        } else {
+            /* Otherwise, allocate and return the handle */
+            g_dir_state[dir] = 1;
+            return dir;
+        }
+    }
 }
 
 /**
@@ -152,7 +177,13 @@ short fsys_opendir(const char * path) {
  * 0 on success, negative number on error
  */
 short fsys_closedir(short dir) {
-    return -1;
+    if (g_dir_state[dir]) {
+        /* Close and deallocate the handle */
+        f_closedir(&g_directory[dir]);
+        g_dir_state[dir] = 0;
+    }
+
+    return 0;
 }
 
 /**
@@ -166,7 +197,33 @@ short fsys_closedir(short dir) {
  * 0 on success, negative number on failure
  */
 short fsys_readdir(short dir, p_file_info file) {
-    return -1;
+    FILINFO finfo;
+
+    if (g_dir_state[dir]) {
+        FRESULT fres = f_readdir(&g_directory[dir], &finfo);
+        if (fres != FR_OK) {
+            return fatfs_to_foenix(fres);
+        } else {
+            int i;
+
+            /* Copy file information into the kernel table */
+            file->size = finfo.fsize;
+            file->date = finfo.fdate;
+            file->time = finfo.ftime;
+            file->attributes = finfo.fattrib;
+
+            for (i = 0; i < MAX_PATH_LEN; i++) {
+                file->name[i] = finfo.fname[i];
+                if (file->name[i] == 0) {
+                    break;
+                }
+            }
+
+            return 0;
+        }
+    } else {
+        return ERR_BAD_HANDLE;
+    }
 }
 
 /**

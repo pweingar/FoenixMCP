@@ -5,7 +5,7 @@
 #ifndef __ERRORS_H
 #define __ERRORS_H
 
-#define MAX_ERROR_NUMBER    10      // Largest (absolute value) of the error number
+#define MAX_ERROR_NUMBER    12      // Largest (absolute value) of the error number
 
 #define ERR_OUT_OF_MEMORY   -1
 #define DEV_ERR_BADDEV      -2      // Device number is bad (too big or no device assigned)
@@ -18,5 +18,6 @@
 #define DEV_WRITEPROT       -9      // The media is write protected
 #define ERR_BADCHANNEL      -10     // The channel number was bad
 #define ERR_OUT_OF_HANDLES  -11     // There are no available handles for channels, files, etc.
+#define ERR_BAD_HANDLE      -12     // The handle passed was not valid
 
 #endif

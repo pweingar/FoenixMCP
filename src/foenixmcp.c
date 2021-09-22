@@ -4,6 +4,8 @@
 
 #include <string.h>
 #include "sys_general.h"
+#include "simpleio.h"
+#include "log.h"
 #include "interrupt.h"
 #include "gabe_reg.h"
 #include "superio.h"
@@ -22,7 +24,6 @@
 #include "snd/sid.h"
 #include "fatfs/ff.h"
 #include "cli/cli.h"
-#include "log.h"
 
 const char* VolumeStr[FF_VOLUMES] = { "@S", "@F", "@H" };
 
@@ -79,46 +80,8 @@ const char* VolumeStr[FF_VOLUMES] = { "@S", "@F", "@H" };
  	*LED2_REG = 0x02;
  }
 
- void print(short channel, char * message) {
-     sys_chan_write(channel, message, strlen(message));
- }
 
- unsigned char number[5];
- unsigned char hex_digits[] = "0123456789ABCDEF";
 
- void print_hex(short channel, unsigned short x) {
-     short digit;
-
-     digit = (x & 0xf0) >> 4;
-     number[0] = hex_digits[digit];
-
-     digit = (x & 0x0f);
-     number[1] = hex_digits[digit];
-
-     number[2] = 0;
-
-     print(channel, number);
- }
-
- void print_hex_16(short channel, unsigned short x) {
-     short digit;
-
-     digit = (x >> 12) & 0x000f;
-     number[0] = hex_digits[digit];
-
-     digit = (x >> 8) & 0x000f;
-     number[1] = hex_digits[digit];
-
-     digit = (x >> 4) & 0x000f;
-     number[2] = hex_digits[digit];
-
-     digit = x & 0x000f;
-     number[3] = hex_digits[digit];
-
-     number[4] = 0;
-
-     print(channel, number);
- }
 
  void print_error(short channel, char * message, short code) {
      print(channel, message);

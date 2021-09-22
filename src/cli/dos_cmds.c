@@ -2,6 +2,7 @@
 #include <string.h>
 
 #include "syscalls.h"
+#include "log.h"
 #include "cli/dos_cmds.h"
 #include "dev/block.h"
 #include "fatfs/ff.h"
