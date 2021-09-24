@@ -6,6 +6,7 @@
  *
  */
 
+#include <ctype.h>
 #include <string.h>
 #include "log.h"
 #include "syscalls.h"
@@ -17,6 +18,18 @@
 #define MAX_DRIVES      8       /* Maximum number of drives */
 #define MAX_DIRECTORIES 8       /* Maximum number of open directories */
 #define MAX_FILES       8       /* Maximum number of open files */
+#define MAX_LOADERS     10      /* Maximum number of file loaders */
+#define MAX_EXT         4
+
+/*
+ * Types
+ */
+
+typedef struct s_loader_record {
+    unsigned char status;                   /* Is the loader registered or not */
+    char extension[MAX_EXT];                /* The file extension for this file loader */
+    p_file_loader loader;                   /* Pointer to the loader */
+} t_loader_record, *p_loader_record;
 
 /**
  * Module variables
@@ -28,7 +41,7 @@ DIR g_directory[MAX_DIRECTORIES];           /* The directory information records
 unsigned char g_fil_state[MAX_FILES];       /* Whether or not a file descriptor is allocated */
 FIL g_file[MAX_FILES];                      /* The file descriptors */
 t_dev_chan g_file_dev;                      /* The descriptor to use for the file channels */
-
+t_loader_record g_file_loader[MAX_LOADERS]; /* Array of file types the loader will understand */
 
 /**
  * Convert a FATFS FRESULT code to the Foenix kernel's internal error codes
@@ -44,6 +57,7 @@ short fatfs_to_foenix(FRESULT r) {
         return 0;
     } else {
         /* TODO: flesh this out */
+        log_num(LOG_DEBUG, "FATFS: ", r);
         return -1;
     }
 }
@@ -537,6 +551,353 @@ short fsys_mount(short bdev) {
     }
 }
 
+/*
+ * Default loader to be used if file extension does not match a known file format
+ * but a destination address is provided
+ *
+ * Inputs:
+ * path = the path to the file to load
+ * destination = the destination address (0 for use file's address)
+ * start = pointer to the long variable to fill with the starting address
+ *         (0 if not an executable, any other number if file is executable
+ *         with a known starting address)
+ *
+ * Returns:
+ * 0 on success, negative number on error
+ */
+short fsys_default_loader(short chan, long destination, long * start) {
+    short n = ERR_GENERAL;
+    unsigned char * dest = (unsigned char *)destination;
+
+    TRACE("fsys_default_loader");
+    log_num(LOG_DEBUG, "Channel: ", chan);
+
+    /* The default loader cannot be used to load executable files, so clear the start address */
+    *start = 0;
+
+    while (1) {
+        n = sys_chan_read(chan, dest, DEFAULT_CHUNK_SIZE);
+        if (n > 0) {
+            /* If we transferred some bytes, keep going */
+            dest += n;
+        } else {
+            /* If we got back nothing or an error, stop and return */
+            break;
+        }
+    }
+    return n;
+}
+
+#define FYS_SREC_MAX_LINE_LENGTH    80   /* Assume no more than 80 characters per line */
+
+/*
+ * Convert a hexadecimal character to a number
+ */
+unsigned short atoi_hex_1(char hex) {
+    if ((hex >= '0') || (hex <= '9')) {
+        return hex - '0';
+    } else if ((hex >= 'a') || (hex <= 'f')) {
+        return hex - 'a' + 10;
+    } else if ((hex >= 'A') || (hex <= 'F')) {
+        return hex - 'A' + 10;
+    } else {
+        return 0;
+    }
+}
+
+/*
+ * Convert a two character hex string to a number
+ */
+unsigned short atoi_hex(char * hex) {
+    return (atoi_hex_1(hex[0]) << 4 | atoi_hex_1(hex[1]));
+}
+
+/*
+ * Loader for the Motorola SREC format
+ *
+ * See: https://en.wikipedia.org/wiki/SREC_(file_format)
+ *
+ * Inputs:
+ * path = the path to the file to load
+ * destination = the destination address (0 for use file's address)
+ * start = pointer to the long variable to fill with the starting address
+ *         (0 if not an executable, any other number if file is executable
+ *         with a known starting address)
+ *
+ * Returns:
+ * 0 on success, negative number on error
+ */
+short fsys_srec_loader(short chan, long destination, long * start) {
+    short n, i, chksum, data_index;
+    long address;
+    unsigned char count,data;
+    unsigned char addr[4];
+    char line[FYS_SREC_MAX_LINE_LENGTH];
+    unsigned char * dest;
+
+    TRACE("fsys_srec_loader");
+
+    /* TODO: verify the check sum */
+
+    while (1) {
+        chksum = 0;
+        count = 0;
+        n = sys_chan_readline(chan, line, FYS_SREC_MAX_LINE_LENGTH);
+        if (n < 0) {
+            /* If there was an error, return it */
+            return n;
+
+        } else if (n == 0) {
+            /* If we got nothing back, we're finished */
+            break;
+
+        } else if (n > 6) {
+            /* Only process the line if it starts with S and has more than six characters */
+            if (line[0] = 'S') {
+                /* Get the count and start the check sum */
+                count = atoi_hex(&line[1]);
+                chksum = count;
+
+                /* Determine how to process the line based on its type */
+                switch (line[1]) {
+                    case '1':
+                        /* 16-bit data line: S1nnaaaadd...ddcc */
+                        addr[1] = atoi_hex(&line[4]);
+                        addr[0] = atoi_hex(&line[6]);
+                        dest = (unsigned char *)(addr[1] << 8 | addr[0]);
+                        data_index = 8;
+                        count -= 2;
+                        chksum += addr[1] + addr[0];
+
+                        /* Copy the data */
+                        for (i = 0; i < count * 2; i += 2) {
+                            data = atoi_hex(&line[data_index + i]);
+                            chksum += data;
+                            *dest++ = data;
+                        }
+
+                        break;
+
+                    case '2':
+                        /* 24-bit address data line: S2nnaaaaaadd..ddcc */
+                        addr[2] = atoi_hex(&line[4]);
+                        addr[1] = atoi_hex(&line[6]);
+                        addr[0] = atoi_hex(&line[8]);
+                        dest = (unsigned char *)(addr[2] << 16 | addr[1] << 8 | addr[0]);
+                        data_index = 8;
+                        count -= 2;
+                        chksum += addr[2] + addr[1] + addr[0];
+
+                        /* Copy the data */
+                        for (i = 0; i < count * 2; i += 2) {
+                            data = atoi_hex(&line[data_index + i]);
+                            chksum += data;
+                            *dest++ = data;
+                        }
+
+                        break;
+
+                    case '3':
+                        /* 32-bit address data line: S2nnaaaaaaaadd..ddcc */
+                        addr[3] = atoi_hex(&line[4]);
+                        addr[2] = atoi_hex(&line[6]);
+                        addr[1] = atoi_hex(&line[8]);
+                        addr[0] = atoi_hex(&line[10]);
+                        dest = (unsigned char *)(addr[3] << 24 | addr[2] << 16 | addr[1] << 8 | addr[0]);
+                        data_index = 8;
+                        count -= 2;
+                        chksum += addr[3] + addr[2] + addr[1] + addr[0];
+
+                        /* Copy the data */
+                        for (i = 0; i < count * 2; i += 2) {
+                            data = atoi_hex(&line[data_index + i]);
+                            chksum += data;
+                            *dest++ = data;
+                        }
+
+                        break;
+
+                    case '5':
+                        /* 16-bit starting address */
+                        addr[1] = atoi_hex(&line[4]);
+                        addr[0] = atoi_hex(&line[6]);
+                        *start = (long)(addr[1] << 8 | addr[0]);
+                        chksum += addr[2] + addr[1] + addr[0];
+                        break;
+
+                    case '6':
+                        /* 24-bit starting address */
+                        addr[2] = atoi_hex(&line[4]);
+                        addr[1] = atoi_hex(&line[6]);
+                        addr[0] = atoi_hex(&line[8]);
+                        *start = (long)(addr[2] << 16 | addr[1] << 8 | addr[0]);
+                        chksum += addr[2] + addr[1] + addr[0];
+                        break;
+
+                    case '7':
+                        /* 32-bit starting address */
+                        addr[3] = atoi_hex(&line[4]);
+                        addr[2] = atoi_hex(&line[6]);
+                        addr[1] = atoi_hex(&line[8]);
+                        addr[0] = atoi_hex(&line[10]);
+                        *start = (long)(addr[3] << 24 | addr[2] << 16 | addr[1] << 8 | addr[0]);
+                        chksum += addr[3] + addr[2] + addr[1] + addr[0];
+                        break;
+
+                    default:
+                        /* Ignore any other kind of line */
+                        count = 0;
+                        break;
+                }
+            }
+        }
+    }
+
+    /* If we get here, we should have loaded the file successfully */
+    return 0;
+}
+
+/*
+ * Load a file into memory at the designated destination address.
+ *
+ * If destination = 0, the file must be in a recognized binary format
+ * that specifies its own loading address.
+ *
+ * Inputs:
+ * path = the path to the file to load
+ * destination = the destination address (0 for use file's address)
+ * start = pointer to the long variable to fill with the starting address
+ *         (0 if not an executable, any other number if file is executable
+ *         with a known starting address)
+ *
+ * Returns:
+ * 0 on success, negative number on error
+ */
+short fsys_load(const char * path, long destination, long * start) {
+    int i;
+    char extension[MAX_EXT];
+    short chan = -1;
+    p_file_loader loader = 0;
+
+    TRACE("fsys_load");
+
+    /* Clear out the extension */
+    for (i = 0; i <= MAX_EXT; i++) {
+        extension[i] = 0;
+    }
+
+    /* Find the extension */
+    char * point = strrchr(path, '.');
+    if (point != 0) {
+        point++;
+        for (i = 0; i < MAX_EXT; i++) {
+            char c = *point++;
+            if (c) {
+                extension[i] = toupper(c);
+            } else {
+                break;
+            }
+        }
+    }
+
+    TRACE("fsys_load: ext");
+
+    if (extension[0] == 0) {
+        if (destination != 0) {
+            /* If a destination was specified, just load it into memory without interpretation */
+            loader = fsys_default_loader;
+
+        } else {
+            /* Couldn't find a file extension to find the correct loader */
+            return ERR_BAD_EXTENSION;
+        }
+    }
+
+    /* Find the loader for the file extension */
+    for (i = 0; i < MAX_LOADERS; i++) {
+        if (g_file_loader[i].status) {
+            if (strcmp(g_file_loader[i].extension, extension) == 0) {
+                /* If the extensions match, pass back the loader */
+                loader = g_file_loader[i].loader;
+                log2(LOG_DEBUG, "loader found: ", g_file_loader[i].extension);
+            }
+        }
+    }
+
+    TRACE("fsys_load: loader search");
+
+    if (loader == 0) {
+        if (destination != 0) {
+            /* If a destination was specified, just load it into memory without interpretation */
+            log(LOG_DEBUG, "Setting default loader.");
+            loader = fsys_default_loader;
+
+        } else {
+            log(LOG_DEBUG, "Returning a bad extension.");
+            /* Return bad extension */
+            return ERR_BAD_EXTENSION;
+        }
+    }
+
+    if (loader == fsys_default_loader) {
+        TRACE("default loader!");
+    } else {
+        TRACE("another loader");
+    }
+
+    /* Open the file for reading */
+    chan = fsys_open(path, FA_READ);
+    if (chan >= 0) {
+        /* If it opened correctly, load the file */
+        short result = loader(chan, destination, start);
+        fsys_close(chan);
+        return result;
+    } else {
+        /* File open returned an error... pass it along */
+        return chan;
+    }
+}
+
+/*
+ * Register a file loading routine
+ *
+ * A file loader, takes a channel number to load from and returns a
+ * short that is the status of the load.
+ *
+ * Inputs:
+ * extension = the file extension to map to
+ * loader = pointer to the file load routine to add
+ *
+ * Returns:
+ * 0 on success, negative number on error
+ */
+short fsys_register_loader(const char * extension, p_file_loader loader) {
+    int i, j;
+
+    for (i = 0; i < MAX_LOADERS; i++) {
+        if (g_file_loader[i].status == 0) {
+            g_file_loader[i].status = 1;                    /* Claim this loader record */
+            g_file_loader[j].loader = loader;               /* Set the loader routine */
+            for (j = 0; j <= MAX_EXT; j++) {                /* Clear out the extension */
+                g_file_loader[i].extension[j] = 0;
+            }
+
+            for (j = 0; j < MAX_EXT; j++) {                 /* Copy the extension */
+                char c;
+                c = extension[j];
+                if (c) {
+                    g_file_loader[i].extension[j] = toupper(c);
+                } else {
+                    break;
+                }
+            }
+
+            return 0;
+        }
+    }
+    return ERR_OUT_OF_HANDLES;
+}
+
 /**
  * Initialize the file system
  *
@@ -544,7 +905,7 @@ short fsys_mount(short bdev) {
  * 0 on success, negative number on failure.
  */
 short fsys_init() {
-    int i;
+    int i, j;
 
     /* Mark all directories as available */
     for (i = 0; i < MAX_DIRECTORIES; i++) {
@@ -564,6 +925,17 @@ short fsys_init() {
             fsys_mount(i);
         }
     }
+
+    for (i = 0; i < MAX_LOADERS; i++) {
+        g_file_loader[i].status = 0;
+        g_file_loader[i].loader = 0;
+        for (j = 0; j <= MAX_EXT; j++) {
+            g_file_loader[i].extension[j] = 0;
+        }
+    }
+
+    /* Register the SREC loader */
+    fsys_register_loader("PRS", fsys_srec_loader);
 
     /* Register the channel driver for files. */
 

@@ -7,7 +7,7 @@
 
 #define MAX_ERROR_NUMBER    12      // Largest (absolute value) of the error number
 
-#define ERR_OUT_OF_MEMORY   -1
+#define ERR_GENERAL         -1      // A general error condition
 #define DEV_ERR_BADDEV      -2      // Device number is bad (too big or no device assigned)
 #define DEV_TIMEOUT         -3      // The block device function timed out
 #define DEV_CANNOT_INIT     -4      // The block device could not initilize
@@ -19,5 +19,7 @@
 #define ERR_BADCHANNEL      -10     // The channel number was bad
 #define ERR_OUT_OF_HANDLES  -11     // There are no available handles for channels, files, etc.
 #define ERR_BAD_HANDLE      -12     // The handle passed was not valid
+#define ERR_BAD_EXTENSION   -13     // The path to load did not have an extension that matched registered loaders
+#define ERR_OUT_OF_MEMORY   -14     // Unable to allocate more memory
 
 #endif

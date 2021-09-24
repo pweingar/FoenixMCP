@@ -96,6 +96,9 @@ short dos_cmd_dir(short screen, char * path) {
     return 0;
 }
 
+/*
+ * Print the contents of a file to the screen
+ */
 short cmd_type(short screen, char * path) {
     unsigned char buffer[128];
 
@@ -124,4 +127,25 @@ short cmd_type(short screen, char * path) {
  */
 short cmd_dir(short screen, char * path) {
     return dos_cmd_dir(screen, path);
+}
+
+
+/*
+ * Load a binary file into memory
+ * parameters: path [address]
+ */
+short cmd_load(short screen, char * parameters) {
+    long start = 0;
+    short result = fsys_load(parameters, 0x30000, &start);
+    if (result == 0) {
+        if (start != 0) {
+            log(LOG_INFO, "Loaded file with a start adddress.");
+        } else {
+            log(LOG_INFO, "File loaded.");
+        }
+    } else {
+        log_num(LOG_ERROR, "Unable to open file: ", result);
+    }
+
+    return result;
 }

@@ -47,11 +47,12 @@ typedef struct s_cli_command {
 //
 
 const t_cli_command g_cli_commands[] = {
-    { "DIR", "DIR <path> -- print directory listing", cmd_dir },
-    { "MBR", "MBR @S: | @F: | @H: -- fetch and display the MBR of the drive", cmd_dump_mbr},
-    { "HELP", "HELP -- print this helpful message", cmd_help },
-    { "TYPE", "TYPE <path> -- print the contents of a text file", cmd_type },
     { "?", "? -- print this helpful message", cmd_help },
+    { "HELP", "HELP -- print this helpful message", cmd_help },
+    { "DIR", "DIR <path> -- print directory listing", cmd_dir },
+    { "LOAD", "LOAD <path> -- load a file into memory", cmd_load },
+    { "MBR", "MBR @S: | @F: | @H: -- fetch and display the MBR of the drive", cmd_dump_mbr},
+    { "TYPE", "TYPE <path> -- print the contents of a text file", cmd_type },
     { 0, 0 }
 };
 

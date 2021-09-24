@@ -7,7 +7,8 @@
 
 #include "types.h"
 
-#define MAX_PATH_LEN 256
+#define MAX_PATH_LEN        256
+#define DEFAULT_CHUNK_SIZE  256
 
 /**
  * Type for directory information about a file
@@ -19,6 +20,14 @@ typedef struct s_file_info {
     unsigned char attributes;
     char name[MAX_PATH_LEN];
 } t_file_info, * p_file_info;
+
+/*
+ * Pointer type for file loaders
+ *
+ * short loader(short chan, destination, start);
+ */
+
+typedef short (*p_file_loader)(short chan, long destination, long * start);
 
 /**
  * Initialize the file system
@@ -172,5 +181,38 @@ extern short fsys_setcwd(const char * path);
  * 0 on success, negative number on failure.
  */
 extern short fsys_getcwd(char * path, short size);
+
+/*
+ * Load a file into memory at the designated destination address.
+ *
+ * If destination = 0, the file must be in a recognized binary format
+ * that specifies its own loading address.
+ *
+ * Inputs:
+ * path = the path to the file to load
+ * destination = the destination address (0 for use file's address)
+ * start = pointer to the long variable to fill with the starting address
+ *         (0 if not an executable, any other number if file is executable
+ *         with a known starting address)
+ *
+ * Returns:
+ * 0 on success, negative number on error
+ */
+extern short fsys_load(const char * path, long destination, long * start);
+
+/*
+ * Register a file loading routine
+ *
+ * A file loader, takes a channel number to load from and returns a
+ * short that is the status of the load.
+ *
+ * Inputs:
+ * extension = the file extension to map to
+ * loader = pointer to the file load routine to add
+ *
+ * Returns:
+ * 0 on success, negative number on error
+ */
+extern short fsys_register_loader(const char * extension, p_file_loader loader);
 
 #endif

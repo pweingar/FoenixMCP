@@ -18,6 +18,14 @@ extern short cmd_dump_mbr(char * drive);
  */
 extern short cmd_dir(char * path);
 
-extern short cmd_type(short screen, char * path);
+/*
+ * Print the contents of a file to the screen
+ */
+extern short cmd_type(short scre en, char * path);
+
+/*
+ * Load a binary file into memory
+ */
+extern short cmd_load(short screen, char * parameters);
 
 #endif
