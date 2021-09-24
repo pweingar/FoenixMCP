@@ -179,10 +179,14 @@ short chan_read(short channel, uint8_t * buffer, short size) {
     p_dev_chan cdev;
     short res;
 
+    log(LOG_TRACE, "chan_read");
+
     res = chan_get_records(channel, &chan, &cdev);
     if (res == 0) {
+        log2(LOG_DEBUG, "chan_read: ", cdev->name);
         return cdev->read(chan, buffer, size);
     } else {
+        log_num(LOG_DEBUG, "Couldn't get channel: ", res);
         return res;
     }
 }

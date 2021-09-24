@@ -18,4 +18,6 @@ extern short cmd_dump_mbr(char * drive);
  */
 extern short cmd_dir(char * path);
 
+extern short cmd_type(short screen, char * path);
+
 #endif

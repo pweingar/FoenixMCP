@@ -3,8 +3,10 @@
 
 #include "syscalls.h"
 #include "log.h"
+#include "simpleio.h"
 #include "cli/dos_cmds.h"
 #include "dev/block.h"
+#include "dev/fsys.h"
 #include "fatfs/ff.h"
 
 void test_get_mbr(short screen, short device) {
@@ -64,54 +66,57 @@ short cmd_dump_mbr(short screen, char * drive) {
     return 0;
 }
 
-
-DIR my_dir;
-FILINFO my_file;
-FATFS my_fs;
-
 short dos_cmd_dir(short screen, char * path) {
-    FRESULT fres;
-    char line[255];
+    t_file_info my_file;
 
-    print(screen, "Attempting to read directory for [");
-    print(screen, path);
-    print(screen, "]\n");
-
-    fres = f_mount(&my_fs, path, 0);
-    if (fres == FR_OK) {
-        fres = f_opendir(&my_dir, "/");
-        if (fres == FR_OK) {
-            do {
-                fres = f_readdir(&my_dir, &my_file);
-                if ((fres == FR_OK) && (my_file.fname[0] != 0)) {
-                    if ((my_file.fattrib & AM_HID) == 0) {
-                        sys_chan_write(screen, my_file.fname, strlen(my_file.fname));
-                        if (my_file.fattrib & AM_DIR) {
-                            sys_chan_write_b(screen, '/');
-                        }
-                        sys_chan_write(screen, "\n", 1);
+    log3(LOG_INFO, "Attempting to read directory for [", path, "]\n");
+    short dir = fsys_opendir(path);
+    if (dir >= 0) {
+        while (1) {
+            short result = fsys_readdir(dir, &my_file);
+            if ((result == 0) && (my_file.name[0] != 0)) {
+                if ((my_file.attributes & AM_HID) == 0) {
+                    print(screen, my_file.name);
+                    if (my_file.attributes & AM_DIR) {
+                        print(screen, "/");
                     }
-                } else {
-                    break;
+                    print(screen, "\n");
                 }
-            } while(1);
-
-            f_closedir(&my_dir);
-        } else {
-            char * err = "Could not open directory: ";
-            sys_chan_write(screen, err, strlen(err));
-            //print_hex_16(screen, fres);
-            sys_chan_write_b(screen, '\n');
+            } else {
+                break;
+            }
         }
 
-        f_mount(0, "", 0);
+        fsys_closedir(dir);
     } else {
-        char * err = "Could not mount drive: ";
-        //sys_chan_write(screen, err, strlen(err));
-        print_hex_16(screen, fres);
+        log_num(LOG_ERROR, "Could not open directory: ", dir);
+        return dir;
     }
 
     return 0;
+}
+
+short cmd_type(short screen, char * path) {
+    unsigned char buffer[128];
+
+    log3(LOG_INFO, "Attempting to type [", path, "]");
+    short fd = fsys_open(path, FA_READ);
+    if (fd >= 0) {
+        log(LOG_INFO, "File open");
+        while (1) {
+            short n = chan_read(fd, buffer, 128);
+            log_num(LOG_INFO, "chan_read: " n);
+            if (n > 0) {
+                chan_write(screen, buffer, n);
+            } else {
+                break;
+            }
+        }
+
+    } else {
+        log_num(LOG_ERROR, "Could not open file for reading: ", fd);
+        return fd;
+    }
 }
 
 /*

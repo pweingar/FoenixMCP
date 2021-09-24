@@ -83,8 +83,8 @@ short fsys_open(const char * path, short mode) {
         chan->dev = CDEV_FILE;
         FRESULT result = f_open(&g_file[fd], path, mode);
         if (result == 0) {
-            chan->data[0] = fd * 0xff;      /* file handle in the channel data block */
-            return fd;
+            chan->data[0] = fd & 0xff;      /* file handle in the channel data block */
+            return chan->number;
         } else {
             /* There was an error... deallocate the channel and file descriptor */
             g_fil_state[fd] = 0;
@@ -111,16 +111,15 @@ short fsys_open(const char * path, short mode) {
 short fsys_close(short c) {
     p_channel chan = 0;
     short fd = 0;
-    FRESULT result;
 
     chan = chan_get_record(c);          /* Get the channel record */
     fd = chan->data[0];                 /* Get the file descriptor number */
 
-    result = f_close(&g_file[fd]);      /* Close the file in FATFS */
+    f_close(&g_file[fd]);               /* Close the file in FATFS */
     chan_free(chan);                    /* Return the channel to the pool */
     g_fil_state[fd] = 0;                /* Return the file descriptor to the pool. */
 
-    return fatfs_to_foenix(result);
+    return 0;
 }
 
 /**
@@ -348,6 +347,8 @@ short fchan_read(t_channel * chan, unsigned char * buffer, short size) {
     FIL * file;
     FRESULT result;
     int total_read;
+
+    log(LOG_TRACE, "fchan_read");
 
     file = fchan_to_file(chan);
     if (file) {
