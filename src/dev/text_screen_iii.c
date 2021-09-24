@@ -346,7 +346,8 @@ void text_put_raw(short screen, char c) {
         case CHAR_BS:
             if (chan->x > 0) {
                 text_set_xy(screen, chan->x - 1, chan->y);
-                *chan->text_cursor_ptr++ = ' ';
+                *chan->text_cursor_ptr = ' ';
+                *chan->color_cursor_ptr = chan->current_color;
             }
             break;
 
