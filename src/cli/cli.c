@@ -4,12 +4,14 @@
 
 #include <ctype.h>
 #include <string.h>
+#include "log.h"
 #include "types.h"
 #include "syscalls.h"
 #include "cli/cli.h"
 #include "cli/dos_cmds.h"
 
 #define MAX_COMMAND_SIZE    128
+#define MAX_ARGC            32
 
 //
 // Types
@@ -32,7 +34,7 @@ typedef struct s_cli_command {
  //
  // List all the commands
  //
- int cmd_help(short channel, char * parameters) {
+ int cmd_help(short channel, int argc, char * argv[]) {
      p_cli_command command;
 
      for (command = g_cli_commands; (command != 0) && (command->name != 0); command++) {
@@ -51,7 +53,6 @@ const t_cli_command g_cli_commands[] = {
     { "HELP", "HELP -- print this helpful message", cmd_help },
     { "DIR", "DIR <path> -- print directory listing", cmd_dir },
     { "LOAD", "LOAD <path> -- load a file into memory", cmd_load },
-    { "MBR", "MBR @S: | @F: | @H: -- fetch and display the MBR of the drive", cmd_dump_mbr},
     { "TYPE", "TYPE <path> -- print the contents of a text file", cmd_type },
     { 0, 0 }
 };
@@ -63,18 +64,18 @@ const t_cli_command g_cli_commands[] = {
 //  command = the upper case name of the command (first word of the command line)
 //  parameters = the string of parameters to be passed to the command
 //
-short cli_exec(short channel, char * command, char * parameters) {
+short cli_exec(short channel, char * command, int argc, char * argv[]) {
     const char * cmd_not_found = "Command not found.\n";
+    p_cli_command commands = g_cli_commands;
 
-    p_cli_command commands;
-
-    commands = g_cli_commands;
+    log3(LOG_INFO, "cli_exec: '", argv[0], "'");
+    log_num(LOG_INFO, "argc = ", argc);
 
     while ((commands != 0) && (commands->name != 0)) {
         // Does the command match the name?
         if (strcmp(commands->name, command) == 0) {
             // Found it, execute the handler
-            return commands->handler(channel, parameters);
+            return commands->handler(channel, argc, argv);
         } else {
             // No match, keep checking...
             commands++;
@@ -87,14 +88,46 @@ short cli_exec(short channel, char * command, char * parameters) {
     return -1;
 }
 
-static char * command_line[MAX_COMMAND_SIZE];
+char * strtok_r(char * source, const char * delimiter, char ** saveptr) {
+    char * x = *saveptr;
+    char * y;
+
+    /* Skip over leading delimiters */
+    for (x = *saveptr; *x && (*x == delimiter[0]); x++) {
+
+    }
+
+    /* If we reached the end of the string, return NULL */
+    if (*x == 0) {
+        return 0;
+    }
+
+    for (y = x; *y && (*y != delimiter[0]); y++) {
+
+    }
+
+    /* If we reached the end of the string, return x */
+    if (*y == 0) {
+        *saveptr = y;
+        return x;
+    }
+
+    /* Otherwise, make that position in the source string NULL, and return x */
+    *y = 0;
+    *saveptr = y + 1;
+    return x;
+}
 
 //
 // Enter the CLI's read-eval-print loop
 //
 short cli_repl(short channel) {
-    char * command;
-    char * parameters;
+    char command_line[MAX_COMMAND_SIZE];
+    char * arg;
+    char * token_save;
+    char * delim = " ";
+    int argc = 0;
+    char * argv[MAX_ARGC];
 
     const char * welcome = "\n\nFoenix/MCP Command Line Utility... online.\nType \"HELP\" or \"?\" for help.\n\n";
     sys_chan_write(channel, welcome, strlen(welcome));
@@ -104,38 +137,24 @@ short cli_repl(short channel) {
         sys_chan_readline(channel, command_line, MAX_COMMAND_SIZE);   // Attempt to read line
         sys_chan_write(channel, "\n", 1);
 
-        // Start at the beginning of the command line
-        command = command_line;
-
-        // Skip over leading white space
-        while (*command != 0 && isspace(*command)) {
-            command++;
-        }
-
-        // Start at the beginning of the command
-        parameters = command;
-
-        // Skip over any non-space character... converting to uppercase as we go
-        while (*parameters != 0 && !isspace(*parameters)) {
-            if (islower(*parameters)) {
-                *parameters = toupper(*parameters);
+        for (argc = 0, token_save = command_line; argc < MAX_ARGC; argc++) {
+            arg = strtok_r(command_line, delim, &token_save);
+            if (arg != 0) {
+                argv[argc] = arg;
+            } else {
+                break;
             }
-            parameters++;
         }
 
-        // If we're not at the end of the line
-        if (*parameters != 0) {
-            // Mark this spot with a 0... end of command
-            *parameters++ = 0;
-        }
+        if (argc > 0) {
+            int i;
+            for (i = 0; i < strlen(argv[0]); i++) {
+                argv[0][i] = toupper(argv[0][i]);
+            }
 
-        // If we are at a space, move to the first non-space character
-        while (*parameters != 0 && isspace(*parameters)) {
-            parameters++;
+            // Try to execute the command
+            cli_exec(channel, argv[0], argc, argv);
         }
-
-        // Try to execute the command
-        cli_exec(channel, command, parameters);
     }
 
     return 0;
