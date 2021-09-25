@@ -34,4 +34,9 @@ extern short cli_init();
  */
 extern short cli_repl(short channel);
 
+/*
+ * Evaluate an argument to a number
+ */
+extern long cli_eval_number(const char * arg);
+
 #endif

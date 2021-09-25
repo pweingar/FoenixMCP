@@ -9,6 +9,7 @@
 #include "syscalls.h"
 #include "cli/cli.h"
 #include "cli/dos_cmds.h"
+#include "cli/mem_cmds.h"
 
 #define MAX_COMMAND_SIZE    128
 #define MAX_ARGC            32
@@ -52,7 +53,14 @@ const t_cli_command g_cli_commands[] = {
     { "?", "? -- print this helpful message", cmd_help },
     { "HELP", "HELP -- print this helpful message", cmd_help },
     { "DIR", "DIR <path> -- print directory listing", cmd_dir },
+    { "DUMP", "DUMP <address> [<count>] -- print a memory dump", mem_cmd_dump},
     { "LOAD", "LOAD <path> -- load a file into memory", cmd_load },
+    { "PEEK8", "PEEK8 <address> -- print the byte at the address in memory", mem_cmd_peek8},
+    { "PEEK16", "PEEK16 <address> -- print the 16-bit word at the address in memory", mem_cmd_peek16},
+    { "PEEK32", "PEEK32 <address> -- print the 32-bit long word at the address in memory", mem_cmd_peek32},
+    { "POKE8", "POKE8 <address> <value> -- write the byte value to the address in memory", mem_cmd_poke8},
+    { "POKE16", "POKE16 <address> <value> -- write the 16-bit word value to the address in memory", mem_cmd_poke16},
+    { "POKE32", "POKE32 <address> <value> -- write the 32-bit long word value to the address in memory", mem_cmd_poke32},
     { "TYPE", "TYPE <path> -- print the contents of a text file", cmd_type },
     { 0, 0 }
 };
@@ -158,6 +166,107 @@ short cli_repl(short channel) {
     }
 
     return 0;
+}
+
+long cli_eval_dec(const char * arg) {
+    long n = 0;
+
+    TRACE("cli_eval_dec");
+
+    while (*arg) {
+        if (*arg == ':') {
+            arg++;
+            continue;
+        } else if (isdigit(*arg)) {
+            n *= 10;
+            n += *arg - '0';
+        } else {
+            break;
+        }
+
+        arg++;
+    }
+
+    return n;
+}
+
+long cli_eval_hex(const char * arg) {
+    long n = 0;
+
+    TRACE("cli_eval_hex");
+
+    while (*arg) {
+        if (*arg == ':') {
+            arg++;
+            continue;
+        } else if (isdigit(*arg)) {
+            n *= 16;
+            n += *arg - '0';
+        } else if ((*arg >= 'a') && (*arg <= 'f')) {
+            n *= 16;
+            n += *arg - 'a' + 10;
+        } else if ((*arg >= 'A') && (*arg <= 'F')) {
+            n *= 16;
+            n += *arg - 'A' + 10;
+        } else {
+            break;
+        }
+
+        arg++;
+    }
+
+    return n;
+}
+
+long cli_eval_bin(const char * arg) {
+    long n = 0;
+
+    TRACE("cli_eval_bin");
+
+    while (*arg) {
+        if (*arg == ':') {
+            arg++;
+            continue;
+        } else if ((*arg == '0') || (*arg == '1')) {
+            n *= 2;
+            n += *arg - '0';
+        } else {
+            break;
+        }
+
+        arg++;
+    }
+
+    return n;
+}
+
+/*
+ * Evaluate an argument to a number
+ */
+long cli_eval_number(const char * arg) {
+    int len = strlen(arg);
+
+    TRACE("cli_eval_number");
+
+    if (len > 2) {
+        if (arg[0] == '0') {
+            if (arg[1] == 'x') {
+                return cli_eval_hex(&arg[2]);
+            } else if (arg[1] == 'b') {
+                return cli_eval_bin(&arg[2]);
+            }
+        }
+    }
+
+    if (len > 1) {
+        if (arg[0] == '$') {
+            return cli_eval_hex(&arg[1]);
+        } else if (arg[0] == '%') {
+            return cli_eval_bin(&arg[1]);
+        }
+    }
+
+    return cli_eval_dec(arg);
 }
 
 //

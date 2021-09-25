@@ -83,3 +83,24 @@ void print_hex_16(short channel, unsigned short x) {
 
     print(channel, number);
 }
+
+/*
+ * Print an 32-bit number as hex to a channel
+ *
+ * Inputs:
+ * channel = the number of the channel
+ * n = the number to print
+ */
+void print_hex_32(short channel, long n) {
+    char number[9];
+    short digit;
+    short i;
+
+    for (i = 0; i < 8; i++) {
+        number[7 - i] = hex_digits[n & 0x0f];
+        n = n >> 4;
+    }
+    number[8] = 0;
+
+    print(channel, number);
+}

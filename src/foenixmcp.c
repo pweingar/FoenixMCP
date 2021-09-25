@@ -80,9 +80,6 @@ const char* VolumeStr[FF_VOLUMES] = { "@S", "@F", "@H" };
  	*LED2_REG = 0x02;
  }
 
-
-
-
  void print_error(short channel, char * message, short code) {
      print(channel, message);
      print(channel, ": ");

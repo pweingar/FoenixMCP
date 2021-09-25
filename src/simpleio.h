@@ -41,4 +41,13 @@ extern void print_hex_8(short channel, short n);
  */
 extern void print_hex_16(short channel, short n);
 
+/*
+ * Print an 32-bit number as hex to a channel
+ *
+ * Inputs:
+ * channel = the number of the channel
+ * n = the number to print
+ */
+extern void print_hex_32(short channel, long n);
+
 #endif
