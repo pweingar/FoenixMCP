@@ -98,6 +98,7 @@ typedef void (*p_int_handler)();
 #define EXT_OPL3_INT25      0x0020		// External OPL3 Interrupt
 #define RESERVED5           0x0040		// No interrupt - Reserved
 #define RESERVED6           0x0080		// No interrupt - Reserved
+
 #define BEATRIX_INT28       0x0100		// Beatrix Interrupt 0
 #define BEATRIX_INT29       0x0200		// Beatrix Interrupt 1
 #define BEATRIX_INT2A       0x0400		// Beatrix Interrupt 2

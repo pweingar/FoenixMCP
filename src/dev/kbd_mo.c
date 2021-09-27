@@ -215,13 +215,13 @@ short kbdmo_init() {
     kbdmo_flush_out();
 
     /* Clear out any pending interrupt */
-    // int_clear(INT_KBD_A2560K);
-    //
-    // /* Register a handler for the keyboard */
-    // int_register(INT_KBD_A2560K, kbdmo_handle_irq);
-    //
-    // /* Enable the interrupt for the keyboard */
-    // int_enable(INT_KBD_A2560K);
+    int_clear(INT_KBD_A2560K);
+
+    /* Register a handler for the keyboard */
+    int_register(INT_KBD_A2560K, kbdmo_handle_irq);
+
+    /* Enable the interrupt for the keyboard */
+    int_enable(INT_KBD_A2560K);
 
     return 0;
 }
@@ -317,7 +317,7 @@ void kbdmo_handle_irq() {
      */
     while ((*KBD_MO_STAT & 0x00ff) != 0) {
         /* Get a scan code from the input buffer */
-        unsigned char scan_code = *KBD_MO_DATA;
+        unsigned short scan_code = *KBD_MO_DATA;
 
         if ((scan_code & 0x7fff) != 0) {
             /* TODO: beep if the input was full or the ring buffer is full */

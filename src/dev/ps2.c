@@ -469,6 +469,9 @@ void kbd_handle_irq() {
     unsigned char scan_code = *data;
     unsigned char translated_code;
 
+    /* Clear the pending flag */
+    int_clear(INT_KBD_PS2);
+
     if (scan_code) {
         // Make sure the scan code isn't 0 or 128, which are invalid make/break codes
         if ((scan_code != 0) && (scan_code != 0x80)) {
@@ -763,14 +766,14 @@ short ps2_init() {
     ps2_flush_out();
 
     // // Controller selftest...
-    // if (ps2_controller_cmd(PS2_CTRL_SELFTEST) != PS2_RESP_OK) {
-    //     ; // return PS2_FAIL_SELFTEST;
-    // }
+    if (ps2_controller_cmd(PS2_CTRL_SELFTEST) != PS2_RESP_OK) {
+        ; // return PS2_FAIL_SELFTEST;
+    }
     //
     // // Keyboard test
-    // if (ps2_controller_cmd(PS2_CTRL_KBDTEST) != 0) {
-    //     ; // return PS2_FAIL_KBDTEST;
-    // }
+    if (ps2_controller_cmd(PS2_CTRL_KBDTEST) != 0) {
+        ; // return PS2_FAIL_KBDTEST;
+    }
 
     // Set scancode translation to set1, enable interrupts on mouse and keyboard
     ps2_controller_cmd_param(PS2_CTRL_WRITECMD, 0x43);

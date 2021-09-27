@@ -139,21 +139,26 @@ autovec1:   movem.l d0-d7/a0-a6,-(a7)
             rte
 
 ;
+; Autovector #1: Used by VICKY III Channel A interrupts
+;
+autovec2:   movem.l d0-d7/a0-a6,-(a7)
+            jsr _int_vicky_channel_a        ; Call the dispatcher for Channel A interrupts
+            movem.l (a7)+,d0-d7/a0-a6
+            rte
+
+;
 ; Interrupt Vector 0x10 -- SuperIO Keyboard
 ;
 interrupt_x10:
             movem.l d0-d7/a0-a6,-(a7)       ; Save all the registers
-            ;lea _g_int_handler,a0           ; Look in the interrupt handler table
-            ;move.w #($10<<2),d0             ; Offset to interrupt #16
-            ;movea.l (0,a0,d0),a1            ; Get the address of the handler
-            ;beq done_intx10                 ; If there isn't one, just return
 
-            ; moveq #0,d2
-            ; moveq #'!',d3
-            ; moveq #$14,d1
-            ; trap #13
+            ; move.l #$00C60001,a0
+            ; move.l #$00C60000,a1
+            ; move.b (a0),d0
+            ; addq.b #1,d0
+            ; move.b d0,(a1)
 
-            jsr _kbd_handle_irq             ; If there is, call it.
+            ; jsr _kbd_handle_irq           ; If there is, call it.
 
 done_intx10 movem.l (a7)+,d0-d7/a0-a6       ; Restore the registers
             rte
@@ -168,27 +173,16 @@ interrupt_x11:
 ;             ; movea.l (0,a0,d0),a1            ; Get the address of the handler
 ;             ; beq done_intx10                 ; If there isn't one, just return
 ;
-;             moveq #0,d2
-;             moveq #'@',d3
-;             moveq #$14,d1
-;             trap #13
-;
 ;             ; jsr (a1)                        ; If there is, call it.
 
-            ; moveq #0,d2
-            ; moveq #'!',d3
-            ; moveq #$14,d1
-            ; trap #13
+            move.l #$00C00102,a0            ; Clear the pending flag
+            move.w (a0),d0
+            andi.w #$0002,d0
+            move.w d0,(a0)
+
+            jsr _kbdmo_handle_irq
 
 done_intx11 movem.l (a7)+,d0-d7/a0-a6       ; Restore the registers
-            rte
-
-;
-; Autovector #1: Used by VICKY III Channel A interrupts
-;
-autovec2:   movem.l d0-d7/a0-a6,-(a7)
-            jsr _int_vicky_channel_a        ; Call the dispatcher for Channel A interrupts
-            movem.l (a7)+,d0-d7/a0-a6
             rte
 
 ;

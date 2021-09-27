@@ -7,12 +7,14 @@
  */
 
 #include <ctype.h>
+#include <stdlib.h>
 #include <string.h>
 #include "log.h"
 #include "syscalls.h"
 #include "fsys.h"
 #include "fatfs/ff.h"
 #include "dev/channel.h"
+#include "simpleio.h"
 #include "errors.h"
 
 #define MAX_DRIVES      8       /* Maximum number of drives */
@@ -613,6 +615,87 @@ unsigned short atoi_hex(char * hex) {
 }
 
 /*
+ * Loader for the PGX binary file format
+ *
+ * Inputs:
+ * path = the path to the file to load
+ * destination = the destination address (ignored for PGX)
+ * start = pointer to the long variable to fill with the starting address
+ *         (0 if not an executable, any other number if file is executable
+ *         with a known starting address)
+ *
+ * Returns:
+ * 0 on success, negative number on error
+ */
+short fsys_pgx_loader(short chan, long destination, long * start) {
+    const char signature[] = "PGX\x02";
+    unsigned char * chunk = 0;
+    unsigned char * dest = 0;
+    long file_idx = 0;
+    long address = 0;
+    short result = 0;
+
+    TRACE("fsys_pgx_loader");
+
+    chunk = malloc(DEFAULT_CHUNK_SIZE);
+    if (chunk == 0) {
+        result = ERR_OUT_OF_MEMORY;
+
+    } else {
+        /* We have our buffer... start reading chunks into it */
+        short n = 1;
+
+        while (result == 0) {
+            /* Try to read a chunk of data */
+            n = chan_read(chan, chunk, DEFAULT_CHUNK_SIZE);
+            if (n > 0) {
+                short i;
+
+                /* Loop through all the bytes of the chunk that we read */
+                for (i = 0; i < n; i++, file_idx++) {
+                    if (file_idx < 4) {
+                        /* Check that the first four bytes match the signature for this CPU */
+                        if (chunk[i] != signature[i]) {
+                            /* If signature does not match, quit */
+                            result = ERR_BAD_BINARY;
+                            break;
+                        }
+
+                    } else if (file_idx < 8) {
+                        /* Parse the next four bytes as the target address */
+                        address = (address << 8) + chunk[i];
+
+                    } else {
+                        /* Treat the remaining bytes as data */
+                        if (file_idx == 8) {
+                            /* For the first data byte, set our destination pointer */
+                            dest = (unsigned char *)address;
+                        }
+
+                        /* Store the data in the destination address */
+                        *dest++ = chunk[i];
+                    }
+                }
+            } else if (n < 0) {
+                /* We got an error while reading... pass it to the caller */
+                result = n;
+                break;
+            } else if (n == 0) {
+                break;
+            }
+        }
+    }
+
+    /* Start address is the first byte of the data */
+    *start = address;
+
+    if (chunk != 0) {
+        free(chunk);
+    }
+    return result;
+}
+
+/*
  * Loader for the Motorola SREC format
  *
  * See: https://en.wikipedia.org/wiki/SREC_(file_format)
@@ -786,21 +869,23 @@ short fsys_load(const char * path, long destination, long * start) {
         extension[i] = 0;
     }
 
-    /* Find the extension */
-    char * point = strrchr(path, '.');
-    if (point != 0) {
-        point++;
-        for (i = 0; i < MAX_EXT; i++) {
-            char c = *point++;
-            if (c) {
-                extension[i] = toupper(c);
-            } else {
-                break;
+    if (destination == 0) {
+        /* Find the extension */
+        char * point = strrchr(path, '.');
+        if (point != 0) {
+            point++;
+            for (i = 0; i < MAX_EXT; i++) {
+                char c = *point++;
+                if (c) {
+                    extension[i] = toupper(c);
+                } else {
+                    break;
+                }
             }
         }
     }
 
-    TRACE("fsys_load: ext");
+    log2(LOG_VERBOSE, "fsys_load ext: ", extension);
 
     if (extension[0] == 0) {
         if (destination != 0) {
@@ -851,9 +936,15 @@ short fsys_load(const char * path, long destination, long * start) {
         /* If it opened correctly, load the file */
         short result = loader(chan, destination, start);
         fsys_close(chan);
+
+        if (result != 0) {
+            log_num(LOG_ERROR, "Could not load file: ", result);
+        }
+
         return result;
     } else {
         /* File open returned an error... pass it along */
+        log_num(LOG_ERROR, "Could not open file: ", chan);
         return chan;
     }
 }
@@ -877,7 +968,7 @@ short fsys_register_loader(const char * extension, p_file_loader loader) {
     for (i = 0; i < MAX_LOADERS; i++) {
         if (g_file_loader[i].status == 0) {
             g_file_loader[i].status = 1;                    /* Claim this loader record */
-            g_file_loader[j].loader = loader;               /* Set the loader routine */
+            g_file_loader[i].loader = loader;               /* Set the loader routine */
             for (j = 0; j <= MAX_EXT; j++) {                /* Clear out the extension */
                 g_file_loader[i].extension[j] = 0;
             }
@@ -934,8 +1025,9 @@ short fsys_init() {
         }
     }
 
-    /* Register the SREC loader */
+    /* Register the built-in binary file loaders */
     fsys_register_loader("PRS", fsys_srec_loader);
+    fsys_register_loader("PGX", fsys_pgx_loader);
 
     /* Register the channel driver for files. */
 

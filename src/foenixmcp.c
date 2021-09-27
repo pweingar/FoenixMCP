@@ -96,7 +96,7 @@ void initialize() {
     text_init();          // Initialize the text channels
     DEBUG("Foenix/MCP starting up...");
 
-    log_setlevel(LOG_ERROR);
+    log_setlevel(LOG_VERBOSE);
 
     /* Initialize the interrupt system */
     int_init();
@@ -146,11 +146,11 @@ void initialize() {
 
     // At this point, we should be able to call into to console to print to the screens
 
-    if (res = ps2_init()) {
-        print_error(0, "FAILED: PS/2 keyboard initialization", res);
-    } else {
-        DEBUG("PS/2 keyboard initialized.");
-    }
+    // if (res = ps2_init()) {
+    //     print_error(0, "FAILED: PS/2 keyboard initialization", res);
+    // } else {
+    //     DEBUG("PS/2 keyboard initialized.");
+    // }
 
     if (res = kbdmo_init()) {
         print_error(0, "FAILED: A2560K built-in keyboard initialization", res);
@@ -171,7 +171,7 @@ void initialize() {
     }
 
     /* Enable all interrupts */
-    // int_enable_all();
+    int_enable_all();
 }
 
 // void try_mo_scancodes(short screen) {
@@ -257,6 +257,18 @@ void int_sof_a() {
 
     /* Acknowledge the interrupt before leaving */
     int_clear(SOF_A_INT00);
+}
+
+/*
+ * Interrupt handler for Channel A's Start of Frame
+ */
+void change_led() {
+    g_sof_counter++;
+
+    long counter_mod = g_sof_counter % 2;
+
+    *RGB_LED_L = 0x0000;
+    *RGB_LED_H = 0xFF00;
 }
 
 void try_format(short screen, char * path) {
@@ -367,6 +379,14 @@ int main(int argc, char * argv[]) {
 
     print(CDEV_CONSOLE, "Text Channel A\n");
     print(CDEV_EVID, "Text Channel B\n");
+
+    print(CDEV_CONSOLE, "MASK_GRP1: ");
+    print_hex_16(CDEV_CONSOLE, *MASK_GRP1);
+    print(CDEV_CONSOLE, "\n");
+
+    print(CDEV_CONSOLE, "MASK_PEND1: ");
+    print_hex_16(CDEV_CONSOLE, *PENDING_GRP1);
+    print(CDEV_CONSOLE, "\n");
 
     // uart_test_send(0);
 

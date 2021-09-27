@@ -40,4 +40,6 @@ extern char kbdmo_getc_poll();
  */
 extern unsigned short kbdmo_get_scancode_poll();
 
+extern void kbdmo_handle_irq();
+
 #endif

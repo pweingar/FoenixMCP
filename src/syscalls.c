@@ -8,6 +8,16 @@
  ***/
 
 /*
+ * Stop running the current user program
+ *
+ * Inputs:
+ * result = the result code to return to the kernel
+ */
+void sys_exit(short result) {
+    syscall(KFN_EXIT, result);
+}
+
+/*
  * Enable all interrupts
  *
  * NOTE: this is actually provided in the low level assembly

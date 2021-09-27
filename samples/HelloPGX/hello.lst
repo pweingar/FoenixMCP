@@ -1,0 +1,57 @@
+F00:0001       ;;;
+F00:0002       ;;; Sample PGX Program
+F00:0003       ;;;
+F00:0004       
+F00:0005                       org $010000
+F00:0006       
+F00:0007                       dc.b "PGX", $02
+               S01:00010000:  50 47 58
+               S01:00010003:  02
+F00:0008                       dc.l _start
+               S01:00010004:  00 01 00 08
+F00:0009       
+F00:0010       _start:         move.l #_greet_end-_greet+1,d3  ; Length of the message
+               S01:00010008:  76 0E
+F00:0011                       move.l #_greet,d2               ; Pointer to the message
+               S01:0001000A:  24 3C 00 01 00 18
+F00:0012                       clr.l d1                        ; Write to channel #0 (main screen)
+               S01:00010010:  72 00
+F00:0013                       move.l #$14,d0                  ; sys_chan_write_b
+               S01:00010012:  70 14
+F00:0014                       trap #15                        ; Call it
+               S01:00010014:  4E 4F
+F00:0015       
+F00:0016       _lock:          bra _lock
+               S01:00010016:  60 FE
+F00:0017       
+F00:0018       _greet:         dc.b "Hello, world!"
+               S01:00010018:  48 65 6C 6C 6F 2C 20 77 6F 72 6C 64 21
+F00:0019       _greet_end:     dc.b 0
+               S01:00010025:  00
+F00:0020       
+
+
+Sections:
+S01  seg10000
+
+
+Sources:
+F00  hello.s
+
+
+Symbols:
+_lock EXPR(65558=0x10016) ABS 
+_greet EXPR(65560=0x10018) ABS 
+_greet_end EXPR(65573=0x10025) ABS 
+_start EXPR(65544=0x10008) ABS 
+_MOVEMBYTES EXPR(0=0x0) INTERNAL 
+ MOVEMSIZE EXPR(0=0x0) INTERNAL 
+_MOVEMREGS EXPR(0=0x0) INTERNAL 
+__LINE__ EXPR(20=0x14) INTERNAL 
+__FO EXPR(0=0x0) INTERNAL 
+__RS EXPR(0=0x0) INTERNAL 
+REPTN EXPR(-1=0xffffffff) INTERNAL 
+__VASM EXPR(1=0x1) INTERNAL 
+__UNIXFS EXPR(0=0x0) INTERNAL 
+
+There have been no errors.

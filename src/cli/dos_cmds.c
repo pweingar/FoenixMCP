@@ -4,21 +4,11 @@
 #include "syscalls.h"
 #include "log.h"
 #include "simpleio.h"
+#include "cli.h"
 #include "cli/dos_cmds.h"
 #include "dev/block.h"
 #include "dev/fsys.h"
 #include "fatfs/ff.h"
-
-/*
- * Fetch and display the MBR for the specified device:
- *
- * Inputs:
- * drive = "@S" for SDC, "@H" for hard drive
- */
-short cmd_dump_mbr(short screen, char * drive) {
-
-    return 0;
-}
 
 short cmd_dir(short screen, int argc, char * argv[]) {
     t_file_info my_file;
@@ -84,6 +74,7 @@ short cmd_type(short screen, int argc, char * argv[]) {
         }
     } else {
         log(LOG_ERROR, "Usage: TYPE <path>");
+        return -1;
     }
 }
 
@@ -94,7 +85,13 @@ short cmd_type(short screen, int argc, char * argv[]) {
 short cmd_load(short screen, int argc, char * argv[]) {
     if (argc > 1) {
         long start = 0;
-        short result = fsys_load(argv[1], 0x30000, &start);
+        long destination = 0;
+
+        if (argc > 2) {
+            destination = cli_eval_number(argv[2]);
+        }
+
+        short result = fsys_load(argv[1], destination, &start);
         if (result == 0) {
             if (start != 0) {
                 log(LOG_INFO, "Loaded file with a start adddress.");
@@ -103,10 +100,12 @@ short cmd_load(short screen, int argc, char * argv[]) {
             }
         } else {
             log_num(LOG_ERROR, "Unable to open file: ", result);
+            return -1;
         }
 
         return result;
     } else {
-        log(LOG_ERROR, "Usage: LOAD <path>");
+        log(LOG_ERROR, "Usage: LOAD <path> [<destination>]");
+        return -1;
     }
 }

@@ -35,7 +35,7 @@ short con_write_b(p_channel chan, uint8_t b) {
 short con_read_b(p_channel chan) {
     char c;
     do {
-        c = kbd_getc_poll();
+        c = kbdmo_getc();
     } while (c == 0);
 
     // Echo the character to the screen
