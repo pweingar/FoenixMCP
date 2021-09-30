@@ -47,6 +47,14 @@ To remove binaries and intermediate files:
 make clean
 ```
 
+#### Built Options
+
+There are three option variables that can be set in the makefile:
+
+* `CPU`: This specifies which CPU is the target. Currently only the M68000 is supported, with a CPU code of 32 (0x20).
+* `MODEL`: This species which Foenix model is the target. Currently only the Foenix A2560K is supported, with a code of 13.
+* `KBD_POLLED`: As a temporary feature, if this option variable is defined, it will specify to the kernel that polled I/O is to be used for keyboard access instead of interrupt driven I/O.
+
 ## License
 
 Most of the source code for this kernel is made available under the open source
