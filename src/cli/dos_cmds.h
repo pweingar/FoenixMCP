@@ -6,6 +6,11 @@
 #define __DOS_CMDS_H
 
 /*
+ * Execute a binary file
+ */
+extern short cmd_run(short screen, int argc, char * argv[]);
+
+/*
  * List the directory at the given path
  */
 extern short cmd_dir(short screen, int argc, char * argv[]);

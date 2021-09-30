@@ -39,4 +39,9 @@ extern short cli_repl(short channel);
  */
 extern long cli_eval_number(const char * arg);
 
+/*
+ * Print a help message
+ */
+extern int cmd_help(short channel, int argc, char * argv[]);
+
 #endif

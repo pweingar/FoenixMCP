@@ -21,6 +21,7 @@ int32_t syscall_dispatch(int32_t function, int32_t param0, int32_t param1, int32
             /* Core System Calls */
             switch (function) {
                 case KFN_EXIT:
+                    proc_exit((int)param0);
                     break;
 
                 case KFN_WARMBOOT:

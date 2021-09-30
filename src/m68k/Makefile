@@ -12,7 +12,7 @@ all: $(aobjects) $(cobjects)
 	$(AS) $(ASFLAGS) -o $@ $<
 
 %.o: %.c
-	$(CC) -c -o $@ $< $(CFLAGS)
+	$(CC) -c -o $@ $< $(CFLAGS) $(DEFINES)
 
 .PHONY: clean
 

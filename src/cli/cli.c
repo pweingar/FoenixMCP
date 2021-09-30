@@ -27,27 +27,10 @@ typedef struct s_cli_command {
 } t_cli_command, *p_cli_command;
 
 /*
- * Commands
+ * Variables
  */
 
- extern const t_cli_command g_cli_commands[];
-
- //
- // List all the commands
- //
- int cmd_help(short channel, int argc, char * argv[]) {
-     p_cli_command command;
-
-     for (command = g_cli_commands; (command != 0) && (command->name != 0); command++) {
-         sys_chan_write(channel, command->help, strlen(command->help));
-         sys_chan_write(channel, "\n", 2);
-     }
-     return 0;
- }
-
-//
-// CLI variables
-//
+short g_current_channel = 0;
 
 const t_cli_command g_cli_commands[] = {
     { "?", "? -- print this helpful message", cmd_help },
@@ -61,9 +44,23 @@ const t_cli_command g_cli_commands[] = {
     { "POKE8", "POKE8 <address> <value> -- write the byte value to the address in memory", mem_cmd_poke8},
     { "POKE16", "POKE16 <address> <value> -- write the 16-bit word value to the address in memory", mem_cmd_poke16},
     { "POKE32", "POKE32 <address> <value> -- write the 32-bit long word value to the address in memory", mem_cmd_poke32},
+    { "RUN", "RUN <path> -- execute a binary file",  cmd_run },
     { "TYPE", "TYPE <path> -- print the contents of a text file", cmd_type },
     { 0, 0 }
 };
+
+//
+// List all the commands
+//
+int cmd_help(short channel, int argc, char * argv[]) {
+    p_cli_command command;
+
+    for (command = g_cli_commands; (command != 0) && (command->name != 0); command++) {
+        sys_chan_write(channel, command->help, strlen(command->help));
+        sys_chan_write(channel, "\n", 2);
+    }
+    return 0;
+}
 
 //
 // Attempt to execute a command
@@ -126,6 +123,12 @@ char * strtok_r(char * source, const char * delimiter, char ** saveptr) {
     return x;
 }
 
+short cli_rerepl() {
+    while (1) {
+        cli_repl(g_current_channel);
+    }
+}
+
 //
 // Enter the CLI's read-eval-print loop
 //
@@ -137,8 +140,7 @@ short cli_repl(short channel) {
     int argc = 0;
     char * argv[MAX_ARGC];
 
-    const char * welcome = "\n\nFoenix/MCP Command Line Utility... online.\nType \"HELP\" or \"?\" for help.\n\n";
-    sys_chan_write(channel, welcome, strlen(welcome));
+    g_current_channel = channel;
 
     while (1) {
         sys_chan_write(channel, "\n> ", 3);                           // Print our prompt

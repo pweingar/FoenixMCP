@@ -5,10 +5,23 @@
 #include "log.h"
 #include "simpleio.h"
 #include "cli.h"
+#include "proc.h"
 #include "cli/dos_cmds.h"
 #include "dev/block.h"
 #include "dev/fsys.h"
 #include "fatfs/ff.h"
+
+short cmd_run(short screen, int argc, char * argv[]) {
+    TRACE("cmd_run");
+
+    if (argc > 1) {
+        short result = proc_run(argv[1]);
+        if (result < 0) {
+            log_num(LOG_ERROR, "Unable to run: ", result);
+            return result;
+        }
+    }
+}
 
 short cmd_dir(short screen, int argc, char * argv[]) {
     t_file_info my_file;

@@ -53,7 +53,7 @@
 //
 // #elif SYSTEM == SYS_FOENIX_A2560K
 #define PS2_STATUS      ((unsigned char *)0x00C02064)
-#define PS2_CMD_BUF     ((unsigned char *)0x00C02060)
+#define PS2_CMD_BUF     ((unsigned char *)0x00C02064)
 #define PS2_OUT_BUF     ((unsigned char *)0x00C02060)
 #define PS2_INPT_BUF    ((unsigned char *)0x00C02060)
 #define PS2_DATA_BUF    ((unsigned char *)0x00C02060)

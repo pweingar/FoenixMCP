@@ -21,7 +21,8 @@ export MODEL=4
 export AS = vasmm68k_mot
 export ASFLAGS = -quiet -Fvobj -nowarn=62
 export CC = vc
-export CFLAGS = +../vbcc/config/m68k-foenix -I. -Iinclude -DCPU=$(CPU) -DMODEL=$(MODEL)
+export DEFINES = -DCPU=$(CPU) -DMODEL=$(MODEL) -DKBD_POLLED=1
+export CFLAGS = +../vbcc/config/m68k-foenix -I. -Iinclude
 export RM = cmd /C del /Q /F
 
 cpu = m68k
@@ -60,7 +61,7 @@ cli:
 	$(MAKE) --directory=cli
 
 foenixmcp.s68: $(c_obj) $(cpu) dev fatfs snd cli
-	$(CC) $(CFLAGS) -o foenixmcp.s68 $(c_obj) $(cpu_c_obj) $(dev_c_obj) $(fat_c_obj) $(snd_c_obj) $(cli_c_obj)
+	$(CC) $(CFLAGS) $(DEFINES) -o foenixmcp.s68 $(c_obj) $(cpu_c_obj) $(dev_c_obj) $(fat_c_obj) $(snd_c_obj) $(cli_c_obj)
 
 %.o: %.c $(DEPS)
 	$(CC) -S -c -o $@ $< $(CFLAGS)

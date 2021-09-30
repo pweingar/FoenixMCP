@@ -278,6 +278,8 @@ short chan_write_b(short channel, uint8_t b) {
     p_dev_chan cdev;
     short res;
 
+    TRACE("chan_write_b");
+
     res = chan_get_records(channel, &chan, &cdev);
     if (res == 0) {
         return cdev->write_b(chan, b);

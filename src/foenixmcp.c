@@ -96,7 +96,7 @@ void initialize() {
     text_init();          // Initialize the text channels
     DEBUG("Foenix/MCP starting up...");
 
-    log_setlevel(LOG_VERBOSE);
+    log_setlevel(LOG_ERROR);
 
     /* Initialize the interrupt system */
     int_init();
@@ -173,50 +173,6 @@ void initialize() {
     /* Enable all interrupts */
     int_enable_all();
 }
-
-// void try_mo_scancodes(short screen) {
-//     // volatile unsigned short * kbd_mo_data = ((volatile unsigned short *)0x00C00040);
-//     // volatile unsigned short * kbd_mo_stat = ((volatile unsigned short *)0x00C00042);
-//
-//     print(screen, "mo> ");
-//
-//     do {
-//         // unsigned short status = *kbd_mo_stat;
-//         // if ((status & KBD_MO_STAT_EMPTY) != KBD_MO_STAT_EMPTY) {
-//         //     unsigned short data = *kbd_mo_data;
-//         //     print(screen, "[");
-//         //     print_hex_16(screen, status);
-//         //     print(screen, "]: {");
-//         //
-//         //     print_hex_16(screen, data);
-//         //     print(screen, "}\n ");
-//         // // }
-//         // }
-//
-//         unsigned short scancode = kbdmo_get_scancode_poll();
-//         if (scancode != 0) {
-//             print(screen, "[");
-//             print_hex_16(screen, scancode);
-//             print(screen, "]\n");
-//         }
-//
-//     } while (1);
-// }
-
-// void try_mo_chars(short screen) {
-//     char buffer[2];
-//     buffer[1] = 0;
-//
-//     print(screen, "mo> ");
-//
-//     while (1) {
-//         unsigned char c = kbdmo_getc_poll();
-//         if (c) {
-//             // text_put_raw(screen, c);
-//             return;
-//         }
-//     }
-// }
 
 void uart_send(short uart, char * message) {
     int i, j;
@@ -380,14 +336,6 @@ int main(int argc, char * argv[]) {
     print(CDEV_CONSOLE, "Text Channel A\n");
     print(CDEV_EVID, "Text Channel B\n");
 
-    print(CDEV_CONSOLE, "MASK_GRP1: ");
-    print_hex_16(CDEV_CONSOLE, *MASK_GRP1);
-    print(CDEV_CONSOLE, "\n");
-
-    print(CDEV_CONSOLE, "MASK_PEND1: ");
-    print_hex_16(CDEV_CONSOLE, *PENDING_GRP1);
-    print(CDEV_CONSOLE, "\n");
-
     // uart_test_send(0);
 
     /* Register a handler for the SOF interrupt and enable it */
@@ -413,6 +361,9 @@ int main(int argc, char * argv[]) {
     //     }
     // }
 
+
+    const char * welcome = "\n\nFoenix/MCP Command Line Utility... online.\nType \"HELP\" or \"?\" for help.\n\n";
+    sys_chan_write(0, welcome, strlen(welcome));
     cli_repl(0);
 
     DEBUG("Stopping.");

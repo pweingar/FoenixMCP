@@ -85,7 +85,7 @@ void log3(short level, char * message1, char * message2, char * message3) {
 void log_num(short level, char * message, int n) {
     if (level <= log_level) {
         print(log_channel, message);
-        print_hex_16(log_channel, n);
+        print_hex_32(log_channel, n);
         print_c(log_channel, '\n');
     }
 }

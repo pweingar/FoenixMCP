@@ -1,8 +1,12 @@
             xref ___main
+            xref _cli_rerepl
+
             xdef _syscall
             xdef ___exit
             xdef _int_enable_all
             xdef _int_disable_all
+            xdef _call_user
+            xdef _restart_cli
 
             section "vectors",code
 
@@ -240,3 +244,22 @@ h_trap_15:
             add.l #28,sp                ; Remove parameters from the stack
 
             rte                         ; Return to the caller
+
+;
+; Jump into a user mode code
+;
+; Inputs:
+; a0 = pointer to code to execute
+; a1 = location to set user stack pointer
+;
+_call_user:
+            move.l (4,a7),a0
+            move.l (8,a7),a1
+            andi #$dfff,sr              ; Drop into user mode
+            movea.l a1,a7               ; Set the stack
+            jmp (a0)
+
+_restart_cli:
+            lea ___STACK,sp
+            jsr _cli_rerepl
+            bra _restart_cli

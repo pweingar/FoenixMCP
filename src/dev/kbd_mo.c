@@ -221,7 +221,9 @@ short kbdmo_init() {
     int_register(INT_KBD_A2560K, kbdmo_handle_irq);
 
     /* Enable the interrupt for the keyboard */
+#ifndef KBD_POLLED
     int_enable(INT_KBD_A2560K);
+#endif
 
     return 0;
 }

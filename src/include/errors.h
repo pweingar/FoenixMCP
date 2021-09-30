@@ -5,7 +5,7 @@
 #ifndef __ERRORS_H
 #define __ERRORS_H
 
-#define MAX_ERROR_NUMBER    15      // Largest (absolute value) of the error number
+#define MAX_ERROR_NUMBER    16      // Largest (absolute value) of the error number
 
 #define ERR_GENERAL         -1      // A general error condition
 #define DEV_ERR_BADDEV      -2      // Device number is bad (too big or no device assigned)
@@ -22,5 +22,5 @@
 #define ERR_BAD_EXTENSION   -13     // The path to load did not have an extension that matched registered loaders
 #define ERR_OUT_OF_MEMORY   -14     // Unable to allocate more memory
 #define ERR_BAD_BINARY      -15     // Bad binary file format... i.e. binary format does not match expectations
-
+#define ERR_NOT_EXECUTABLE  -16     // Binary file format does not have a starting address
 #endif

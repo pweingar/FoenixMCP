@@ -50,3 +50,6 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+samples/HelloPGX/hello.pgx
+samples/HelloPGX/hello.pgx
+samples/HelloPGX/hello.lst

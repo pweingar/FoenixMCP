@@ -90,6 +90,18 @@ extern int32_t syscall(int32_t function, ...);
  ***/
 
 /*
+ * Quit the current user process
+ *
+ * NOTE: at the moment, this relaunches the CLI. In the future, this
+ *       may cause execution to return to the program that started
+ *       the user process.
+ *
+ * Inputs:
+ * result = the code to return to the kernel
+ */
+extern void sys_exit(int result);
+
+/*
  * Enable all interrupts
  *
  * NOTE: this is actually provided in the low level assembly
