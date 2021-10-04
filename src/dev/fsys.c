@@ -614,6 +614,159 @@ unsigned short atoi_hex(char * hex) {
     return (atoi_hex_1(hex[0]) << 4 | atoi_hex_1(hex[1]));
 }
 
+/* Loader for the PGZ binary file format
+ * Supports both the original 24-bit PGZ format and the new 32-bit PGZ format
+ *
+ * The PGZ format:
+ * First byte: ASCII "Z" for 24-bit PGZ, ASCII "z" for 32-bit PGZ
+ * Remaining bytes are segments of two types:
+ * 1) Data segment.
+ *    Each data segment starts with an address, which is either 24-bit or 32-bit long, depending on
+ *    which flavor of PGZ is used. The address expressed in little-endian form and is the starting
+ *    address of the destination for this data block.
+ *    Immediately following the address is the size of the block, also either 24-bits or 32-bits,
+ *    and also in little-endian form. This size is the number of bytes in the data segment.
+ *    Immediately following the size are the data bytes (as many as were specified in the size field)
+ *
+ * 2) Start segment.
+ *    A data segment consists of the same address and size fields as the data segment, but the size
+ *    is 0. The start segment specifies the starting address of the executable. The start segment
+ *    is not required unless the PGZ is intended as an executable file. If none is present, the
+ *    PGZ can be loaded but not executed. There should be at most one start segment in a PGZ file,
+ *    if more than one is present, only the last will be honored.
+ *
+ * Inputs:
+ * path = the path to the file to load
+ * destination = the destination address (ignored for PGX)
+ * start = pointer to the long variable to fill with the starting address
+ *         (0 if not an executable, any other number if file is executable
+ *         with a known starting address)
+ *
+ * Returns:
+ * 0 on success, negative number on error
+ */
+short fsys_pgz_loader(short chan, long destination, long * start) {
+    unsigned char * chunk = 0;
+    unsigned char * dest = 0;
+    long file_idx = 0;          /* Offset within the file */
+    long segment_idx = 0;       /* Offset within a segment */
+    long address = -1;          /* Current segment address */
+    long count = -1;            /* Current segment size */
+    short use_32bits = 0;       /* File format is either 24-bit or 32-bit */
+    short size_idx = 0;         /* Expected offset for first byte of the size */
+    short data_idx = 0;         /* Expected offset for the first byte of the data */
+    short result = 0;
+
+    TRACE("fsys_pgx_loader");
+
+    /* Allocate the buffer we'll use for reading the file */
+    chunk = malloc(DEFAULT_CHUNK_SIZE);
+    if (chunk == 0) {
+        result = ERR_OUT_OF_MEMORY;
+
+    } else {
+        /* We have our buffer... start reading chunks into it */
+        while (result == 0) {
+            /* Try to read a chunk of data */
+            short n = chan_read(chan, chunk, DEFAULT_CHUNK_SIZE);
+            if (n > 0) {
+                int i;
+                for (i = 0; i < n; i++, file_idx++) {
+                    if (file_idx == 0) {
+                        /* Signature byte... must be either "Z", or "z" */
+                        if (chunk[i] == 'Z') {
+                            /* PGZ 24-bit signature byte */
+                            use_32bits = 0;
+                            size_idx = 3;
+                            data_idx = 6;
+
+                        } else if (chunk[i] == 'z') {
+                            /* PGZ 32-bit signature byte */
+                            use_32bits = 1;
+                            size_idx = 4;
+                            data_idx = 8;
+
+                        } else {
+                            /* Signature byte does not match expectation */
+                            return ERR_BAD_BINARY;
+                        }
+
+                    } else {
+                        /* We're in the segments... */
+                        if ((segment_idx >= 0) && (segment_idx < size_idx)) {
+                            /* We're in the address bytes */
+                            switch (segment_idx) {
+                                case 0:
+                                    address = chunk[i];
+                                    count = -1;
+                                    break;
+                                case 1:
+                                    address = address | chunk[i] << 8;
+                                    break;
+                                case 2:
+                                    address = address | chunk[i] << 16;
+                                    log_num(LOG_INFO, "PGZ 24-bit address: ", address);
+                                    break;
+                                case 3:
+                                    address = address | chunk[i] << 24;
+                                    log_num(LOG_INFO, "PGZ 32-bit address: ", address);
+                                    break;
+                            }
+
+                        } else if ((segment_idx >= size_idx) && (segment_idx < data_idx)) {
+                            /* We're in the size bytes */
+                            switch (segment_idx - size_idx) {
+                                case 0:
+                                    dest = (unsigned char *)address;
+                                    count = chunk[i];
+                                    break;
+                                case 1:
+                                    count = count | chunk[i] << 8;
+                                    break;
+                                case 2:
+                                    count = count | chunk[i] << 16;
+                                    if (!use_32bits && count == 0) {
+                                        *start = address;
+                                    }
+                                    log_num(LOG_INFO, "PGZ 24-bit count: ", count);
+                                    break;
+                                case 3:
+                                    count = count | chunk[i] << 24;
+                                    if (use_32bits && count == 0) {
+                                        *start = address;
+                                    }
+                                    log_num(LOG_INFO, "PGZ 32-bit count: ", count);
+                                    break;
+                            }
+                        } else {
+                            /* We're in the data bytes */
+                            if (segment_idx - data_idx < count) {
+                                *dest++ = chunk[i];
+                            }
+                        }
+
+                        segment_idx++;
+                        if (count >= 0) {
+                            if (segment_idx >= data_idx + count) {
+                                /* If we've reached the end of the segment, start the next */
+                                segment_idx = 0;
+                                address = -1;
+                                count = -1;
+                            }
+                        }
+                    }
+                }
+
+            } else {
+                /* We've reached the end of the file */
+                break;
+            }
+        }
+    }
+
+    return result;
+}
+
 /*
  * Loader for the PGX binary file format
  *
@@ -693,151 +846,6 @@ short fsys_pgx_loader(short chan, long destination, long * start) {
         free(chunk);
     }
     return result;
-}
-
-/*
- * Loader for the Motorola SREC format
- *
- * See: https://en.wikipedia.org/wiki/SREC_(file_format)
- *
- * Inputs:
- * path = the path to the file to load
- * destination = the destination address (0 for use file's address)
- * start = pointer to the long variable to fill with the starting address
- *         (0 if not an executable, any other number if file is executable
- *         with a known starting address)
- *
- * Returns:
- * 0 on success, negative number on error
- */
-short fsys_srec_loader(short chan, long destination, long * start) {
-    short n, i, chksum, data_index;
-    long address;
-    unsigned char count,data;
-    unsigned char addr[4];
-    char line[FYS_SREC_MAX_LINE_LENGTH];
-    unsigned char * dest;
-
-    TRACE("fsys_srec_loader");
-
-    /* TODO: verify the check sum */
-
-    while (1) {
-        chksum = 0;
-        count = 0;
-        n = sys_chan_readline(chan, line, FYS_SREC_MAX_LINE_LENGTH);
-        if (n < 0) {
-            /* If there was an error, return it */
-            return n;
-
-        } else if (n == 0) {
-            /* If we got nothing back, we're finished */
-            break;
-
-        } else if (n > 6) {
-            /* Only process the line if it starts with S and has more than six characters */
-            if (line[0] = 'S') {
-                /* Get the count and start the check sum */
-                count = atoi_hex(&line[1]);
-                chksum = count;
-
-                /* Determine how to process the line based on its type */
-                switch (line[1]) {
-                    case '1':
-                        /* 16-bit data line: S1nnaaaadd...ddcc */
-                        addr[1] = atoi_hex(&line[4]);
-                        addr[0] = atoi_hex(&line[6]);
-                        dest = (unsigned char *)(addr[1] << 8 | addr[0]);
-                        data_index = 8;
-                        count -= 2;
-                        chksum += addr[1] + addr[0];
-
-                        /* Copy the data */
-                        for (i = 0; i < count * 2; i += 2) {
-                            data = atoi_hex(&line[data_index + i]);
-                            chksum += data;
-                            *dest++ = data;
-                        }
-
-                        break;
-
-                    case '2':
-                        /* 24-bit address data line: S2nnaaaaaadd..ddcc */
-                        addr[2] = atoi_hex(&line[4]);
-                        addr[1] = atoi_hex(&line[6]);
-                        addr[0] = atoi_hex(&line[8]);
-                        dest = (unsigned char *)(addr[2] << 16 | addr[1] << 8 | addr[0]);
-                        data_index = 8;
-                        count -= 2;
-                        chksum += addr[2] + addr[1] + addr[0];
-
-                        /* Copy the data */
-                        for (i = 0; i < count * 2; i += 2) {
-                            data = atoi_hex(&line[data_index + i]);
-                            chksum += data;
-                            *dest++ = data;
-                        }
-
-                        break;
-
-                    case '3':
-                        /* 32-bit address data line: S2nnaaaaaaaadd..ddcc */
-                        addr[3] = atoi_hex(&line[4]);
-                        addr[2] = atoi_hex(&line[6]);
-                        addr[1] = atoi_hex(&line[8]);
-                        addr[0] = atoi_hex(&line[10]);
-                        dest = (unsigned char *)(addr[3] << 24 | addr[2] << 16 | addr[1] << 8 | addr[0]);
-                        data_index = 8;
-                        count -= 2;
-                        chksum += addr[3] + addr[2] + addr[1] + addr[0];
-
-                        /* Copy the data */
-                        for (i = 0; i < count * 2; i += 2) {
-                            data = atoi_hex(&line[data_index + i]);
-                            chksum += data;
-                            *dest++ = data;
-                        }
-
-                        break;
-
-                    case '5':
-                        /* 16-bit starting address */
-                        addr[1] = atoi_hex(&line[4]);
-                        addr[0] = atoi_hex(&line[6]);
-                        *start = (long)(addr[1] << 8 | addr[0]);
-                        chksum += addr[2] + addr[1] + addr[0];
-                        break;
-
-                    case '6':
-                        /* 24-bit starting address */
-                        addr[2] = atoi_hex(&line[4]);
-                        addr[1] = atoi_hex(&line[6]);
-                        addr[0] = atoi_hex(&line[8]);
-                        *start = (long)(addr[2] << 16 | addr[1] << 8 | addr[0]);
-                        chksum += addr[2] + addr[1] + addr[0];
-                        break;
-
-                    case '7':
-                        /* 32-bit starting address */
-                        addr[3] = atoi_hex(&line[4]);
-                        addr[2] = atoi_hex(&line[6]);
-                        addr[1] = atoi_hex(&line[8]);
-                        addr[0] = atoi_hex(&line[10]);
-                        *start = (long)(addr[3] << 24 | addr[2] << 16 | addr[1] << 8 | addr[0]);
-                        chksum += addr[3] + addr[2] + addr[1] + addr[0];
-                        break;
-
-                    default:
-                        /* Ignore any other kind of line */
-                        count = 0;
-                        break;
-                }
-            }
-        }
-    }
-
-    /* If we get here, we should have loaded the file successfully */
-    return 0;
 }
 
 /*
@@ -1026,7 +1034,7 @@ short fsys_init() {
     }
 
     /* Register the built-in binary file loaders */
-    fsys_register_loader("PRS", fsys_srec_loader);
+    fsys_register_loader("PGZ", fsys_pgz_loader);
     fsys_register_loader("PGX", fsys_pgx_loader);
 
     /* Register the channel driver for files. */
