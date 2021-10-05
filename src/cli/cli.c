@@ -53,7 +53,7 @@ const t_cli_command g_cli_commands[] = {
     { "POKE32", "POKE32 <address> <value> -- write the 32-bit long word value to the address in memory", mem_cmd_poke32},
     { "RUN", "RUN <path> -- execute a binary file",  cmd_run },
     { "GETTIME", "GETTIME -- prints the current time", cmd_gettime },
-    { "SETTIME", "SETTIME -- prints the current time", cmd_settime },
+    { "SETTIME", "SETTIME -- sets the current time", cmd_settime },
     { "SYSINFO", "SYSINFO -- prints information about the system", cmd_sysinfo },
     { "TESTIDE", "TESTIDE -- fetches and prints the IDE MBR repeatedly", cmd_testide},
     { "TYPE", "TYPE <path> -- print the contents of a text file", cmd_type },

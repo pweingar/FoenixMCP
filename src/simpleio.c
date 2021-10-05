@@ -115,7 +115,7 @@ void print_hex_32(short channel, long n) {
  * the binary form of the number
  */
 unsigned short bcd_to_i(unsigned char bcd) {
-    short tens = (bcd >> 4) & 0xf0;
+    short tens = (bcd >> 4) & 0x0f;
     short ones = bcd & 0x0f;
 
     if ((ones > 9) || (tens > 9)) {

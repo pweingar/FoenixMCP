@@ -97,7 +97,7 @@ void initialize() {
     text_init();          // Initialize the text channels
     DEBUG("Foenix/MCP starting up...");
 
-    log_setlevel(LOG_DEBUG);
+    log_setlevel(LOG_ERROR);
 
     /* Initialize the interrupt system */
     int_init();
