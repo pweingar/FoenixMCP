@@ -50,4 +50,26 @@ extern void print_hex_16(short channel, short n);
  */
 extern void print_hex_32(short channel, long n);
 
+/*
+ * Convert a BCD byte to an integer
+ *
+ * Inputs:
+ * bcd = a byte containing a BCD number
+ *
+ * Returns:
+ * the binary form of the number
+ */
+extern unsigned short bcd_to_i(unsigned char bcd);
+
+/*
+ * Convert a number from 0 to 99 to BCD
+ *
+ * Inputs:
+ * n = a binary number from 0 to 99
+ *
+ * Returns:
+ * a byte containing n as a BCD number
+ */
+extern unsigned char i_to_bcd(unsigned short n);
+
 #endif

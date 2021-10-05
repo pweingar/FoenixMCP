@@ -36,7 +36,7 @@ short mem_cmd_dump(short channel, int argc, char * argv[]) {
                 print(channel, ": ");
             }
 
-            print_hex(channel, address[i]);
+            print_hex_8(channel, address[i]);
             print(channel, " ");
         }
 
@@ -81,7 +81,7 @@ short mem_cmd_peek8(short channel, int argc, char * argv[]) {
     if (argc == 2) {
         unsigned char * address = (unsigned char *)cli_eval_number(argv[1]);
         unsigned char c = *address;
-        print_hex(channel, c);
+        print_hex_8(channel, c);
 
         return c;
     } else {

@@ -16,35 +16,48 @@ void sys_get_info(p_sys_info info) {
     switch (machine_id & 0x000f) {
         case 0x00:
             info->model = MODEL_FOENIX_FMX;
+            info->model_name = "Foenix FMX";
+            info->cpu_name = "WDC 65816";
             info->has_floppy = 1;
             break;
 
         case 0x01:
             info->model = MODEL_FOENIX_C256U;
+            info->model_name = "Foenix C256U";
+            info->cpu_name = "WDC 65816";
             break;
 
         case 0x05:
             info->model = MODEL_FOENIX_C256U_PLUS;
+            info->model_name = "Foenix C256U+";
+            info->cpu_name = "WDC 65816";
             break;
 
         case 0x0B:
             info->model = MODEL_FOENIX_A2560K;
+            info->model_name = "Foenix A2560K";
+            info->cpu_name = "m68000";
             info->has_floppy = 1;
             break;
 
         case 0x09:
             info->model = MODEL_FOENIX_A2560U;
+            info->model_name = "Foenix A2560U";
+            info->cpu_name = "m68000";
             break;
 
         default:
             /* Model is unknown */
             info->model = 0xffff;
+            info->model_name = "Unknown";
+            info->cpu_name = "Unknown";
             break;
     }
 
     switch ((machine_id & 0xf000) >> 12) {
         case 0x00:
             info->cpu = CPU_M68000;
+            info->cpu_name = "m68000";
             break;
 
         default:

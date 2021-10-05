@@ -9,7 +9,39 @@
 #include "cli/dos_cmds.h"
 #include "dev/block.h"
 #include "dev/fsys.h"
+#include "dev/kbd_mo.h"
 #include "fatfs/ff.h"
+
+/*
+ * Test the IDE interface by reading the MBR
+ */
+short cmd_testide(short screen, int argc, char * argv[]) {
+    unsigned char buffer[512];
+    short i;
+    short scancode;
+    short n = 0;
+
+    while (1) {
+        n = bdev_read(BDEV_HDC, 0, buffer, 512);
+        if (n <= 0) {
+            log_num(LOG_ERROR, "Unable to read MBR: ", n);
+            return n;
+        }
+
+        for (i = 0; i < n; i++) {
+            if ((i % 16) == 0) {
+                print(screen, "\n");
+            }
+
+            print_hex_8(screen, buffer[i]);
+            print(screen, " ");
+        }
+
+        print(screen, "\n\n");
+
+        if (kbdmo_getc_poll()) break;
+    }
+}
 
 short cmd_run(short screen, int argc, char * argv[]) {
     TRACE("cmd_run");

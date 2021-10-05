@@ -6,10 +6,13 @@
 #include <string.h>
 #include "log.h"
 #include "types.h"
+#include "simpleio.h"
 #include "syscalls.h"
+#include "sys_general.h"
 #include "cli/cli.h"
 #include "cli/dos_cmds.h"
 #include "cli/mem_cmds.h"
+#include "dev/rtc.h"
 
 #define MAX_COMMAND_SIZE    128
 #define MAX_ARGC            32
@@ -25,6 +28,10 @@ typedef struct s_cli_command {
     char *help;
     cli_cmd_handler handler;
 } t_cli_command, *p_cli_command;
+
+extern short cmd_gettime(short channel, int argc, char * argv[]);
+extern short cmd_settime(short channel, int argc, char * argv[]);
+extern short cmd_sysinfo(short channel, int argc, char * argv[]);
 
 /*
  * Variables
@@ -45,6 +52,10 @@ const t_cli_command g_cli_commands[] = {
     { "POKE16", "POKE16 <address> <value> -- write the 16-bit word value to the address in memory", mem_cmd_poke16},
     { "POKE32", "POKE32 <address> <value> -- write the 32-bit long word value to the address in memory", mem_cmd_poke32},
     { "RUN", "RUN <path> -- execute a binary file",  cmd_run },
+    { "GETTIME", "GETTIME -- prints the current time", cmd_gettime },
+    { "SETTIME", "SETTIME -- prints the current time", cmd_settime },
+    { "SYSINFO", "SYSINFO -- prints information about the system", cmd_sysinfo },
+    { "TESTIDE", "TESTIDE -- fetches and prints the IDE MBR repeatedly", cmd_testide},
     { "TYPE", "TYPE <path> -- print the contents of a text file", cmd_type },
     { 0, 0 }
 };
@@ -59,6 +70,62 @@ int cmd_help(short channel, int argc, char * argv[]) {
         sys_chan_write(channel, command->help, strlen(command->help));
         sys_chan_write(channel, "\n", 2);
     }
+    return 0;
+}
+
+/*
+ * Display information about the system
+ */
+short cmd_sysinfo(short channel, int argc, char * argv[]) {
+    t_sys_info info;
+
+    sys_get_info(&info);
+    print(channel, "System information:\nModel: ");
+    print(channel, info.model_name);
+
+    print(channel, "\nCPU: ");
+    print(channel, info.cpu_name);
+
+    print(channel, "\nGABE version: ");
+    print_hex_16(channel, info.gabe_number);
+    print(channel, ".");
+    print_hex_16(channel, info.gabe_version);
+    print(channel, ".");
+    print_hex_16(channel, info.gabe_subrev);
+
+    print(channel, "\nVICKY version: ");
+    print_hex_16(channel, info.vicky_rev);
+
+    print(channel, "\n");
+
+    return 0;
+}
+
+short cmd_gettime(short channel, int argc, char * argv[]) {
+    char time_string[128];
+    t_time time;
+
+    rtc_get_time(&time);
+    sprintf(time_string, "%04d-%02d-%02d %02d:%02d:%02d\n", time.year, time.month, time.day, time.hour, time.minute, time.second);
+    print(channel, time_string);
+
+    return 0;
+}
+
+short cmd_settime(short channel, int argc, char * argv[]) {
+    t_time time;
+
+    time.year = 2021;
+    time.month = 10;
+    time.day = 4;
+    time.hour = 9;
+    time.minute = 15;
+    time.second = 0;
+    time.is_24hours = 0;
+    time.is_pm = 1;
+
+    rtc_set_time(&time);
+
     return 0;
 }
 

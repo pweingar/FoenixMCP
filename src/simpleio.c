@@ -43,7 +43,7 @@ unsigned char hex_digits[] = "0123456789ABCDEF";
  * channel = the number of the channel
  * n = the number to print
  */
-void print_hex(short channel, unsigned short x) {
+void print_hex_8(short channel, unsigned short x) {
     short digit;
 
     digit = (x & 0xf0) >> 4;
@@ -103,4 +103,47 @@ void print_hex_32(short channel, long n) {
     number[8] = 0;
 
     print(channel, number);
+}
+
+/*
+ * Convert a BCD byte to an integer
+ *
+ * Inputs:
+ * bcd = a byte containing a BCD number
+ *
+ * Returns:
+ * the binary form of the number
+ */
+unsigned short bcd_to_i(unsigned char bcd) {
+    short tens = (bcd >> 4) & 0xf0;
+    short ones = bcd & 0x0f;
+
+    if ((ones > 9) || (tens > 9)) {
+        /* Byte was not in BCD... just return a 0 */
+        return 0;
+    } else {
+        return tens * 10 + ones;
+    }
+}
+
+/*
+ * Convert a number from 0 to 99 to BCD
+ *
+ * Inputs:
+ * n = a binary number from 0 to 99
+ *
+ * Returns:
+ * a byte containing n as a BCD number
+ */
+unsigned char i_to_bcd(unsigned short n) {
+    if (n > 99) {
+        /* Input was out of range... just return 0 */
+        return 0;
+
+    } else {
+        unsigned short tens = n / 10;
+        unsigned short ones = n - (tens * 10);
+
+        return tens << 4 | ones;
+    }
 }

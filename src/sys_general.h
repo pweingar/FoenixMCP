@@ -33,7 +33,9 @@
  */
 typedef struct s_sys_info {
     unsigned short model;       /* Code to say what model of machine this is */
+    const char * model_name;    /* Human readable name of the model of the computer */
     unsigned short cpu;         /* Code to say which CPU is running */
+    const char * cpu_name;      /* Human readable name for the CPU */
     unsigned short gabe_number; /* GABE revision information */
     unsigned short gabe_version;
     unsigned short gabe_subrev;

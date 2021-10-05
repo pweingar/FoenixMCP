@@ -17,6 +17,7 @@
 #include "dev/pata.h"
 #include "dev/ps2.h"
 #include "dev/kbd_mo.h"
+#include "dev/rtc.h"
 #include "dev/sdc.h"
 #include "dev/uart.h"
 #include "snd/codec.h"
@@ -25,7 +26,7 @@
 #include "fatfs/ff.h"
 #include "cli/cli.h"
 
-const char* VolumeStr[FF_VOLUMES] = { "@S", "@F", "@H" };
+const char* VolumeStr[FF_VOLUMES] = { "sdc", "fdc", "hdc" };
 
 /*
  * Initialize the SuperIO registers
@@ -96,7 +97,7 @@ void initialize() {
     text_init();          // Initialize the text channels
     DEBUG("Foenix/MCP starting up...");
 
-    log_setlevel(LOG_ERROR);
+    log_setlevel(LOG_DEBUG);
 
     /* Initialize the interrupt system */
     int_init();
@@ -131,6 +132,9 @@ void initialize() {
     } else {
         DEBUG("Console installed.");
     }
+
+    /* Initialize the real time clock */
+    rtc_init();
 
     if (res = pata_install()) {
         print_error(0, "FAILED: PATA driver installation", res);
