@@ -26,4 +26,22 @@
 #define GABE_CHIP_VERSION   ((volatile unsigned short *)0x00C00010)
 #define GABE_CHIP_NUMBER	((volatile unsigned short *)0x00C00012)
 
+/*
+ * 16-bit register controlling the key of the A2560K built-in keyboard
+ */
+
+#define GABE_MO_LEDS        ((volatile unsigned short *)0x00C00006)
+#define GABE_MO_LED_0_B     0x0001      /* LED 0 (Close to DEL key) -- Blue ON */
+#define GABE_MO_LED_0_G     0x0002      /* LED 0 (Close to DEL key) -- Green ON */
+#define GABE_MO_LED_0_R     0x0004      /* LED 0 (Close to DEL key) -- Red ON */
+#define GABE_MO_LED_1_B     0x0008      /* LED 1 (Below #0) -- Blue ON */
+#define GABE_MO_LED_1_G     0x0010      /* LED 1 (Below #0) -- Green ON */
+#define GABE_MO_LED_1_R     0x0020      /* LED 1 (Below #0) -- Red ON */
+#define GABE_MO_LED_2_B     0x0040      /* LED 2 (above arrow) -- Blue ON */
+#define GABE_MO_LED_2_G     0x0080      /* LED 2 (above arrow) -- Green ON */
+#define GABE_MO_LED_2_R     0x0100      /* LED 2 (above arrow) -- Red ON */
+#define GABE_MO_LED_3_B     0x0200      /* LED 2 (caps lock, Rev C) -- Blue ON */
+#define GABE_MO_LED_3_G     0x0400      /* LED 2 (caps lock, Rev C) -- Green ON */
+#define GABE_MO_LED_3_R     0x0800      /* LED 2 (caps lock, Rev C) -- Red ON */
+
 #endif

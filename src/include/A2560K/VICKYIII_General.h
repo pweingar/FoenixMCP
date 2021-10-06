@@ -77,7 +77,7 @@
 #define ScreenText_B			    ((volatile char *)0x00CA0000)		/* Text matrix */
 #define ColorText_B				    ((volatile uint8_t *)0x00CA8000)	/* Color matrix */
 #define FG_CLUT_B 				    ((volatile uint16_t *)0x00CAC400)	/* Foreground LUT */
-#define BG_CLUT_B 				    ((volatile uint16_t *)0x00CAC440)	/* Background LUT */	
+#define BG_CLUT_B 				    ((volatile uint16_t *)0x00CAC440)	/* Background LUT */
 
 #define BM0_Control_Reg			    ((volatile uint16_t *)0x00C80100)
 #define BM0_Addy_Pointer_Reg	    ((volatile uint16_t *)0x00C80104)
@@ -99,6 +99,13 @@
 #define LUT_5					    ((volatile uint8_t *)0x00C83400)
 #define LUT_6					    ((volatile uint8_t *)0x00C83800)
 #define LUT_7					    ((volatile uint8_t *)0x00C83C00)
+
+/*
+ * Text mode font memory
+ */
+
+#define VICKY_TXT_FONT_A            ((volatile unsigned char *)0x00C48000)  /* $00C48000..$00C48FFF    - FONT MEMORY Channel A */
+#define VICKY_TXT_FONT_B            ((volatile unsigned char *)0x00C88000)  /* $00C88000..$00C88FFF    - FONT MEMORY Channel B */
 
 /*
  * Location of VRAM

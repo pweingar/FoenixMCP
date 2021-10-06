@@ -95,8 +95,6 @@ void initialize() {
     short res;
 
     text_init();          // Initialize the text channels
-    DEBUG("Foenix/MCP starting up...");
-
     log_setlevel(LOG_ERROR);
 
     /* Initialize the interrupt system */
@@ -122,30 +120,30 @@ void initialize() {
     sid_test_internal();
 
     cdev_init_system();   // Initialize the channel device system
-    DEBUG("Channel device system ready.");
+    log(LOG_INFO, "Channel device system ready.");
 
     bdev_init_system();   // Initialize the channel device system
-    DEBUG("Block device system ready.");
+    log(LOG_INFO, "Block device system ready.");
 
     if (res = con_install()) {
-        print_error(0, "FAILED: Console installation", res);
+        log_num(LOG_ERROR, "FAILED: Console installation", res)
     } else {
-        DEBUG("Console installed.");
+        log(LOG_INFO, "Console installed.");
     }
 
     /* Initialize the real time clock */
     rtc_init();
 
     if (res = pata_install()) {
-        print_error(0, "FAILED: PATA driver installation", res);
+        log_num(LOG_ERROR, "FAILED: PATA driver installation", res);
     } else {
-        DEBUG("PATA driver installed.");
+        log(LOG_INFO, "PATA driver installed.");
     }
 
     if (res = sdc_install()) {
-        print_error(0, "FAILED: SDC driver installation", res);
+        log_num(LOG_ERROR, "FAILED: SDC driver installation", res);
     } else {
-        DEBUG("SDC driver installed.");
+        log(LOG_INFO, "SDC driver installed.");
     }
 
     // At this point, we should be able to call into to console to print to the screens
@@ -157,21 +155,21 @@ void initialize() {
     // }
 
     if (res = kbdmo_init()) {
-        print_error(0, "FAILED: A2560K built-in keyboard initialization", res);
+        log_num(LOG_ERROR, "FAILED: A2560K built-in keyboard initialization", res);
     } else {
-        DEBUG("A2560K built-in keyboard initialized.");
+        log(LOG_INFO, "A2560K built-in keyboard initialized.");
     }
 
     if (res = cli_init()) {
-        print_error(0, "FAILED: CLI initialization", res);
+        log_num(LOG_ERROR, "FAILED: CLI initialization", res);
     } else {
-        DEBUG("CLI initialized.");
+        log(LOG_INFO, "CLI initialized.");
     }
 
     if (res = fsys_init()) {
-        print_error(0, "FAILED: file system initialization", res);
+        log_num(LOG_ERROR, "FAILED: file system initialization", res);
     } else {
-        DEBUG("File system initialized.");
+        log(LOG_INFO, "File system initialized.");
     }
 
     /* Enable all interrupts */
@@ -183,7 +181,6 @@ void uart_send(short uart, char * message) {
 
     for (i = 0; i < strlen(message); i++) {
         uart_put(uart, message[i]);
-
     }
 }
 
@@ -193,42 +190,6 @@ void uart_test_send(short uart) {
         uart_put(uart, 'a');
         for (j = 1; j < 10000; j++) ;
     }
-}
-
-static long g_sof_counter = 0;
-
-/*
- * Interrupt handler for Channel A's Start of Frame
- */
-void int_sof_a() {
-    g_sof_counter++;
-
-    long counter_mod = g_sof_counter % 60;
-
-    if (counter_mod == 0) {
-        /* Set the power LED to red */
-        *RGB_LED_L = 0x00FF;
-        *RGB_LED_H = 0x0000;
-    } else if (counter_mod == 30) {
-        /* Set the power LED to blue */
-        *RGB_LED_L = 0x0000;
-        *RGB_LED_H = 0x00FF;
-    }
-
-    /* Acknowledge the interrupt before leaving */
-    int_clear(SOF_A_INT00);
-}
-
-/*
- * Interrupt handler for Channel A's Start of Frame
- */
-void change_led() {
-    g_sof_counter++;
-
-    long counter_mod = g_sof_counter % 2;
-
-    *RGB_LED_L = 0x0000;
-    *RGB_LED_H = 0xFF00;
 }
 
 void try_format(short screen, char * path) {
@@ -337,40 +298,11 @@ int main(int argc, char * argv[]) {
 
     initialize();
 
-    print(CDEV_CONSOLE, "Text Channel A\n");
-    print(CDEV_EVID, "Text Channel B\n");
-
-    // uart_test_send(0);
-
-    /* Register a handler for the SOF interrupt and enable it */
-    int_register(0x00, int_sof_a);
-    int_enable(0x00);
-
-    // uart_init(0);
-    // uart_test_send(0);
-
-    // test_get_mbr(0, BDEV_SDC);
-    // try_write(0, "0:");
-    // dos_cmd_dir(0, "0:");
-    // try_mo(0);
-    // try_mo_scancodes(0);
-    // try_bdev_getput(0, BDEV_SDC);
-
-    // print(0, "Watching for MIDI signals:\n");
-    // while (1) {
-    //     midi_byte = midi_get_poll();
-    //     if (midi_byte && (midi_byte != 0xFE) && (midi_byte != 0xF8)) {
-    //         print_hex(0, midi_byte);
-    //         print(0, "\n");
-    //     }
-    // }
-
-
-    const char * welcome = "\n\nFoenix/MCP Command Line Utility... online.\nType \"HELP\" or \"?\" for help.\n\n";
+    const char * welcome = "Foenix/MCP Command Line Utility... online.\nType \"HELP\" or \"?\" for help.\n";
     sys_chan_write(0, welcome, strlen(welcome));
     cli_repl(0);
 
-    DEBUG("Stopping.");
+    log(LOG_INFO, "Stopping.");
 
     /* Infinite loop... */
     while (1) {};

@@ -5,6 +5,7 @@
 #include "constants.h"
 #include "vicky_general.h"
 #include "text_screen_iii.h"
+#include "rsrc/font/foenix_st_8_8.h"
 
 #define MAX_TEXT_CHANNELS 2
 
@@ -105,6 +106,13 @@ int text_init() {
 	chan_a->border_control[0] = 0x00102001;	// Enable
 	chan_a->border_control[1] = 0x00000040;	//Dark Blue
 
+    /* Set the font for channel A */
+
+    for (i = 0; i < 0x800; i++) {
+        unsigned char b = foenix_st_8x8[i];
+        VICKY_TXT_FONT_A[i] = b;
+    }
+
     text_setsizes(0);
     text_set_color(0, 15, 3);
     text_clear(0);
@@ -128,6 +136,13 @@ int text_init() {
     text_clear(1);
     text_set_cursor(1, 0xF3, 0xB1, 1, 1);
     text_set_xy(1, 0, 0);
+
+    /* Set the font for channel B */
+
+    for (i = 0; i < 0x800; i++) {
+        unsigned char b = foenix_st_8x8[i];
+        VICKY_TXT_FONT_B[i] = b;
+    }
 
     return 0;
 }
