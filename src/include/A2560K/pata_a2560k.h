@@ -36,7 +36,7 @@
 #define PATA_STAT_ERR       0x01    // ERR (Error) indicates that an error occurred during execution of the previous command.
 
 #define PATA_CMD_INIT           0x00
-#define PATA_CMD_READ_SECTOR    0x21
+#define PATA_CMD_READ_SECTOR    0x20 // 0x21
 #define PATA_CMD_WRITE_SECTOR   0x30
 #define PATA_CMD_IDENTITY       0xEC
 

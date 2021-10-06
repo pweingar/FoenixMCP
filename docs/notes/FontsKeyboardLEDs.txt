@@ -1,0 +1,9 @@
+Keyboard Status LED:
+Gabe Control Register $00C00006 (16bit write)
+Bit[2:0] = Bit 0 - Blue On/Off, Bit 1 - Green On/Off, Bit 2 - Red On/Off - This is the LED Close to DEL key
+Bit[5:3] = Bit 3 - Blue On/Off, Bit 4 - Green On/Off, Bit 5 - Red On/Off - This is the LED below 1st one
+Bit[8:6] = Bit 6 - Blue On/Off, Bit 7 - Green On/Off, Bit 8 - Red On/Off - This is the LED above Arrow Key
+Bit[11:9] = Bit 9 - Blue On/Off, Bit 10 - Green On/Off, Bit 11 - Red On/Off - This is the Caps Lock LED (on Rev C Keyboard)
+You can now change the FONT Set
+// $00C48000..$00C48FFF    - FONT MEMORY Channel A
+// $00C88000..$00C88FFF    - FONT MEMORY Channel B

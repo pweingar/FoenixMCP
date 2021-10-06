@@ -12,6 +12,7 @@
 #include "dev/text_screen_iii.h"
 #include "ff.h"			/* Obtains integer types */
 #include "diskio.h"		/* Declarations of disk functions */
+#include "simpleio.h"
 
 /* Definitions of physical drive number for each drive */
 #define DEV_SDC		0	/* Example: Map Ramdisk to physical drive 0 */
@@ -75,10 +76,10 @@ DRESULT disk_read (
 	for (i = 0; i < count; i++) {
 		result = bdev_read(pdrv, sector, buff, 512);
 		if (result < 0) {
-			DEBUG("disk_read error: ");
+			log_num(LOG_ERROR, "disk_read error: ", result);
 			return RES_PARERR;
 		} else {
-			sector += result;
+			sector++;
 		}
 	}
 

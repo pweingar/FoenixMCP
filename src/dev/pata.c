@@ -81,9 +81,13 @@ short pata_wait_ready_not_busy() {
 
     TRACE("pata_wait_ready_not_busy");
 
+    // do {
+    //     status = *PATA_CMD_STAT;
+    // } while (((status & (PATA_STAT_DRDY | PATA_STAT_BSY)) != PATA_STAT_DRDY) && (count-- > 0));
+
     do {
-        status = *PATA_CMD_STAT;
-    } while (((status & (PATA_STAT_DRDY | PATA_STAT_BSY)) != PATA_STAT_DRDY) && (count-- > 0));
+        while ((*PATA_CMD_STAT & PATA_STAT_DRDY) != PATA_STAT_DRDY);
+    } while ((*PATA_CMD_STAT & PATA_STAT_BSY) == PATA_STAT_BSY);
 
     if (count == 0) {
         return DEV_TIMEOUT;
@@ -106,7 +110,7 @@ short pata_wait_data_request() {
 
     do {
         status = *PATA_CMD_STAT;
-    } while (((status & PATA_STAT_DRQ) == 0) && (count-- > 0));
+    } while (((status & PATA_STAT_DRQ) != PATA_STAT_DRQ) && (count-- > 0));
 
     if (count == 0) {
         return DEV_TIMEOUT;
@@ -230,6 +234,7 @@ short pata_read(long lba, unsigned char * buffer, short size) {
     short i;
     unsigned short *wptr;
     TRACE("pata_read");
+    log_num(LOG_VERBOSE, "pata_read lba: ", lba);
 
     if (pata_wait_ready_not_busy()) {
         return DEV_TIMEOUT;
@@ -243,13 +248,17 @@ short pata_read(long lba, unsigned char * buffer, short size) {
     *PATA_SECT_CNT = 1;                             // Read one sector (make this an option?)
     *PATA_SECT_SRT = lba & 0xff;                    // Set the rest of the LBA
     *PATA_CLDR_LO = (lba >> 8) & 0xff;
-    *PATA_CLDR_LO = (lba >> 16) & 0xff;
+    *PATA_CLDR_HI = (lba >> 16) & 0xff;
 
     *PATA_CMD_STAT = PATA_CMD_READ_SECTOR;          // Issue the READ command
 
     // TODO: Wait ~500ns
 
     if (pata_wait_ready_not_busy()) {
+        return DEV_TIMEOUT;
+    }
+
+    if (pata_wait_data_request()) {
         return DEV_TIMEOUT;
     }
 
