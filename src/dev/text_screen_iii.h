@@ -36,6 +36,16 @@ extern void text_set_cursor(short screen, short color, char character, short rat
 extern void text_set_xy(short screen, unsigned short x, unsigned short y);
 
 /*
+ * Get the position of the cursor on the screen.
+ *
+ * Inputs:
+ * screen = the screen number 0 for channel A, 1 for channel B
+ * x = pointer to the location to store the column (0 is left most)
+ * y =  pointer to the location to store the row (0 is right most)
+ */
+extern void text_get_xy(short screen, unsigned short * x, unsigned short * y);
+
+/*
  * Compute the size information for the text screen based on the current settings in VICKY
  * These settings are needed to correctly position text on the screen.
  *
@@ -52,15 +62,6 @@ extern void text_setsizes(short screen);
  * c = the character to print
  */
 extern void text_put_raw(short screen, char c);
-
-/*
- * Send a character to the screen... but handle ANSI escape codes and process accordingly.
- *
- * Inputs:
- * screen = the screen number 0 for channel A, 1 for channel B
- * c = the character to print
- */
-void text_put_ansi(short screen, char c);
 
 /*
  * Set the foreground and background color for printing
