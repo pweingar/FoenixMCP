@@ -20,6 +20,8 @@ t_channel g_channels[CHAN_MAX];
 void cdev_init_system() {
     int i;
 
+    TRACE("cdev_init_system");
+
     // Clear out all the channel device records...
     for (i = 0; i < CDEV_DEVICES_MAX; i++) {
         g_channel_devs[i].number = 0;
@@ -47,6 +49,8 @@ short cdev_register(p_dev_chan device) {
         cdev->number = device->number;
         cdev->name = device->name;
         cdev->init = device->init;
+        cdev->open = device->open;
+        cdev->close = device->close;
         cdev->read = device->read;
         cdev->readline = device->readline;
         cdev->read_b = device->read_b;
@@ -74,14 +78,16 @@ short cdev_register(p_dev_chan device) {
 p_channel chan_alloc(short dev) {
     int i;
 
+    TRACE("chan_alloc");
+
     if ((dev == CDEV_CONSOLE) || (dev == CDEV_EVID)) {
         /* For CONSOLE and EVID, the channel is always the same number as the device */
-        g_channels[i].number = dev;
-        g_channels[i].dev = dev;
-        return &g_channels[i];
+        g_channels[dev].number = dev;
+        g_channels[dev].dev = dev;
+        return &g_channels[dev];
 
     } else {
-        for (i = 0; i < CHAN_MAX; i++) {
+        for (i = CDEV_EVID + 1; i < CHAN_MAX; i++) {
             if (g_channels[i].number < 0) {
                 g_channels[i].number = i;
                 g_channels[i].dev = dev;
@@ -136,10 +142,12 @@ short chan_get_records(short channel, p_channel * chan, p_dev_chan * cdev) {
                 *cdev = &g_channel_devs[(*chan)->dev];
                 return 0;
             } else {
+                log_num(LOG_ERROR, "chan_get_records 1: ", (*chan)->dev);
                 return DEV_ERR_BADDEV;
             }
 
         } else {
+            log_num(LOG_ERROR, "chan_get_records 2: ", channel);
             return DEV_ERR_BADDEV;
         }
 
@@ -183,6 +191,9 @@ short chan_open(short dev, uint8_t * path, short mode) {
     short result;
     p_channel chan;
     p_dev_chan cdev;
+
+    TRACE("chan_open");
+    log_num(LOG_DEBUG, "dev = ", dev);
 
     if (dev < CDEV_DEVICES_MAX) {
         /* Get the device record */
@@ -326,7 +337,8 @@ short chan_write(short channel, const uint8_t * buffer, short size) {
     if (res == 0) {
         return cdev->write(chan, buffer, size);
     } else {
-        DEBUG("chan_write error\n");
+        log_num(LOG_ERROR, "chan_write error: ", res);
+        while (1) ;
         return res;
     }
 }

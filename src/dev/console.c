@@ -7,6 +7,7 @@
 
 #include <ctype.h>
 #include <string.h>
+#include "log.h"
 #include "types.h"
 #include "constants.h"
 #include "dev/channel.h"
@@ -70,13 +71,18 @@ const t_ansi_seq ansi_sequence[] = {
  */
 void ansi_cuu(p_channel chan, short arg_count, short args[]) {
     unsigned short x, y;
+    short delta = 1;
 
-    if (args[0] == 0) {
-        args[0] == 1;
+    TRACE("ansi_cuu");
+
+    if (arg_count > 0) {
+        delta = args[0];
     }
 
+    if (delta == 0) delta = 1;
+
     text_get_xy(chan->dev, &x, &y);
-    y -= args[0];
+    y -= delta;
     text_set_xy(chan->dev, x, y);
 }
 
@@ -85,13 +91,18 @@ void ansi_cuu(p_channel chan, short arg_count, short args[]) {
  */
 void ansi_cuf(p_channel chan, short arg_count, short args[]) {
     unsigned short x, y;
+    short delta = 1;
 
-    if (args[0] == 0) {
-        args[0] == 1;
+    TRACE("ansi_cuf");
+
+    if (arg_count > 0) {
+        delta = args[0];
     }
 
+    if (delta == 0) delta = 1;
+
     text_get_xy(chan->dev, &x, &y);
-    x += args[0];
+    x += delta;
     text_set_xy(chan->dev, x, y);
 }
 
@@ -100,13 +111,18 @@ void ansi_cuf(p_channel chan, short arg_count, short args[]) {
  */
 void ansi_cub(p_channel chan, short arg_count, short args[]) {
     unsigned short x, y;
+    short delta = 1;
 
-    if (args[0] == 0) {
-        args[0] == 1;
+    TRACE("ansi_cub");
+
+    if (arg_count > 0) {
+        delta = args[0];
     }
 
+    if (delta == 0) delta = 1;
+
     text_get_xy(chan->dev, &x, &y);
-    x -= args[0];
+    x -= delta;
     text_set_xy(chan->dev, x, y);
 }
 
@@ -115,13 +131,18 @@ void ansi_cub(p_channel chan, short arg_count, short args[]) {
  */
 void ansi_cud(p_channel chan, short arg_count, short args[]) {
     unsigned short x, y;
+    short delta = 1;
 
-    if (args[0] == 0) {
-        args[0] == 1;
+    TRACE("ansi_cud");
+
+    if (arg_count > 0) {
+        delta = args[0];
     }
 
+    if (delta == 0) delta = 1;
+
     text_get_xy(chan->dev, &x, &y);
-    y += args[0];
+    y += delta;
     text_set_xy(chan->dev, x, y);
 }
 
@@ -146,6 +167,8 @@ short con_init() {
 short con_open(p_channel chan, uint8_t * path, short mode) {
     int i;
     p_console_data con_data;
+
+    TRACE("con_open");
 
     /* Initialize the console data for this channel */
 
@@ -200,7 +223,7 @@ short con_close(p_channel chan) {
  */
 short ansi_start_code(char c) {
     switch (c) {
-        case CHAR_ESC:
+        case '\x27':
             return 1;
 
         default:
@@ -260,6 +283,7 @@ short ansi_match_pattern(p_channel chan, p_console_data con_data, p_ansi_seq seq
         for (i = 0; i < buffer_count; i++) {
             buffer[i] = 0;
         }
+        con_data->ansi_buffer_count = 0;
 
         sequence->handler(chan, arg_idx, arg);
         return 1;
@@ -424,12 +448,14 @@ short con_readline(p_channel chan, uint8_t * buffer, short size) {
 short con_write(p_channel chan, const uint8_t * buffer, short size) {
     int i;
 
+    TRACE("con_write");
+
     for (i = 0; i < size; i++) {
         char c = (char)buffer[i];
         if (c == 0) {
             break;
         } else {
-            text_put_raw(chan->dev, c);
+            con_write_b(chan, c);
         }
     }
 
@@ -460,11 +486,14 @@ short con_ioctrl(p_channel chan, short command, uint8_t * buffer, short size) {
 // Install the console device driver
 //
 short con_install() {
+    short result;
     t_dev_chan dev;
 
     dev.name = "CONSOLE";
     dev.number = CDEV_CONSOLE;
     dev.init = con_init;
+    dev.open = con_open;
+    dev.close = con_close;
     dev.read = con_read;
     dev.readline = con_readline;
     dev.read_b = con_read_b;
@@ -475,11 +504,16 @@ short con_install() {
     dev.status = con_status;
     dev.ioctrl = con_ioctrl;
 
-    cdev_register(&dev);
+    result = cdev_register(&dev);
+    if (result) {
+        return result;
+    }
 
     dev.name = "EVID";
     dev.number = CDEV_EVID;
     dev.init = con_init;
+    dev.open = con_open;
+    dev.close = con_close;
     dev.read = con_read;
     dev.readline = con_readline;
     dev.read_b = con_read_b;
@@ -490,10 +524,15 @@ short con_install() {
     dev.status = con_status;
     dev.ioctrl = con_ioctrl;
 
-    return cdev_register(&dev);
+    result = cdev_register(&dev);
+    if (result) {
+        return result;
+    }
 
     /* Pre-open the console and EVID channels */
-    
+
     chan_open(CDEV_CONSOLE, 0, 0);
-    chan_open(CDEV_EVID, 0, 0);
+    // chan_open(CDEV_EVID, 0, 0);
+
+    return result;
 }
