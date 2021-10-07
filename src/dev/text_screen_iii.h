@@ -96,6 +96,24 @@ extern void text_clear(short screen, short mode);
 extern text_clear_line(short screen, short mode);
 
 /*
+ * Insert a number of characters at the cursor position
+ *
+ * Inputs:
+ * screen = the screen number 0 for channel A, 1 for channel B
+ * count = the number of characters to insert
+ */
+extern void text_insert(short screen, short count);
+
+/*
+ * Delete a number of characters at the cursor position
+ *
+ * Inputs:
+ * screen = the screen number 0 for channel A, 1 for channel B
+ * count = the number of characters to delete
+ */
+extern void text_delete(short screen, short count);
+
+/*
  * Scroll the text screen up one row
  * Inputs:
  * screen = the screen number 0 for channel A, 1 for channel B

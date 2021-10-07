@@ -399,6 +399,50 @@ void text_clear_line(short screen, short mode) {
 }
 
 /*
+ * Insert a number of characters at the cursor position
+ *
+ * Inputs:
+ * screen = the screen number 0 for channel A, 1 for channel B
+ * count = the number of characters to insert
+ */
+void text_insert(short screen, short count) {
+    int i;
+    p_text_channel chan = &text_channel[screen];
+    int eol_index = (chan->y + 1) * chan->columns_max - 1;
+    int cursor_index = chan->y * chan->columns_max + chan->x;
+
+    for (i = cursor_index; i < eol_index; i++) {
+        chan->text_cells[i+1] = chan->text_cells[i];
+        chan->color_cells[i+1] = chan->color_cells[i];
+    }
+
+    chan->text_cells[cursor_index] = ' ';
+    chan->color_cells[cursor_index] = chan->current_color;
+}
+
+/*
+ * Delete a number of characters at the cursor position
+ *
+ * Inputs:
+ * screen = the screen number 0 for channel A, 1 for channel B
+ * count = the number of characters to delete
+ */
+void text_delete(short screen, short count) {
+    int i;
+    p_text_channel chan = &text_channel[screen];
+    int eol_index = (chan->y + 1) * chan->columns_max - 1;
+    int cursor_index = chan->y * chan->columns_max + chan->x;
+
+    for (i = cursor_index; i < eol_index; i++) {
+        chan->text_cells[i] = chan->text_cells[i+1];
+        chan->color_cells[i] = chan->color_cells[i+1];
+    }
+
+    chan->text_cells[eol_index] = ' ';
+    chan->color_cells[eol_index] = chan->current_color;
+}
+
+/*
  * Scroll the text screen up one row
  * Inputs:
  * screen = the screen number 0 for channel A, 1 for channel B
@@ -442,6 +486,7 @@ void text_scroll(short screen) {
  */
 void text_put_raw(short screen, char c) {
     if (screen < MAX_TEXT_CHANNELS) {
+        short x, y;
         p_text_channel chan = &text_channel[screen];
 
         switch (c) {
@@ -458,6 +503,12 @@ void text_put_raw(short screen, char c) {
                 *chan->text_cursor_ptr = ' ';
                 *chan->color_cursor_ptr = chan->current_color;
             }
+            break;
+
+        case CHAR_TAB:
+            text_get_xy(screen, &x, &y);
+            y = (y & 0x07) + 8;
+            text_set_xy(screen, x, y);
             break;
 
         default:
