@@ -20,6 +20,8 @@ t_channel g_channels[CHAN_MAX];
 void cdev_init_system() {
     int i;
 
+    TRACE("cdev_init_system");
+
     // Clear out all the channel device records...
     for (i = 0; i < CDEV_DEVICES_MAX; i++) {
         g_channel_devs[i].number = 0;
@@ -31,13 +33,6 @@ void cdev_init_system() {
         g_channels[i].number = -1;
         g_channels[i].dev = -1;
     }
-
-    // Pre-open a channel for the console and EVID
-    g_channels[0].number = 0;
-    g_channels[0].dev = 0;
-
-    g_channels[1].number = 1;
-    g_channels[1].dev = 1;
 }
 
 //
@@ -54,6 +49,8 @@ short cdev_register(p_dev_chan device) {
         cdev->number = device->number;
         cdev->name = device->name;
         cdev->init = device->init;
+        cdev->open = device->open;
+        cdev->close = device->close;
         cdev->read = device->read;
         cdev->readline = device->readline;
         cdev->read_b = device->read_b;
@@ -69,19 +66,33 @@ short cdev_register(p_dev_chan device) {
     }
 }
 
-//
-// Get a free channel
-//
-// Returns:
-// A pointer to the free channel, 0 if none are available.
-//
-p_channel chan_alloc() {
+/*
+ * Get a free channel
+ *
+ * Inputs:
+ * the device to associate with the channel
+ *
+ * Returns:
+ * A pointer to the free channel, 0 if none are available.
+ */
+p_channel chan_alloc(short dev) {
     int i;
 
-    for (i = 0; i < CHAN_MAX; i++) {
-        if (g_channels[i].number < 0) {
-            g_channels[i].number = i;
-            return &g_channels[i];
+    TRACE("chan_alloc");
+
+    if ((dev == CDEV_CONSOLE) || (dev == CDEV_EVID)) {
+        /* For CONSOLE and EVID, the channel is always the same number as the device */
+        g_channels[dev].number = dev;
+        g_channels[dev].dev = dev;
+        return &g_channels[dev];
+
+    } else {
+        for (i = CDEV_EVID + 1; i < CHAN_MAX; i++) {
+            if (g_channels[i].number < 0) {
+                g_channels[i].number = i;
+                g_channels[i].dev = dev;
+                return &g_channels[i];
+            }
         }
     }
 
@@ -113,6 +124,39 @@ void chan_free(p_channel chan) {
 }
 
 //
+// Find the records for the channel and the channel's device, given the channel number
+//
+// Inputs:
+//  channel = the number of the channel to look up
+//  chan = pointer to the channel structure pointer to set
+//  cdev = pointer to the channel device structure pointer to set
+//
+//  Returns:
+//   0 on success, a negative number on error
+//
+short chan_get_records(short channel, p_channel * chan, p_dev_chan * cdev) {
+    if (channel < CHAN_MAX) {
+        *chan = &g_channels[channel];
+        if ((*chan)->number == channel) {
+            if ((*chan)->dev < CDEV_DEVICES_MAX) {
+                *cdev = &g_channel_devs[(*chan)->dev];
+                return 0;
+            } else {
+                log_num(LOG_ERROR, "chan_get_records 1: ", (*chan)->dev);
+                return DEV_ERR_BADDEV;
+            }
+
+        } else {
+            log_num(LOG_ERROR, "chan_get_records 2: ", channel);
+            return DEV_ERR_BADDEV;
+        }
+
+    } else {
+        return ERR_BADCHANNEL;
+    }
+}
+
+//
 // Initialize the device
 //
 // Inputs:
@@ -132,35 +176,70 @@ short cdev_init(short dev) {
     }
 }
 
-//
-// Find the records for the channel and the channel's device, given the channel number
-//
-// Inputs:
-//  channel = the number of the channel to look up
-//  chan = pointer to the channel structure pointer to set
-//  cdev = pointer to the channel device structure pointer to set
-//
-//  Returns:
-//   0 on success, a negative number on error
-//
-short chan_get_records(short channel, p_channel * chan, p_dev_chan * cdev) {
-    if (channel < CHAN_MAX) {
-        *chan = &g_channels[channel];
-        if ((*chan)->number == channel) {
-            if ((*chan)->dev < CDEV_DEVICES_MAX) {
-                *cdev = &g_channel_devs[(*chan)->dev];
-                return 0;
-            } else {
-                return DEV_ERR_BADDEV;
-            }
+/*
+ * Open a channel
+ *
+ * Inputs:
+ * dev = the device number to have a channel opened
+ * path = a "path" describing how the device is to be open
+ * mode = is the device to be read, written, both?
+ *
+ * Returns:
+ * the number of the channel opened, negative number on error
+ */
+short chan_open(short dev, uint8_t * path, short mode) {
+    short result;
+    p_channel chan;
+    p_dev_chan cdev;
 
-        } else {
+    TRACE("chan_open");
+    log_num(LOG_DEBUG, "dev = ", dev);
+
+    if (dev < CDEV_DEVICES_MAX) {
+        /* Get the device record */
+        cdev = &g_channel_devs[dev];
+        if (cdev->number != dev) {
+            /* Double check we have a real device */
             return DEV_ERR_BADDEV;
         }
 
+        /* Grab a channel */
+        chan = chan_alloc(dev);
+        if (chan == 0) {
+            return ERR_OUT_OF_HANDLES;
+        }
+
+        /* Open the channel */
+        result = cdev->open(chan, path, mode);
+        if (result == 0) {
+            /* Success: return the channel number */
+            return chan->number;
+        } else {
+            return result;
+        }
     } else {
-        return ERR_BADCHANNEL;
+        return DEV_ERR_BADDEV;
     }
+}
+
+/*
+ * Close a channel
+ *
+ * Inputs:
+ * chan = the number of the channel to close
+ *
+ * Returns:
+ * nothing useful
+ */
+short chan_close(short channel) {
+    p_channel chan;
+    p_dev_chan cdev;
+    if (chan_get_records(channel, &chan, &cdev) == 0) {
+        cdev->close(chan);
+        chan_free(chan);
+    }
+
+    return 0;
 }
 
 //
@@ -258,7 +337,8 @@ short chan_write(short channel, const uint8_t * buffer, short size) {
     if (res == 0) {
         return cdev->write(chan, buffer, size);
     } else {
-        DEBUG("chan_write error\n");
+        log_num(LOG_ERROR, "chan_write error: ", res);
+        while (1) ;
         return res;
     }
 }

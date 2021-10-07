@@ -200,6 +200,21 @@ void text_set_xy(short screen, unsigned short x, unsigned short y) {
 }
 
 /*
+ * Get the position of the cursor on the screen.
+ *
+ * Inputs:
+ * screen = the screen number 0 for channel A, 1 for channel B
+ * x = pointer to the location to store the column (0 is left most)
+ * y =  pointer to the location to store the row (0 is right most)
+ */
+void text_get_xy(short screen, unsigned short * x, unsigned short * y) {
+    p_text_channel chan = &text_channel[screen];
+
+    *x = chan->x;
+    *y = chan->y;
+}
+
+/*
  * Compute the size information for the text screen based on the current settings in VICKY
  * These settings are needed to correctly position text on the screen.
  *
