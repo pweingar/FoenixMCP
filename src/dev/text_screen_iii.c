@@ -307,25 +307,30 @@ void text_set_color(short screen, short foreground, short background) {
  *
  * Inputs:
  * screen = the screen number 0 for channel A, 1 for channel B
- * mode = 0: erase from home to cursor, 1: erase from cursor to end of screen, 2: erase entire screen
+ * mode = 0: erase from the cursor to the end of the screen,
+          1: erase from start of the screen to the cursor,
+          2: erase entire screen
  */
 void text_clear(short screen, short mode) {
     if (screen < MAX_TEXT_CHANNELS) {
         int i;
+        int sos_index = 0;
         p_text_channel chan = &text_channel[screen];
+        int eos_index = chan->columns_max * chan->rows_max;
+        int cursor_index = chan->y * chan->columns_max + chan->x;
 
         switch (mode) {
             case 0:
                 /* Clear from cursor to the end of the screen */
-                for (i = chan->y * chan->columns_max + chan->x; i < chan->columns_max * chan->rows_max; i++) {
+                for (i = cursor_index; i < eos_index; i++) {
                     chan->text_cells[i] = ' ';
                     chan->color_cells[i] = chan->current_color;
                 }
                 break;
-                
+
             case 1:
                 /* Clear from (0, 0) to cursor */
-                for (i = 0; i <= chan->y * chan->columns_max + chan->x; i++) {
+                for (i = sos_index; i <= cursor_index; i++) {
                     chan->text_cells[i] = ' ';
                     chan->color_cells[i] = chan->current_color;
                 }
@@ -333,7 +338,55 @@ void text_clear(short screen, short mode) {
 
             case 2:
                 /* Clear entire screen */
-                for (i = 0; i < chan->columns_max * chan->rows_max; i++) {
+                for (i = sos_index; i <= eos_index; i++) {
+                    chan->text_cells[i] = ' ';
+                    chan->color_cells[i] = chan->current_color;
+                }
+                break;
+
+            default:
+                break;
+        }
+    }
+}
+
+/*
+ * Clear part or all of the current line
+ *
+ * Inputs:
+ * screen = the screen number 0 for channel A, 1 for channel B
+ * mode = 0: erase from the cursor to the end of the line
+ *        1: erase from the start of the line to the cursor
+ *        2: erase entire line
+ */
+void text_clear_line(short screen, short mode) {
+    if (screen < MAX_TEXT_CHANNELS) {
+        int i;
+        p_text_channel chan = &text_channel[screen];
+        int sol_index = chan->y * chan->columns_max;
+        int eol_index = (chan->y + 1) * chan->columns_max;
+        int cursor_index = chan->y * chan->columns_max + chan->x;
+
+        switch (mode) {
+            case 0:
+                /* Clear from cursor to the end of the line */
+                for (i = cursor_index; i < eol_index; i++) {
+                    chan->text_cells[i] = ' ';
+                    chan->color_cells[i] = chan->current_color;
+                }
+                break;
+
+            case 1:
+                /* Clear from (0, y) to cursor */
+                for (i = sol_index; i <= cursor_index; i++) {
+                    chan->text_cells[i] = ' ';
+                    chan->color_cells[i] = chan->current_color;
+                }
+                break;
+
+            case 2:
+                /* Clear entire screen */
+                for (i = sol_index; i < eol_index; i++) {
                     chan->text_cells[i] = ' ';
                     chan->color_cells[i] = chan->current_color;
                 }
@@ -413,18 +466,5 @@ void text_put_raw(short screen, char c) {
             text_set_xy(screen, chan->x + 1, chan->y);
             break;
         }
-    }
-}
-
-/*
- * Send a character to the screen... but handle ANSI escape codes and process accordingly.
- *
- * Inputs:
- * screen = the screen number 0 for channel A, 1 for channel B
- * c = the character to print
- */
-void text_put_ansi(short screen, char c) {
-    if (screen < MAX_TEXT_CHANNELS) {
-        /* TODO: magic! */
     }
 }

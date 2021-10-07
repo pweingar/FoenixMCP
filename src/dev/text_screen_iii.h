@@ -78,8 +78,22 @@ extern void text_set_color(short screen, short foreground, short background);
  *
  * Inputs:
  * screen = the screen number 0 for channel A, 1 for channel B
+ * mode = 0: erase from the cursor to the end of the screen,
+          1: erase from start of the screen to the cursor,
+          2: erase entire screen
  */
 extern void text_clear(short screen, short mode);
+
+/*
+ * Clear part or all of the current line
+ *
+ * Inputs:
+ * screen = the screen number 0 for channel A, 1 for channel B
+ * mode = 0: erase from the start of the line to the cursor,
+ *        1: erase from cursor to end of the line,
+ *        2: erase entire line
+ */
+extern text_clear_line(short screen, short mode);
 
 /*
  * Scroll the text screen up one row

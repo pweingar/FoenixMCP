@@ -50,6 +50,7 @@ extern void ansi_cub(p_channel chan, short arg_count, short args[]);
 extern void ansi_cud(p_channel chan, short arg_count, short args[]);
 extern void ansi_cup(p_channel chan, short arg_count, short args[]);
 extern void ansi_ed(p_channel chan, short arg_count, short args[]);
+extern void ansi_el(p_channel chan, short arg_count, short args[]);
 
 /*
  * Console variables and constants
@@ -67,6 +68,7 @@ const t_ansi_seq ansi_sequence[] = {
     { "\x1B[#C", ansi_cub },
     { "\x1B[#D", ansi_cud },
     { "\x1B[#J", ansi_ed },
+    { "\x1B[#K", ansi_el },
     { "\x1B[#;#H", ansi_cup },
     { 0, 0 }
 };
@@ -186,6 +188,21 @@ void ansi_ed(p_channel chan, short arg_count, short args[]) {
     }
 
     text_clear(chan->dev, n);
+}
+
+/*
+ * ANSI Handler: erase in line
+ */
+void ansi_el(p_channel chan, short arg_count, short args[]) {
+    unsigned short n = 2;
+
+    TRACE("ansi_el");
+
+    if (arg_count > 0) {
+        n = args[0];
+    }
+
+    text_clear_line(chan->dev, n);
 }
 
 //
