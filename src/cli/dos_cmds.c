@@ -102,16 +102,21 @@ short cmd_type(short screen, int argc, char * argv[]) {
         log3(LOG_INFO, "Attempting to type [", argv[1], "]");
         short fd = fsys_open(argv[1], FA_READ);
         if (fd >= 0) {
-            log(LOG_INFO, "File open");
+            log_num(LOG_INFO, "File open: ", fd);
             while (1) {
                 short n = chan_read(fd, buffer, 128);
-                log_num(LOG_INFO, "chan_read: ", n);
+                log_num(LOG_INFO, "cmd_type chan_read: ", n);
                 if (n > 0) {
+                    log(LOG_INFO, "cmd_type chan_write: ");
                     chan_write(screen, buffer, n);
+                    log(LOG_INFO, "/cmd_type chan_write: ");
                 } else {
                     break;
                 }
             }
+
+            fsys_close(fd);
+            return 0;
 
         } else {
             log_num(LOG_ERROR, "Could not open file for reading: ", fd);

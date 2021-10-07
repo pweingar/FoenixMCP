@@ -87,8 +87,8 @@ p_channel chan_alloc(short dev) {
         return &g_channels[dev];
 
     } else {
-        for (i = CDEV_EVID + 1; i < CHAN_MAX; i++) {
-            if (g_channels[i].number < 0) {
+        for (i = CDEV_FILE; i < CHAN_MAX; i++) {
+            if (g_channels[i].number != i) {
                 g_channels[i].number = i;
                 g_channels[i].dev = dev;
                 return &g_channels[i];
@@ -119,8 +119,10 @@ p_channel chan_get_record(short c) {
 // chan = a pointer to the channel record to return to the kernel
 //
 void chan_free(p_channel chan) {
+    log_num(LOG_INFO, "chan_free: ", chan->number);
+
     chan->number = -1;
-    chan->dev = 0;
+    chan->dev = -1;
 }
 
 //
@@ -332,6 +334,8 @@ short chan_write(short channel, const uint8_t * buffer, short size) {
     p_channel chan;
     p_dev_chan cdev;
     short res;
+
+    log_num(LOG_INFO, "chan_write: ", channel);
 
     res = chan_get_records(channel, &chan, &cdev);
     if (res == 0) {

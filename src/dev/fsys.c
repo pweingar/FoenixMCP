@@ -78,6 +78,8 @@ short fsys_open(const char * path, short mode) {
     p_channel chan = 0;
     short i, fd = -1;
 
+    TRACE("fsys_open");
+
     /* Allocate a file handle */
 
     for (i = 0; i < MAX_FILES; i++) {
@@ -89,13 +91,15 @@ short fsys_open(const char * path, short mode) {
     }
 
     if (fd < 0) {
+        log(LOG_ERROR, "fsys_open out of handles");
         return ERR_OUT_OF_HANDLES;
     }
 
     /* Allocate a channel */
 
-    chan = chan_alloc();
+    chan = chan_alloc(CDEV_FILE);
     if (chan) {
+        log_num(LOG_INFO, "chan_alloc: ", chan->number);
         chan->dev = CDEV_FILE;
         FRESULT result = f_open(&g_file[fd], path, mode);
         if (result == 0) {
@@ -103,6 +107,7 @@ short fsys_open(const char * path, short mode) {
             return chan->number;
         } else {
             /* There was an error... deallocate the channel and file descriptor */
+            log_num(LOG_ERROR, "fsys_open error: ", result);
             g_fil_state[fd] = 0;
             chan_free(chan);
             return fatfs_to_foenix(result);
@@ -110,6 +115,7 @@ short fsys_open(const char * path, short mode) {
 
     } else {
         /* We couldn't allocate a channel... return our file descriptor */
+        log(LOG_ERROR, "fsys_open out of channels");
         g_fil_state[fd] = 0;
         return ERR_OUT_OF_HANDLES;
     }

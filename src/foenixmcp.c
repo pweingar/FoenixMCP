@@ -298,7 +298,7 @@ int main(int argc, char * argv[]) {
 
     initialize();
 
-    const char * welcome = "\x1B[J\x1B[HFoenix/MCP Command Line Utility... online.\x1B[;2HType \"HELP\" or \"?\" for help.\n";
+    const char * welcome = "\x1B[2J\x1B[HFoenix/MCP Command Line Utility... online.\x1B[;2HType \"HELP\" or \"?\" for help.\n";
     sys_chan_write(0, welcome, strlen(welcome));
 
     cli_repl(0);
