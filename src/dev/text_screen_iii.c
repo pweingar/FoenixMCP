@@ -115,7 +115,7 @@ int text_init() {
 
     text_setsizes(0);
     text_set_color(0, 15, 3);
-    text_clear(0);
+    text_clear(0, 2);
     text_set_cursor(0, 0xF3, 0xB1, 1, 1);
     text_set_xy(0, 0, 0);
 
@@ -133,7 +133,7 @@ int text_init() {
 
     text_setsizes(1);
     text_set_color(1, 15, 3);
-    text_clear(1);
+    text_clear(1, 2);
     text_set_cursor(1, 0xF3, 0xB1, 1, 1);
     text_set_xy(1, 0, 0);
 
@@ -307,14 +307,40 @@ void text_set_color(short screen, short foreground, short background) {
  *
  * Inputs:
  * screen = the screen number 0 for channel A, 1 for channel B
+ * mode = 0: erase from home to cursor, 1: erase from cursor to end of screen, 2: erase entire screen
  */
-void text_clear(short screen) {
+void text_clear(short screen, short mode) {
     if (screen < MAX_TEXT_CHANNELS) {
         int i;
         p_text_channel chan = &text_channel[screen];
-        for (i = 0; i < chan->columns_max * chan->rows_max; i++) {
-            chan->text_cells[i] = ' ';
-            chan->color_cells[i] = chan->current_color;
+
+        switch (mode) {
+            case 0:
+                /* Clear from cursor to the end of the screen */
+                for (i = chan->y * chan->columns_max + chan->x; i < chan->columns_max * chan->rows_max; i++) {
+                    chan->text_cells[i] = ' ';
+                    chan->color_cells[i] = chan->current_color;
+                }
+                break;
+                
+            case 1:
+                /* Clear from (0, 0) to cursor */
+                for (i = 0; i <= chan->y * chan->columns_max + chan->x; i++) {
+                    chan->text_cells[i] = ' ';
+                    chan->color_cells[i] = chan->current_color;
+                }
+                break;
+
+            case 2:
+                /* Clear entire screen */
+                for (i = 0; i < chan->columns_max * chan->rows_max; i++) {
+                    chan->text_cells[i] = ' ';
+                    chan->color_cells[i] = chan->current_color;
+                }
+                break;
+
+            default:
+                break;
         }
     }
 }

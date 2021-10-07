@@ -32,6 +32,7 @@ typedef struct s_cli_command {
 extern short cmd_gettime(short channel, int argc, char * argv[]);
 extern short cmd_settime(short channel, int argc, char * argv[]);
 extern short cmd_sysinfo(short channel, int argc, char * argv[]);
+extern short cmd_cls(short channel, int argc, char * argv[]);
 
 /*
  * Variables
@@ -42,6 +43,7 @@ short g_current_channel = 0;
 const t_cli_command g_cli_commands[] = {
     { "?", "? -- print this helpful message", cmd_help },
     { "HELP", "HELP -- print this helpful message", cmd_help },
+    { "CLS", "CLS -- clear the screen", cmd_cls },
     { "DIR", "DIR <path> -- print directory listing", cmd_dir },
     { "DUMP", "DUMP <address> [<count>] -- print a memory dump", mem_cmd_dump},
     { "LOAD", "LOAD <path> -- load a file into memory", cmd_load },
@@ -70,6 +72,16 @@ int cmd_help(short channel, int argc, char * argv[]) {
         sys_chan_write(channel, command->help, strlen(command->help));
         sys_chan_write(channel, "\n", 2);
     }
+    return 0;
+}
+
+/*
+ * Clear the screen
+ */
+short cmd_cls(short channel, int argc, char * argv[]) {
+    const char * ansi_cls = "\x1B[2J\x1B[H";
+
+    sys_chan_write(channel, ansi_cls, strlen(ansi_cls));
     return 0;
 }
 

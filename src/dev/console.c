@@ -48,6 +48,8 @@ extern void ansi_cuu(p_channel chan, short arg_count, short args[]);
 extern void ansi_cuf(p_channel chan, short arg_count, short args[]);
 extern void ansi_cub(p_channel chan, short arg_count, short args[]);
 extern void ansi_cud(p_channel chan, short arg_count, short args[]);
+extern void ansi_cup(p_channel chan, short arg_count, short args[]);
+extern void ansi_ed(p_channel chan, short arg_count, short args[]);
 
 /*
  * Console variables and constants
@@ -59,10 +61,13 @@ extern void ansi_cud(p_channel chan, short arg_count, short args[]);
  *
  */
 const t_ansi_seq ansi_sequence[] = {
-    { "\x27[#A", ansi_cuu },
-    { "\x27[#B", ansi_cuf },
-    { "\x27[#C", ansi_cub },
-    { "\x27[#D", ansi_cud },
+    { "\x1B[H", ansi_cup },
+    { "\x1B[#A", ansi_cuu },
+    { "\x1B[#B", ansi_cuf },
+    { "\x1B[#C", ansi_cub },
+    { "\x1B[#D", ansi_cud },
+    { "\x1B[#J", ansi_ed },
+    { "\x1B[#;#H", ansi_cup },
     { 0, 0 }
 };
 
@@ -146,6 +151,43 @@ void ansi_cud(p_channel chan, short arg_count, short args[]) {
     text_set_xy(chan->dev, x, y);
 }
 
+/*
+ * ANSI Handler: cursor position
+ */
+void ansi_cup(p_channel chan, short arg_count, short args[]) {
+    unsigned short x = 1;
+    unsigned short y = 1;
+
+    TRACE("ansi_cup");
+
+    if (arg_count > 0) {
+        x = args[0];
+        if (arg_count > 1) {
+            y = args[1];
+        }
+    }
+
+    if (x == 0) x = 1;
+    if (y == 0) y = 1;
+
+    text_set_xy(chan->dev, x - 1, y - 1);
+}
+
+/*
+ * ANSI Handler: erase in display
+ */
+void ansi_ed(p_channel chan, short arg_count, short args[]) {
+    unsigned short n = 2;
+
+    TRACE("ansi_ed");
+
+    if (arg_count > 0) {
+        n = args[0];
+    }
+
+    text_clear(chan->dev, n);
+}
+
 //
 // Initialize the console... nothing needs to happen here
 //
@@ -223,7 +265,7 @@ short con_close(p_channel chan) {
  */
 short ansi_start_code(char c) {
     switch (c) {
-        case '\x27':
+        case CHAR_ESC:
             return 1;
 
         default:
@@ -259,17 +301,23 @@ short ansi_match_pattern(p_channel chan, p_console_data con_data, p_ansi_seq seq
         } else if (pattern[i] == '#') {
             /* Parse a number of decimal digits */
             arg[arg_idx] = 0;
-            while (isdigit(buffer[j]) && (j < buffer_count)) {
-                arg[arg_idx] = arg[arg_idx] * 10 + (buffer[j] - '0');
-                j++;
-            }
-
-            if (j == buffer_count) {
-                /* This pattern does not match */
-                return 0;
-            } else {
-                /* We've read a number */
+            if (buffer[j] == pattern[i+1]) {
+                /* Parameter is missing... set to zero */
                 arg_idx++;
+
+            } else {
+                while (isdigit(buffer[j]) && (j < buffer_count)) {
+                    arg[arg_idx] = arg[arg_idx] * 10 + (buffer[j] - '0');
+                    j++;
+                }
+
+                if (j == buffer_count) {
+                    /* This pattern does not match */
+                    return 0;
+                } else {
+                    /* We've read a number */
+                    arg_idx++;
+                }
             }
         } else {
             return 0;
