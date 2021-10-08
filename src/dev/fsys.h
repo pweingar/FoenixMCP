@@ -125,6 +125,24 @@ extern short fsys_findfirst(const char * path, const char * pattern, p_file_info
  */
 extern short fsys_findnext(short dir, p_file_info file);
 
+/*
+ * Get the label for the drive holding the path
+ *
+ * Inputs:
+ * path = path to the drive
+ * label = buffer that will hold the label... should be at least 35 bytes
+ */
+extern short fsys_getlabel(char * path, char * label);
+
+/*
+ * Set the label for the drive holding the path
+ *
+ * Inputs:
+ * path = path to the drive
+ * label = buffer that holds the label
+ */
+extern short fsys_setlabel(char * path, char * label);
+
 /**
  * Create a directory
  *

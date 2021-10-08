@@ -507,7 +507,7 @@ void text_put_raw(short screen, char c) {
 
         case CHAR_TAB:
             text_get_xy(screen, &x, &y);
-            y = (y & 0x07) + 8;
+            x = x + 8;
             text_set_xy(screen, x, y);
             break;
 

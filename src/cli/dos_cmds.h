@@ -21,6 +21,21 @@ extern short cmd_run(short screen, int argc, char * argv[]);
 extern short cmd_dir(short screen, int argc, char * argv[]);
 
 /*
+ * Create a directory
+ */
+extern short cmd_mkdir(short screen, int argc, char * argv[]);
+
+/*
+ * Delete a file or directory
+ */
+extern short cmd_del(short screen, int argc, char * argv[]);
+
+/*
+ * Rename a file or directory
+ */
+extern short cmd_rename(short screen, int argc, char * argv[]);
+
+/*
  * Print the contents of a file to the screen
  */
 extern short cmd_type(short screen, int argc, char * argv[]);

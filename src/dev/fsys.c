@@ -553,10 +553,39 @@ short fsys_mount(short bdev) {
     if (fres != FR_OK) {
         DEBUG("Unable to mount drive:");
         DEBUG(drive);
-        return fres;
+        return fatfs_to_foenix(fres);
     } else {
         return 0;
     }
+}
+
+/*
+ * Get the label for the drive holding the path
+ *
+ * Inputs:
+ * path = path to the drive
+ * label = buffer that will hold the label... should be at least 35 bytes
+ */
+short fsys_getlabel(char * path, char * label) {
+    TRACE("fsys_getlabel");
+
+    FRESULT fres = f_getlabel(path, label, 0);
+    if (fres != FR_OK) {
+        return fatfs_to_foenix(fres);
+    } else {
+        return 0;
+    }
+}
+
+/*
+ * Set the label for the drive holding the path
+ *
+ * Inputs:
+ * path = path to the drive
+ * label = buffer that holds the label
+ */
+short fsys_setlabel(char * path, char * label) {
+    return 0;
 }
 
 /*

@@ -55,9 +55,66 @@ short cmd_run(short screen, int argc, char * argv[]) {
     }
 }
 
+/*
+ * Create a directory
+ */
+short cmd_mkdir(short screen, int argc, char * argv[]) {
+
+    TRACE("cmd_mkdir");
+
+    if (argc > 1) {
+        short result = fsys_mkdir(argv[1]);
+        if (result < 0) {
+            log_num(LOG_ERROR, "Unable to create directory: ", result);
+            return result;
+        }
+    }
+
+    return 0;
+}
+
+/*
+ * Delete a file
+ */
+short cmd_del(short screen, int argc, char * argv[]) {
+
+    TRACE("cmd_del");
+
+    if (argc > 1) {
+        short result = fsys_delete(argv[1]);
+        if (result < 0) {
+            log_num(LOG_ERROR, "Unable to delete: ", result);
+            return result;
+        }
+    }
+
+    return 0;
+}
+
+/*
+ * Rename a file or directory
+ */
+extern short cmd_rename(short screen, int argc, char * argv[]) {
+
+    TRACE("cmd_rename");
+
+    if (argc > 2) {
+        short result = fsys_rename(argv[1], argv[2]);
+        if (result < 0) {
+            log_num(LOG_ERROR, "Unable to rename: ", result);
+            return result;
+        }
+    }
+
+    return 0;
+}
+
 short cmd_dir(short screen, int argc, char * argv[]) {
+    short result;
+    char buffer[80];
     t_file_info my_file;
     char * path = "";
+    char label[40];
 
     log_num(LOG_INFO, "cmd_dir: ", argc);
 
@@ -68,15 +125,30 @@ short cmd_dir(short screen, int argc, char * argv[]) {
     log3(LOG_INFO, "Attempting to read directory for [", path, "]\n");
     short dir = fsys_opendir(path);
     if (dir >= 0) {
+        result = fsys_getlabel(path, label);
+        if ((result == 0) && (strlen(label) > 0)) {
+            sprintf(buffer, "Drive: %s\n", label);
+            chan_write(screen, buffer, strlen(buffer));
+        }
+
         while (1) {
             short result = fsys_readdir(dir, &my_file);
             if ((result == 0) && (my_file.name[0] != 0)) {
+
                 if ((my_file.attributes & AM_HID) == 0) {
-                    print(screen, my_file.name);
                     if (my_file.attributes & AM_DIR) {
-                        print(screen, "/");
+                        sprintf(buffer, "%s/\n", my_file.name);
+
+                    } else {
+                        if (my_file.size < 1024) {
+                            sprintf(buffer, "%-20.20s %d\n", my_file.name, (int)my_file.size);
+                        } else if (my_file.size < 1024*1024) {
+                            sprintf(buffer, "%-20.20s %d KB\n", my_file.name, (int)my_file.size / 1024);
+                        } else {
+                            sprintf(buffer, "%-29.20s %d MB\n", my_file.name, (int)my_file.size / (1024*1024));
+                        }
+                        chan_write(screen, buffer, strlen(buffer));
                     }
-                    print(screen, "\n");
                 }
             } else {
                 break;
