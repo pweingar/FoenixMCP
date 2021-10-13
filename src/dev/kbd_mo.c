@@ -217,11 +217,11 @@ short kbdmo_init() {
     /* Clear out any pending interrupt */
     int_clear(INT_KBD_A2560K);
 
+#ifndef KBD_POLLED
     /* Register a handler for the keyboard */
     int_register(INT_KBD_A2560K, kbdmo_handle_irq);
 
     /* Enable the interrupt for the keyboard */
-#ifndef KBD_POLLED
     int_enable(INT_KBD_A2560K);
 #endif
 
@@ -301,22 +301,15 @@ void kbdmo_enqueue_scan(unsigned char scan_code) {
 }
 
 /*
- * Try to retrieve the next scancode from the keyboard.
- *
- * Returns:
- *      The next scancode to be processed, 0 if nothing.
- */
-unsigned short kbdmo_get_scancode() {
-    return rb_word_get(&g_kbdmo_control.sc_buf);
-}
-
-/*
  * IRQ handler for the keyboard... read a scan code and queue it
  */
 void kbdmo_handle_irq() {
     /* We got an interrupt for MO.
      * While there is data in the input queue...
      */
+
+    int_clear(INT_KBD_A2560K);
+
     while ((*KBD_MO_STAT & 0x00ff) != 0) {
         /* Get a scan code from the input buffer */
         unsigned short scan_code = *KBD_MO_DATA;
@@ -326,6 +319,31 @@ void kbdmo_handle_irq() {
 
             /* Process it and enqueue it */
             kbdmo_enqueue_scan((unsigned char)(scan_code & 0x00ff));
+        }
+    }
+}
+
+
+/*
+ * Try to retrieve the next scancode from the keyboard.
+ *
+ * Returns:
+ *      The next scancode to be processed, 0 if nothing.
+ */
+unsigned short kbdmo_get_scancode() {
+    unsigned short scan_code = rb_word_get(&g_kbdmo_control.sc_buf);
+    if (scan_code != 0) {
+        /* Got a result... return it */
+        return scan_code;
+
+    } else {
+        /* Nothing in the queue... let's make sure we haven't lost an interrupt */
+        if ((*KBD_MO_STAT & 0x00ff) != 0) {
+            /* Something is pending, process it as if an interrupt occurred */
+            kbdmo_handle_irq();
+            return rb_word_get(&g_kbdmo_control.sc_buf);
+        } else {
+            return 0;
         }
     }
 }

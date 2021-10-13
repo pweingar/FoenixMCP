@@ -6,6 +6,7 @@
 #include <string.h>
 #include "log.h"
 #include "types.h"
+#include "interrupt.h"
 #include "simpleio.h"
 #include "syscalls.h"
 #include "sys_general.h"
@@ -33,6 +34,7 @@ extern short cmd_gettime(short channel, int argc, char * argv[]);
 extern short cmd_settime(short channel, int argc, char * argv[]);
 extern short cmd_sysinfo(short channel, int argc, char * argv[]);
 extern short cmd_cls(short channel, int argc, char * argv[]);
+extern short cmd_showint(short channel, int argc, char * argv[]);
 
 /*
  * Variables
@@ -59,6 +61,7 @@ const t_cli_command g_cli_commands[] = {
     { "RUN", "RUN <path> -- execute a binary file",  cmd_run },
     { "GETTIME", "GETTIME -- prints the current time", cmd_gettime },
     { "SETTIME", "SETTIME -- sets the current time", cmd_settime },
+    { "SHOWINT", "SHOWINT -- Show information about the interrupt registers", cmd_showint },
     { "SYSINFO", "SYSINFO -- prints information about the system", cmd_sysinfo },
     { "TESTIDE", "TESTIDE -- fetches and prints the IDE MBR repeatedly", cmd_testide },
     { "TYPE", "TYPE <path> -- print the contents of a text file", cmd_type },
@@ -140,6 +143,32 @@ short cmd_settime(short channel, int argc, char * argv[]) {
     time.is_pm = 1;
 
     rtc_set_time(&time);
+
+    return 0;
+}
+
+/*
+ * Show information about the interrupt registers
+ */
+short cmd_showint(short channel, int argc, char * argv[]) {
+    char buffer[80];
+
+    TRACE("cmd_showint");
+
+    print(channel, "Interrupt control registers...\n\n");
+    print(channel, "          GRP0 GRP1 GRP2\n");
+
+    sprintf(buffer, "Polarity: %04x %04x %04x\n", *POL_GRP0, *POL_GRP1, *POL_GRP2);
+    print(channel, buffer);
+
+    sprintf(buffer, "    Edge: %04x %04x %04x\n", *EDGE_GRP0, *EDGE_GRP1, *EDGE_GRP2);
+    print(channel, buffer);
+
+    sprintf(buffer, "    Mask: %04x %04x %04x\n", *MASK_GRP0, *MASK_GRP1, *MASK_GRP2);
+    print(channel, buffer);
+
+    sprintf(buffer, " Pending: %04x %04x %04x\n", *PENDING_GRP0, *PENDING_GRP1, *PENDING_GRP2);
+    print(channel, buffer);
 
     return 0;
 }

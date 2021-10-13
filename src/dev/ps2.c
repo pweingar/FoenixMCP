@@ -5,11 +5,14 @@
 #include "log.h"
 #include "types.h"
 #include "ring_buffer.h"
+#include "interrupt.h"
+#include "vicky_general.h"
 #include "dev/ps2.h"
 #include "dev/text_screen_iii.h"
-#include "interrupt.h"
+#include "rsrc/bitmaps/mouse_pointer.h"
 
-#define PS2_RETRY_MAX 1000
+#define PS2_RETRY_MAX   20000       /* For timeout purposes when sending a command */
+#define PS2_RESEND_MAX  50          /* Number of times we'll repeat a command on receiving a 0xFE reply */
 
 /*
  * Controller responses
@@ -84,6 +87,8 @@ struct s_ps2_kbd {
  */
 
 struct s_ps2_kbd g_kbd_control;
+
+short g_mouse_state = 0;                /* Mouse packet state machine's state */
 
 // Translation table from base set1 make scan codes to Foenix scan codes
 unsigned char g_kbd_set1_base[128] = {
@@ -248,7 +253,7 @@ char g_us_sc_ctrl_shift[] = {
  */
 
 /*
- * Wait for the output buffer of the PS/2 controller to hace data.
+ * Wait for the output buffer of the PS/2 controller to have data.
  *
  * Returns:
  *  0 if successful, -1 if there was no response after PS2_RETRY_MAX tries
@@ -726,6 +731,188 @@ char kbd_getc() {
 }
 
 /*
+ * Handle an interrupt from the PS/2 mouse port
+ */
+void mouse_handle_irq() {
+    unsigned char status = *PS2_STATUS;
+    unsigned char mouse_byte = *PS2_DATA_BUF;
+
+    /* Clear the pending interrupt flag for the mouse */
+    int_clear(INT_MOUSE);
+
+    *ScreenText_A = *ScreenText_A + 1;
+
+    if ((g_mouse_state == 0) && ((mouse_byte & 0x08) != 0x08)) {
+        /*
+         * If this is the first byte in the packet, bit 4 must be set
+         * If it is not, ignore the byte... we're out of synch
+         */
+        return;
+
+    } else {
+        /* Send the byte to Vicky */
+        MousePtr_A_Mouse0[g_mouse_state++] = (unsigned short)mouse_byte;
+
+        /* After three bytes, return to state 0 */
+        if (g_mouse_state > 2) {
+            g_mouse_state = 0;
+        }
+    }
+}
+
+/*
+ * Send a command to the mouse
+ *
+ * Inputs:
+ * cmd = the mouse command byte to send
+ *
+ * Returns:
+ * -1 on timeout, otherwise the result of the command
+ */
+short ps2_mouse_command(unsigned char cmd) {
+
+    short result;
+
+    if (ps2_wait_in()) return -10;
+    *PS2_CMD_BUF = MOUSE_CMD_PREFIX;
+
+    // log_num(LOG_VERBOSE, "ps_mouse_command command: ", cmd);
+
+    if (ps2_wait_in()) return -20;
+    *PS2_DATA_BUF = cmd;
+
+    if (ps2_wait_out()) return -30;
+    result = *PS2_DATA_BUF;
+
+    // log_num(LOG_VERBOSE, "ps_mouse_command result: ", result);
+
+    return (short)result;
+}
+
+short ps2_mouse_command_repeatable(unsigned char cmd) {
+    int sends = 0;
+    short result = 0;
+
+    while ((result != PS2_RESP_ACK) && (sends < PS2_RESEND_MAX)) {
+        result = ps2_mouse_command(cmd);
+        sends++;
+    }
+
+    return result;
+}
+
+/*
+ * Query the mouse for an update packet (use if we aren't using interrupts)
+ *
+ * Returns:
+ * 0 on success, any other number is an error
+ */
+short ps2_mouse_get_packet() {
+    short result;
+    short i;
+
+    TRACE("ps2_mouse_get_packet");
+
+    result = ps2_mouse_command(MOUSE_CMD_REQPACK);
+    if (result == -1) {
+        log_num(LOG_ERROR, "MOUSE_CMD_REQPACK: ", result);
+        return result;
+    }
+
+    for (i = 0; i < 3; i++) {
+        if (ps2_wait_out()) return -1;
+        unsigned char data = *PS2_DATA_BUF;
+
+        /* Send the byte to Vicky */
+        MousePtr_A_Mouse0[i] = (unsigned short)data;
+    }
+
+    return 0;
+}
+
+/*
+ * Attempt to initialize the PS/2 mouse
+ *
+ * Returns:
+ * 0 on success, any other number is an error
+ */
+short mouse_init() {
+    short i, retries;
+    unsigned short low_components;
+    unsigned short hi_components;
+    short result;
+
+    TRACE("mouse_init");
+
+    /* Set the state machine to the initial state */
+
+    g_mouse_state = 0;
+
+    /* Send a mouse reset command, and wait for the mouse to reply with 0xAA */
+
+    result = ps2_mouse_command(MOUSE_CMD_RESET);
+    if (result == -1) {
+        log_num(LOG_ERROR, "MOUSE_CMD_RESET: ", result);
+        return result;
+    }
+
+    /* Disable streaming for the moment */
+
+    result = ps2_mouse_command_repeatable(MOUSE_CMD_DISABLE);
+    if (result != 0xFA) {
+        log_num(LOG_ERROR, "MOUSE_CMD_DISABLE: ", result);
+        return result;
+    }
+
+    /* Set the mouse to default settings */
+
+    result = ps2_mouse_command_repeatable(MOUSE_CMD_DEFAULTS);
+    if (result != 0xFA) {
+        log_num(LOG_ERROR, "MOUSE_CMD_DEFAULTS: ", result);
+        return result;
+    }
+
+    /* Set resolution to be lowest for 640x480 */
+
+    // result = ps2_mouse_command_repeatable(MOUSE_CMD_SETRES);
+    // if (result != 0xFA) {
+    //     log_num(LOG_ERROR, "MOUSE_CMD_SETRES: ", result);
+    //     return result;
+    // }
+    //
+    // result = ps2_mouse_command_repeatable(0x00);
+    // if (result != 0xFA) {
+    //     log_num(LOG_ERROR, "MOUSE_CMD_SETRES resolution: ", result);
+    //     return result;
+    // }
+
+    /* Enable packet streaming */
+
+    result = ps2_mouse_command_repeatable(MOUSE_CMD_ENABLE);
+    if (result != 0xFA) {
+        log_num(LOG_ERROR, "MOUSE_CMD_ENABLE: ", result);
+        return result;
+    }
+
+    /* Set up the mouse pointer */
+
+    for (i = 0; i < 256; i++) {
+        short src_offset = 3*i;
+        short dest_offset = 2*i;
+        low_components = Color_Pointer_bin[src_offset+1] << 8 + Color_Pointer_bin[src_offset];
+        hi_components = Color_Pointer_bin[src_offset+2];
+        MousePointer_Mem_A[dest_offset] = low_components;
+        MousePointer_Mem_A[dest_offset+1] = hi_components;
+    }
+
+    /* Enable the mouse pointer on channel A */
+
+    *MousePtr_A_CTRL_Reg = MousePtr_En;
+
+    return 0;
+}
+
+/*
  * Initialize the PS2 controller and any attached devices
  * Enable keyboard and mouse interrupts as appropriate.
  *
@@ -736,6 +923,7 @@ short ps2_init() {
     volatile unsigned char *command = (unsigned char *)PS2_CMD_BUF;
     volatile unsigned char *data = (unsigned char *)PS2_DATA_BUF;
     unsigned char x;
+    short mouse_error;
     short res;
 
     // Initialize the keyboard controller variables
@@ -769,8 +957,8 @@ short ps2_init() {
     if (ps2_controller_cmd(PS2_CTRL_SELFTEST) != PS2_RESP_OK) {
         ; // return PS2_FAIL_SELFTEST;
     }
-    //
-    // // Keyboard test
+
+    // Keyboard test
     if (ps2_controller_cmd(PS2_CTRL_KBDTEST) != 0) {
         ; // return PS2_FAIL_KBDTEST;
     }
@@ -790,6 +978,14 @@ short ps2_init() {
 
     // TODO: set the keyboard LEDs
 
+    /* Initialize the mouse */
+    if (mouse_error = mouse_init()) {
+        log_num(LOG_ERROR, "Unable to initialize mouse", res);
+    }
+
+    ps2_wait_in();
+    *command = PS2_CTRL_ENABLE_2;
+
     // Make sure everything is read
     ps2_flush_out();
 
@@ -801,6 +997,19 @@ short ps2_init() {
 
     // Enable the keyboard interrupt
     int_enable(INT_KBD_PS2);
+
+    if (mouse_error == 0) {
+        log(LOG_TRACE, "mouse enabled");
+
+        // Register the interrupt handler for the mouse
+        int_register(INT_MOUSE, mouse_handle_irq);
+
+        // Clear any pending mouse interrupts
+        int_clear(INT_MOUSE);
+
+        // Enable the mouse interrupt
+        int_enable(INT_MOUSE);
+    }
 
     return(0);
 }

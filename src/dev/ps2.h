@@ -46,4 +46,12 @@ extern char kbd_getc();
 
 extern char kbd_getc_poll();
 
+/*
+ * Query the mouse for an update packet (use if we aren't using interrupts)
+ *
+ * Returns:
+ * 0 on success, any other number is an error
+ */
+extern short ps2_mouse_get_packet();
+
 #endif

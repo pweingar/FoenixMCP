@@ -455,6 +455,7 @@ short con_read_b(p_channel chan) {
     char c;
     do {
 #ifdef KBD_POLLED
+        ps2_mouse_get_packet();
         c = kbdmo_getc_poll();
 #else
         c = kbdmo_getc();

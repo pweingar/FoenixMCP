@@ -37,6 +37,7 @@
 
 #define MousePointer_Mem_A		    ((volatile uint16_t *)0x00C40400)
 #define MousePtr_A_CTRL_Reg		    ((volatile uint16_t *)0x00C40C00)
+#define MousePtr_En                 0x0001
 
 #define MousePtr_A_X_Pos		    ((volatile uint16_t *)0x00C40C02)
 #define MousePtr_A_Y_Pos		    ((volatile uint16_t *)0x00C40C04)

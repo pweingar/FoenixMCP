@@ -76,7 +76,7 @@
             dc.l not_impl           ; 63 - Reserved
             dc.l interrupt_x10      ; 64 - Interrupt 0x10 - SuperIO - PS/2 Keyboard
             dc.l interrupt_x11      ; 65 - Interrupt 0x11 - A2560K Built-in Keyboard (Mo)
-            ; dc.l interrupt_x12      ; 66 - Interrupt 0x12 - SuperIO - PS/2 Mouse
+            dc.l interrupt_x12      ; 66 - Interrupt 0x12 - SuperIO - PS/2 Mouse
             ; dc.l interrupt_x13      ; 67 - Interrupt 0x13 - SuperIO - COM1
             ; dc.l interrupt_x14      ; 68 - Interrupt 0x14 - SuperIO - COM2
             ; dc.l interrupt_x15      ; 69 - Interrupt 0x15 - SuperIO - LPT1
@@ -89,7 +89,7 @@
             ; dc.l interrupt_x1C      ; 75 - Interrupt 0x1C - Timer 4
             ; dc.l not_impl           ; 77 - Interrupt 0x1D - Reserved
             ; dc.l not_impl           ; 78 - Interrupt 0x1E - Reserved
-            ; dc.l interrupt_x1F      ; 79 - Interrupt 0x1F - Real Time Clock
+            dc.l interrupt_x1F      ; 79 - Interrupt 0x1F - Real Time Clock
 
             ; dc.l interrupt_x20      ; 80 - Interrupt 0x20 - IDE HDD Generated Interrupt
             ; dc.l interrupt_x21      ; 81 - Interrupt 0x21 - SDCard Insert
@@ -151,43 +151,55 @@ autovec2:   movem.l d0-d7/a0-a6,-(a7)
             rte
 
 ;
+; Given the interrupt's offset in the interrupt handler table, fetch the pointer
+; to the interrupt handler and call it... if there is one
+;
+; Assumes registers D0-D7, A0-A6 have been saved to the stack with MOVEM
+;
+int_dispatch:
+            lea _g_int_handler,a0           ; Look in the interrupt handler table
+            movea.l (0,a0,d0),a1            ; Get the address of the handler
+            beq intdis_end                  ; If there isn't one, just return
+
+            jsr (a1)                        ; If there is, call it.
+
+intdis_end: movem.l (a7)+,d0-d7/a0-a6       ; Restore the registers
+            rte
+
+;
 ; Interrupt Vector 0x10 -- SuperIO Keyboard
 ;
 interrupt_x10:
             movem.l d0-d7/a0-a6,-(a7)       ; Save all the registers
-
-            ; move.l #$00C60001,a0
-            ; move.l #$00C60000,a1
-            ; move.b (a0),d0
-            ; addq.b #1,d0
-            ; move.b d0,(a1)
-
-            ; jsr _kbd_handle_irq           ; If there is, call it.
-
-done_intx10 movem.l (a7)+,d0-d7/a0-a6       ; Restore the registers
-            rte
+            move.w #($10<<2),d0             ; Get the offset to interrupt 0x11
+            bra int_dispatch                ; And process the interrupt
 
 ;
-; Interrupt Vector 0x11 -- SuperIO Keyboard
+; Interrupt Vector 0x11 -- A2560K "Mo" keyboard
 ;
 interrupt_x11:
             movem.l d0-d7/a0-a6,-(a7)       ; Save all the registers
-;             ; lea _g_int_handler,a0           ; Look in the interrupt handler table
-;             ; move.w #($11<<2),d0             ; Offset to interrupt #16
-;             ; movea.l (0,a0,d0),a1            ; Get the address of the handler
-;             ; beq done_intx10                 ; If there isn't one, just return
+            move.w #($11<<2),d0             ; Get the offset to interrupt 0x11
+            bra int_dispatch                ; And process the interrupt
+
 ;
-;             ; jsr (a1)                        ; If there is, call it.
-
-            move.l #$00C00102,a0            ; Clear the pending flag
-            move.w (a0),d0
-            andi.w #$0002,d0
-            move.w d0,(a0)
-
-            jsr _kbdmo_handle_irq
-
-done_intx11 movem.l (a7)+,d0-d7/a0-a6       ; Restore the registers
-            rte
+; Interrupt Vector 0x12 -- SuperIO Mouse
+;
+interrupt_x12:
+            movem.l d0-d7/a0-a6,-(a7)       ; Save all the registers
+            move.w #($12<<2),d0             ; Get the offset to interrupt 0x11
+            bra int_dispatch                ; And process the interrupt
+            ; jsr _mouse_handle_irq
+            ; movem.l (a7)+,d0-d7/a0-a6       ; Restore the registers
+            ; rte
+            
+;
+; Interrupt Vector 0x1F -- RTC
+;
+interrupt_x1F:
+            movem.l d0-d7/a0-a6,-(a7)       ; Save all the registers
+            move.w #($1f<<2),d0             ; Get the offset to interrupt 0x1f
+            bra int_dispatch                ; And process the interrupt
 
 ;
 ; Unimplemented Exception Handler -- just return

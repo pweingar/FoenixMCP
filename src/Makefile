@@ -21,7 +21,7 @@ export MODEL=4
 export AS = vasmm68k_mot
 export ASFLAGS = -quiet -Fvobj -nowarn=62
 export CC = vc
-export DEFINES = -DCPU=$(CPU) -DMODEL=$(MODEL) -DKBD_POLLED=1
+export DEFINES = -DCPU=$(CPU) -DMODEL=$(MODEL) # -DKBD_POLLED
 export CFLAGS = +../vbcc/config/m68k-foenix -I. -Iinclude
 export RM = cmd /C del /Q /F
 

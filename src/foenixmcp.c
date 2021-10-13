@@ -148,11 +148,11 @@ void initialize() {
 
     // At this point, we should be able to call into to console to print to the screens
 
-    // if (res = ps2_init()) {
-    //     print_error(0, "FAILED: PS/2 keyboard initialization", res);
-    // } else {
-    //     DEBUG("PS/2 keyboard initialized.");
-    // }
+    if (res = ps2_init()) {
+        print_error(0, "FAILED: PS/2 keyboard initialization", res);
+    } else {
+        DEBUG("PS/2 keyboard initialized.");
+    }
 
     if (res = kbdmo_init()) {
         log_num(LOG_ERROR, "FAILED: A2560K built-in keyboard initialization", res);
@@ -298,8 +298,8 @@ int main(int argc, char * argv[]) {
 
     initialize();
 
-    const char * welcome = "\x1B[2J\x1B[HFoenix/MCP Command Line Utility... online.\x1B[;2HType \"HELP\" or \"?\" for help.\n";
-    sys_chan_write(0, welcome, strlen(welcome));
+    // const char * welcome = "\x1B[2J\x1B[HFoenix/MCP Command Line Utility... online.\x1B[;2HType \"HELP\" or \"?\" for help.\n";
+    // sys_chan_write(0, welcome, strlen(welcome));
 
     cli_repl(0);
 
