@@ -15,13 +15,6 @@
 #define PS2_RESEND_MAX  50          /* Number of times we'll repeat a command on receiving a 0xFE reply */
 
 /*
- * Controller responses
- */
-
-#define PS2_RESP_OK         0x55    /* Keyboard response: Command was OK */
-#define PS2_RESP_ACK        0xFA    /* Keyboard response: command acknowledged */
-
-/*
  * Modifier bit flags
  */
 
@@ -259,10 +252,9 @@ char g_us_sc_ctrl_shift[] = {
  *  0 if successful, -1 if there was no response after PS2_RETRY_MAX tries
  */
 short ps2_wait_out() {
-    volatile unsigned char *status = (unsigned char *)PS2_STATUS;
     short count = 0;
 
-    while ((*status & PS2_STAT_OBF) == 0) {
+    while ((*PS2_STATUS & PS2_STAT_OBF) == 0) {
         if (count++ > PS2_RETRY_MAX) {
             return -1;
         }
@@ -278,10 +270,9 @@ short ps2_wait_out() {
  *  0 if successful, -1 if there was no response after PS2_RETRY_MAX tries
  */
 short ps2_wait_in() {
-    volatile unsigned char *status = (unsigned char *)PS2_STATUS;
     short count = 0;
 
-    while ((*status & PS2_STAT_IBF) != 0) {
+    while ((*PS2_STATUS & PS2_STAT_IBF) != 0) {
         if (count++ > PS2_RETRY_MAX) {
             return -1;
         }
@@ -297,13 +288,11 @@ short ps2_wait_in() {
  *  The response from the PS/2 controller, -1 if there was a timeout
  */
 short ps2_controller_cmd(unsigned char cmd) {
-    volatile unsigned char *command = (unsigned char *)PS2_CMD_BUF;
-    volatile unsigned char *data = (unsigned char *)PS2_DATA_BUF;
-
     if (ps2_wait_in()) return -1;
-    *command = cmd;
+    *PS2_CMD_BUF = cmd;
+
     if (ps2_wait_out()) return -1;
-    return (short)*data;
+    return (short)*PS2_DATA_BUF;
 }
 
 /*
@@ -313,14 +302,11 @@ short ps2_controller_cmd(unsigned char cmd) {
  *  The response from the PS/2 controller, -1 if there was a timeout
  */
 short ps2_controller_cmd_param(unsigned char cmd, unsigned char parameter) {
-    volatile unsigned char *command = (unsigned char *)PS2_CMD_BUF;
-    volatile unsigned char *data = (unsigned char *)PS2_DATA_BUF;
+    if (ps2_wait_in()) return -1;
+    *PS2_CMD_BUF = cmd;
 
     if (ps2_wait_in()) return -1;
-    *command = cmd;
-
-    if (ps2_wait_in()) return -1;
-    *data = parameter;
+    *PS2_DATA_BUF = parameter;
 
     return 0;
 }
@@ -332,16 +318,13 @@ short ps2_controller_cmd_param(unsigned char cmd, unsigned char parameter) {
  *  The response from the PS/2 controller, -1 if there was a timeout
  */
 short ps2_kbd_cmd_p(unsigned char cmd, unsigned char parameter) {
-    volatile unsigned char *command = (unsigned char *)PS2_CMD_BUF;
-    volatile unsigned char *data = (unsigned char *)PS2_DATA_BUF;
-
     if (ps2_wait_in()) return -1;
-    *data = cmd;
+    *PS2_DATA_BUF = cmd;
 
     // May need a delay here
 
     if (ps2_wait_in()) return -1;
-    *data = parameter;
+    *PS2_DATA_BUF = parameter;
 
     // Return 0 by default... maybe read DATA?
     return 0;
@@ -358,10 +341,8 @@ short ps2_kbd_cmd_p(unsigned char cmd, unsigned char parameter) {
  *  The response from the PS/2 controller, -1 if there was a timeout
  */
 short ps2_kbd_cmd(unsigned char cmd, short delay) {
-    volatile unsigned char *data = (unsigned char *)PS2_DATA_BUF;
-
     if (ps2_wait_in()) return -1;
-    *data = cmd;
+    *PS2_DATA_BUF = cmd;
 
     // A delay may be needed here
     while (delay-- > 0) {
@@ -369,18 +350,15 @@ short ps2_kbd_cmd(unsigned char cmd, short delay) {
     }
 
     if (ps2_wait_out()) return -1;
-    return (short)*data;
+    return (short)*PS2_DATA_BUF;
 }
 
 /*
  * Read from the PS/2 data port until there are no more bytes ready.
  */
 void ps2_flush_out() {
-    volatile unsigned char *status = (unsigned char *)PS2_STATUS;
-    volatile unsigned char *data = (unsigned char *)PS2_DATA_BUF;
-
-    while (*status & PS2_STAT_OBF) {
-        unsigned char x = *data;
+    while (*PS2_STATUS & PS2_STAT_OBF) {
+        unsigned char x = *PS2_DATA_BUF;
     }
 }
 
@@ -773,15 +751,15 @@ short ps2_mouse_command(unsigned char cmd) {
 
     short result;
 
-    if (ps2_wait_in()) return -10;
+    if (ps2_wait_in()) return -1;
     *PS2_CMD_BUF = MOUSE_CMD_PREFIX;
 
     // log_num(LOG_VERBOSE, "ps_mouse_command command: ", cmd);
 
-    if (ps2_wait_in()) return -20;
+    if (ps2_wait_in()) return -1;
     *PS2_DATA_BUF = cmd;
 
-    if (ps2_wait_out()) return -30;
+    if (ps2_wait_out()) return -1;
     result = *PS2_DATA_BUF;
 
     // log_num(LOG_VERBOSE, "ps_mouse_command result: ", result);
@@ -831,6 +809,29 @@ short ps2_mouse_get_packet() {
 }
 
 /*
+ * Set the visibility of the VICKY mouse pointer
+ *
+ * Input:
+ * is_visible = 0 for hide, any other value to show
+ */
+void mouse_set_visible(short is_visible) {
+    short i;
+
+    if (is_visible != 0) {
+        *MousePtr_A_CTRL_Reg = MousePtr_En;
+    } else {
+        *MousePtr_A_CTRL_Reg = 0;
+
+        for (i = 0; i < 256; i++) {
+            short dest_offset = 2*i;
+
+            MousePointer_Mem_A[dest_offset] = 0;
+            MousePointer_Mem_A[dest_offset+1] = 0;
+        }
+    }
+}
+
+/*
  * Attempt to initialize the PS/2 mouse
  *
  * Returns:
@@ -859,7 +860,7 @@ short mouse_init() {
     /* Disable streaming for the moment */
 
     result = ps2_mouse_command_repeatable(MOUSE_CMD_DISABLE);
-    if (result != 0xFA) {
+    if (result != PS2_RESP_ACK) {
         log_num(LOG_ERROR, "MOUSE_CMD_DISABLE: ", result);
         return result;
     }
@@ -867,29 +868,29 @@ short mouse_init() {
     /* Set the mouse to default settings */
 
     result = ps2_mouse_command_repeatable(MOUSE_CMD_DEFAULTS);
-    if (result != 0xFA) {
+    if (result != PS2_RESP_ACK) {
         log_num(LOG_ERROR, "MOUSE_CMD_DEFAULTS: ", result);
         return result;
     }
 
     /* Set resolution to be lowest for 640x480 */
 
-    // result = ps2_mouse_command_repeatable(MOUSE_CMD_SETRES);
-    // if (result != 0xFA) {
-    //     log_num(LOG_ERROR, "MOUSE_CMD_SETRES: ", result);
-    //     return result;
-    // }
-    //
-    // result = ps2_mouse_command_repeatable(0x00);
-    // if (result != 0xFA) {
-    //     log_num(LOG_ERROR, "MOUSE_CMD_SETRES resolution: ", result);
-    //     return result;
-    // }
+    result = ps2_mouse_command_repeatable(MOUSE_CMD_SETRES);
+    if (result != PS2_RESP_ACK) {
+        log_num(LOG_ERROR, "MOUSE_CMD_SETRES: ", result);
+        return result;
+    }
+
+    result = ps2_mouse_command_repeatable(0x00);
+    if (result != PS2_RESP_ACK) {
+        log_num(LOG_ERROR, "MOUSE_CMD_SETRES resolution: ", result);
+        return result;
+    }
 
     /* Enable packet streaming */
 
     result = ps2_mouse_command_repeatable(MOUSE_CMD_ENABLE);
-    if (result != 0xFA) {
+    if (result != PS2_RESP_ACK) {
         log_num(LOG_ERROR, "MOUSE_CMD_ENABLE: ", result);
         return result;
     }
@@ -906,8 +907,7 @@ short mouse_init() {
     }
 
     /* Enable the mouse pointer on channel A */
-
-    *MousePtr_A_CTRL_Reg = MousePtr_En;
+    mouse_set_visible(1);
 
     return 0;
 }
@@ -920,9 +920,8 @@ short mouse_init() {
  *  Status code indicating if either the mouse or the keyboard is missing.
  */
 short ps2_init() {
-    volatile unsigned char *command = (unsigned char *)PS2_CMD_BUF;
-    volatile unsigned char *data = (unsigned char *)PS2_DATA_BUF;
     unsigned char x;
+    short mouse_present;
     short mouse_error;
     short res;
 
@@ -963,12 +962,19 @@ short ps2_init() {
         ; // return PS2_FAIL_KBDTEST;
     }
 
+    /* Test if the mouse is working */
+    if (ps2_controller_cmd(PS2_CTRL_MOUSETEST) == 0) {
+        mouse_present = 1;
+    } else {
+        mouse_present = 0;
+    }
+
     // Set scancode translation to set1, enable interrupts on mouse and keyboard
-    ps2_controller_cmd_param(PS2_CTRL_WRITECMD, 0x43);
+    ps2_controller_cmd_param(PS2_CTRL_WRITECMD, 0x43);  /* %01000011 */
 
     // Enable the keyboard, don't check response
     ps2_wait_in();
-    *command = PS2_CTRL_ENABLE_1;
+    *PS2_CMD_BUF = PS2_CTRL_ENABLE_1;
 
     // Reset the keyboard... waiting a bit before we check for a result
     ps2_kbd_cmd(KBD_CMD_RESET, 1000);
@@ -978,13 +984,15 @@ short ps2_init() {
 
     // TODO: set the keyboard LEDs
 
-    /* Initialize the mouse */
-    if (mouse_error = mouse_init()) {
-        log_num(LOG_ERROR, "Unable to initialize mouse", res);
+    if (mouse_present) {
+        /* Initialize the mouse */
+        if (mouse_error = mouse_init()) {
+            log_num(LOG_ERROR, "Unable to initialize mouse", res);
+        }
     }
 
     ps2_wait_in();
-    *command = PS2_CTRL_ENABLE_2;
+    *PS2_CMD_BUF = PS2_CTRL_ENABLE_2;
 
     // Make sure everything is read
     ps2_flush_out();
@@ -998,7 +1006,7 @@ short ps2_init() {
     // Enable the keyboard interrupt
     int_enable(INT_KBD_PS2);
 
-    if (mouse_error == 0) {
+    if (mouse_present && (mouse_error == 0)) {
         log(LOG_TRACE, "mouse enabled");
 
         // Register the interrupt handler for the mouse

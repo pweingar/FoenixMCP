@@ -13,6 +13,7 @@
 #define VKY3_MCR_TEXT_EN            0x00000001  /* Text Mode Enable */
 #define VKY3_MCR_TEXT_OVRLY         0x00000002  /* Text Mode overlay */
 #define VKY3_MCR_GRAPH_EN           0x00000004  /* Graphic Mode Enable */
+#define VKY3_MCR_BITMAP_EN          0x00000008  /* Bitmap Engine Enable */
 #define VKY3_MCR_RESOLUTION_MASK    0x00000300  /* Resolution - 00: 640x480, 01:800x600, 10: 1024x768, 11: 640x400 */
 #define VKY3_MCR_DOUBLE_EN          0x00000400  /* Doubling Pixel */
 #define VKY3_MCR_GAMMA_EN           0x00010000  /* GAMMA Enable */

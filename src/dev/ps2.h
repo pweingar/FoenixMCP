@@ -54,4 +54,12 @@ extern char kbd_getc_poll();
  */
 extern short ps2_mouse_get_packet();
 
+/*
+ * Set the visibility of the VICKY mouse pointer
+ *
+ * Input:
+ * is_visible = 0 for hide, any other value to show
+ */
+extern void mouse_set_visible(short is_visible);
+
 #endif

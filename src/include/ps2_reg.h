@@ -22,16 +22,25 @@
 #define PS2_STAT_PE     0x80
 
 /*
+ * Controller responses
+ */
+
+#define PS2_RESP_OK         0x55    /* Keyboard response: Command was OK */
+#define PS2_RESP_ACK        0xFA    /* Keyboard response: command acknowledged */
+
+/*
  * PS2 and Keyboard Commands
  */
 
-#define PS2_CTRL_WRITECMD   0x60
-#define PS2_CTRL_SELFTEST   0xAA
-#define PS2_CTRL_KBDTEST    0xAB
-#define PS2_CTRL_ENABLE_1   0xAE
-#define PS2_CTRL_DISABLE_1  0xAD
-#define PS2_CTRL_ENABLE_2   0xA9
-#define PS2_CTRL_DISABLE_2  0xA7
+#define PS2_CTRL_READCMD    0x20    /* Read the command byte */
+#define PS2_CTRL_WRITECMD   0x60    /* Write the command byte */
+#define PS2_CTRL_SELFTEST   0xAA    /* Test the PS/2 controller */
+#define PS2_CTRL_KBDTEST    0xAB    /* Test the main (keyboard) port */
+#define PS2_CTRL_MOUSETEST  0xA9    /* Test the secondary (mouse) port */
+#define PS2_CTRL_ENABLE_1   0xAE    /* Enable the first (keyboard) port */
+#define PS2_CTRL_DISABLE_1  0xAD    /* Disable the first (keyboard) port */
+#define PS2_CTRL_ENABLE_2   0xA9    /* Enable the second (mouse) port */
+#define PS2_CTRL_DISABLE_2  0xA7    /* Disable the second (mouse) port */
 
 #define KBD_CMD_RESET       0xFF    /* Keyboard command: reset the keyboard */
 #define KBD_CMD_ENABLE      0xF4    /* Keyboard command: enable to keyboard */
