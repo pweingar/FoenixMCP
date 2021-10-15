@@ -64,7 +64,7 @@ const t_cli_command g_cli_commands[] = {
     // { "REN", "REN <old path> <new path> : rename a file or directory", cmd_rename },
     { "RUN", "RUN <path> : execute a binary file",  cmd_run },
     { "GETTIME", "GETTIME : prints the current time", cmd_gettime },
-    { "SETTIME", "SETTIME : sets the current time", cmd_settime },
+    { "SETTIME", "SETTIME yyyy-mm-dd HH:MM:SS : sets the current time", cmd_settime },
     { "SHOWINT", "SHOWINT : Show information about the interrupt registers", cmd_showint },
     { "SYSINFO", "SYSINFO : prints information about the system", cmd_sysinfo },
     { "TESTIDE", "TESTIDE : fetches and prints the IDE MBR repeatedly", cmd_testide },
@@ -135,19 +135,90 @@ short cmd_gettime(short channel, int argc, char * argv[]) {
     return 0;
 }
 
-short cmd_settime(short channel, int argc, char * argv[]) {
-    t_time time;
+short atoi_n(char * text, short n) {
+    short result = 0;
+    short i;
 
-    time.year = 2021;
-    time.month = 10;
-    time.day = 4;
-    time.hour = 9;
-    time.minute = 15;
-    time.second = 0;
-    time.is_24hours = 0;
-    time.is_pm = 1;
+    for (i = 0; i < n; i++) {
+        result = result * 10;
+        result = result + (text[i] - '0');
+    }
 
-    rtc_set_time(&time);
+    return result;
+}
+
+/*
+ * Set the date and time in the RTC
+ *
+ * SETTIME yyyy-mm-dd HH:MM:SS
+ */
+short cmd_settime(short screen, int argc, char * argv[]) {
+    char * date;
+    char * time
+    t_time date_time;
+    short i;
+
+    date_time.year = 2021;
+    date_time.month = 10;
+    date_time.day = 4;
+    date_time.hour = 9;
+    date_time.minute = 15;
+    date_time.second = 0;
+    date_time.is_24hours = 1;
+    date_time.is_pm = 0;
+
+    if (argc != 3) {
+        print(screen, "USAGE: SETTIME yyyy-mm-dd HH:MM:SS\n");
+        return -1;
+    }
+
+    date = argv[1];
+    time = argv[2];
+
+    /* Validate date is correct format */
+
+    for (i = 0; i < 10; i++) {
+        if ((i == 4) || (i == 7)) {
+            if (date[i] != '-') {
+                print(screen, "USAGE: SETTIME yyyy-mm-dd HH:MM:SS\n");
+                print(screen, "                   ^");
+                return -1;
+            }
+        } else {
+            if ((date[i] < '0') || (date[i] > '9')) {
+                print(screen, "USAGE: SETTIME yyyy-mm-dd HH:MM:SS\n");
+                print(screen, "               ^");
+                return -1;
+            }
+        }
+    }
+
+    /* Validate time is correct format */
+
+    for (i = 0; i < 8; i++) {
+        if ((i == 2) || (i == 5)) {
+            if (time[i] != ':') {
+                print(screen, "USAGE: SETTIME yyyy-mm-dd HH:MM:SS\n");
+                print(screen, "                            ^");
+                return -1;
+            }
+        } else {
+            if ((time[i] < '0') || (date[i] > '9')) {
+                print(screen, "USAGE: SETTIME yyyy-mm-dd HH:MM:SS\n");
+                print(screen, "                          ^");
+                return -1;
+            }
+        }
+    }
+
+    date_time.year = atoi_n(&date[0], 4);
+    date_time.month = atoi_n(&date[5], 2);
+    date_time.day = atoi_n(&date[8], 2);
+    date_time.hour = atoi_n(&time[0], 2);
+    date_time.minute = atoi_n(&time[3], 2);
+    date_time.second = atoi_n(&time[6], 2);
+
+    rtc_set_time(&date_time);
 
     return 0;
 }
