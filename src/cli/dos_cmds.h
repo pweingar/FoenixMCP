@@ -60,4 +60,18 @@ extern short cmd_type(short screen, int argc, char * argv[]);
  */
 extern short cmd_load(short screen, int argc, char * argv[]);
 
+/*
+ * Read a sector off a drive
+ *
+ * DISKREAD <drive #> <sector #>
+ */
+extern short cmd_diskread(short screen, int argc, char * argv[]);
+
+/*
+ * Fill a sector of a drive with a byte value
+ *
+ * DISKFILL <drive #> <sector #> <value>
+ */
+extern short cmd_diskfill(short screen, int argc, char * argv[]);
+
 #endif

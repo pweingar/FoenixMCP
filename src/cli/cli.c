@@ -49,6 +49,8 @@ const t_cli_command g_cli_commands[] = {
     { "CLS", "CLS : clear the screen", cmd_cls },
     { "DEL", "DEL <path> : delete a file or directory", cmd_del },
     { "DIR", "DIR <path> : print directory listing", cmd_dir },
+    { "DISKFILL", "DISKFILL <drive #> <sector #> <byte value>", cmd_diskfill },
+    { "DISKREAD", "DISKREAD <drive #> <sector #>", cmd_diskread },
     { "DUMP", "DUMP <addr> [<count>] : print a memory dump", mem_cmd_dump},
     { "LOAD", "LOAD <path> : load a file into memory", cmd_load },
     { "MKDIR", "MKDIR <path> : create a directory", cmd_mkdir },

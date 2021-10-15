@@ -41,38 +41,38 @@ const unsigned short fg_color_lut [32] = {
 	0x0000, 0xFF00,	// Black (transparent)
 	0x0000, 0xFF80, // Mid-Tone Red
 	0x8000, 0xFF00, // Mid-Tone Green
-	0x0080, 0xFF00, // Mid-Tone Blue
 	0x8000, 0xFF80, // Mid-Tone Yellow
-	0x8080, 0xFF00, // Mid-Tone Cian
+	0x0080, 0xFF00, // Mid-Tone Blue
 	0x0080, 0xFF80, // Mid-Tone Purple
+	0x8080, 0xFF00, // Mid-Tone Cian
 	0x8080, 0xFF80, // 50% Grey
-	0x4500, 0xFFFF, // Orange? Brown?
-	0x4513, 0xFF8B, // Orange? Brown?
-	0x0000, 0xFF20, // 12.5% Red
-	0x2000, 0xFF00, // 12.5% Green
-	0x0020, 0xFF00, // 12.5% Blue
-	0x2020, 0xFF20, // 12.5% Grey
-	0x4040, 0xFF40, // 25% Grey
-	0xFFFF, 0xFFFF 	// 100% Grey = White
+	0x5555, 0xFF55, // Dark Grey
+    0x5555, 0xFFFF, // Bright Red
+	0xFF55, 0xFF55, // Bright Green
+	0xFF55, 0xFFFF, // Bright Yellow
+	0x55FF, 0xFF55, // Bright Blue
+	0x55FF, 0xFFFF, // Bright Purple
+	0xFFFF, 0xFF55, // Bright Cyan
+	0xFFFF, 0xFFFF 	// White
 };
 
 const unsigned short bg_color_lut [32] = {
-	0x0000, 0xFF00,	// Black (transparent)
+    0x0000, 0xFF00,	// Black (transparent)
 	0x0000, 0xFF80, // Mid-Tone Red
 	0x8000, 0xFF00, // Mid-Tone Green
+	0x8000, 0xFF80, // Mid-Tone Yellow
 	0x0080, 0xFF00, // Mid-Tone Blue
-	0x2000, 0xFF20, // 12.5% Yellow
-	0x2020, 0xFF00, // 12.5% Cian
-	0x0020, 0xFF20, // 12.5% Purple
-	0x2020, 0xFF20, // 12.5% Grey
-	0x691E, 0xFFD2, // Orange? Brown?
-	0x4513, 0xFF8B, // Orange? Brown?
-	0x0000, 0xFF20, // 12.5% Red
-	0x2000, 0xFF00, // 12.5% Green
-	0x0020, 0xFF00, // 12.5% Blue
-	0x1010, 0xFF10, // 6.25% Grey
-	0x4040, 0xFF40, // 25% Grey
-	0xFFFF, 0xFFFF 	// 100% Grey = White
+	0x0080, 0xFF80, // Mid-Tone Purple
+	0x8080, 0xFF00, // Mid-Tone Cian
+	0x8080, 0xFF80, // 50% Grey
+	0x5555, 0xFF55, // Dark Grey
+    0x5555, 0xFFFF, // Bright Red
+	0xFF55, 0xFF55, // Bright Green
+	0xFF55, 0xFFFF, // Bright Yellow
+	0x55FF, 0xFF55, // Bright Blue
+	0x55FF, 0xFFFF, // Bright Purple
+	0xFFFF, 0xFF55, // Bright Cyan
+	0xFFFF, 0xFFFF 	// White
 };
 
 /*
@@ -104,7 +104,7 @@ int text_init() {
     // *chan_a->border_control = 0;                    /* Set to no border */
 
 	chan_a->border_control[0] = 0x00102001;	// Enable
-	chan_a->border_control[1] = 0x00000040;	//Dark Blue
+	chan_a->border_control[1] = 0x00000020;	//Dark Blue
 
     /* Set the font for channel A */
 
@@ -114,7 +114,7 @@ int text_init() {
     }
 
     text_setsizes(0);
-    text_set_color(0, 15, 3);
+    text_set_color(0, 12, 4);
     text_clear(0, 2);
     text_set_cursor(0, 0xF3, 0xB1, 1, 1);
     text_set_xy(0, 0, 0);
@@ -132,7 +132,7 @@ int text_init() {
 	chan_b->border_control[1] = 0x00400000;	//Dark Red
 
     text_setsizes(1);
-    text_set_color(1, 15, 3);
+    text_set_color(1, 4, 3);
     text_clear(1, 2);
     text_set_cursor(1, 0xF3, 0xB1, 1, 1);
     text_set_xy(1, 0, 0);

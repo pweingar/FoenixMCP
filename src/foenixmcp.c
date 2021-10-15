@@ -26,7 +26,7 @@
 #include "snd/sid.h"
 #include "fatfs/ff.h"
 #include "cli/cli.h"
-#include "rsrc/bitmaps/splash_a2560k.h"
+/* #include "rsrc/bitmaps/splash_a2560k.h"*/
 
 const char* VolumeStr[FF_VOLUMES] = { "sdc", "fdc", "hdc" };
 
@@ -83,39 +83,39 @@ const char* VolumeStr[FF_VOLUMES] = { "sdc", "fdc", "hdc" };
  	*LED2_REG = 0x02;
  }
 
-/*
- * Load and display the splash screen
- */
-void load_splashscreen() {
-    int i;
-
-    /* Turn off the screen */
-    *MasterControlReg_A = VKY3_MCR_BLANK_EN;
-
-    /* Copy the splash screen LUT */
-    for (i = 0; i < sizeof(splash_screen_cmap); i++) {
-        LUT_0[i] = splash_screen_cmap[i][0];
-        LUT_0[i+1] = splash_screen_cmap[i][1];
-        LUT_0[i+2] = splash_screen_cmap[i][2];
-    }
-
-    /* Copy the bitmap to video RAM */
-    for (i = 0; i < sizeof(splash_screen_bmap); i++) {
-        VRAM_Bank0[i] = splash_screen_bmap[i];
-    }
-
-    /* Set up the bitmap */
-    *BM0_Addy_Pointer_Reg = 0;
-    *BM0_Control_Reg = 1;
-
-    /* Turn off the border */
-    *BorderControlReg_L_A = 0;
-
-    /* Display the splashscreen: 320x200 */
-    *MasterControlReg_A = VKY3_MCR_BITMAP_EN | VKY3_MCR_GRAPH_EN | VKY3_MCR_DOUBLE_EN;
-
-    for (i = 0; i < 4096*1024; i++) ;
-}
+// /*
+//  * Load and display the splash screen
+//  */
+// void load_splashscreen() {
+//     int i;
+//
+//     /* Turn off the screen */
+//     *MasterControlReg_A = VKY3_MCR_BLANK_EN;
+//
+//     /* Copy the splash screen LUT */
+//     for (i = 0; i < sizeof(splash_screen_cmap); i++) {
+//         LUT_0[i] = splash_screen_cmap[i][0];
+//         LUT_0[i+1] = splash_screen_cmap[i][1];
+//         LUT_0[i+2] = splash_screen_cmap[i][2];
+//     }
+//
+//     /* Copy the bitmap to video RAM */
+//     for (i = 0; i < sizeof(splash_screen_bmap); i++) {
+//         VRAM_Bank0[i] = splash_screen_bmap[i];
+//     }
+//
+//     /* Set up the bitmap */
+//     *BM0_Addy_Pointer_Reg = 0;
+//     *BM0_Control_Reg = 1;
+//
+//     /* Turn off the border */
+//     *BorderControlReg_L_A = 0;
+//
+//     /* Display the splashscreen: 320x200 */
+//     *MasterControlReg_A = VKY3_MCR_BITMAP_EN | VKY3_MCR_GRAPH_EN | VKY3_MCR_DOUBLE_EN;
+//
+//     for (i = 0; i < 4096*1024; i++) ;
+// }
 
  void print_error(short channel, char * message, short code) {
      print(channel, message);

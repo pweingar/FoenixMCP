@@ -284,6 +284,7 @@ short pata_read(long lba, unsigned char * buffer, short size) {
 short pata_write(long lba, const unsigned char * buffer, short size) {
     short i;
     unsigned short *wptr;
+    unsigned char status;
     TRACE("pata_write");
 
     if (pata_wait_ready_not_busy()) {
@@ -302,7 +303,8 @@ short pata_write(long lba, const unsigned char * buffer, short size) {
 
     *PATA_CMD_STAT = PATA_CMD_WRITE_SECTOR;         // Issue the WRITE command
 
-    // TODO: Wait ~500ns
+    // Give the controller some time...
+    for (i = 0; i < 32000; i++) ;
 
     if (pata_wait_ready_not_busy()) {
         return DEV_TIMEOUT;
@@ -313,7 +315,30 @@ short pata_write(long lba, const unsigned char * buffer, short size) {
         *PATA_DATA_16 = *wptr++;
     }
 
-    return 0;
+    // Give the controller some time...
+    for (i = 0; i < 32000; i++) ;
+
+    if (pata_wait_ready_not_busy()) {
+        return DEV_TIMEOUT;
+    }
+
+    // Give the controller some time...
+    for (i = 0; i < 32000; i++) ;
+
+    status = *PATA_CMD_STAT;
+    if ((status & PATA_STAT_DF) != 0){
+        log(LOG_ERROR, "pata_write: device fault");
+        return -1;
+    }
+
+    if ((status & PATA_STAT_ERR) != 0) {
+        log(LOG_ERROR, "pata_write: error");
+        return -1;
+    }
+
+    TRACE("PATA WRITE COMPLETE");
+
+    return size;
 }
 
 //

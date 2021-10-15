@@ -13,6 +13,92 @@
 #include "fatfs/ff.h"
 
 /*
+ * Read a sector off a drive
+ *
+ * DISKREAD <drive #> <sector #>
+ */
+short cmd_diskread(short screen, int argc, char * argv[]) {
+    unsigned char buffer[512];
+    short bdev_number = 0;
+    long lba = 0;
+    short result;
+    short i;
+
+    if (argc < 3) {
+        print(screen, "USAGE: DISKREAD <drive #> <sector #>\n");
+        return -1;
+    }
+
+    bdev_number = (short)cli_eval_number(argv[1]);
+    lba = cli_eval_number(argv[2]);
+
+    sprintf(buffer, "Reading drive #%d, sector 0x%X\n", bdev_number, lba);
+    print(screen, buffer);
+
+    result = bdev_read(bdev_number, lba, buffer, 512);
+    if (result < 512) {
+        print(screen, "Unable to read sector: ");
+        print_hex_32(screen, result);
+        print(screen, "\n");
+        return -2;
+    }
+
+    for (i = 0; i < 512; i++) {
+        if (i % 16 == 0) {
+            print(screen, "\n");
+        }
+
+        print_hex_8(screen, buffer[i]);
+        print(screen, " ");
+    }
+
+    print(screen, "\n");
+
+    return 0;
+}
+
+/*
+ * Fill a sector of a drive with a byte value
+ *
+ * DISKFILL <drive #> <sector #> <value>
+ */
+short cmd_diskfill(short screen, int argc, char * argv[]) {
+    unsigned char buffer[512];
+    unsigned char value;
+    short bdev_number = 0;
+    long lba = 0;
+    short result;
+    short i;
+
+    if (argc < 4) {
+        print(screen, "USAGE: DISKFILL <drive #> <sector #> <byte value>\n");
+        return -1;
+    }
+
+    bdev_number = (short)cli_eval_number(argv[1]);
+    lba = cli_eval_number(argv[2]);
+    value = (unsigned char)cli_eval_number(argv[3]);
+
+    sprintf(buffer, "Filling drive #%d, sector 0x%X with 0x%02X\n", bdev_number, lba, value);
+    print(screen, buffer);
+
+    for (i = 0; i < 512; i++) {
+        buffer[i] = value;
+    }
+
+    result = bdev_write(bdev_number, lba, buffer, 512);
+    if (result < 512) {
+        print(screen, "Unable to write sector: ");
+        print_hex_32(screen, result);
+        print(screen, "\n");
+        return -2;
+    }
+
+    /* Read the sector back for verification */
+    return cmd_diskread(screen, argc, argv);
+}
+
+/*
  * Test the IDE interface by reading the MBR
  */
 short cmd_testide(short screen, int argc, char * argv[]) {
