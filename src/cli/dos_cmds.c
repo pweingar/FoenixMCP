@@ -43,6 +43,39 @@ short cmd_testide(short screen, int argc, char * argv[]) {
     }
 }
 
+/*
+ * Test file creation
+ */
+short cmd_testcreate(short screen, int argc, char * argv[]) {
+    short n;
+
+    if (argc > 1) {
+        short channel = fsys_open(argv[1], FA_CREATE_NEW | FA_WRITE);
+        if (channel >= 0) {
+            char * message = "Hello, world!\n";
+            n = chan_write(channel, message, strlen(message));
+            if (n <= 0) {
+                print(screen, "Unable to write to file: ");
+                print_hex_16(screen, n);
+                print(screen, "\n");
+            }
+
+            fsys_close(channel);
+            return 0;
+
+        } else {
+            print(screen, "Unable to open file: ");
+            print_hex_16(screen, channel);
+            print(screen, "\n");
+            return -1;
+        }
+
+    } else {
+        print(screen, "USAGE: TESTCREATE <path>\n");
+        return -1;
+    }
+}
+
 short cmd_run(short screen, int argc, char * argv[]) {
     TRACE("cmd_run");
 
@@ -68,9 +101,10 @@ short cmd_mkdir(short screen, int argc, char * argv[]) {
             log_num(LOG_ERROR, "Unable to create directory: ", result);
             return result;
         }
+    } else {
+        print(screen, "USAGE: MKDIR <path>\n");
+        return -1;
     }
-
-    return 0;
 }
 
 /*
@@ -86,9 +120,53 @@ short cmd_del(short screen, int argc, char * argv[]) {
             log_num(LOG_ERROR, "Unable to delete: ", result);
             return result;
         }
+    } else {
+        print(screen, "USAGE: DEL <path>\n");
+        return -1;
+    }
+}
+
+/*
+ * Change the directory
+ */
+short cmd_cd(short screen, int argc, char * argv[]) {
+
+    TRACE("cmd_cd");
+
+    if (argc > 1) {
+        short result = fsys_setcwd(argv[1]);
+        if (result < 0) {
+            log_num(LOG_ERROR, "Unable to change directory: ", result);
+            return result;
+        } else {
+            print(screen, "Changed to: ");
+            print(screen, argv[1]);
+            print(screen, "\n");
+        }
+    } else {
+        print(screen, "USAGE: CD <path>\n");
+        return -1;
     }
 
     return 0;
+}
+
+/*
+ * Change the directory
+ */
+short cmd_pwd(short screen, int argc, char * argv[]) {
+    char buffer[128];
+
+    TRACE("cmd_pwd");
+
+    short result = fsys_getcwd(buffer, 128);
+    if (result < 0) {
+        log_num(LOG_ERROR, "Unable to get directory: ", result);
+        return result;
+    } else {
+        print(screen, buffer);
+        return 0;
+    }
 }
 
 /*
@@ -138,6 +216,7 @@ short cmd_dir(short screen, int argc, char * argv[]) {
                 if ((my_file.attributes & AM_HID) == 0) {
                     if (my_file.attributes & AM_DIR) {
                         sprintf(buffer, "%s/\n", my_file.name);
+                        chan_write(screen, buffer, strlen(buffer));
 
                     } else {
                         if (my_file.size < 1024) {

@@ -11,6 +11,11 @@
 extern short cmd_testide(short screen, int argc, char * argv[]);
 
 /*
+ * Test file creation
+ */
+extern short cmd_testcreate(short screen, int argc, char * argv[]);
+
+/*
  * Execute a binary file
  */
 extern short cmd_run(short screen, int argc, char * argv[]);
@@ -29,6 +34,16 @@ extern short cmd_mkdir(short screen, int argc, char * argv[]);
  * Delete a file or directory
  */
 extern short cmd_del(short screen, int argc, char * argv[]);
+
+/*
+ * Set the current working directory
+ */
+extern short cmd_cd(short screen, int argc, char * argv[]);
+
+/*
+ * Print the current working directory
+ */
+extern short cmd_pwd(short screen, int argc, char * argv[]);
 
 /*
  * Rename a file or directory

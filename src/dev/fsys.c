@@ -176,7 +176,13 @@ short fsys_opendir(const char * path) {
         return ERR_OUT_OF_HANDLES;
     } else {
         /* Try to open the directory */
-        fres = f_opendir(&g_directory[dir], path);
+        if (path[0] == 0) {
+            char cwd[128];
+            fsys_getcwd(cwd, 128);
+            fres = f_opendir(&g_directory[dir], cwd);
+        } else {
+            fres = f_opendir(&g_directory[dir], path);
+        }
         if (fres != FR_OK) {
             /* If there was a problem, return an error number */
             return fatfs_to_foenix(fres);
@@ -286,7 +292,18 @@ short fsys_findnext(short dir, p_file_info file) {
  * 0 on success, negative number on failure.
  */
 short fsys_mkdir(const char * path) {
-    return -1;
+    FRESULT result;
+
+    TRACE("fsys_mkdir");
+
+    result = f_mkdir(path);
+    if (result == FR_OK) {
+        log_num(LOG_ERROR, "fsys_mkdir error: ", result);
+        return 0;
+    } else {
+        log_num(LOG_ERROR, "fsys_mkdir error: ", result);
+        return fatfs_to_foenix(result);
+    }
 }
 
 /**
@@ -299,7 +316,15 @@ short fsys_mkdir(const char * path) {
  * 0 on success, negative number on failure.
  */
 short fsys_delete(const char * path) {
-    return -1;
+    FRESULT result;
+
+    result = f_unlink(path);
+    if (result == FR_OK) {
+        return 0;
+    } else {
+        log_num(LOG_ERROR, "fsys_delete error: ", result);
+        return fatfs_to_foenix(result);
+    }
 }
 
 /**
@@ -326,7 +351,15 @@ short fsys_rename(const char * old_path, const char * new_path) {
  * 0 on success, negative number on failure.
  */
 short fsys_setcwd(const char * path) {
-    return -1;
+    FRESULT result;
+
+    result = f_chdir(path);
+    if (result == FR_OK) {
+        return 0;
+    } else {
+        log_num(LOG_ERROR, "fsys_setcwd error: ", result);
+        return fatfs_to_foenix(result);
+    }
 }
 
 /**
@@ -340,7 +373,16 @@ short fsys_setcwd(const char * path) {
  * 0 on success, negative number on failure.
  */
 short fsys_getcwd(char * path, short size) {
-    return -1;
+    FRESULT result;
+
+    f_chdrive("");
+    result = f_getcwd(path);
+    if (result == FR_OK) {
+        return 0;
+    } else {
+        log_num(LOG_ERROR, "fsys_setcwd error: ", result);
+        return fatfs_to_foenix(result);
+    }
 }
 
 short fchan_init() {
@@ -427,6 +469,7 @@ short fchan_write(p_channel chan, const unsigned char * buffer, short size) {
         if (result == FR_OK) {
             return (short)total_written;
         } else {
+            log_num(LOG_ERROR, "fchan_write error: ", result);
             return fatfs_to_foenix(result);
         }
     }
