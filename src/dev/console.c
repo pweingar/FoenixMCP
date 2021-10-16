@@ -105,7 +105,7 @@ short ansi_start_code(char c) {
 void ansi_match_pattern(p_channel chan, p_console_data con_data) {
     char c;
     short argc = 0;
-    int arg[MAX_ANSI_ARGS];
+    short arg[MAX_ANSI_ARGS];
     short i, j;
 
     TRACE("ansi_match_pattern");
@@ -349,33 +349,48 @@ void ansi_dch(p_channel chan, short arg_count, short args[]) {
 /*
  * Set Graphics Rendition
  */
-void ansi_sgr(p_channel chan, short arg_count, short args[]) {
+void ansi_sgr(p_channel chan, short argc, short args[]) {
+    short foreground = 0, background = 0;
     short i;
 
     TRACE("ansi_sgr");
 
-    log_num(LOG_ERROR, "ansi_sgr", arg_count);
+    /* Get the current colors */
+    text_get_color(chan->dev, &foreground, &background);
 
-    for (i = 0; i < arg_count; i++) {
+    /* Walk through each argument code... */
+    for (i = 0; i < argc; i++) {
         short code = args[i];
 
-        log_num(LOG_ERROR, "code = ", code);
-
         if ((code >= 30) && (code <= 37)) {
-            short foreground = 0, background = 0;
-
             /* Set foreground color */
-            text_get_color(chan->dev, &foreground, &background);
-            text_set_color(chan->dev, code - 30, background);
+            foreground = code - 30;
+
+        } else if ((code >= 90) && (code <= 97)) {
+            /* Set bright foreground color */
+            foreground = code - 82;
 
         } else if ((code >= 40) && (code <= 47)) {
-            short foreground = 0, background = 0;
-
             /* Set background color */
-            text_get_color(chan->dev, &foreground, &background);
-            text_set_color(chan->dev, foreground, code - 40);
+            background = code - 40;
+
+        } else if ((code >= 100) && (code <= 107)) {
+            /* Set bright background color */
+            background = code - 92;
+
+        } else if ((code == 0) || (code == 2) || (code == 22)) {
+            /* Reset, dim, and normal intensity */
+            foreground = foreground & 0x07;
+            background = background & 0x07;
+
+        } else if (code == 1) {
+            /* Bold intensity */
+            foreground = foreground | 0x08;
         }
     }
+
+    /* Set the colors */
+    text_set_color(chan->dev, foreground, background);
 }
 
 //
