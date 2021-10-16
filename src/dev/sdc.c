@@ -67,7 +67,7 @@ void sdc_set_led(short is_on) {
 //  0 on success, DEV_TIMEOUT on timeout
 //
 short sdc_wait_busy() {
-    short retry_count = MAX_TRIES_BUSY;
+    int retry_count = MAX_TRIES_BUSY;
     unsigned char status;
 
     do {
@@ -104,16 +104,18 @@ short sdc_init() {
     if (sdc_wait_busy() == 0) {                     // Wait for it to complete
         g_sdc_error = *SDC_TRANS_ERROR_REG;         // Check for any error condition
         if (g_sdc_error == 0) {
-            TRACE("sdc_init: SUCCESS");
+            log(LOG_INFO, "sdc_init: SUCCESS");
             g_sdc_status = 0;                       // Flag that the SD has been initialized
             return 0;
+
         } else {
-            TRACE("sdc_init: DEV_CANNOT_INIT");
+            log(LOG_ERROR, "sdc_init: DEV_CANNOT_INIT");
             g_sdc_status = SDC_STAT_NOINIT;
             return DEV_CANNOT_INIT;
         }
+
     } else {
-        TRACE("sdc_init: DEV_TIMEOUT");
+        log(LOG_ERROR, "sdc_init: DEV_TIMEOUT");
         g_sdc_status = SDC_STAT_NOINIT;
         return DEV_TIMEOUT;
     }

@@ -380,7 +380,7 @@ short fsys_getcwd(char * path, short size) {
     if (result == FR_OK) {
         return 0;
     } else {
-        log_num(LOG_ERROR, "fsys_setcwd error: ", result);
+        log_num(LOG_ERROR, "fsys_getcwd error: ", result);
         return fatfs_to_foenix(result);
     }
 }

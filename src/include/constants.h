@@ -10,7 +10,7 @@
  * Miscellaneous definitions
  */
 
-#define MAX_TRIES_BUSY  10000   /* The maximum number of times to check for an operation to complete (general purpose) */
+#define MAX_TRIES_BUSY  100000   /* The maximum number of times to check for an operation to complete (general purpose) */
 
 /*
  * Definitions of special characters

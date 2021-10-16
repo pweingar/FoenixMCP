@@ -1018,16 +1018,16 @@ Symbols of text:
   0x00020748 l60: local reloc, size 0
   0x00020762 l63: local reloc, size 0
   0x00020764 l61: local reloc, size 0
-  0x00020774 l62: local reloc, size 0
   0x00020774 l58: local reloc, size 0
+  0x00020774 l62: local reloc, size 0
   0x0002077c _uart_test_send: global reloc, size 0
   0x00020784 l69: local reloc, size 0
   0x0002079a l75: local reloc, size 0
   0x0002079a l72: local reloc, size 0
   0x0002079c l73: local reloc, size 0
   0x000207a4 l74: local reloc, size 0
-  0x000207a6 l67: local reloc, size 0
   0x000207a6 l71: local reloc, size 0
+  0x000207a6 l67: local reloc, size 0
   0x000207ac _try_format: global reloc, size 0
   0x000207ee l82: local reloc, size 0
   0x0002082e l86: local reloc, size 0
@@ -1286,8 +1286,8 @@ Symbols of text:
   0x0002232a l55: local reloc, size 0
   0x0002232c l53: local reloc, size 0
   0x00022332 l51: local reloc, size 0
-  0x00022332 l48: local reloc, size 0
   0x00022332 l54: local reloc, size 0
+  0x00022332 l48: local reloc, size 0
   0x00022338 _int_vicky_channel_b: global reloc, size 0
   0x00022354 l65: local reloc, size 0
   0x00022358 l67: local reloc, size 0
@@ -1295,8 +1295,8 @@ Symbols of text:
   0x00022386 l72: local reloc, size 0
   0x0002238e l70: local reloc, size 0
   0x00022390 l68: local reloc, size 0
-  0x00022396 l69: local reloc, size 0
   0x00022396 l66: local reloc, size 0
+  0x00022396 l69: local reloc, size 0
   0x00022396 l63: local reloc, size 0
   0x0002239c _log_init: global reloc, size 0
   0x000223aa l3: local reloc, size 0
@@ -1304,8 +1304,8 @@ Symbols of text:
   0x000223b6 l8: local reloc, size 0
   0x000223b8 _log: global reloc, size 0
   0x000223cc l15: local reloc, size 0
-  0x000223f6 l13: local reloc, size 0
   0x000223f6 l16: local reloc, size 0
+  0x000223f6 l13: local reloc, size 0
   0x000223fc _log2: global reloc, size 0
   0x00022414 l22: local reloc, size 0
   0x00022450 l20: local reloc, size 0
@@ -1316,8 +1316,8 @@ Symbols of text:
   0x000224c2 l30: local reloc, size 0
   0x000224c8 _log_num: global reloc, size 0
   0x000224e0 l36: local reloc, size 0
-  0x0002251c l37: local reloc, size 0
   0x0002251c l34: local reloc, size 0
+  0x0002251c l37: local reloc, size 0
   0x00022524 _log_c: global reloc, size 0
   0x00022538 l43: local reloc, size 0
   0x00022552 l41: local reloc, size 0
@@ -1343,14 +1343,14 @@ Symbols of text:
   0x0002263a l33: local reloc, size 0
   0x00022640 l35: local reloc, size 0
   0x00022644 l36: local reloc, size 0
-  0x00022648 l25: local reloc, size 0
   0x00022648 l32: local reloc, size 0
   0x00022648 l34: local reloc, size 0
+  0x00022648 l25: local reloc, size 0
   0x0002264a l23: local reloc, size 0
   0x00022650 l24: local reloc, size 0
   0x00022656 l37: local reloc, size 0
-  0x0002265a l20: local reloc, size 0
   0x0002265a l38: local reloc, size 0
+  0x0002265a l20: local reloc, size 0
   0x00022660 _mem_alloc: global reloc, size 0
   0x0002267a l44: local reloc, size 0
   0x0002268e l48: local reloc, size 0
@@ -1364,9 +1364,9 @@ Symbols of text:
   0x000226d8 l60: local reloc, size 0
   0x000226da l58: local reloc, size 0
   0x000226ee l59: local reloc, size 0
-  0x000226fc l56: local reloc, size 0
   0x000226fc l52: local reloc, size 0
   0x000226fc l47: local reloc, size 0
+  0x000226fc l56: local reloc, size 0
   0x00022700 l45: local reloc, size 0
   0x0002270a l46: local reloc, size 0
   0x0002270c l42: local reloc, size 0
@@ -1405,8 +1405,8 @@ Symbols of text:
   0x0002288e l107: local reloc, size 0
   0x0002288e l105: local reloc, size 0
   0x00022890 l103: local reloc, size 0
-  0x00022896 l104: local reloc, size 0
   0x00022896 l100: local reloc, size 0
+  0x00022896 l104: local reloc, size 0
   0x0002289c _proc_exec: global reloc, size 0
   0x000228ea l3: local reloc, size 0
   0x000228f0 l5: local reloc, size 0
@@ -1438,14 +1438,14 @@ Symbols of text:
   0x00022a40 _rb_word_empty: global reloc, size 0
   0x00022a50 l18: local reloc, size 0
   0x00022a54 l16: local reloc, size 0
-  0x00022a56 l17: local reloc, size 0
   0x00022a56 l14: local reloc, size 0
+  0x00022a56 l17: local reloc, size 0
   0x00022a5c _rb_word_put: global reloc, size 0
   0x00022a72 l24: local reloc, size 0
   0x00022a8e l26: local reloc, size 0
-  0x00022a92 l25: local reloc, size 0
   0x00022a92 l22: local reloc, size 0
   0x00022a92 l27: local reloc, size 0
+  0x00022a92 l25: local reloc, size 0
   0x00022a98 _rb_word_get: global reloc, size 0
   0x00022aaa l33: local reloc, size 0
   0x00022ac6 l35: local reloc, size 0
@@ -1480,8 +1480,8 @@ Symbols of text:
   0x00022cfc _i_to_bcd: global reloc, size 0
   0x00022d0a l45: local reloc, size 0
   0x00022d0e l46: local reloc, size 0
-  0x00022d36 l47: local reloc, size 0
   0x00022d36 l43: local reloc, size 0
+  0x00022d36 l47: local reloc, size 0
   0x00022d3c _dump_buffer: global reloc, size 0
   0x00022d54 l53: local reloc, size 0
   0x00022d5c l56: local reloc, size 0
@@ -1517,9 +1517,9 @@ Symbols of text:
   0x00022f70 l23: local reloc, size 0
   0x00022f80 l25: local reloc, size 0
   0x00022f86 l22: local reloc, size 0
+  0x00022fbe l29: local reloc, size 0
   0x00022fbe l28: local reloc, size 0
   0x00022fbe l27: local reloc, size 0
-  0x00022fbe l29: local reloc, size 0
   0x00022fcc l30: local reloc, size 0
   0x00022fd6 l1: local reloc, size 0
   0x00022fd6 l26: local reloc, size 0
@@ -1593,8 +1593,8 @@ Symbols of text:
   0x000234a2 l12: local reloc, size 0
   0x000234ac l13: local reloc, size 0
   0x000234c2 l14: local reloc, size 0
-  0x000234da l15: local reloc, size 0
   0x000234da l5: local reloc, size 0
+  0x000234da l15: local reloc, size 0
   0x000234de l16: local reloc, size 0
   0x000234fc l58: local reloc, size 0
   0x00023524 l18: local reloc, size 0
@@ -1607,8 +1607,8 @@ Symbols of text:
   0x000235de l25: local reloc, size 0
   0x000235fc l26: local reloc, size 0
   0x00023622 l27: local reloc, size 0
-  0x00023634 l28: local reloc, size 0
   0x00023634 l17: local reloc, size 0
+  0x00023634 l28: local reloc, size 0
   0x00023638 l29: local reloc, size 0
   0x0002365c l31: local reloc, size 0
   0x0002367e l32: local reloc, size 0
@@ -1616,8 +1616,8 @@ Symbols of text:
   0x000236b4 l34: local reloc, size 0
   0x000236c8 l35: local reloc, size 0
   0x000236ee l36: local reloc, size 0
-  0x00023700 l30: local reloc, size 0
   0x00023700 l37: local reloc, size 0
+  0x00023700 l30: local reloc, size 0
   0x00023704 l38: local reloc, size 0
   0x00023720 l59: local reloc, size 0
   0x00023744 l40: local reloc, size 0
@@ -1629,12 +1629,12 @@ Symbols of text:
   0x000237c4 l46: local reloc, size 0
   0x000237da l47: local reloc, size 0
   0x000237ea l48: local reloc, size 0
+  0x000237fe l3: local reloc, size 0
+  0x000237fe l49: local reloc, size 0
   0x000237fe l39: local reloc, size 0
   0x000237fe l50: local reloc, size 0
-  0x000237fe l49: local reloc, size 0
-  0x000237fe l3: local reloc, size 0
-  0x0002380e l52: local reloc, size 0
   0x0002380e l54: local reloc, size 0
+  0x0002380e l52: local reloc, size 0
   0x00023810 l53: local reloc, size 0
   0x00023812 l1: local reloc, size 0
   0x00023818 l51: local reloc, size 0
@@ -1655,32 +1655,32 @@ Symbols of text:
   0x00023964 l23: local reloc, size 0
   0x0002398e l25: local reloc, size 0
   0x0002399a l26: local reloc, size 0
-  0x0002399c l24: local reloc, size 0
   0x0002399c l20: local reloc, size 0
   0x0002399c l27: local reloc, size 0
+  0x0002399c l24: local reloc, size 0
   0x000239a4 l22: local reloc, size 0
   0x000239b0 _bdev_read: global reloc, size 0
   0x000239dc l34: local reloc, size 0
   0x00023a06 l36: local reloc, size 0
   0x00023a20 l37: local reloc, size 0
-  0x00023a22 l38: local reloc, size 0
   0x00023a22 l35: local reloc, size 0
   0x00023a22 l31: local reloc, size 0
+  0x00023a22 l38: local reloc, size 0
   0x00023a2c l33: local reloc, size 0
   0x00023a38 _bdev_write: global reloc, size 0
   0x00023a64 l45: local reloc, size 0
   0x00023a8e l47: local reloc, size 0
   0x00023aa8 l48: local reloc, size 0
-  0x00023aaa l46: local reloc, size 0
   0x00023aaa l49: local reloc, size 0
   0x00023aaa l42: local reloc, size 0
+  0x00023aaa l46: local reloc, size 0
   0x00023ab4 l44: local reloc, size 0
   0x00023ac0 _bdev_status: global reloc, size 0
   0x00023ae0 l56: local reloc, size 0
   0x00023b0a l58: local reloc, size 0
   0x00023b16 l59: local reloc, size 0
-  0x00023b18 l53: local reloc, size 0
   0x00023b18 l60: local reloc, size 0
+  0x00023b18 l53: local reloc, size 0
   0x00023b18 l57: local reloc, size 0
   0x00023b20 l55: local reloc, size 0
   0x00023b2c _bdev_flush: global reloc, size 0
@@ -1695,8 +1695,8 @@ Symbols of text:
   0x00023bc4 l78: local reloc, size 0
   0x00023bee l80: local reloc, size 0
   0x00023c0c l81: local reloc, size 0
-  0x00023c0e l75: local reloc, size 0
   0x00023c0e l82: local reloc, size 0
+  0x00023c0e l75: local reloc, size 0
   0x00023c0e l79: local reloc, size 0
   0x00023c18 l77: local reloc, size 0
   0x00023c24 _cdev_init_system: global reloc, size 0
@@ -1713,19 +1713,19 @@ Symbols of text:
   0x00023cf8 _cdev_register: global reloc, size 0
   0x00023d08 l17: local reloc, size 0
   0x00023d82 l18: local reloc, size 0
-  0x00023d84 l19: local reloc, size 0
   0x00023d84 l15: local reloc, size 0
+  0x00023d84 l19: local reloc, size 0
   0x00023d8c _chan_alloc: global reloc, size 0
   0x00023da8 l28: local reloc, size 0
   0x00023dae l26: local reloc, size 0
   0x00023e24 l27: local reloc, size 0
   0x00023e2a l30: local reloc, size 0
   0x00023e52 l34: local reloc, size 0
-  0x00023eba l35: local reloc, size 0
   0x00023eba l33: local reloc, size 0
+  0x00023eba l35: local reloc, size 0
   0x00023ebc l31: local reloc, size 0
-  0x00023ec4 l29: local reloc, size 0
   0x00023ec4 l32: local reloc, size 0
+  0x00023ec4 l29: local reloc, size 0
   0x00023ec6 l23: local reloc, size 0
   0x00023ecc l25: local reloc, size 0
   0x00023ed8 _chan_get_record: global reloc, size 0
@@ -1750,9 +1750,9 @@ Symbols of text:
   0x00024048 l68: local reloc, size 0
   0x00024072 l70: local reloc, size 0
   0x0002407e l71: local reloc, size 0
-  0x00024080 l72: local reloc, size 0
   0x00024080 l69: local reloc, size 0
   0x00024080 l66: local reloc, size 0
+  0x00024080 l72: local reloc, size 0
   0x00024088 _chan_open: global reloc, size 0
   0x000240c8 l80: local reloc, size 0
   0x000240f2 l82: local reloc, size 0
@@ -1763,8 +1763,8 @@ Symbols of text:
   0x0002412c l87: local reloc, size 0
   0x00024130 l88: local reloc, size 0
   0x00024132 l81: local reloc, size 0
-  0x00024134 l89: local reloc, size 0
   0x00024134 l76: local reloc, size 0
+  0x00024134 l89: local reloc, size 0
   0x00024140 l78: local reloc, size 0
   0x0002414c l79: local reloc, size 0
   0x00024154 _chan_close: global reloc, size 0
@@ -1774,8 +1774,8 @@ Symbols of text:
   0x000241a4 _chan_read: global reloc, size 0
   0x000241e4 l103: local reloc, size 0
   0x0002421a l104: local reloc, size 0
-  0x00024234 l100: local reloc, size 0
   0x00024234 l106: local reloc, size 0
+  0x00024234 l100: local reloc, size 0
   0x00024240 l105: local reloc, size 0
   0x0002424c l107: local reloc, size 0
   0x00024264 l102: local reloc, size 0
@@ -1801,8 +1801,8 @@ Symbols of text:
   0x000243cc _chan_write_b: global reloc, size 0
   0x00024408 l143: local reloc, size 0
   0x00024424 l144: local reloc, size 0
-  0x00024426 l140: local reloc, size 0
   0x00024426 l145: local reloc, size 0
+  0x00024426 l140: local reloc, size 0
   0x00024430 l142: local reloc, size 0
   0x00024440 _chan_status: global reloc, size 0
   0x0002446a l151: local reloc, size 0
@@ -1827,8 +1827,8 @@ Symbols of text:
   0x000245a0 _ansi_start_code: global reloc, size 0
   0x000245ae l4: local reloc, size 0
   0x000245b2 l5: local reloc, size 0
-  0x000245b4 l3: local reloc, size 0
   0x000245b4 l1: local reloc, size 0
+  0x000245b4 l3: local reloc, size 0
   0x000245b8 _ansi_match_pattern: global reloc, size 0
   0x000245de l12: local reloc, size 0
   0x000245ec l15: local reloc, size 0
@@ -1841,16 +1841,16 @@ Symbols of text:
   0x00024672 l24: local reloc, size 0
   0x00024678 l26: local reloc, size 0
   0x0002467a l27: local reloc, size 0
-  0x0002467a l25: local reloc, size 0
   0x0002467a l22: local reloc, size 0
+  0x0002467a l25: local reloc, size 0
   0x0002467c l20: local reloc, size 0
   0x0002468c l21: local reloc, size 0
   0x0002469e l28: local reloc, size 0
   0x000246c4 l32: local reloc, size 0
   0x000246ec l34: local reloc, size 0
-  0x00024702 l35: local reloc, size 0
-  0x00024702 l33: local reloc, size 0
   0x00024702 l31: local reloc, size 0
+  0x00024702 l33: local reloc, size 0
+  0x00024702 l35: local reloc, size 0
   0x00024704 l29: local reloc, size 0
   0x0002472c l30: local reloc, size 0
   0x00024734 l9: local reloc, size 0
@@ -1866,8 +1866,8 @@ Symbols of text:
   0x000247c4 l48: local reloc, size 0
   0x000247c6 l46: local reloc, size 0
   0x000247de l44: local reloc, size 0
-  0x000247de l39: local reloc, size 0
   0x000247de l52: local reloc, size 0
+  0x000247de l39: local reloc, size 0
   0x000247e4 l41: local reloc, size 0
   0x000247f4 _ansi_cuu: global reloc, size 0
   0x0002481c l59: local reloc, size 0
@@ -1947,13 +1947,13 @@ Symbols of text:
   0x00024c78 l165: local reloc, size 0
   0x00024c9a l166: local reloc, size 0
   0x00024ca0 l170: local reloc, size 0
-  0x00024ca6 l148: local reloc, size 0
-  0x00024ca6 l160: local reloc, size 0
-  0x00024ca6 l156: local reloc, size 0
-  0x00024ca6 l169: local reloc, size 0
-  0x00024ca6 l171: local reloc, size 0
   0x00024ca6 l152: local reloc, size 0
   0x00024ca6 l164: local reloc, size 0
+  0x00024ca6 l148: local reloc, size 0
+  0x00024ca6 l169: local reloc, size 0
+  0x00024ca6 l156: local reloc, size 0
+  0x00024ca6 l171: local reloc, size 0
+  0x00024ca6 l160: local reloc, size 0
   0x00024ca8 l146: local reloc, size 0
   0x00024cae l147: local reloc, size 0
   0x00024cd0 l142: local reloc, size 0
@@ -1971,8 +1971,8 @@ Symbols of text:
   0x00024d56 l194: local reloc, size 0
   0x00024d74 l197: local reloc, size 0
   0x00024d76 l195: local reloc, size 0
-  0x00024d80 l196: local reloc, size 0
   0x00024d80 l193: local reloc, size 0
+  0x00024d80 l196: local reloc, size 0
   0x00024d86 l190: local reloc, size 0
   0x00024d8c _con_close: global reloc, size 0
   0x00024d9a l201: local reloc, size 0
@@ -1991,8 +1991,8 @@ Symbols of text:
   0x00024e4a l229: local reloc, size 0
   0x00024e4e l231: local reloc, size 0
   0x00024e5c l230: local reloc, size 0
-  0x00024e5c l232: local reloc, size 0
   0x00024e5c l227: local reloc, size 0
+  0x00024e5c l232: local reloc, size 0
   0x00024e5e l225: local reloc, size 0
   0x00024e66 l226: local reloc, size 0
   0x00024e68 l222: local reloc, size 0
@@ -2007,10 +2007,10 @@ Symbols of text:
   0x00024ec8 l250: local reloc, size 0
   0x00024ece l251: local reloc, size 0
   0x00024ed0 l252: local reloc, size 0
+  0x00024ede l239: local reloc, size 0
   0x00024ede l246: local reloc, size 0
   0x00024ede l243: local reloc, size 0
   0x00024ede l245: local reloc, size 0
-  0x00024ede l239: local reloc, size 0
   0x00024ee8 l240: local reloc, size 0
   0x00024eea l236: local reloc, size 0
   0x00024ef0 _con_write: global reloc, size 0
@@ -2039,14 +2039,14 @@ Symbols of text:
   0x000250d4 _fatfs_to_foenix: global reloc, size 0
   0x000250dc l3: local reloc, size 0
   0x000250e0 l4: local reloc, size 0
-  0x000250f6 l5: local reloc, size 0
   0x000250f6 l1: local reloc, size 0
+  0x000250f6 l5: local reloc, size 0
   0x000250fc l6: local reloc, size 0
   0x00025104 _fsys_open: global reloc, size 0
   0x00025128 l13: local reloc, size 0
   0x00025134 l17: local reloc, size 0
-  0x00025144 l16: local reloc, size 0
   0x00025144 l18: local reloc, size 0
+  0x00025144 l16: local reloc, size 0
   0x00025146 l14: local reloc, size 0
   0x0002514c l15: local reloc, size 0
   0x00025150 l19: local reloc, size 0
@@ -2079,8 +2079,8 @@ Symbols of text:
   0x000253c6 l53: local reloc, size 0
   0x000253d0 l54: local reloc, size 0
   0x000253de l49: local reloc, size 0
-  0x000253de l39: local reloc, size 0
   0x000253de l55: local reloc, size 0
+  0x000253de l39: local reloc, size 0
   0x000253e8 _fsys_closedir: global reloc, size 0
   0x00025434 l62: local reloc, size 0
   0x00025436 l59: local reloc, size 0
@@ -2089,8 +2089,8 @@ Symbols of text:
   0x0002549a l71: local reloc, size 0
   0x000254b4 l73: local reloc, size 0
   0x000254c4 l77: local reloc, size 0
-  0x000254c6 l78: local reloc, size 0
   0x000254c6 l76: local reloc, size 0
+  0x000254c6 l78: local reloc, size 0
   0x000254c8 l74: local reloc, size 0
   0x000254d0 l75: local reloc, size 0
   0x000254d4 l72: local reloc, size 0
@@ -2104,8 +2104,8 @@ Symbols of text:
   0x000254ec _fsys_mkdir: global reloc, size 0
   0x00025512 l96: local reloc, size 0
   0x0002552a l97: local reloc, size 0
-  0x00025544 l93: local reloc, size 0
   0x00025544 l99: local reloc, size 0
+  0x00025544 l93: local reloc, size 0
   0x0002554c l98: local reloc, size 0
   0x00025560 l100: local reloc, size 0
   0x00025574 l95: local reloc, size 0
@@ -2120,14 +2120,14 @@ Symbols of text:
   0x000255d4 _fsys_setcwd: global reloc, size 0
   0x000255ea l120: local reloc, size 0
   0x000255ee l121: local reloc, size 0
-  0x00025608 l122: local reloc, size 0
   0x00025608 l118: local reloc, size 0
+  0x00025608 l122: local reloc, size 0
   0x00025610 l123: local reloc, size 0
   0x00025624 _fsys_getcwd: global reloc, size 0
   0x00025644 l130: local reloc, size 0
   0x00025648 l131: local reloc, size 0
-  0x00025662 l132: local reloc, size 0
   0x00025662 l127: local reloc, size 0
+  0x00025662 l132: local reloc, size 0
   0x00025668 l133: local reloc, size 0
   0x0002567c l129: local reloc, size 0
   0x00025680 _fchan_init: global reloc, size 0
@@ -2140,8 +2140,8 @@ Symbols of text:
   0x000256d0 _fchan_read: global reloc, size 0
   0x0002571e l155: local reloc, size 0
   0x00025724 l156: local reloc, size 0
-  0x0002572e l154: local reloc, size 0
   0x0002572e l157: local reloc, size 0
+  0x0002572e l154: local reloc, size 0
   0x00025730 l150: local reloc, size 0
   0x0002573c l152: local reloc, size 0
   0x00025748 _fchan_readline: global reloc, size 0
@@ -2161,8 +2161,8 @@ Symbols of text:
   0x00025830 _fchan_write_b: global reloc, size 0
   0x00025872 l191: local reloc, size 0
   0x00025878 l192: local reloc, size 0
-  0x00025882 l193: local reloc, size 0
   0x00025882 l190: local reloc, size 0
+  0x00025882 l193: local reloc, size 0
   0x00025884 l187: local reloc, size 0
   0x00025890 _fchan_status: global reloc, size 0
   0x000258b2 l205: local reloc, size 0
@@ -2180,9 +2180,9 @@ Symbols of text:
   0x0002592e l222: local reloc, size 0
   0x00025946 l223: local reloc, size 0
   0x0002594c l225: local reloc, size 0
+  0x0002596c l224: local reloc, size 0
   0x0002596c l226: local reloc, size 0
   0x0002596c l221: local reloc, size 0
-  0x0002596c l224: local reloc, size 0
   0x0002596e l218: local reloc, size 0
   0x00025974 _fchan_ioctrl: global reloc, size 0
   0x00025976 l230: local reloc, size 0
@@ -2219,10 +2219,10 @@ Symbols of text:
   0x00025b44 l283: local reloc, size 0
   0x00025b4a l281: local reloc, size 0
   0x00025b5e l282: local reloc, size 0
-  0x00025b60 l276: local reloc, size 0
   0x00025b60 l280: local reloc, size 0
-  0x00025b60 l271: local reloc, size 0
+  0x00025b60 l276: local reloc, size 0
   0x00025b60 l284: local reloc, size 0
+  0x00025b60 l271: local reloc, size 0
   0x00025b64 _atoi_hex: global reloc, size 0
   0x00025b9a l288: local reloc, size 0
   0x00025ba0 _fsys_pgz_loader: global reloc, size 0
@@ -2236,8 +2236,8 @@ Symbols of text:
   0x00025c34 l311: local reloc, size 0
   0x00025c3c l313: local reloc, size 0
   0x00025c48 l314: local reloc, size 0
-  0x00025c4e l312: local reloc, size 0
   0x00025c4e l315: local reloc, size 0
+  0x00025c4e l312: local reloc, size 0
   0x00025c52 l309: local reloc, size 0
   0x00025c58 l319: local reloc, size 0
   0x00025c60 l317: local reloc, size 0
@@ -2267,10 +2267,10 @@ Symbols of text:
   0x00025da2 l344: local reloc, size 0
   0x00025da8 l347: local reloc, size 0
   0x00025db2 l349: local reloc, size 0
+  0x00025db8 l348: local reloc, size 0
+  0x00025db8 l307: local reloc, size 0
   0x00025db8 l350: local reloc, size 0
   0x00025db8 l316: local reloc, size 0
-  0x00025db8 l307: local reloc, size 0
-  0x00025db8 l348: local reloc, size 0
   0x00025dc4 l305: local reloc, size 0
   0x00025dd0 l306: local reloc, size 0
   0x00025dd2 l303: local reloc, size 0
@@ -2298,9 +2298,9 @@ Symbols of text:
   0x00025f12 l376: local reloc, size 0
   0x00025f18 l378: local reloc, size 0
   0x00025f1a l379: local reloc, size 0
+  0x00025f24 l374: local reloc, size 0
   0x00025f24 l369: local reloc, size 0
   0x00025f24 l377: local reloc, size 0
-  0x00025f24 l374: local reloc, size 0
   0x00025f2c l367: local reloc, size 0
   0x00025f30 l368: local reloc, size 0
   0x00025f32 l365: local reloc, size 0
@@ -2308,8 +2308,8 @@ Symbols of text:
   0x00025f3a l382: local reloc, size 0
   0x00025f3e l384: local reloc, size 0
   0x00025f40 l362: local reloc, size 0
-  0x00025f40 l380: local reloc, size 0
   0x00025f40 l383: local reloc, size 0
+  0x00025f40 l380: local reloc, size 0
   0x00025f40 l385: local reloc, size 0
   0x00025f46 l363: local reloc, size 0
   0x00025f46 l360: local reloc, size 0
@@ -2330,13 +2330,13 @@ Symbols of text:
   0x00025ffe l405: local reloc, size 0
   0x00026000 l403: local reloc, size 0
   0x00026006 l404: local reloc, size 0
-  0x00026006 l399: local reloc, size 0
   0x00026006 l401: local reloc, size 0
+  0x00026006 l399: local reloc, size 0
   0x00026024 l410: local reloc, size 0
   0x00026028 l412: local reloc, size 0
   0x0002602e l413: local reloc, size 0
-  0x00026034 l411: local reloc, size 0
   0x00026034 l414: local reloc, size 0
+  0x00026034 l411: local reloc, size 0
   0x0002603a l415: local reloc, size 0
   0x0002609e l421: local reloc, size 0
   0x000260f4 l420: local reloc, size 0
@@ -2347,8 +2347,8 @@ Symbols of text:
   0x00026112 l425: local reloc, size 0
   0x00026116 l427: local reloc, size 0
   0x0002612c l428: local reloc, size 0
-  0x00026142 l426: local reloc, size 0
   0x00026142 l430: local reloc, size 0
+  0x00026142 l426: local reloc, size 0
   0x0002614a l432: local reloc, size 0
   0x0002615c l433: local reloc, size 0
   0x0002616c l435: local reloc, size 0
@@ -2397,8 +2397,8 @@ Symbols of text:
   0x000263f0 l477: local reloc, size 0
   0x000263f4 l479: local reloc, size 0
   0x00026406 l483: local reloc, size 0
-  0x0002640e l482: local reloc, size 0
   0x0002640e l484: local reloc, size 0
+  0x0002640e l482: local reloc, size 0
   0x00026410 l480: local reloc, size 0
   0x00026416 l481: local reloc, size 0
   0x0002641a l485: local reloc, size 0
@@ -2424,8 +2424,8 @@ Symbols of text:
   0x000265a6 l12: local reloc, size 0
   0x000265ac l13: local reloc, size 0
   0x000265ba l14: local reloc, size 0
-  0x000265c0 l8: local reloc, size 0
   0x000265c0 l15: local reloc, size 0
+  0x000265c0 l8: local reloc, size 0
   0x000265c8 l19: local reloc, size 0
   0x000265d6 l18: local reloc, size 0
   0x000265dc l16: local reloc, size 0
@@ -2434,13 +2434,13 @@ Symbols of text:
   0x00026606 l23: local reloc, size 0
   0x0002660c l24: local reloc, size 0
   0x0002660e l17: local reloc, size 0
-  0x00026612 l25: local reloc, size 0
   0x00026612 l1: local reloc, size 0
+  0x00026612 l25: local reloc, size 0
   0x00026618 _kbdmo_flush_out: global reloc, size 0
   0x0002662c l10: local reloc, size 0
   0x00026632 l11: local reloc, size 0
-  0x00026648 l12: local reloc, size 0
   0x00026648 l7: local reloc, size 0
+  0x00026648 l12: local reloc, size 0
   0x0002664c l9: local reloc, size 0
   0x0002665c _kbdmo_init: global reloc, size 0
   0x00026700 l16: local reloc, size 0
@@ -2454,12 +2454,12 @@ Symbols of text:
   0x00026748 _kbdmo_enqueue_scan: global reloc, size 0
   0x00026754 l39: local reloc, size 0
   0x0002675c l37: local reloc, size 0
-  0x000267c0 l41: local reloc, size 0
   0x000267c0 l42: local reloc, size 0
-  0x000267d2 l44: local reloc, size 0
+  0x000267c0 l41: local reloc, size 0
   0x000267d2 l43: local reloc, size 0
-  0x000267e4 l46: local reloc, size 0
+  0x000267d2 l44: local reloc, size 0
   0x000267e4 l45: local reloc, size 0
+  0x000267e4 l46: local reloc, size 0
   0x000267f6 l47: local reloc, size 0
   0x00026808 l48: local reloc, size 0
   0x0002681a l49: local reloc, size 0
@@ -2470,26 +2470,26 @@ Symbols of text:
   0x00026838 l54: local reloc, size 0
   0x0002683a l55: local reloc, size 0
   0x0002683e l56: local reloc, size 0
-  0x00026848 l57: local reloc, size 0
   0x00026848 l58: local reloc, size 0
+  0x00026848 l57: local reloc, size 0
   0x00026848 l40: local reloc, size 0
   0x00026868 l38: local reloc, size 0
   0x00026868 l35: local reloc, size 0
   0x00026870 _kbdmo_handle_irq: global reloc, size 0
   0x00026880 l64: local reloc, size 0
   0x00026896 l67: local reloc, size 0
-  0x000268ae l68: local reloc, size 0
   0x000268ae l65: local reloc, size 0
-  0x000268c4 l62: local reloc, size 0
+  0x000268ae l68: local reloc, size 0
   0x000268c4 l66: local reloc, size 0
+  0x000268c4 l62: local reloc, size 0
   0x000268c8 _kbdmo_get_scancode: global reloc, size 0
   0x000268dc l74: local reloc, size 0
   0x000268e0 l75: local reloc, size 0
   0x000268f6 l77: local reloc, size 0
   0x0002690a l78: local reloc, size 0
-  0x0002690c l76: local reloc, size 0
-  0x0002690c l72: local reloc, size 0
   0x0002690c l79: local reloc, size 0
+  0x0002690c l72: local reloc, size 0
+  0x0002690c l76: local reloc, size 0
   0x00026910 _kbdmo_getc: global reloc, size 0
   0x00026926 l85: local reloc, size 0
   0x00026938 l86: local reloc, size 0
@@ -2503,14 +2503,14 @@ Symbols of text:
   0x00026a22 l105: local reloc, size 0
   0x00026a32 l106: local reloc, size 0
   0x00026a34 l103: local reloc, size 0
-  0x00026a44 l92: local reloc, size 0
+  0x00026a44 l107: local reloc, size 0
   0x00026a44 l95: local reloc, size 0
   0x00026a44 l101: local reloc, size 0
-  0x00026a44 l107: local reloc, size 0
+  0x00026a44 l92: local reloc, size 0
   0x00026a4a l89: local reloc, size 0
   0x00026a50 l90: local reloc, size 0
-  0x00026a52 l83: local reloc, size 0
   0x00026a52 l87: local reloc, size 0
+  0x00026a52 l83: local reloc, size 0
   0x00026a58 _kbdmo_getc_poll: global reloc, size 0
   0x00026a60 l111: local reloc, size 0
   0x00026a64 _kbdmo_get_scancode_poll: global reloc, size 0
@@ -2532,15 +2532,15 @@ Symbols of text:
   0x00026b0c l18: local reloc, size 0
   0x00026b10 l21: local reloc, size 0
   0x00026b14 l22: local reloc, size 0
-  0x00026b16 l14: local reloc, size 0
   0x00026b16 l23: local reloc, size 0
+  0x00026b16 l14: local reloc, size 0
   0x00026b1c l16: local reloc, size 0
   0x00026b2c _pata_wait_ready_not_busy: global reloc, size 0
-  0x00026b42 l30: local reloc, size 0
   0x00026b42 l34: local reloc, size 0
+  0x00026b42 l30: local reloc, size 0
   0x00026b42 l33: local reloc, size 0
-  0x00026b5e l35: local reloc, size 0
   0x00026b5e l32: local reloc, size 0
+  0x00026b5e l35: local reloc, size 0
   0x00026b7c l31: local reloc, size 0
   0x00026b80 l36: local reloc, size 0
   0x00026b84 l37: local reloc, size 0
@@ -2589,8 +2589,8 @@ Symbols of text:
   0x00026ff6 l104: local reloc, size 0
   0x0002700c l106: local reloc, size 0
   0x0002702a l108: local reloc, size 0
-  0x00027036 l112: local reloc, size 0
   0x00027036 l109: local reloc, size 0
+  0x00027036 l112: local reloc, size 0
   0x00027038 l110: local reloc, size 0
   0x0002703e l111: local reloc, size 0
   0x0002704a l114: local reloc, size 0
@@ -2605,8 +2605,8 @@ Symbols of text:
   0x000270f0 _pata_write: global reloc, size 0
   0x0002711e l128: local reloc, size 0
   0x00027144 l130: local reloc, size 0
-  0x00027188 l131: local reloc, size 0
   0x00027188 l134: local reloc, size 0
+  0x00027188 l131: local reloc, size 0
   0x0002718a l132: local reloc, size 0
   0x00027190 l133: local reloc, size 0
   0x0002719e l136: local reloc, size 0
@@ -2619,8 +2619,8 @@ Symbols of text:
   0x000271ba l142: local reloc, size 0
   0x000271c0 l143: local reloc, size 0
   0x000271cc l146: local reloc, size 0
-  0x000271d0 l147: local reloc, size 0
   0x000271d0 l150: local reloc, size 0
+  0x000271d0 l147: local reloc, size 0
   0x000271d2 l148: local reloc, size 0
   0x000271d8 l149: local reloc, size 0
   0x000271f4 l151: local reloc, size 0
@@ -2660,8 +2660,8 @@ Symbols of text:
   0x00027400 _ps2_wait_out: global reloc, size 0
   0x00027404 l4: local reloc, size 0
   0x0002740e l7: local reloc, size 0
-  0x00027412 l5: local reloc, size 0
   0x00027412 l8: local reloc, size 0
+  0x00027412 l5: local reloc, size 0
   0x0002742c l6: local reloc, size 0
   0x0002742e l2: local reloc, size 0
   0x00027430 _ps2_wait_in: global reloc, size 0
@@ -2685,27 +2685,27 @@ Symbols of text:
   0x000274f2 l40: local reloc, size 0
   0x000274f8 _ps2_kbd_cmd: global reloc, size 0
   0x00027510 l52: local reloc, size 0
-  0x00027516 l54: local reloc, size 0
   0x00027516 l53: local reloc, size 0
+  0x00027516 l54: local reloc, size 0
   0x0002751e l55: local reloc, size 0
   0x0002752a l57: local reloc, size 0
   0x00027532 l49: local reloc, size 0
   0x00027538 _ps2_flush_out: global reloc, size 0
   0x0002753a l63: local reloc, size 0
   0x00027540 l64: local reloc, size 0
-  0x0002755a l65: local reloc, size 0
   0x0002755a l61: local reloc, size 0
+  0x0002755a l65: local reloc, size 0
   0x0002755c _kbd_toggle_modifier: global reloc, size 0
   0x00027568 l69: local reloc, size 0
   0x0002756c _kbd_makebreak_modifier: global reloc, size 0
   0x00027588 l77: local reloc, size 0
-  0x00027590 l78: local reloc, size 0
   0x00027590 l74: local reloc, size 0
+  0x00027590 l78: local reloc, size 0
   0x00027594 _kbd_enqueue_scan: global reloc, size 0
   0x000275a0 l86: local reloc, size 0
   0x000275a8 l84: local reloc, size 0
-  0x0002760c l88: local reloc, size 0
   0x0002760c l89: local reloc, size 0
+  0x0002760c l88: local reloc, size 0
   0x0002761e l90: local reloc, size 0
   0x0002761e l91: local reloc, size 0
   0x00027630 l92: local reloc, size 0
@@ -2720,9 +2720,9 @@ Symbols of text:
   0x00027684 l101: local reloc, size 0
   0x00027686 l102: local reloc, size 0
   0x0002768a l103: local reloc, size 0
+  0x00027694 l87: local reloc, size 0
   0x00027694 l104: local reloc, size 0
   0x00027694 l105: local reloc, size 0
-  0x00027694 l87: local reloc, size 0
   0x000276b4 l82: local reloc, size 0
   0x000276b4 l85: local reloc, size 0
   0x000276bc _kbd_get_scancode: global reloc, size 0
@@ -2780,12 +2780,12 @@ Symbols of text:
   0x00027904 l168: local reloc, size 0
   0x0002790e l170: local reloc, size 0
   0x00027920 l171: local reloc, size 0
-  0x00027926 l172: local reloc, size 0
-  0x00027926 l121: local reloc, size 0
-  0x00027926 l117: local reloc, size 0
   0x00027926 l119: local reloc, size 0
-  0x00027926 l169: local reloc, size 0
+  0x00027926 l121: local reloc, size 0
+  0x00027926 l172: local reloc, size 0
   0x00027926 l114: local reloc, size 0
+  0x00027926 l117: local reloc, size 0
+  0x00027926 l169: local reloc, size 0
   0x0002792c _kbd_getc: global reloc, size 0
   0x00027942 l179: local reloc, size 0
   0x00027954 l180: local reloc, size 0
@@ -2801,11 +2801,11 @@ Symbols of text:
   0x00027a5c l202: local reloc, size 0
   0x00027a5e l199: local reloc, size 0
   0x00027a6e l197: local reloc, size 0
-  0x00027a6e l191: local reloc, size 0
   0x00027a6e l203: local reloc, size 0
+  0x00027a6e l191: local reloc, size 0
   0x00027a70 l188: local reloc, size 0
-  0x00027a80 l204: local reloc, size 0
   0x00027a80 l186: local reloc, size 0
+  0x00027a80 l204: local reloc, size 0
   0x00027a86 l183: local reloc, size 0
   0x00027a8c l184: local reloc, size 0
   0x00027a8e l177: local reloc, size 0
@@ -2815,9 +2815,9 @@ Symbols of text:
   0x00027ad6 l210: local reloc, size 0
   0x00027ad8 l211: local reloc, size 0
   0x00027b00 l214: local reloc, size 0
-  0x00027b06 l213: local reloc, size 0
   0x00027b06 l215: local reloc, size 0
   0x00027b06 l208: local reloc, size 0
+  0x00027b06 l213: local reloc, size 0
   0x00027b0c _ps2_mouse_command: global reloc, size 0
   0x00027b20 l222: local reloc, size 0
   0x00027b34 l224: local reloc, size 0
@@ -2875,8 +2875,8 @@ Symbols of text:
   0x00027ea8 l286: local reloc, size 0
   0x00027ebc l268: local reloc, size 0
   0x00027ec8 _ps2_init: global reloc, size 0
-  0x00027f5a l297: local reloc, size 0
   0x00027f5a l296: local reloc, size 0
+  0x00027f5a l297: local reloc, size 0
   0x00027f64 l298: local reloc, size 0
   0x00027f64 l299: local reloc, size 0
   0x00027f72 l300: local reloc, size 0
@@ -2893,8 +2893,8 @@ Symbols of text:
   0x00028074 _kbd_getc_poll: global reloc, size 0
   0x0002807c l317: local reloc, size 0
   0x00028086 l318: local reloc, size 0
-  0x00028088 l319: local reloc, size 0
   0x00028088 l315: local reloc, size 0
+  0x00028088 l319: local reloc, size 0
   0x0002808c l1: local reloc, size 0
   0x0002838c _rtc_handle_int: global reloc, size 0
   0x000283a4 l5: local reloc, size 0
@@ -2902,6 +2902,7 @@ Symbols of text:
   0x000283a8 _rtc_init: global reloc, size 0
   0x000283bc l9: local reloc, size 0
   0x000283c0 _rtc_set_time: global reloc, size 0
+  0x000284fe l23: local reloc, size 0
   0x00028508 l26: local reloc, size 0
   0x00028508 l24: local reloc, size 0
   0x000286a0 l40: local reloc, size 0
@@ -2963,15 +2964,15 @@ Symbols of text:
   0x00028c22 l7: local reloc, size 0
   0x00028c24 _sdc_protected: global reloc, size 0
   0x00028c26 l12: local reloc, size 0
-  0x00028c28 l17: local reloc, size 0
   0x00028c28 _sdc_set_led: global reloc, size 0
+  0x00028c28 l17: local reloc, size 0
   0x00028c2c _sdc_wait_busy: global reloc, size 0
-  0x00028c34 l24: local reloc, size 0
-  0x00028c3c l27: local reloc, size 0
-  0x00028c40 l28: local reloc, size 0
-  0x00028c46 l26: local reloc, size 0
-  0x00028c5e l25: local reloc, size 0
-  0x00028c60 l22: local reloc, size 0
+  0x00028c36 l24: local reloc, size 0
+  0x00028c3e l27: local reloc, size 0
+  0x00028c42 l28: local reloc, size 0
+  0x00028c48 l26: local reloc, size 0
+  0x00028c60 l25: local reloc, size 0
+  0x00028c62 l22: local reloc, size 0
   0x00028c68 _sdc_init: global reloc, size 0
   0x00028c7e l35: local reloc, size 0
   0x00028c8a l36: local reloc, size 0
@@ -2980,8 +2981,8 @@ Symbols of text:
   0x00028cc6 l40: local reloc, size 0
   0x00028ce2 l42: local reloc, size 0
   0x00028ce4 l38: local reloc, size 0
-  0x00028cfe l44: local reloc, size 0
   0x00028cfe l32: local reloc, size 0
+  0x00028cfe l44: local reloc, size 0
   0x00028d00 l41: local reloc, size 0
   0x00028d14 l43: local reloc, size 0
   0x00028d30 l45: local reloc, size 0
@@ -3000,11 +3001,11 @@ Symbols of text:
   0x00028e3c l63: local reloc, size 0
   0x00028e50 l65: local reloc, size 0
   0x00028e54 l66: local reloc, size 0
-  0x00028e58 l67: local reloc, size 0
   0x00028e58 l58: local reloc, size 0
+  0x00028e58 l67: local reloc, size 0
   0x00028e5a l55: local reloc, size 0
-  0x00028e64 l68: local reloc, size 0
   0x00028e64 l49: local reloc, size 0
+  0x00028e64 l68: local reloc, size 0
   0x00028e6c l51: local reloc, size 0
   0x00028e78 _sdc_write: global reloc, size 0
   0x00028ea0 l75: local reloc, size 0
@@ -3018,8 +3019,8 @@ Symbols of text:
   0x00028eda l85: local reloc, size 0
   0x00028ee0 l88: local reloc, size 0
   0x00028ee2 l86: local reloc, size 0
-  0x00028ef6 l87: local reloc, size 0
   0x00028ef6 l84: local reloc, size 0
+  0x00028ef6 l87: local reloc, size 0
   0x00028ef8 l78: local reloc, size 0
   0x00028efe l89: local reloc, size 0
   0x00028f5e l90: local reloc, size 0

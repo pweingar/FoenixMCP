@@ -85,7 +85,7 @@ void rtc_set_time(p_time time) {
     log_num(LOG_INFO, "Minute: ", minute_bcd);
     log_num(LOG_INFO, "Second: ", second_bcd);
 
-    if (time->is_24hours) {
+    if (!time->is_24hours) {
         if (time->is_pm) {
             hour_bcd = hour_bcd | 0x80;
         }

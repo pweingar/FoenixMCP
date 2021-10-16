@@ -104,7 +104,7 @@ int text_init() {
     // *chan_a->border_control = 0;                    /* Set to no border */
 
 	chan_a->border_control[0] = 0x00102001;	// Enable
-	chan_a->border_control[1] = 0x00000050;	//Dark Blue
+	chan_a->border_control[1] = 0x00000040;	//Dark Blue
 
     /* Set the font for channel A */
 

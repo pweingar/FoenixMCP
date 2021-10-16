@@ -28,8 +28,8 @@
 1. [ ] Auto-run/configuration file
 1. Built-in commands:
     1. [x] DIR [path]
-    1. COPY [path] TO [path]
-    1. RENAME [path] TO [path]
+    1. [ ] COPY [path] TO [path]
+    1. [ ] RENAME [path] TO [path]
     1. [x] DELETE [path]
     1. [x] CD [path]
     1. [x] PWD
@@ -37,7 +37,7 @@
     1. [ ] PRINT [expression]
     1. [x] POKE [address], [value] -- value to an address
     1. [x] PEEK [address] -- value from an address
-    1. CALL [address] -- Start running assembly code
+    1. [ ] CALL [address] -- Start running assembly code
     1. [x] DUMP [address], [size]
     1. [ ] SETCOLOR [lut], [index], [r], [g], [b] -- set a color LUT value
     1. [x] SETTIME
