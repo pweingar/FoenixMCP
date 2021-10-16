@@ -15,6 +15,7 @@
 #include "dev/ps2.h"
 #include "dev/kbd_mo.h"
 #include "dev/text_screen_iii.h"
+#include "simpleio.h"
 
 #define ANSI_BUFFER_SIZE    16
 #define MAX_ANSI_ARGS       10
@@ -27,7 +28,7 @@ typedef void (*ansi_handler)(p_channel, short, short[]);
  * Structure to map an ANSI escape sequence pattern to a handler
  */
 typedef struct s_ansi_seq {
-    char * pattern;
+    char code;
     ansi_handler handler;
 } t_ansi_seq, *p_ansi_seq;
 
@@ -53,29 +54,135 @@ extern void ansi_ed(p_channel chan, short arg_count, short args[]);
 extern void ansi_el(p_channel chan, short arg_count, short args[]);
 extern void ansi_ich(p_channel chan, short arg_count, short args[]);
 extern void ansi_dch(p_channel chan, short arg_count, short args[]);
+extern void ansi_sgr(p_channel chan, short arg_count, short args[]);
 
 /*
  * Console variables and constants
  */
 
 /*
- * ANSI escape sequences:
- * # is a placeholder for any number of numerals
- *
+ * ANSI escape sequences
  */
 const t_ansi_seq ansi_sequence[] = {
-    { "\x1B[H", ansi_cup },
-    { "\x1B[#A", ansi_cuu },
-    { "\x1B[#B", ansi_cuf },
-    { "\x1B[#C", ansi_cub },
-    { "\x1B[#D", ansi_cud },
-    { "\x1B[#J", ansi_ed },
-    { "\x1B[#K", ansi_el },
-    { "\x1B[#@]", ansi_ich },
-    { "\x1B[#P]", ansi_dch },
-    { "\x1B[#;#H", ansi_cup },
+    { '@', ansi_ich },
+    { 'A', ansi_cuu },
+    { 'B', ansi_cuf },
+    { 'C', ansi_cub },
+    { 'D', ansi_cud },
+    { 'J', ansi_ed },
+    { 'K', ansi_el },
+    { 'P', ansi_dch },
+    { 'H', ansi_cup },
+    { 'm', ansi_sgr },
     { 0, 0 }
 };
+
+/*
+ * Return true if a character is an initial character for an ANSI escape code
+ *
+ * Inputs:
+ * c = the character to test
+ *
+ * Returns:
+ * 0 if the character is not an ANSI initial, 1 if it is
+ */
+short ansi_start_code(char c) {
+    switch (c) {
+        case '\x1b':
+            return 1;
+
+        default:
+            return 0;
+    }
+}
+
+/*
+ * Find the escape sequence pattern that matches what we've collected.
+ *
+ * If one is found, execute it.
+ * If one is not found, just dump the ANSI buffer
+ */
+void ansi_match_pattern(p_channel chan, p_console_data con_data) {
+    char c;
+    short argc = 0;
+    int arg[MAX_ANSI_ARGS];
+    short i, j;
+
+    TRACE("ansi_match_pattern");
+
+    /* Clear out the argument list */
+    for (i = 0; i < MAX_ANSI_ARGS; i++) {
+        arg[i] = 0;
+    }
+
+    /* Make sure we have an escape sequence */
+    if ((con_data->ansi_buffer[0] != '\x1b') || (con_data->ansi_buffer[1] != '[')) {
+        /* If not, dump the buffer and return */
+        con_flush(chan);
+        return;
+    }
+
+    /* Try to assemble the arguments */
+    for (i = 2, argc = 0; i < con_data->ansi_buffer_count - 1; i++) {
+        c = con_data->ansi_buffer[i];
+        if (isdigit(c)) {
+            /* If the character is a digit, add it to the current argument */
+            arg[argc] = arg[argc] * 10 + (c - '0');
+
+        } else if (c == ';') {
+            /* If it's a semi-colon, start the next argument */
+            argc++;
+        }
+    }
+
+    argc++;
+
+    /* Get the last character... should be the code */
+    c = con_data->ansi_buffer[con_data->ansi_buffer_count - 1];
+
+    /* Try to find the matching escape code */
+    for (i = 0; ansi_sequence[i].code != 0; i++) {
+        if (ansi_sequence[i].code == c) {
+            ansi_handler handler = ansi_sequence[i].handler;
+            if (handler != 0) {
+                /* If we found the handler... call it */
+                handler(chan, argc, arg);
+                return;
+            }
+        }
+    }
+
+    /* We got to the end without a match... dump the buffer */
+    con_flush(chan);
+}
+
+/*
+ * Add a character to the ANSI buffer... and process when an escape sequence is found
+ */
+void ansi_process_c(p_channel chan, p_console_data con_data, char c) {
+    TRACE("ansi_process_c");
+
+    if (c == '\x1B') {
+        /* Start the escape sequence */
+        con_data->ansi_buffer[0] = c;
+        con_data->ansi_buffer_count = 1;
+
+    } else if (con_data->ansi_buffer_count > 0) {
+        /* We're processing an escape sequence... add the character to the buffer */
+        con_data->ansi_buffer[con_data->ansi_buffer_count++] = c;
+
+        /* Check to see if we just wrote the trigger */
+        if (((c >= '@') && (c <= 'Z')) ||
+            ((c >= 'a') && (c <= 'z'))) {
+            ansi_match_pattern(chan, con_data);
+            con_data->ansi_buffer_count = 0;
+        }
+
+    } else {
+        /* Not working on a sequence... so just print it */
+        text_put_raw(chan->dev, c);
+    }
+}
 
 /*
  * ANSI Handler: cursor up
@@ -239,6 +346,38 @@ void ansi_dch(p_channel chan, short arg_count, short args[]) {
     text_delete(chan->dev, n);
 }
 
+/*
+ * Set Graphics Rendition
+ */
+void ansi_sgr(p_channel chan, short arg_count, short args[]) {
+    short i;
+
+    TRACE("ansi_sgr");
+
+    log_num(LOG_ERROR, "ansi_sgr", arg_count);
+
+    for (i = 0; i < arg_count; i++) {
+        short code = args[i];
+
+        log_num(LOG_ERROR, "code = ", code);
+
+        if ((code >= 30) && (code <= 37)) {
+            short foreground = 0, background = 0;
+
+            /* Set foreground color */
+            text_get_color(chan->dev, &foreground, &background);
+            text_set_color(chan->dev, code - 30, background);
+
+        } else if ((code >= 40) && (code <= 47)) {
+            short foreground = 0, background = 0;
+
+            /* Set background color */
+            text_get_color(chan->dev, &foreground, &background);
+            text_set_color(chan->dev, foreground, code - 40);
+        }
+    }
+}
+
 //
 // Initialize the console... nothing needs to happen here
 //
@@ -289,8 +428,11 @@ short con_flush(p_channel chan) {
     if (con_data->control & CON_CTRL_ANSI) {
         for (i = 0; i < con_data->ansi_buffer_count; i++) {
             text_put_raw(chan->dev, con_data->ansi_buffer[i]);
+            con_data->ansi_buffer[i] = 0;
         }
     }
+
+    con_data->ansi_buffer_count = 0;
     return 0;
 }
 
@@ -306,120 +448,6 @@ short con_close(p_channel chan) {
 }
 
 /*
- * Return true if a character is an initial character for an ANSI escape code
- *
- * Inputs:
- * c = the character to test
- *
- * Returns:
- * 0 if the character is not an ANSI initial, 1 if it is
- */
-short ansi_start_code(char c) {
-    switch (c) {
-        case CHAR_ESC:
-            return 1;
-
-        default:
-            return 0;
-    }
-}
-
-/*
- * Attempt to match a pattern to what's in the buffer
- * Calls the sequence's handler if the pattern matches
- *
- * Inputs:
- * chan = pointer to the channel record
- * con_data = pointer to the console data record for this channel
- * sequence = pointer to the ANSI sequence mapping to check
- *
- * Returns
- * 0 if not a match, 1 if it is a match
- */
-short ansi_match_pattern(p_channel chan, p_console_data con_data, p_ansi_seq sequence) {
-    short arg_idx = 0;
-    short arg[MAX_ANSI_ARGS];
-    short i, j;
-    char * pattern = sequence->pattern;
-    char * buffer = con_data->ansi_buffer;
-    short buffer_count = con_data->ansi_buffer_count;
-
-    for (i = 0, j = 0; i < strlen(pattern); i++) {
-        if (buffer[j] == pattern[i]) {
-            /* Character matches... advance to the next character in the buffer and pattern */
-            j++;
-
-        } else if (pattern[i] == '#') {
-            /* Parse a number of decimal digits */
-            arg[arg_idx] = 0;
-            if (buffer[j] == pattern[i+1]) {
-                /* Parameter is missing... set to zero */
-                arg_idx++;
-
-            } else {
-                while (isdigit(buffer[j]) && (j < buffer_count)) {
-                    arg[arg_idx] = arg[arg_idx] * 10 + (buffer[j] - '0');
-                    j++;
-                }
-
-                if (j == buffer_count) {
-                    /* This pattern does not match */
-                    return 0;
-                } else {
-                    /* We've read a number */
-                    arg_idx++;
-                }
-            }
-        } else {
-            return 0;
-        }
-    }
-
-    if (i == strlen(pattern)) {
-        /* The pattern has been completely matched */
-
-        /* Clear the buffer */
-        for (i = 0; i < buffer_count; i++) {
-            buffer[i] = 0;
-        }
-        con_data->ansi_buffer_count = 0;
-
-        sequence->handler(chan, arg_idx, arg);
-        return 1;
-    }
-
-    return 0;
-}
-
-/*
- * Attempt to match what's in the buffer to known ANSI escape sequences
- *
- * Inputs:
- * chan = pointer to the channel record
- * con_data = pointer to the console data record for this channel
- */
-void ansi_match_buffer(p_channel chan, p_console_data con_data) {
-    short arg[MAX_ANSI_ARGS];
-    short arg_count = 0;
-    int i;
-
-    for (i = 0; i < MAX_ANSI_ARGS; i++) {
-        arg[i] = 0;
-    }
-
-    for (i = 0; ansi_sequence[i].pattern; i++) {
-        if (ansi_match_pattern(chan, con_data, &ansi_sequence[i])) {
-            return;
-        }
-    }
-
-    /* If not currently matching, but the buffer is full, we need to flush */
-    if (con_data->ansi_buffer_count == ANSI_BUFFER_SIZE) {
-        con_flush(chan);
-    }
-}
-
-/*
  * Send a byte to the console screen
  */
 short con_write_b(p_channel chan, uint8_t b) {
@@ -429,17 +457,7 @@ short con_write_b(p_channel chan, uint8_t b) {
     con_data = &(chan->data);
     if (con_data->control & CON_CTRL_ANSI) {
         /* ANSI codes are to be processed */
-        if ((con_data->ansi_buffer_count > 0) || ansi_start_code(b)) {
-            /* We're working on a sequence: add the character to the buffer */
-            con_data->ansi_buffer[con_data->ansi_buffer_count++] = b;
-
-            /* Attempt to match the buffer to an escape sequence */
-            ansi_match_buffer(chan, con_data);
-
-        } else {
-            /* We're not working on a sequence: just print the character */
-            text_put_raw(chan->dev, (char)b);
-        }
+        ansi_process_c(chan, con_data, (char)b);
 
     } else {
         /* Not processing ANSI codes... just pass it to the text driver */

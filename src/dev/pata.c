@@ -250,7 +250,7 @@ short pata_read(long lba, unsigned char * buffer, short size) {
     *PATA_CLDR_LO = (lba >> 8) & 0xff;
     *PATA_CLDR_HI = (lba >> 16) & 0xff;
 
-    *PATA_CMD_STAT = PATA_CMD_READ_SECTOR;          // Issue the READ command
+    *PATA_CMD_STAT = PATA_CMD_READ_SECTOR;          // Issue the READ command 0xE4; //
 
     // TODO: Wait ~500ns
 
@@ -268,6 +268,53 @@ short pata_read(long lba, unsigned char * buffer, short size) {
     }
 
     return i;
+}
+
+short pata_flush_cache() {
+    short i;
+    unsigned short *wptr;
+    unsigned char status;
+    TRACE("pata_write");
+
+    if (pata_wait_ready_not_busy()) {
+        return DEV_TIMEOUT;
+    }
+
+    *PATA_HEAD = 0xe0;                          // Drive 0
+
+    if (pata_wait_ready_not_busy()) {
+        return DEV_TIMEOUT;
+    }
+
+    *PATA_SECT_SRT = 0;                    // Set the rest of the LBA
+    *PATA_CLDR_LO = 0;
+    *PATA_CLDR_HI = 0;
+
+    if (pata_wait_ready_not_busy()) {
+        return DEV_TIMEOUT;
+    }
+
+    *PATA_CMD_STAT = 0xE7; // PATA_CMD_FLUSH_CACHE;
+
+    // Give the controller some time...
+    for (i = 0; i < 32000; i++) ;
+
+    if (pata_wait_ready_not_busy()) {
+        return DEV_TIMEOUT;
+    }
+
+    status = *PATA_CMD_STAT;
+    if ((status & PATA_STAT_DF) != 0){
+        log(LOG_ERROR, "pata_flush_cache: device fault");
+        return -1;
+    }
+
+    if ((status & PATA_STAT_ERR) != 0) {
+        log(LOG_ERROR, "pata_flush_cache: error");
+        return -1;
+    }
+
+    return 0;
 }
 
 //
@@ -292,6 +339,7 @@ short pata_write(long lba, const unsigned char * buffer, short size) {
     }
 
     *PATA_HEAD = ((lba >> 24) & 0x07) | 0xe0;       // Upper 3 bits of LBA, Drive 0, LBA mode.
+
     if (pata_wait_ready_not_busy()) {
         return DEV_TIMEOUT;
     }
@@ -299,7 +347,7 @@ short pata_write(long lba, const unsigned char * buffer, short size) {
     *PATA_SECT_CNT = 1;                             // Read one sector (make this an option?)
     *PATA_SECT_SRT = lba & 0xff;                    // Set the rest of the LBA
     *PATA_CLDR_LO = (lba >> 8) & 0xff;
-    *PATA_CLDR_LO = (lba >> 16) & 0xff;
+    *PATA_CLDR_HI = (lba >> 16) & 0xff;
 
     *PATA_CMD_STAT = PATA_CMD_WRITE_SECTOR;         // Issue the WRITE command
 
@@ -335,8 +383,6 @@ short pata_write(long lba, const unsigned char * buffer, short size) {
         log(LOG_ERROR, "pata_write: error");
         return -1;
     }
-
-    TRACE("PATA WRITE COMPLETE");
 
     return size;
 }

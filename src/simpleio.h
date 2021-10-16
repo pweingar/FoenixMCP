@@ -72,4 +72,14 @@ extern unsigned short bcd_to_i(unsigned char bcd);
  */
 extern unsigned char i_to_bcd(unsigned short n);
 
+/*
+ * Print a nice dump of a byte buffer to the channel
+ *
+ * Inputs:
+ * channel = the number of the channel
+ * buffer = the byte buffer to print
+ * size = the number of bytes to print
+ */
+extern void dump_buffer(short channel, unsigned char * buffer, short size);
+
 #endif

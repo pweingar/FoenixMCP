@@ -303,6 +303,22 @@ void text_set_color(short screen, short foreground, short background) {
 }
 
 /*
+ * Get the foreground and background color for printing
+ *
+ * Inputs:
+ * screen = the screen number 0 for channel A, 1 for channel B
+ * foreground = pointer to the foreground color number
+ * background = pointer to the background color number
+ */
+void text_get_color(short screen, short * foreground, short * background) {
+    if (screen < MAX_TEXT_CHANNELS) {
+        p_text_channel chan = &text_channel[screen];
+        *foreground = (chan->current_color >> 4) & 0x0f;
+        *background = chan->current_color & 0x0f;
+    }
+}
+
+/*
  * Clear the screen of data
  *
  * Inputs:

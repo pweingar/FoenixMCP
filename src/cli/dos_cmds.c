@@ -43,16 +43,7 @@ short cmd_diskread(short screen, int argc, char * argv[]) {
         return -2;
     }
 
-    for (i = 0; i < 512; i++) {
-        if (i % 16 == 0) {
-            print(screen, "\n");
-        }
-
-        print_hex_8(screen, buffer[i]);
-        print(screen, " ");
-    }
-
-    print(screen, "\n");
+    dump_buffer(screen, buffer, 512);
 
     return 0;
 }

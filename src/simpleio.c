@@ -147,3 +147,50 @@ unsigned char i_to_bcd(unsigned short n) {
         return tens << 4 | ones;
     }
 }
+
+/*
+ * Print a nice dump of a byte buffer to the channel
+ *
+ * Inputs:
+ * channel = the number of the channel
+ * buffer = the byte buffer to print
+ * size = the number of bytes to print
+ */
+void dump_buffer(short channel, unsigned char * buffer, short size) {
+    short i, j, ascii_idx;
+    char ascii_buffer[17];
+    unsigned char c;
+
+    for (j = 0; j < 17; j++) {
+        ascii_buffer[j] = 0;
+    }
+
+    for (i = 0; i < size; i++) {
+        c = buffer[i];
+
+        if (i % 16 == 0) {
+            print(channel, " ");
+            print(channel, ascii_buffer);
+            print(channel, "\n");
+
+            for (j = 0; j < 17; j++) {
+                ascii_buffer[j] = 0;
+            }
+
+            ascii_idx = 0;
+        }
+
+        if (isgraph(c)) {
+            ascii_buffer[ascii_idx++] = c;
+        } else {
+            ascii_buffer[ascii_idx++] = '.';
+        }
+
+        print_hex_8(channel, c);
+        print(channel, " ");
+    }
+
+    print(channel, " ");
+    print(channel, ascii_buffer);
+    print(channel, "\n");
+}
