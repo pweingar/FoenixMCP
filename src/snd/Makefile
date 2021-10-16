@@ -7,7 +7,7 @@ cobjects = $(subst .c,.o,$(csources))
 all: $(cobjects)
 
 %.o: %.c
-	$(CC) -k -c -o $@ $< $(CFLAGS)
+	$(CC) -k -c -o $@ $< $(CFLAGS) $(DEFINES)
 
 .PHONY: clean
 

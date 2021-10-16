@@ -340,11 +340,43 @@ void try_bdev_getput(short screen, short dev) {
 }
 
 int main(int argc, char * argv[]) {
+    const char * color_bars = "\x1b[31m\x0b\x0c\x1b[35m\x0b\x0c\x1b[33m\x0b\x0c\x1b[32m\x0b\x0c\x1b[36m\x0b\x0c";
+
+#if MODEL == MODEL_FOENIX_A2560U
+    const char * title_1 = "\x1b[37m   A   2222  55555  666   000  U   U";
+    const char * title_2 = "\x1b[37m  A A      2 5     6     0   0 U   U";
+    const char * title_3 = "\x1b[37m AAAAA  222   555  6666  0   0 U   U";
+    const char * title_4 = "\x1b[37m A   A 2         5 6   6 0   0 U   U";
+    const char * title_5 = "\x1b[37m A   A 22222 5555   666   000   UUU";
+#elif MODEL == MODEL_FOENIX_A2560U
+    const char * title_1 = "\x1b[37m   A   2222  55555  666   000  U   U   +";
+    const char * title_2 = "\x1b[37m  A A      2 5     6     0   0 U   U   +";
+    const char * title_3 = "\x1b[37m AAAAA  222   555  6666  0   0 U   U +++++";
+    const char * title_4 = "\x1b[37m A   A 2         5 6   6 0   0 U   U   +";
+    const char * title_5 = "\x1b[37m A   A 22222 5555   666   000   UUU    +";
+#elif MODEL == MODEL_FOENIX_A2560K
+    const char * title_1 = "\x1b[37m   A   2222  55555  666   000  K   K";
+    const char * title_2 = "\x1b[37m  A A      2 5     6     0   0 K  K";
+    const char * title_3 = "\x1b[37m AAAAA  222   555  6666  0   0 KKK";
+    const char * title_4 = "\x1b[37m A   A 2         5 6   6 0   0 K  K";
+    const char * title_5 = "\x1b[37m A   A 22222 5555   666   000  K   K";
+#else
+    const char * title_1 = "\x1b[37m FFFFF  OOO  EEEEE N   N IIIII X   X";
+    const char * title_2 = "\x1b[37m F     O   O E     NN  N   I    X X";
+    const char * title_3 = "\x1b[37m FFF   O   O EEE   N N N   I     X";
+    const char * title_4 = "\x1b[37m F     O   O E     N  NN   I    X X";
+    const char * title_5 = "\x1b[37m F      OOO  EEEEE N   N IIIII X   X";
+#endif
+
+    char welcome[255];
     short result;
 
     initialize();
 
-    const char * welcome = "\x1B[37m\x1B[2J\x1B[;1HFoenix/\x1B[1mMCP\x1B[0m Command Line Utility... online."; // "\x1B[;2HType \"HELP\" or \"?\" for help.\n";
+    sprintf(welcome, "    %s%s\n   %s %s\n  %s  %s\n %s   %s\n%s    %s\n\n", color_bars, title_1, color_bars, title_2, color_bars, title_3, color_bars, title_4, color_bars, title_5);
+    sys_chan_write(0, welcome, strlen(welcome));
+
+    sprintf(welcome, "Foenix/MCP v%02d.%02d-alpha+%04d\n\nType \"HELP\" or \"?\" for command summary.", VER_MAJOR, VER_MINOR, VER_BUILD);
     sys_chan_write(0, welcome, strlen(welcome));
 
     cli_repl(0);

@@ -16,12 +16,16 @@ export CPU=32
 # MODEL_FOENIX_A2560X         8
 # MODEL_FOENIX_A2560U         9
 # MODEL_FOENIX_A2560K         13
-export MODEL=4
+export MODEL=13
+
+export VER_MAJOR = 0
+export VER_MINOR = 0
+export VER_BUILD = 1
 
 export AS = vasmm68k_mot
 export ASFLAGS = -quiet -Fvobj -nowarn=62
 export CC = vc
-export DEFINES = -DCPU=$(CPU) -DMODEL=$(MODEL) # -DKBD_POLLED
+export DEFINES = -DCPU=$(CPU) -DMODEL=$(MODEL) -DVER_MAJOR=$(VER_MAJOR) -DVER_MINOR=$(VER_MINOR) -DVER_BUILD=$(VER_BUILD) # -DKBD_POLLED
 export CFLAGS = +../vbcc/config/m68k-foenix -I. -Iinclude
 export RM = cmd /C del /Q /F
 
@@ -64,7 +68,7 @@ foenixmcp.s68: $(c_obj) $(cpu) dev fatfs snd cli
 	$(CC) $(CFLAGS) $(DEFINES) -o foenixmcp.s68 $(c_obj) $(cpu_c_obj) $(dev_c_obj) $(fat_c_obj) $(snd_c_obj) $(cli_c_obj)
 
 %.o: %.c $(DEPS)
-	$(CC) -S -c -o $@ $< $(CFLAGS)
+	$(CC) -S -c -o $@ $< $(CFLAGS) $(DEFINES)
 
 .PHONEY: clean
 

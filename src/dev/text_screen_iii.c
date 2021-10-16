@@ -43,7 +43,7 @@ const unsigned short fg_color_lut [32] = {
 	0x8000, 0xFF00, // Mid-Tone Green
 	0x8000, 0xFF80, // Mid-Tone Yellow
 	0x0080, 0xFF00, // Mid-Tone Blue
-	0x0080, 0xFF80, // Mid-Tone Purple
+	0x5500, 0xFFAA, // Mid-Tone Orange
 	0x8080, 0xFF00, // Mid-Tone Cian
 	0x8080, 0xFF80, // 50% Grey
 	0x5555, 0xFF55, // Dark Grey
@@ -51,7 +51,7 @@ const unsigned short fg_color_lut [32] = {
 	0xFF55, 0xFF55, // Bright Green
 	0xFF55, 0xFFFF, // Bright Yellow
 	0x55FF, 0xFF55, // Bright Blue
-	0x55FF, 0xFFFF, // Bright Purple
+	0x7FFF, 0xFFFF, // Bright Orange
 	0xFFFF, 0xFF55, // Bright Cyan
 	0xFFFF, 0xFFFF 	// White
 };
@@ -62,7 +62,7 @@ const unsigned short bg_color_lut [32] = {
 	0x8000, 0xFF00, // Mid-Tone Green
 	0x8000, 0xFF80, // Mid-Tone Yellow
 	0x0080, 0xFF00, // Mid-Tone Blue
-	0x0080, 0xFF80, // Mid-Tone Purple
+	0x8000, 0xFF80, // Mid-Tone Orange
 	0x8080, 0xFF00, // Mid-Tone Cian
 	0x8080, 0xFF80, // 50% Grey
 	0x5555, 0xFF55, // Dark Grey
@@ -70,7 +70,7 @@ const unsigned short bg_color_lut [32] = {
 	0xFF55, 0xFF55, // Bright Green
 	0xFF55, 0xFFFF, // Bright Yellow
 	0x55FF, 0xFF55, // Bright Blue
-	0x55FF, 0xFFFF, // Bright Purple
+	0x7FFF, 0xFFFF, // Bright Orange
 	0xFFFF, 0xFF55, // Bright Cyan
 	0xFFFF, 0xFFFF 	// White
 };
@@ -104,7 +104,7 @@ int text_init() {
     // *chan_a->border_control = 0;                    /* Set to no border */
 
 	chan_a->border_control[0] = 0x00102001;	// Enable
-	chan_a->border_control[1] = 0x00000020;	//Dark Blue
+	chan_a->border_control[1] = 0x00000050;	//Dark Blue
 
     /* Set the font for channel A */
 
