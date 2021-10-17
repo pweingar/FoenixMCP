@@ -624,12 +624,46 @@ short fsys_getlabel(char * path, char * label) {
  * Set the label for the drive holding the path
  *
  * Inputs:
- * path = path to the drive
+ * drive = drive number
  * label = buffer that holds the label
  */
-short fsys_setlabel(char * path, char * label) {
-    return 0;
+short fsys_setlabel(short drive, char * label) {
+    FRESULT fres;
+    char buffer[80];
+
+    sprintf(buffer, "%d:%s", drive, label);
+    fres = f_setlabel(buffer);
+    if (fres != FR_OK) {
+        log_num(LOG_ERROR, "fsys_setlabel: ", fres);
+        return fatfs_to_foenix(fres);
+    } else {
+        return 0;
+    }
 }
+
+unsigned char workspace[FF_MAX_SS * 4];
+
+/*
+ * Format a drive
+ *
+ * Inputs:
+ * drive = drive number
+ * label = the label to apply to the drive
+ */
+short fsys_mkfs(short drive, char * label) {
+    char buffer[80];
+    FRESULT fres;
+
+    sprintf(buffer, "%d:", drive);
+    fres = f_mkfs(buffer, 0, workspace, FF_MAX_SS * 4);
+    if (fres != FR_OK) {
+        log_num(LOG_ERROR, "fsys_mkfs: ", fres);
+        return fatfs_to_foenix(fres);
+    } else {
+        return 0;
+    }
+}
+
 
 /*
  * Default loader to be used if file extension does not match a known file format

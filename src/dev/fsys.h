@@ -138,10 +138,19 @@ extern short fsys_getlabel(char * path, char * label);
  * Set the label for the drive holding the path
  *
  * Inputs:
- * path = path to the drive
+ * drive = drive number
  * label = buffer that holds the label
  */
-extern short fsys_setlabel(char * path, char * label);
+extern short fsys_setlabel(short drive, char * label);
+
+/*
+ * Format a drive
+ *
+ * Inputs:
+ * drive = drive number
+ * label = the label to apply to the drive
+ */
+extern short fsys_mkfs(short drive, char * label);
 
 /**
  * Create a directory

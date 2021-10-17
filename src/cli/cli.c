@@ -52,6 +52,7 @@ const t_cli_command g_cli_commands[] = {
     { "DISKFILL", "DISKFILL <drive #> <sector #> <byte value>", cmd_diskfill },
     { "DISKREAD", "DISKREAD <drive #> <sector #>", cmd_diskread },
     { "DUMP", "DUMP <addr> [<count>] : print a memory dump", mem_cmd_dump},
+    { "LABEL", "LABEL <drive#> <label> : set the label of a drive", cmd_label },
     { "LOAD", "LOAD <path> : load a file into memory", cmd_load },
     { "MKDIR", "MKDIR <path> : create a directory", cmd_mkdir },
     { "PEEK8", "PEEK8 <addr> : print the byte at the address in memory", mem_cmd_peek8 },

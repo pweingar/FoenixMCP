@@ -387,3 +387,46 @@ short cmd_load(short screen, int argc, char * argv[]) {
         return -1;
     }
 }
+
+/*
+ * Set the label of a drive
+ *
+ * LABEL <drive #> <label>
+ *
+ */
+short cmd_label(short screen, int argc, char * argv[]) {
+    if (argc > 2) {
+        short drive = cli_eval_number(argv[1]);
+        short result = fsys_setlabel(drive, argv[2]);
+        if (result != 0) {
+            print(screen, "Unable to set the label: ");
+            print_hex_16(screen, result);
+            return -1;
+        }
+
+    } else {
+        print(screen, "USAGE: LABEL <drive #> <label>\n");
+        return -1;
+    }
+}
+
+/*
+ * Format a drive
+ *
+ * FORMAT <drive #>
+ */
+short cmd_format(short screen, int argc, char * argv[]) {
+    if (argc > 1) {
+        short drive = cli_eval_number(argv[1]);
+        short result = fsys_mkfs(drive, "");
+        if (result != 0) {
+            print(screen, "Unable to format the drive: ");
+            print_hex_16(screen, result);
+            return -1;
+        }
+
+    } else {
+        print(screen, "USAGE: FORMAT <drive #>\n");
+        return -1;
+    }
+}

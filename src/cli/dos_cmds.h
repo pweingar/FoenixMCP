@@ -74,4 +74,19 @@ extern short cmd_diskread(short screen, int argc, char * argv[]);
  */
 extern short cmd_diskfill(short screen, int argc, char * argv[]);
 
+/*
+ * Set the label of a drive
+ *
+ * LABEL <drive #> <label>
+ *
+ */
+extern short cmd_label(short screen, int argc, char * argv[]);
+
+/*
+ * Format a drive
+ *
+ * FORMAT <drive #>
+ */
+extern short cmd_format(short screen, int argc, char * argv[]);
+
 #endif
