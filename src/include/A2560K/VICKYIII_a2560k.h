@@ -1,5 +1,5 @@
 /*
- * Registers and memory blocks for VICKY III
+ * Registers and memory blocks for VICKY III for the A2560K
  */
 
 #ifndef __VICKYIII_General_H

@@ -1,0 +1,87 @@
+// MC68SEC000 Memory Map Model
+//1Mx16   (2x 1Mx8) <- $0000_0000 - $001F_FFFF - RAM (U Model)
+//2Mx16   (2x 2Mx8) <- $0000_0000 - $003F_FFFF - RAM (U + Model)
+//                                          $0040_0000 - $00AF_FFFF - FREE SPACE (Future SDRAM Expansion Card?)
+
+//                     $00B0_0000 - $00B1_FFFF - GABE Registers (SuperIO/Math Block/SDCard/IDE/Ethernet/SDMA)
+//                     $00B2_0000 - $00B3_FFFF - BEATRIX Registers (CODEC/ADC/DAC0/DAC1/PSG/SID)
+//                             $00B4_0000 - $00B5_FFFF - VICKY Registers
+//                             $00B6_0000 - $00B6_3FFF - TEXT Memory
+//                             $00B6_4000 - $00B6_7FFF - Color Memory
+
+//                            $00BF_0000 - $00BF_FFFF - EXPANSION Chip Select
+// 512Kx32 (2Mx8) <- $00C0_0000 - $00DF_FFFF - VRAM MEMORY
+// 1Mx16   (2Mx8) <- $00E0_0000 - $00FF_FFFF - FLASH0
+
+so the Keyboard is $B02800 - $B0280F
+The Serial is @ $B028F8 - $B028FF
+#ifndef KeyboardH   /* Include guard */
+#define KeyboardH
+// Status
+#define     OUT_BUF_FULL   0x01
+#define     INPT_BUF_FULL     0x02
+#define     SYS_FLAG           0x04
+#define     CMD_DATA           0x08
+#define     KEYBD_INH      0x10
+#define     TRANS_TMOUT       0x20
+#define     RCV_TMOUT           0x40
+#define     PARITY_EVEN         0x80
+#define     INH_KEYBOARD     0x10
+#define     KBD_ENA        0xAE
+#define     KBD_DIS               0xAD
+// Keyboard
+unsigned char * STATUS_PORT       = (void *)0x00B02804;
+unsigned char * KBD_OUT_BUF       = (void *)0x00B02800;
+unsigned char * KBD_INPT_BUF       = (void *)0x00B02800;
+unsigned char * KBD_CMD_BUF       = (void *)0x00B02804;
+unsigned char * KBD_DATA_BUF       = (void *)0x00B02800;
+
+unsigned char * PORT_A               = (void *)0x00B02808;
+unsigned char * PORT_B               = (void *)0x00B02809;
+
+
+assign    CS0                     = ( ADDY_In[23:22] == 2'b00 ) & ( UserData | UserProgram | SuperData | SuperProgram ); //$000000 - $3FFFFF
+assign    BERR                    = ( ADDY_In[23:22] == 2'b01 ) & ( UserData | UserProgram | SuperData | SuperProgram ); //$400000 - $7FFFFF
+
+assign     CS_GABE                = ( ADDY_In[23:17] == 7'b1011_000 ) & ( UserData  | SuperData );         //$B0
+assign     CS_BEATRIX             = ( ADDY_In[23:17] == 7'b1011_001 ) & ( UserData  | SuperData );         //$B2
+// Vicky II
+assign     CS_VICKY             = ( ADDY_In[23:17] == 7'b1011_010 ) & ( UserData  | SuperData );         //$B4
+assign     CS_VICKY_MEM        = ( ADDY_In[23:17] == 7'b1011_011 ) & ( UserData  | SuperData );         //$B6
+assign   CS_EXP                = ( ADDY_In[23:16] == 8'b1011_1111 ) & ( UserData  | SuperData );         //$BF
+// Video RAM
+assign     CS_VRAM              = ( ADDY_In[23:21] == 3'b110 )          & ( UserData  | SuperData );         //$C0_0000 - DFFFFF (2M)
+assign     FLASH0                = ( ADDY_In[23:21] == 3'b111 )         & ( SuperData | SuperProgram );    //$E0_0000 - FFFFFF (2M)
+assign    CS0                     = ( ADDY_In[23:22] == 2'b00 ) & ( UserData | UserProgram | SuperData | SuperProgram ); //$000000 - $3FFFFF
+assign    BERR                    = ( ADDY_In[23:22] == 2'b01 ) & ( UserData | UserProgram | SuperData | SuperProgram ); //$400000 - $7FFFFF
+
+assign     CS_GABE                = ( ADDY_In[23:17] == 7'b1011_000 ) & ( UserData  | SuperData );         //$B0
+assign     CS_BEATRIX             = ( ADDY_In[23:17] == 7'b1011_001 ) & ( UserData  | SuperData );         //$B2
+// Vicky II
+assign     CS_VICKY             = ( ADDY_In[23:17] == 7'b1011_010 ) & ( UserData  | SuperData );         //$B4
+assign     CS_VICKY_MEM        = ( ADDY_In[23:17] == 7'b1011_011 ) & ( UserData  | SuperData );         //$B6
+assign   CS_EXP                = ( ADDY_In[23:16] == 8'b1011_1111 ) & ( UserData  | SuperData );         //$BF
+// Video RAM
+assign     CS_VRAM              = ( ADDY_In[23:21] == 3'b110 )          & ( UserData  | SuperData );         //$C0_0000 - DFFFFF (2M)
+assign     FLASH0                = ( ADDY_In[23:21] == 3'b111 )         & ( SuperData | SuperProgram );    //$E0_0000 - FFFFFF (2M)
+***
+assign CS_VICKY_REG_o                    = ( iBUS_A_i[16:7] == 10'b0_0000_0000_0) & iBUS_CS_VICKY_i;                        // $B40000..$B4007F    - Control Registers
+assign CS_Bitmap_Registers_o             = ( iBUS_A_i[16:8] ==  9'b0_0000_0001) & iBUS_CS_VICKY_i;                        // $B40100..$B401FF    - Bitmap Control Registers
+assign CS_Tile0_Registers_o             = ( iBUS_A_i[16:7] == 10'b0_0000_0010_0) & iBUS_CS_VICKY_i;                        // $B40200..$B4027F    - TileMap Control Registers
+assign CS_Tile1_Registers_o             = ( iBUS_A_i[16:7] == 10'b0_0000_0010_1) & iBUS_CS_VICKY_i;                        // $B40280..$B402FF    - TileSet Control Registers
+assign CS_Collisions_Registers_o     = ( iBUS_A_i[16:8] ==  9'b0_0000_0011) & iBUS_CS_VICKY_i;                        // $B40300..$B403FF    - Collision Control Registers
+assign CS_Mouse_Ptr_Graphics_o        = ( iBUS_A_i[16:10] == 7'b0_0000_01) & iBUS_CS_VICKY_i;                            // $B40400..$B40BFF    - Mouser Pointer graphics 16x16 ARGB x2
+assign CS_Mouse_Ptr_Registers_o        = ( iBUS_A_i[16:8] ==  9'b0_0000_1100) & iBUS_CS_VICKY_i;                        // $B40C00..$B40CFF    - Mouser Pointer Registers
+
+assign CS_Sprites_Registers_o         = ( iBUS_A_i[16:12] == 5'b0_0001) & iBUS_CS_VICKY_i;                                // $B41000..$B41FFF    - Sprites Registers
+assign CS_LUT0_o                             = ( iBUS_A_i[16:13] == 4'b0_001) & iBUS_CS_VICKY_i;                                // $B42000..$B43FFF    - LUT
+assign CS_GAMMA_B_o                         = ( iBUS_A_i[16:8] ==  9'b0_0100_0000) & iBUS_CS_VICKY_i;                        // $B44000..$B440FF    - GAMMA Blue
+assign CS_GAMMA_G_o                         = ( iBUS_A_i[16:8] ==  9'b0_0100_0001) & iBUS_CS_VICKY_i;                        // $B44100..$B441FF    - GAMMA Green
+assign CS_GAMMA_R_o                         = ( iBUS_A_i[16:8] ==  9'b0_0100_0010) & iBUS_CS_VICKY_i;                        // $B44200..$B442FF    - GAMMA Red
+
+//    $B6_0000 - $BE_FFFF - VICKY TEXT MODE Internal Memory and CLUT
+assign CS_TextMemory_o                     = (iBUS_A_i[16:14] == 3'b000) & iBUS_CS_VICKY_MEM_i;                                //    $B60000..$B63FFF    - Text Memory
+assign CS_ColorMemory_o                 = (iBUS_A_i[16:14] == 3'b010) & iBUS_CS_VICKY_MEM_i;                               //    $B68000..$B6BFFF    - Color Memory
+assign CS_BF_CLUT_o                        = (iBUS_A_i[16:06] == 11'b0_1100_0100_00) & iBUS_CS_VICKY_MEM_i;              //    $B6C400..$B6C43F    - Foreground Character LUT
+assign CS_BG_CLUT_o                      = (iBUS_A_i[16:06] == 11'b0_1100_0100_01) & iBUS_CS_VICKY_MEM_i;                 //    $B6C440..$B6C47F    - Background Character LUT
+// $BF:0000 - $BF:FFFF for Expension ChipSelect

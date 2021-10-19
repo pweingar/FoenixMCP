@@ -2,34 +2,38 @@
  * Startup file for the Foenix/MCP
  */
 
+#include <stdlib.h>
 #include <string.h>
 #include "sys_general.h"
 #include "simpleio.h"
 #include "log.h"
-#include "interrupt.h"
-#include "gabe_reg.h"
+// #include "interrupt.h"
+// #include "gabe_reg.h"
+#if MODEL == MODEL_FOENIX_A2560K
 #include "superio.h"
+#endif
 #include "syscalls.h"
-#include "dev/block.h"
-#include "dev/channel.h"
-#include "dev/console.h"
+// #include "dev/block.h"
+// #include "dev/channel.h"
+// #include "dev/console.h"
 #include "dev/text_screen_iii.h"
-#include "dev/pata.h"
-#include "dev/ps2.h"
-#include "dev/kbd_mo.h"
-#include "dev/rtc.h"
-#include "dev/sdc.h"
-#include "dev/uart.h"
+// #include "dev/pata.h"
+// #include "dev/ps2.h"
+// #include "dev/kbd_mo.h"
+// #include "dev/rtc.h"
+// #include "dev/sdc.h"
+// #include "dev/uart.h"
 #include "vicky_general.h"
-#include "snd/codec.h"
-#include "snd/psg.h"
-#include "snd/sid.h"
+// #include "snd/codec.h"
+// #include "snd/psg.h"
+// #include "snd/sid.h"
 #include "fatfs/ff.h"
-#include "cli/cli.h"
+// #include "cli/cli.h"
 /* #include "rsrc/bitmaps/splash_a2560k.h"*/
 
 const char* VolumeStr[FF_VOLUMES] = { "sdc", "fdc", "hdc" };
 
+#if MODEL == MODEL_FOENIX_A2560K
 /*
  * Initialize the SuperIO registers
  */
@@ -82,6 +86,7 @@ const char* VolumeStr[FF_VOLUMES] = { "sdc", "fdc", "hdc" };
  	*LED1_REG = 0x01;
  	*LED2_REG = 0x02;
  }
+#endif
 
 // /*
 //  * Load and display the splash screen
@@ -124,6 +129,8 @@ const char* VolumeStr[FF_VOLUMES] = { "sdc", "fdc", "hdc" };
      print(channel, "\n");
  }
 
+extern short current_color;
+
 /*
  * Initialize the kernel systems.
  */
@@ -134,7 +141,7 @@ void initialize() {
     /* Set the logging level */
     log_setlevel(LOG_ERROR);
 
-    /* Hide the mouse */
+    // /* Hide the mouse */
     mouse_set_visible(0);
 
     /* Display the splash screen */
@@ -146,12 +153,15 @@ void initialize() {
     /* Initialize the interrupt system */
     int_init();
 
+#if MODEL == MODEL_FOENIX_A2560K
     /* Set the power LED to purple */
     *RGB_LED_L = 0x00FF;
     *RGB_LED_H = 0x00FF;
 
     /* Initialize the SuperIO chip */
     init_superio();
+#endif
+
 
     /* Mute the PSG */
     psg_mute_all();
@@ -179,13 +189,13 @@ void initialize() {
 
     /* Initialize the real time clock */
     rtc_init();
-
-    if (res = pata_install()) {
-        log_num(LOG_ERROR, "FAILED: PATA driver installation", res);
-    } else {
-        log(LOG_INFO, "PATA driver installed.");
-    }
-
+//
+//     if (res = pata_install()) {
+//         log_num(LOG_ERROR, "FAILED: PATA driver installation", res);
+//     } else {
+//         log(LOG_INFO, "PATA driver installed.");
+//     }
+//
     if (res = sdc_install()) {
         log_num(LOG_ERROR, "FAILED: SDC driver installation", res);
     } else {
@@ -199,13 +209,13 @@ void initialize() {
     } else {
         DEBUG("PS/2 keyboard initialized.");
     }
-
-    if (res = kbdmo_init()) {
-        log_num(LOG_ERROR, "FAILED: A2560K built-in keyboard initialization", res);
-    } else {
-        log(LOG_INFO, "A2560K built-in keyboard initialized.");
-    }
-
+//
+//     if (res = kbdmo_init()) {
+//         log_num(LOG_ERROR, "FAILED: A2560K built-in keyboard initialization", res);
+//     } else {
+//         log(LOG_INFO, "A2560K built-in keyboard initialized.");
+//     }
+//
     if (res = cli_init()) {
         log_num(LOG_ERROR, "FAILED: CLI initialization", res);
     } else {
@@ -220,123 +230,7 @@ void initialize() {
 
     /* Enable all interrupts */
     int_enable_all();
-}
 
-void uart_send(short uart, char * message) {
-    int i, j;
-
-    for (i = 0; i < strlen(message); i++) {
-        uart_put(uart, message[i]);
-    }
-}
-
-void uart_test_send(short uart) {
-    while (1) {
-        int j;
-        uart_put(uart, 'a');
-        for (j = 1; j < 10000; j++) ;
-    }
-}
-
-void try_format(short screen, char * path) {
-    FATFS fs;           /* Filesystem object */
-    FIL fil;            /* File object */
-    FRESULT res;        /* API result code */
-    UINT bw;            /* Bytes written */
-    BYTE work[FF_MAX_SS]; /* Work area (larger is better for processing time) */
-
-    /* Format the HDD with default parameters */
-    res = f_mkfs(path, 0, work, sizeof work);
-    if (res) {
-        print(screen, "Could not format drive.\n");
-        return;
-    }
-
-    /* Give a work area to the default drive */
-    f_mount(&fs, path, 0);
-
-    /* Create a file as new */
-    res = f_open(&fil, "hello.txt", FA_CREATE_NEW | FA_WRITE);
-    if (res) {
-        print(screen, "Could not create hello.txt.\n");
-        return;
-    }
-
-    /* Write a message */
-    f_write(&fil, "Hello, World!\r\n", 15, &bw);
-    if (bw != 15) {
-        print(screen, "Error writing file.\n");
-        return;
-    }
-
-    /* Close the file */
-    f_close(&fil);
-
-    /* Unregister work area */
-    f_mount(0, "", 0);
-}
-
-void try_write(short screen, char * path) {
-    FATFS fs;           /* Filesystem object */
-    FIL fil;            /* File object */
-    FRESULT res;        /* API result code */
-    UINT bw;            /* Bytes written */
-
-    /* Give a work area to the default drive */
-    f_mount(&fs, path, 0);
-
-    /* Create a file as new */
-    res = f_open(&fil, "hello.txt", FA_CREATE_NEW | FA_WRITE);
-    if (res) {
-        print(screen, "Could not create hello.txt: ");
-        print_hex_16(screen, res);
-        print(screen, "\n");
-        return;
-    }
-
-    /* Write a message */
-    f_write(&fil, "Hello, World!\r\n", 15, &bw);
-    if (bw != 15) {
-        print(screen, "Error writing file.\n");
-        return;
-    }
-
-    /* Close the file */
-    f_close(&fil);
-
-    /* Unregister work area */
-    f_mount(0, "", 0);
-}
-
-unsigned char test_block_1[512];
-unsigned char test_block_2[512];
-
-void try_bdev_getput(short screen, short dev) {
-    int i;
-    for (i = 0; i < 512; i++) {
-        test_block_1[i] = (unsigned short)i & 0xff;
-    }
-
-    short n = bdev_write(dev, 0x010000, test_block_1, 512);
-    if (n != 512) {
-        print(screen, "Could not write block.\n");
-        return;
-    }
-
-    n = bdev_read(dev, 0x010000, test_block_2, 512);
-    if (n != 512) {
-        print(screen, "Could not read block.\n");
-        return;
-    }
-
-    for (i = 0; i < 512; i++) {
-        if (test_block_1[i] != test_block_2[i]) {
-            print(screen, "Block did not verify.\n");
-            return;
-        }
-    }
-
-    print(screen, "BDEV read/write success.\n");
 }
 
 int main(int argc, char * argv[]) {

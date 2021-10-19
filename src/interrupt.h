@@ -5,12 +5,16 @@
 #ifndef __INTERRUPT_H
 #define __INTERRUPT_H
 
+#include "sys_general.h"
+
 /* Type declaration for an interrupt handler */
 typedef void (*p_int_handler)();
 
 /*
  * Interrupt control registers
  */
+
+#if MODEL == MODEL_FOENIX_A2560K
 
 #define PENDING_GRP0 		((volatile unsigned short *)0x00C00100)
 #define PENDING_GRP1 		((volatile unsigned short *)0x00C00102)
@@ -27,6 +31,27 @@ typedef void (*p_int_handler)();
 #define MASK_GRP0 			((volatile unsigned short *)0x00C00118)
 #define MASK_GRP1 			((volatile unsigned short *)0x00C0011A)
 #define MASK_GRP2 			((volatile unsigned short *)0x00C0011C)
+
+#elif MODEL == MODEL_FOENIX_A2560U || MODEL == MODEL_FOENIX_A2560U_PLUS
+
+#define PENDING_GRP0 		((volatile unsigned short *)0x00B00100)
+#define PENDING_GRP1 		((volatile unsigned short *)0x00B00102)
+#define PENDING_GRP2 		((volatile unsigned short *)0x00B00104)
+
+#define POL_GRP0 			((volatile unsigned short *)0x00B00108)
+#define POL_GRP1 			((volatile unsigned short *)0x00B0010A)
+#define POL_GRP2 			((volatile unsigned short *)0x00B0010C)
+
+#define EDGE_GRP0 			((volatile unsigned short *)0x00B00110)
+#define EDGE_GRP1 			((volatile unsigned short *)0x00B00112)
+#define EDGE_GRP2 			((volatile unsigned short *)0x00B00114)
+
+#define MASK_GRP0 			((volatile unsigned short *)0x00B00118)
+#define MASK_GRP1 			((volatile unsigned short *)0x00B0011A)
+#define MASK_GRP2 			((volatile unsigned short *)0x00B0011C)
+
+#endif
+
 
 /*
  * For A2560K: $00C00100..$00C001FF - Interrupt Controllers

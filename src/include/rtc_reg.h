@@ -5,8 +5,11 @@
 #ifndef __RTC_REG_H
 #define __RTC_REG_H
 
-#define RTC_BASE        ((volatile unsigned char *)0x00C00080)
+#include "sys_general.h"
 
+#if MODEL == MODEL_FOENIX_A2560K
+
+#define RTC_BASE        ((volatile unsigned char *)0x00C00080)
 #define RTC_SEC         ((volatile unsigned char *)0x00C00080)
 #define RTC_ALRM_SEC    ((volatile unsigned char *)0x00C00081)
 #define RTC_MIN         ((volatile unsigned char *)0x00C00082)
@@ -23,6 +26,28 @@
 #define RTC_FLAGS       ((volatile unsigned char *)0x00C0008D)
 #define RTC_CTRL        ((volatile unsigned char *)0x00C0008E)
 #define RTC_CENTURY     ((volatile unsigned char *)0x00C0008F)
+
+#elif MODEL_FOENIX_A2560U || MODEL == MODEL_FOENIX_A2560U_PLUS
+
+#define RTC_BASE        ((volatile unsigned char *)0x00B00080)
+#define RTC_SEC         ((volatile unsigned char *)0x00B00080)
+#define RTC_ALRM_SEC    ((volatile unsigned char *)0x00B00081)
+#define RTC_MIN         ((volatile unsigned char *)0x00B00082)
+#define RTC_ALRM_MIN    ((volatile unsigned char *)0x00B00083)
+#define RTC_HOUR        ((volatile unsigned char *)0x00B00084)
+#define RTC_ALRM_HOUR   ((volatile unsigned char *)0x00B00085)
+#define RTC_DAY         ((volatile unsigned char *)0x00B00086)
+#define RTC_ALRM_DAY    ((volatile unsigned char *)0x00B00087)
+#define RTC_DAY_OF_WEEK ((volatile unsigned char *)0x00B00088)
+#define RTC_MONTH       ((volatile unsigned char *)0x00B00089)
+#define RTC_YEAR        ((volatile unsigned char *)0x00B0008A)
+#define RTC_RATES       ((volatile unsigned char *)0x00B0008B)
+#define RTC_ENABLES     ((volatile unsigned char *)0x00B0008C)
+#define RTC_FLAGS       ((volatile unsigned char *)0x00B0008D)
+#define RTC_CTRL        ((volatile unsigned char *)0x00B0008E)
+#define RTC_CENTURY     ((volatile unsigned char *)0x00B0008F)
+
+#endif
 
 /* Rate fields and settings */
 #define RTC_RATES_WD    0xf0

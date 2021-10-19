@@ -5,7 +5,7 @@
 #ifndef __PSG_H
 #define __PSG_H
 
-#define PSG_PORT    ((volatile unsigned char *)0x00C20100)  /* Control register for the SN76489 */
+#include "sound_reg.h"
 
 /*
  * Mute all voices on the PSG

@@ -7,7 +7,7 @@ _codec_wait
 	movem.l	l6,-(a7)
 l3
 l4
-	move.w	12717568,d0
+	move.w	11668992,d0
 	cmp.w	#32768,d0
 	beq	l3
 l5
@@ -21,19 +21,19 @@ l8	equ	0
 	cnop	0,4
 _init_codec
 	movem.l	l11,-(a7)
-	move.w	#6656,12717568
+	move.w	#6656,11668992
 	jsr	_codec_wait
-	move.w	#10783,12717568
+	move.w	#10783,11668992
 	jsr	_codec_wait
-	move.w	#8961,12717568
+	move.w	#8961,11668992
 	jsr	_codec_wait
-	move.w	#11271,12717568
+	move.w	#11271,11668992
 	jsr	_codec_wait
-	move.w	#5122,12717568
+	move.w	#5122,11668992
 	jsr	_codec_wait
-	move.w	#5634,12717568
+	move.w	#5634,11668992
 	jsr	_codec_wait
-	move.w	#6213,12717568
+	move.w	#6213,11668992
 	jsr	_codec_wait
 l9
 l11	reg

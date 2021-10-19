@@ -8,6 +8,12 @@
 
 #include "sys_general.h"
 
+#if MODEL == MODEL_FOENIX_A2560K
+#include "A2560K/ps2_a2560k.h"
+#elif MODEL == MODEL_FOENIX_A2560U || MODEL == MODEL_FOENIX_A2560U_PLUS
+#include "A2560U/ps2_a2560u.h"
+#endif
+
 /*
  * Status flags
  */
@@ -53,27 +59,5 @@
 #define MOUSE_CMD_DISABLE   0xF5    /* Mouse command: disable streaming */
 #define MOUSE_CMD_DEFAULTS  0xF6    /* Mouse command: set defaults */
 #define MOUSE_CMD_RESET     0xFF    /* Mouse command: reset the mouse */
-
-// #if SYSTEM == SYS_FOENIX_U || SYSTEM == SYS_FOENIX_U_PLUS
-// #define PS2_STATUS      ((unsigned char *)0xAF1807)
-// #define PS2_CMD_BUF     ((unsigned char *)0xAF1807)
-// #define PS2_OUT_BUF     ((unsigned char *)0xAF1803)
-// #define PS2_INPT_BUF    ((unsigned char *)0xAF1803)
-// #define PS2_DATA_BUF    ((unsigned char *)0xAF1803)
-//
-// #elif SYSTEM == SYS_FOENIX_FMX
-// #define PS2_STATUS      ((unsigned char *)0xAF1064)
-// #define PS2_CMD_BUF     ((unsigned char *)0xAF1064)
-// #define PS2_OUT_BUF     ((unsigned char *)0xAF1060)
-// #define PS2_INPT_BUF    ((unsigned char *)0xAF1060)
-// #define PS2_DATA_BUF    ((unsigned char *)0xAF1060)
-//
-// #elif SYSTEM == SYS_FOENIX_A2560K
-#define PS2_STATUS      ((unsigned char *)0x00C02064)
-#define PS2_CMD_BUF     ((unsigned char *)0x00C02064)
-#define PS2_OUT_BUF     ((unsigned char *)0x00C02060)
-#define PS2_INPT_BUF    ((unsigned char *)0x00C02060)
-#define PS2_DATA_BUF    ((unsigned char *)0x00C02060)
-// #endif
 
 #endif

@@ -21,10 +21,12 @@ volatile unsigned char * sid_get_base(short sid) {
             return SID_INT_L_V1_FREQ_LO;
         case 2:
             return SID_INT_R_V1_FREQ_LO;
+#if MODEL == MODEL_FOENIX_A2560K
         case 3:
             return SID_EXT_L_V1_FREQ_LO;
         case 4:
             return SID_EXT_R_V1_FREQ_LO;
+#endif
         default:
             return 0;
     }
@@ -138,6 +140,8 @@ void sid_text_external() {
     unsigned char i;
     unsigned int j;
 
+#if MODEL == MODEL_FOENIX_A2560K
+
     // Clear all Channels
     //	for (i = 0; i<24 ; i++) {
     //		SID_INT_L_V1_FREQ_LO[i] = 0x00;
@@ -213,4 +217,6 @@ void sid_text_external() {
         *SID_EXT_L_MODE_VOL = 15 - i;
         *SID_EXT_R_MODE_VOL = 15 - i;
     }
+
+#endif
 }

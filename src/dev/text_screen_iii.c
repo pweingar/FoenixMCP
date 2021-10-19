@@ -5,6 +5,7 @@
 #include "constants.h"
 #include "vicky_general.h"
 #include "text_screen_iii.h"
+#include "simpleio.h"
 #include "rsrc/font/foenix_st_8_8.h"
 
 #define MAX_TEXT_CHANNELS 2
@@ -13,12 +14,14 @@
  * Structure to hold pointers to the text channel's registers and memory
  */
 typedef struct s_text_channel {
-    volatile uint32_t * master_control;
+    unsigned char current_color;
+
+    volatile unsigned long * master_control;
     volatile char * text_cells;
-    volatile uint8_t * color_cells;
-    volatile uint32_t * cursor_settings;
-    volatile uint32_t * cursor_position;
-    volatile uint32_t * border_control;
+    volatile char * color_cells;
+    volatile unsigned long * cursor_settings;
+    volatile unsigned long * cursor_position;
+    volatile unsigned long * border_control;
 
     short columns_max;
     short rows_max;
@@ -28,12 +31,10 @@ typedef struct s_text_channel {
     short x;
     short y;
     volatile char * text_cursor_ptr;
-    volatile uint8_t * color_cursor_ptr;
-    uint8_t current_color;
+    volatile unsigned char * color_cursor_ptr;
 } t_text_channel, *p_text_channel;
 
 static t_text_channel text_channel[MAX_TEXT_CHANNELS];
-
 
 //  0xHHLL, 0xHHLL
 //  0xGGBB, 0xAARR
@@ -81,14 +82,37 @@ const unsigned short bg_color_lut [32] = {
 int text_init() {
     int i, x;
     p_text_channel chan_a = &text_channel[0];
+
+#if MODEL == MODEL_FOENIX_A2560K
     p_text_channel chan_b = &text_channel[1];
+#endif
+
+    for (i = 0; i < MAX_TEXT_CHANNELS; i++) {
+        text_channel[i].master_control = 0xffffffff;
+        text_channel[i].text_cells = 0xffffffff;
+        text_channel[i].color_cells = 0xffffffff;
+        text_channel[i].cursor_settings = 0xffffffff;
+        text_channel[i].cursor_position = 0xffffffff;
+        text_channel[i].border_control = 0xffffffff;
+        text_channel[i].text_cursor_ptr = 0xffffffff;
+        text_channel[i].color_cursor_ptr = 0xffffffff;
+        text_channel[i].current_color = 0;
+        text_channel[i].columns_max = 0;
+        text_channel[i].rows_max = 0;
+        text_channel[i].columns_visible = 0;
+        text_channel[i].rows_visible = 0;
+        text_channel[i].x = 0;
+        text_channel[i].y = 0;
+    }
 
 	// Init CLUT for the Color Memory
 	for (i = 0; i<32; i++) {
 		FG_CLUT_A[i] = fg_color_lut[i];
-		FG_CLUT_B[i] = fg_color_lut[i];
 		BG_CLUT_A[i] = bg_color_lut[i];
+#if MODEL == MODEL_FOENIX_A2560K
+		FG_CLUT_B[i] = fg_color_lut[i];
 		BG_CLUT_B[i] = bg_color_lut[i];
+#endif
 	}
 
     /* TODO: initialize everything... only do a screen if it's present */
@@ -100,11 +124,10 @@ int text_init() {
     chan_a->cursor_position = CursorControlReg_H_A;
     chan_a->border_control = BorderControlReg_L_A;
 
-    *chan_a->master_control = 1;     /* Set to text only mode: 640x480 */
-    // *chan_a->border_control = 0;                    /* Set to no border */
+    *chan_a->master_control = VKY3_MCR_TEXT_EN;             /* Set to text only mode: 640x480 */
 
-	chan_a->border_control[0] = 0x00102001;	// Enable
-	chan_a->border_control[1] = 0x00000040;	//Dark Blue
+	chan_a->border_control[0] = 0x00102001;	// Enable border
+	chan_a->border_control[1] = 0x00008080;	// Cyan border
 
     /* Set the font for channel A */
 
@@ -114,35 +137,39 @@ int text_init() {
     }
 
     text_setsizes(0);
-    text_set_color(0, 12, 4);
-    text_clear(0, 2);
+    text_set_color(0, 0xf, 4);
     text_set_cursor(0, 0xF3, 0xB1, 1, 1);
     text_set_xy(0, 0, 0);
+    text_clear(0, 2);
 
-    chan_b->master_control = MasterControlReg_B;
-    chan_b->text_cells = ScreenText_B;
-    chan_b->color_cells = ColorText_B;
-    chan_b->cursor_settings = CursorControlReg_L_B;
-    chan_b->cursor_position = CursorControlReg_H_B;
-    chan_b->border_control = BorderControlReg_L_B;
-
-    *chan_b->master_control = 1;     /* Set to text only mode: 640x480 */
-
-    chan_b->border_control[0] = 0x00102000;	// Enable
-	chan_b->border_control[1] = 0x00400000;	//Dark Red
-
-    text_setsizes(1);
-    text_set_color(1, 4, 3);
-    text_clear(1, 2);
-    text_set_cursor(1, 0xF3, 0xB1, 1, 1);
-    text_set_xy(1, 0, 0);
-
-    /* Set the font for channel B */
-
-    for (i = 0; i < 0x800; i++) {
-        unsigned char b = foenix_st_8x8[i];
-        VICKY_TXT_FONT_B[i] = b;
-    }
+// #if MODEL == MODEL_FOENIX_A2560K
+//
+//     chan_b->master_control = MasterControlReg_B;
+//     chan_b->text_cells = ScreenText_B;
+//     chan_b->color_cells = ColorText_B;
+//     chan_b->cursor_settings = CursorControlReg_L_B;
+//     chan_b->cursor_position = CursorControlReg_H_B;
+//     chan_b->border_control = BorderControlReg_L_B;
+//
+//     *chan_b->master_control = 1;     /* Set to text only mode: 640x480 */
+//
+//     chan_b->border_control[0] = 0x00102000;	// Enable
+// 	chan_b->border_control[1] = 0x00400000;	//Dark Red
+//
+//     text_setsizes(1);
+//     text_set_color(1, 4, 3);
+//     text_clear(1, 2);
+//     text_set_cursor(1, 0xF3, 0xB1, 1, 1);
+//     text_set_xy(1, 0, 0);
+//
+//     /* Set the font for channel B */
+//
+//     for (i = 0; i < 0x800; i++) {
+//         unsigned char b = foenix_st_8x8[i];
+//         VICKY_TXT_FONT_B[i] = b;
+//     }
+//
+// #endif
 
     return 0;
 }
@@ -335,34 +362,35 @@ void text_clear(short screen, short mode) {
         int eos_index = chan->columns_max * chan->rows_max;
         int cursor_index = chan->y * chan->columns_max + chan->x;
 
-        switch (mode) {
-            case 0:
-                /* Clear from cursor to the end of the screen */
-                for (i = cursor_index; i < eos_index; i++) {
-                    chan->text_cells[i] = ' ';
-                    chan->color_cells[i] = chan->current_color;
-                }
-                break;
-
-            case 1:
-                /* Clear from (0, 0) to cursor */
-                for (i = sos_index; i <= cursor_index; i++) {
-                    chan->text_cells[i] = ' ';
-                    chan->color_cells[i] = chan->current_color;
-                }
-                break;
-
-            case 2:
+        // switch (mode) {
+        //     case 0:
+        //         /* Clear from cursor to the end of the screen */
+        //         for (i = cursor_index; i < eos_index; i++) {
+        //             chan->text_cells[i] = ' ';
+        //             chan->color_cells[i] = chan->current_color;
+        //         }
+        //         break;
+        //
+        //     case 1:
+        //         /* Clear from (0, 0) to cursor */
+        //         for (i = sos_index; i <= cursor_index; i++) {
+        //             chan->text_cells[i] = ' ';
+        //             chan->color_cells[i] = chan->current_color;
+        //         }
+        //         break;
+        //
+        //     case 2:
                 /* Clear entire screen */
-                for (i = sos_index; i <= eos_index; i++) {
+                for (i = 0; i < 0x2000; i++) {
                     chan->text_cells[i] = ' ';
                     chan->color_cells[i] = chan->current_color;
                 }
-                break;
 
-            default:
-                break;
-        }
+        //         break;
+        //
+        //     default:
+        //         break;
+        // }
     }
 }
 

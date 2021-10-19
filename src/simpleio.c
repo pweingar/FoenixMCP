@@ -33,8 +33,7 @@ void print(short channel, char * message) {
     // sys_chan_write(channel, message, strlen(message));
 }
 
-unsigned char number[5];
-unsigned char hex_digits[] = "0123456789ABCDEF";
+const unsigned char hex_digits[] = "0123456789ABCDEF";
 
 /*
  * Print an 8-bit number as hex to a channel
@@ -45,6 +44,7 @@ unsigned char hex_digits[] = "0123456789ABCDEF";
  */
 void print_hex_8(short channel, unsigned short x) {
     short digit;
+    char number[3];
 
     digit = (x & 0xf0) >> 4;
     number[0] = hex_digits[digit];
@@ -66,6 +66,7 @@ void print_hex_8(short channel, unsigned short x) {
  */
 void print_hex_16(short channel, unsigned short x) {
     short digit;
+    char number[5];
 
     digit = (x >> 12) & 0x000f;
     number[0] = hex_digits[digit];

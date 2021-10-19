@@ -5,10 +5,22 @@
 #ifndef __UART_REG_H
 #define __UART_REG_H
 
+#include "sys_general.h"
+
+#if MODEL == MODEL_FOENIX_A2560K
 #define UART1_BASE              0x00C023F8  /* Base address for UART 1 (COM1) */
 #define UART2_BASE              0x00C022F8  /* Base address for UART 2 (COM2) */
 
-// Register Offsets
+#elif MODEL == MODEL_FOENIX_A2560U || MODEL == MODEL_FOENIX_A2560U_PLUS
+#define UART1_BASE              0x00B02808  /* Base address for UART 1 (COM1) */
+#define UART2_BASE              0x00B02809  /* Base address for UART 2 (COM2) */
+
+#endif
+
+/*
+ * Register Offsets
+ */
+
 #define UART_TRHB               0x00        /* Transmit/Receive Hold Buffer */
 #define UART_DLL                UART_TRHB   /* Divisor Latch Low Byte */
 #define UART_DLH                0x01        /* Divisor Latch High Byte */
