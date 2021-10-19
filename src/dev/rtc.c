@@ -4,6 +4,7 @@
 
 #include "log.h"
 #include "interrupt.h"
+#include "gabe_reg.h"
 #include "rtc.h"
 #include "rtc_reg.h"
 #include "simpleio.h"
@@ -16,11 +17,18 @@ static long rtc_ticks;
 void rtc_handle_int() {
     unsigned char flags;
 
-    flags = *RTC_FLAGS;
-    if (flags | RTC_PF) {
+    //flags = *RTC_FLAGS;
+    //if (flags | RTC_PF) {
         /* Peridic interrupt: increment the ticks counter */
         rtc_ticks++;
-    }
+
+        long ticks = rtc_ticks % 6000;
+        if (ticks == 3000) {
+            *GABE_CTRL_REG = *GABE_CTRL_REG | POWER_ON_LED;
+        } else if (ticks == 0){
+            *GABE_CTRL_REG = *GABE_CTRL_REG & ~POWER_ON_LED;
+        }
+    //}
 }
 
 /*
@@ -30,25 +38,25 @@ void rtc_init() {
     unsigned char rates;
     unsigned char enables;
 
-    // int_disable(INT_RTC);
-    //
-    // /* Reset the ticks counter */
-    // rtc_ticks = 0;
-    //
-    // /* Set the periodic interrupt to 976.5625 microseconds */
-    // *RTC_RATES = (*RTC_RATES & RTC_RATES_WD) | RTC_RATE_976us;
-    //
-    // /* Enable the periodic interrupt */
-    *RTC_RATES = 0;
-    *RTC_ENABLES = 0; // RTC_PIE;
+    int_disable(INT_RTC);
+
+    /* Reset the ticks counter */
+    rtc_ticks = 0;
+
+    /* Set the periodic interrupt to 976.5625 microseconds */
+    *RTC_RATES = RTC_RATE_976us;
+
+    /* Enable the periodic interrupt */
+    // *RTC_RATES = 0;
+    *RTC_ENABLES = RTC_PIE;
 
     /* Make sure the RTC is on */
     *RTC_CTRL = RTC_STOP;
 
     /* Register our interrupt handler and clear out any pending interrupts */
-    // int_register(INT_RTC, rtc_handle_int);
-    // int_clear(INT_RTC);
-    // int_enable(INT_RTC);
+    int_register(INT_RTC, rtc_handle_int);
+    int_clear(INT_RTC);
+    int_enable(INT_RTC);
 }
 
 /*

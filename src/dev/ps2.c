@@ -718,8 +718,6 @@ void mouse_handle_irq() {
     /* Clear the pending interrupt flag for the mouse */
     int_clear(INT_MOUSE);
 
-    *ScreenText_A = *ScreenText_A + 1;
-
     if ((g_mouse_state == 0) && ((mouse_byte & 0x08) != 0x08)) {
         /*
          * If this is the first byte in the packet, bit 4 must be set

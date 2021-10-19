@@ -92,7 +92,7 @@
             dc.l interrupt_x1F      ; 79 - Interrupt 0x1F - Real Time Clock
 
             ; dc.l interrupt_x20      ; 80 - Interrupt 0x20 - IDE HDD Generated Interrupt
-            ; dc.l interrupt_x21      ; 81 - Interrupt 0x21 - SDCard Insert
+            dc.l interrupt_x21      ; 81 - Interrupt 0x21 - SDCard Insert
             ; dc.l interrupt_x22      ; 82 - Interrupt 0x22 - SDCard Controller
             ; dc.l interrupt_x23      ; 83 - Interrupt 0x23 - Internal OPM
             ; dc.l interrupt_x24      ; 84 - Interrupt 0x24 - External OPN2
@@ -192,13 +192,21 @@ interrupt_x12:
             ; jsr _mouse_handle_irq
             ; movem.l (a7)+,d0-d7/a0-a6       ; Restore the registers
             ; rte
-            
+
 ;
 ; Interrupt Vector 0x1F -- RTC
 ;
 interrupt_x1F:
             movem.l d0-d7/a0-a6,-(a7)       ; Save all the registers
             move.w #($1f<<2),d0             ; Get the offset to interrupt 0x1f
+            bra int_dispatch                ; And process the interrupt
+
+;
+; Interrupt Vector 0x21 -- SDCard Insert
+;
+interrupt_x21:
+            movem.l d0-d7/a0-a6,-(a7)       ; Save all the registers
+            move.w #($21<<2),d0             ; Get the offset to interrupt 0x1f
             bra int_dispatch                ; And process the interrupt
 
 ;

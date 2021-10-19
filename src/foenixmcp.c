@@ -7,28 +7,30 @@
 #include "sys_general.h"
 #include "simpleio.h"
 #include "log.h"
-// #include "interrupt.h"
-// #include "gabe_reg.h"
+#include "interrupt.h"
+#include "gabe_reg.h"
+
 #if MODEL == MODEL_FOENIX_A2560K
 #include "superio.h"
+#include "dev/kbd_mo.h"
 #endif
+
 #include "syscalls.h"
-// #include "dev/block.h"
-// #include "dev/channel.h"
-// #include "dev/console.h"
+#include "dev/block.h"
+#include "dev/channel.h"
+#include "dev/console.h"
 #include "dev/text_screen_iii.h"
-// #include "dev/pata.h"
-// #include "dev/ps2.h"
-// #include "dev/kbd_mo.h"
-// #include "dev/rtc.h"
-// #include "dev/sdc.h"
-// #include "dev/uart.h"
+#include "dev/pata.h"
+#include "dev/ps2.h"
+#include "dev/rtc.h"
+#include "dev/sdc.h"
+#include "dev/uart.h"
 #include "vicky_general.h"
-// #include "snd/codec.h"
-// #include "snd/psg.h"
-// #include "snd/sid.h"
+#include "snd/codec.h"
+#include "snd/psg.h"
+#include "snd/sid.h"
 #include "fatfs/ff.h"
-// #include "cli/cli.h"
+#include "cli/cli.h"
 /* #include "rsrc/bitmaps/splash_a2560k.h"*/
 
 const char* VolumeStr[FF_VOLUMES] = { "sdc", "fdc", "hdc" };
@@ -188,14 +190,14 @@ void initialize() {
     }
 
     /* Initialize the real time clock */
-    rtc_init();
-//
-//     if (res = pata_install()) {
-//         log_num(LOG_ERROR, "FAILED: PATA driver installation", res);
-//     } else {
-//         log(LOG_INFO, "PATA driver installed.");
-//     }
-//
+    // rtc_init();
+
+    if (res = pata_install()) {
+        log_num(LOG_ERROR, "FAILED: PATA driver installation", res);
+    } else {
+        log(LOG_INFO, "PATA driver installed.");
+    }
+
     if (res = sdc_install()) {
         log_num(LOG_ERROR, "FAILED: SDC driver installation", res);
     } else {
@@ -209,13 +211,15 @@ void initialize() {
     } else {
         DEBUG("PS/2 keyboard initialized.");
     }
-//
-//     if (res = kbdmo_init()) {
-//         log_num(LOG_ERROR, "FAILED: A2560K built-in keyboard initialization", res);
-//     } else {
-//         log(LOG_INFO, "A2560K built-in keyboard initialized.");
-//     }
-//
+
+#if MODEL == MODEL_FOENIX_A2560K
+    if (res = kbdmo_init()) {
+        log_num(LOG_ERROR, "FAILED: A2560K built-in keyboard initialization", res);
+    } else {
+        log(LOG_INFO, "A2560K built-in keyboard initialized.");
+    }
+#endif
+
     if (res = cli_init()) {
         log_num(LOG_ERROR, "FAILED: CLI initialization", res);
     } else {
