@@ -102,6 +102,7 @@ short cmd_cls(short channel, int argc, char * argv[]) {
  */
 short cmd_sysinfo(short channel, int argc, char * argv[]) {
     t_sys_info info;
+    char buffer[80];
 
     sys_get_info(&info);
     print(channel, "System information:\nModel: ");
@@ -119,6 +120,9 @@ short cmd_sysinfo(short channel, int argc, char * argv[]) {
 
     print(channel, "\nVICKY version: ");
     print_hex_16(channel, info.vicky_rev);
+
+    sprintf(buffer, "\nMCP version: v%02d.%02d.%04d", info.mcp_version, info.mcp_rev, info.mcp_build);
+    print(channel, buffer);
 
     print(channel, "\n");
 

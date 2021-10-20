@@ -9,7 +9,7 @@
  * Screen Channel A
  */
 
-#define MasterControlReg_A		    ((volatile uint32_t *)0x00B40000)
+#define MasterControlReg_A		    ((volatile unsigned long *)0x00B40000)
 #define VKY3_MCR_TEXT_EN            0x00000001  /* Text Mode Enable */
 #define VKY3_MCR_TEXT_OVRLY         0x00000002  /* Text Mode overlay */
 #define VKY3_MCR_GRAPH_EN           0x00000004  /* Graphic Mode Enable */
@@ -20,57 +20,57 @@
 #define VKY3_MCR_MANUAL_GAMMA_EN    0x00020000  /* Enable Manual GAMMA Enable */
 #define VKY3_MCR_BLANK_EN           0x00040000  /* Turn OFF sync (to monitor in sleep mode) */
 
-#define BorderControlReg_L_A	    ((volatile uint32_t *)0x00B40004)
+#define BorderControlReg_L_A	    ((volatile unsigned long *)0x00B40004)
 #define VKY3_BRDR_EN                0x00000001  /* Border Enable */
 #define VKY3_X_SCROLL_MASK          0x00000070  /* X Scroll */
 #define VKY3_X_SIZE_MASK            0x00003f00  /* X Size */
 #define VKY3_Y_SIZE_MASK            0x003f0000  /* Y Size */
 
-#define BorderControlReg_H_A 	    ((volatile uint32_t *)0x00B40008)
-#define BackGroundControlReg_A	    ((volatile uint32_t *)0x00B4000C)
-#define CursorControlReg_L_A	    ((volatile uint32_t *)0x00B40010)
-#define CursorControlReg_H_A	    ((volatile uint32_t *)0x00B40014)
+#define BorderControlReg_H_A 	    ((volatile unsigned long *)0x00B40008)
+#define BackGroundControlReg_A	    ((volatile unsigned long *)0x00B4000C)
+#define CursorControlReg_L_A	    ((volatile unsigned long *)0x00B40010)
+#define CursorControlReg_H_A	    ((volatile unsigned long *)0x00B40014)
 
-#define LineInterrupt0_A		    ((volatile uint16_t *)0x00B40018)
-#define LineInterrupt1_A		    ((volatile uint16_t *)0x00B4001A)
-#define LineInterrupt2_A		    ((volatile uint16_t *)0x00B4001C)
-#define LineInterrupt3_A		    ((volatile uint16_t *)0x00B4001E)
+#define LineInterrupt0_A		    ((volatile unsigned short *)0x00B40018)
+#define LineInterrupt1_A		    ((volatile unsigned short *)0x00B4001A)
+#define LineInterrupt2_A		    ((volatile unsigned short *)0x00B4001C)
+#define LineInterrupt3_A		    ((volatile unsigned short *)0x00B4001E)
 
-#define MousePointer_Mem_A		    ((volatile uint16_t *)0x00B40400)
-#define MousePtr_A_CTRL_Reg		    ((volatile uint16_t *)0x00B40C00)
+#define MousePointer_Mem_A		    ((volatile unsigned short *)0x00B40400)
+#define MousePtr_A_CTRL_Reg		    ((volatile unsigned short *)0x00B40C00)
 #define MousePtr_En                 0x0001
 
-#define MousePtr_A_X_Pos		    ((volatile uint16_t *)0x00B40C02)
-#define MousePtr_A_Y_Pos		    ((volatile uint16_t *)0x00B40C04)
-#define MousePtr_A_Mouse0		    ((volatile uint16_t *)0x00B40C0A)
-#define MousePtr_A_Mouse1		    ((volatile uint16_t *)0x00B40C0C)
-#define MousePtr_A_Mouse2		    ((volatile uint16_t *)0x00B40C0E)
+#define MousePtr_A_X_Pos		    ((volatile unsigned short *)0x00B40C02)
+#define MousePtr_A_Y_Pos		    ((volatile unsigned short *)0x00B40C04)
+#define MousePtr_A_Mouse0		    ((volatile unsigned short *)0x00B40C0A)
+#define MousePtr_A_Mouse1		    ((volatile unsigned short *)0x00B40C0C)
+#define MousePtr_A_Mouse2		    ((volatile unsigned short *)0x00B40C0E)
 
 #define ScreenText_A			    ((volatile char *)0x00B60000)	    /* Text matrix */
-#define ColorText_A				    ((volatile uint8_t *)0x00B68000)	/* Color matrix */
-#define FG_CLUT_A 				    ((volatile uint16_t *)0x00B6C400)	/* Foreground LUT */
-#define BG_CLUT_A 				    ((volatile uint16_t *)0x00B6C440)	/* Background LUT */
+#define ColorText_A				    ((volatile unsigned char *)0x00B68000)	/* Color matrix */
+#define FG_CLUT_A 				    ((volatile unsigned short *)0x00B6C400)	/* Foreground LUT */
+#define BG_CLUT_A 				    ((volatile unsigned short *)0x00B6C440)	/* Background LUT */
 
-#define BM0_Control_Reg			    ((volatile uint16_t *)0x00B40100)
-#define BM0_Addy_Pointer_Reg	    ((volatile uint16_t *)0x00B40104)
+#define BM0_Control_Reg			    ((volatile unsigned long *)0x00B40100)
+#define BM0_Addy_Pointer_Reg	    ((volatile unsigned long *)0x00B40104)
 
-#define Sprite_0_CTRL			    ((volatile uint16_t *)0x00B41000)
-#define Sprite_0_ADDY_HI		    ((volatile uint16_t *)0x00B41002)
-#define Sprite_0_POS_X	     	    ((volatile uint16_t *)0x00B41004)
-#define Sprite_0_POS_Y	   		    ((volatile uint16_t *)0x00B41006)
+#define Sprite_0_CTRL			    ((volatile unsigned short *)0x00B41000)
+#define Sprite_0_ADDY_HI		    ((volatile unsigned short *)0x00B41002)
+#define Sprite_0_POS_X	     	    ((volatile unsigned short *)0x00B41004)
+#define Sprite_0_POS_Y	   		    ((volatile unsigned short *)0x00B41006)
 
 /*
  * Color lookup tables
  */
 
-#define LUT_0					    ((volatile uint8_t *)0x00B42000)
-#define LUT_1					    ((volatile uint8_t *)0x00B42400)
-#define LUT_2					    ((volatile uint8_t *)0x00B42800)
-#define LUT_3					    ((volatile uint8_t *)0x00B42C00)
-#define LUT_4					    ((volatile uint8_t *)0x00B43000)
-#define LUT_5					    ((volatile uint8_t *)0x00B43400)
-#define LUT_6					    ((volatile uint8_t *)0x00B43800)
-#define LUT_7					    ((volatile uint8_t *)0x00B43C00)
+#define LUT_0					    ((volatile unsigned char *)0x00B42000)
+#define LUT_1					    ((volatile unsigned char *)0x00B42400)
+#define LUT_2					    ((volatile unsigned char *)0x00B42800)
+#define LUT_3					    ((volatile unsigned char *)0x00B42C00)
+#define LUT_4					    ((volatile unsigned char *)0x00B43000)
+#define LUT_5					    ((volatile unsigned char *)0x00B43400)
+#define LUT_6					    ((volatile unsigned char *)0x00B43800)
+#define LUT_7					    ((volatile unsigned char *)0x00B43C00)
 
 /*
  * Text mode font memory
@@ -82,6 +82,6 @@
  * Location of VRAM
  */
 
-#define VRAM_Bank0				    ((volatile uint8_t *)0x00C00000)
+#define VRAM_Bank0				    ((volatile unsigned char *)0x00C00000)
 
 #endif

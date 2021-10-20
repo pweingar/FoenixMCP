@@ -32,6 +32,9 @@
  * Structure to describe the hardware
  */
 typedef struct s_sys_info {
+    unsigned short mcp_version; /* Current version of the MCP kernel */
+    unsigned short mcp_rev;     /* Current revision, or sub-version of the MCP kernel */
+    unsigned short mcp_build;   /* Current vuild # of the MCP kernel */
     unsigned short model;       /* Code to say what model of machine this is */
     const char * model_name;    /* Human readable name of the model of the computer */
     unsigned short cpu;         /* Code to say which CPU is running */

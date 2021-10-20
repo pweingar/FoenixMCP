@@ -126,9 +126,6 @@ int text_init() {
 
     *chan_a->master_control = VKY3_MCR_TEXT_EN;             /* Set to text only mode: 640x480 */
 
-	chan_a->border_control[0] = 0x00102001;	// Enable border
-	chan_a->border_control[1] = 0x00008080;	// Cyan border
-
     /* Set the font for channel A */
 
     for (i = 0; i < 0x800; i++) {
@@ -136,6 +133,7 @@ int text_init() {
         VICKY_TXT_FONT_A[i] = b;
     }
 
+    text_set_border(0, 1, 0x20, 0x10, 0x00008080);
     text_setsizes(0);
     text_set_color(0, 0xf, 4);
     text_set_cursor(0, 0xF3, 0xB1, 1, 1);
@@ -172,6 +170,33 @@ int text_init() {
 // #endif
 
     return 0;
+}
+
+/*
+ * Set the border
+ *
+ * Inputs:
+ * screen = the screen number 0 for channel A, 1 for channel B
+ * visible = 0 to hide, any other number to show
+ * width = the horizontal thickness of the border in pixels
+ * height = the vertical thickness of the border in pixels
+ * color = the RGB color (xxRRGGBB)
+ */
+void text_set_border(short screen, short visible, short width, short height, unsigned long color) {
+    if (screen < MAX_TEXT_CHANNELS) {
+        p_text_channel chan = &text_channel[screen];
+
+        if (visible) {
+            /* Set the width and color */
+            chan->border_control[0] = ((height & 0xff) << 16) | ((width & 0xff) << 8) | 1;
+            chan->border_control[1] = (color & 0x00ff0000) | ((color & 0xff) << 8) | ((color & 0xff00) >> 8);
+
+        } else {
+            /* Hide the border and make it 0 width */
+            chan->border_control[0] = 0;
+            chan->border_control[1] = 0;
+        }
+    }
 }
 
 /*

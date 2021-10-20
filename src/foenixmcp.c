@@ -31,7 +31,8 @@
 #include "snd/sid.h"
 #include "fatfs/ff.h"
 #include "cli/cli.h"
-/* #include "rsrc/bitmaps/splash_a2560k.h"*/
+// #include "rsrc/bitmaps/splash_a2560k.h"
+// #include "rsrc/bitmaps/splash_a2560u.h"
 
 const char* VolumeStr[FF_VOLUMES] = { "sdc", "fdc", "hdc" };
 
@@ -89,7 +90,7 @@ const char* VolumeStr[FF_VOLUMES] = { "sdc", "fdc", "hdc" };
  	*LED2_REG = 0x02;
  }
 #endif
-
+//
 // /*
 //  * Load and display the splash screen
 //  */
@@ -108,7 +109,7 @@ const char* VolumeStr[FF_VOLUMES] = { "sdc", "fdc", "hdc" };
 //
 //     /* Copy the bitmap to video RAM */
 //     for (i = 0; i < sizeof(splash_screen_bmap); i++) {
-//         VRAM_Bank0[i] = splash_screen_bmap[i];
+//         VRAM_Bank0[i] = i * 0xff; // splash_screen_bmap[i];
 //     }
 //
 //     /* Set up the bitmap */
@@ -118,20 +119,21 @@ const char* VolumeStr[FF_VOLUMES] = { "sdc", "fdc", "hdc" };
 //     /* Turn off the border */
 //     *BorderControlReg_L_A = 0;
 //
+//     /* Set a background color for the bitmap mode */
+//     *BackGroundControlReg_A = 0x00800080;
+//
 //     /* Display the splashscreen: 320x200 */
-//     *MasterControlReg_A = VKY3_MCR_BITMAP_EN | VKY3_MCR_GRAPH_EN | VKY3_MCR_DOUBLE_EN;
+//     *MasterControlReg_A = 0x000000fD | VKY3_MCR_DOUBLE_EN;
 //
 //     for (i = 0; i < 4096*1024; i++) ;
 // }
 
- void print_error(short channel, char * message, short code) {
-     print(channel, message);
-     print(channel, ": ");
-     print_hex_16(channel, code);
-     print(channel, "\n");
- }
-
-extern short current_color;
+void print_error(short channel, char * message, short code) {
+    print(channel, message);
+    print(channel, ": ");
+    print_hex_16(channel, code);
+    print(channel, "\n");
+}
 
 /*
  * Initialize the kernel systems.
@@ -147,7 +149,7 @@ void initialize() {
     mouse_set_visible(0);
 
     /* Display the splash screen */
-    /* load_splashscreen(); */
+    // load_splashscreen();
 
     /* Initialize the text channels */
     text_init();
@@ -246,7 +248,7 @@ int main(int argc, char * argv[]) {
     const char * title_3 = "\x1b[37m AAAAA  222   555  6666  0   0 U   U";
     const char * title_4 = "\x1b[37m A   A 2         5 6   6 0   0 U   U";
     const char * title_5 = "\x1b[37m A   A 22222 5555   666   000   UUU";
-#elif MODEL == MODEL_FOENIX_A2560U
+#elif MODEL == MODEL_FOENIX_A2560U_PLUS
     const char * title_1 = "\x1b[37m   A   2222  55555  666   000  U   U   +";
     const char * title_2 = "\x1b[37m  A A      2 5     6     0   0 U   U   +";
     const char * title_3 = "\x1b[37m AAAAA  222   555  6666  0   0 U   U +++++";

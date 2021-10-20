@@ -13,6 +13,16 @@
 #define LOG_VERBOSE 5   /* Log a truly verbose message... the sort you almost never want to bother with */
 
 /*
+ * Display a panic screen
+ *
+ * Inputs:
+ * message = string indicating the type of error
+ * pc = the value of the program counter at the time of the error
+ * address = (optional) the address of the access that caused the issue
+ */
+extern void panic(const char * message, unsigned long pc, unsigned long address);
+
+/*
  * Set the maximum level of verbosity in logging.
  * To be printed, a message must have a level lower or equal to this level.
  *
