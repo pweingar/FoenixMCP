@@ -895,13 +895,16 @@ short mouse_init() {
 
     /* Set up the mouse pointer */
 
+    short src_offset = 0;
+    short dest_offset = 0;
     for (i = 0; i < 256; i++) {
-        short src_offset = 3*i;
-        short dest_offset = 2*i;
-        low_components = Color_Pointer_bin[src_offset+1] << 8 + Color_Pointer_bin[src_offset];
+        low_components = (Color_Pointer_bin[src_offset+1] << 8) + Color_Pointer_bin[src_offset];
         hi_components = Color_Pointer_bin[src_offset+2];
         MousePointer_Mem_A[dest_offset] = low_components;
         MousePointer_Mem_A[dest_offset+1] = hi_components;
+
+        src_offset += 3;
+        dest_offset += 2;
     }
 
     /* Enable the mouse pointer on channel A */

@@ -192,7 +192,7 @@ void initialize() {
     }
 
     /* Initialize the real time clock */
-    // rtc_init();
+    rtc_init();
 
     if (res = pata_install()) {
         log_num(LOG_ERROR, "FAILED: PATA driver installation", res);
