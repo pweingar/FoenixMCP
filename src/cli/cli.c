@@ -13,7 +13,12 @@
 #include "cli/cli.h"
 #include "cli/dos_cmds.h"
 #include "cli/mem_cmds.h"
+#include "dev/ps2.h"
 #include "dev/rtc.h"
+#include "dev/uart.h"
+#include "uart_reg.h"
+#include "rtc_reg.h"
+#include "vicky_general.h"
 
 #define MAX_COMMAND_SIZE    128
 #define MAX_ARGC            32
@@ -35,6 +40,9 @@ extern short cmd_settime(short channel, int argc, char * argv[]);
 extern short cmd_sysinfo(short channel, int argc, char * argv[]);
 extern short cmd_cls(short channel, int argc, char * argv[]);
 extern short cmd_showint(short channel, int argc, char * argv[]);
+extern short cmd_testuart(short channel, int argc, char * argv[]);
+extern short cmd_get_ticks(short channel, int argc, char * argv[]);
+extern short cmd_testrtc(short channel, int argc, char * argv[]);
 
 /*
  * Variables
@@ -64,12 +72,15 @@ const t_cli_command g_cli_commands[] = {
     { "PWD", "PWD : prints the current directory", cmd_pwd },
     // { "REN", "REN <old path> <new path> : rename a file or directory", cmd_rename },
     { "RUN", "RUN <path> : execute a binary file",  cmd_run },
+    { "GETTICKS", "GETTICKS : print number of ticks since reset", cmd_get_ticks },
     { "GETTIME", "GETTIME : prints the current time", cmd_gettime },
     { "SETTIME", "SETTIME yyyy-mm-dd HH:MM:SS : sets the current time", cmd_settime },
     { "SHOWINT", "SHOWINT : Show information about the interrupt registers", cmd_showint },
     { "SYSINFO", "SYSINFO : prints information about the system", cmd_sysinfo },
     { "TESTIDE", "TESTIDE : fetches and prints the IDE MBR repeatedly", cmd_testide },
     { "TESTCREATE", "TESTCREATE <path> : tries to create a file", cmd_testcreate },
+    { "TESTRTC", "TESTRTC : poll the RTC for a periodic interrupt", cmd_testrtc },
+    { "TESTUART", "TESTUART : echo key presses between terminal and console", cmd_testuart },
     { "TYPE", "TYPE <path> : print the contents of a text file", cmd_type },
     { 0, 0 }
 };
@@ -85,6 +96,68 @@ int cmd_help(short channel, int argc, char * argv[]) {
         sys_chan_write(channel, "\n", 2);
     }
     return 0;
+}
+
+/*
+ * Try using the RTC periodic interrupt in polled mode
+ */
+short cmd_testrtc(short channel, int argc, char * argv[]) {
+    char buffer[80];
+    char * spinner = "|/-\\";
+    short count = 0;
+    int_enable(INT_RTC);
+
+    *RTC_RATES = 0xfe;          /* Periodic interrupt rate: 0.5 s */
+    *RTC_ENABLES = RTC_PIE;     /* Turn on the periodic interrupt */
+
+    while (1) {
+        if (*RTC_FLAGS & RTC_PF) {
+            /* We got the periodic interrupt */
+
+            ScreenText_A[0] = spinner[count];
+            ColorText_A[0] = 0x14;
+
+            if (count++ >= strlen(spinner) - 1) {
+                count = 0;
+            }
+        }
+    }
+}
+
+/*
+ * Print the number of ticks since last restart
+ */
+short cmd_get_ticks(short channel, int argc, char * argv[]) {
+    char buffer[80];
+
+    sprintf(buffer, "%d\n", rtc_get_ticks());
+    sys_chan_write(channel, buffer, strlen(buffer));
+    return 0;
+}
+
+short cmd_testuart(short channel, int argc, char * argv[]) {
+    char c;
+    char buffer[80];
+
+    uart_init(0);
+    uart_setbps(0, UART_115200);
+    uart_setlcr(0, LCR_DATABITS_8 | LCR_STOPBIT_1 | LCR_PARITY_NONE);
+
+    sprintf(buffer, "COM1: 115200, no parity, 1 stop bit, 8 data bits\nPress ESC to finish.\n");
+    sys_chan_write(0, buffer, strlen(buffer));
+
+    while (1) {
+        c = kbd_getc();
+        if (c != 0) {
+            if (c == 0x1b) {
+                return 0;
+            }
+            uart_put(0, c);
+        } else if (uart_has_bytes(0)) {
+            c = uart_get(0);
+            sys_chan_write_b(channel, c);
+        }
+    }
 }
 
 /*

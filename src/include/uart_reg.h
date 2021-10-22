@@ -12,8 +12,8 @@
 #define UART2_BASE              0x00C022F8  /* Base address for UART 2 (COM2) */
 
 #elif MODEL == MODEL_FOENIX_A2560U || MODEL == MODEL_FOENIX_A2560U_PLUS
-#define UART1_BASE              0x00B02808  /* Base address for UART 1 (COM1) */
-#define UART2_BASE              0x00B02809  /* Base address for UART 2 (COM2) */
+#define UART1_BASE              0x00B028F8  /* Base address for UART 1 (COM1) */
+#define UART2_BASE              0x00B028F9  /* Base address for UART 2 (COM2) */
 
 #endif
 

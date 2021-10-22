@@ -90,43 +90,50 @@ const char* VolumeStr[FF_VOLUMES] = { "sdc", "fdc", "hdc" };
  	*LED2_REG = 0x02;
  }
 #endif
-//
-// /*
-//  * Load and display the splash screen
-//  */
-// void load_splashscreen() {
-//     int i;
-//
-//     /* Turn off the screen */
-//     *MasterControlReg_A = VKY3_MCR_BLANK_EN;
-//
-//     /* Copy the splash screen LUT */
-//     for (i = 0; i < sizeof(splash_screen_cmap); i++) {
-//         LUT_0[i] = splash_screen_cmap[i][0];
-//         LUT_0[i+1] = splash_screen_cmap[i][1];
-//         LUT_0[i+2] = splash_screen_cmap[i][2];
-//     }
-//
-//     /* Copy the bitmap to video RAM */
-//     for (i = 0; i < sizeof(splash_screen_bmap); i++) {
-//         VRAM_Bank0[i] = i * 0xff; // splash_screen_bmap[i];
-//     }
-//
-//     /* Set up the bitmap */
-//     *BM0_Addy_Pointer_Reg = 0;
-//     *BM0_Control_Reg = 1;
-//
-//     /* Turn off the border */
-//     *BorderControlReg_L_A = 0;
-//
-//     /* Set a background color for the bitmap mode */
-//     *BackGroundControlReg_A = 0x00800080;
-//
-//     /* Display the splashscreen: 320x200 */
-//     *MasterControlReg_A = 0x000000fD | VKY3_MCR_DOUBLE_EN;
-//
-//     for (i = 0; i < 4096*1024; i++) ;
-// }
+
+/*
+ * Load and display the splash screen
+ */
+void load_splashscreen() {
+    int i;
+
+    /* Turn off the screen */
+    *MasterControlReg_A = VKY3_MCR_BLANK_EN;
+
+    for (i = 0; i < 256; i++) {
+        LUT_0[4*i] = 0;
+        LUT_0[4*i+1] = i;
+        LUT_0[4*i+2] = i;
+        LUT_0[4*i+3] = 0;
+    }
+
+
+    /* Copy the bitmap to video RAM */
+    for (i = 0; i < 320*240; i++) {
+        VRAM_Bank0[i] = i * 0xff; // splash_screen_bmap[i];
+    }
+
+    /* Set up the bitmap */
+    *BM0_Addy_Pointer_Reg = 0;
+    *BM0_Control_Reg = 1;
+
+    /* Turn off the border */
+    *BorderControlReg_L_A = 0;
+
+    /* Set a background color for the bitmap mode */
+    *BackGroundControlReg_A = 0x00800000;
+
+    /* Display the splashscreen: 320x200 */
+    *MasterControlReg_A = 0x000000fD | VKY3_MCR_DOUBLE_EN;
+
+    /* Play the SID test bong on the Gideon SID implementation */
+    sid_test_internal();
+
+    for (i = 0; i < 2048*1024; i++) ;
+
+    /* Initialize the text channels */
+    text_init();
+}
 
 void print_error(short channel, char * message, short code) {
     print(channel, message);
@@ -147,9 +154,6 @@ void initialize() {
 
     // /* Hide the mouse */
     mouse_set_visible(0);
-
-    /* Display the splash screen */
-    // load_splashscreen();
 
     /* Initialize the text channels */
     text_init();
@@ -176,8 +180,8 @@ void initialize() {
     /* Initialize the SID chips */
     sid_init_all();
 
-    /* Play the SID test bong on the Gideon SID implementation */
-    sid_test_internal();
+    /* Display the splash screen */
+    load_splashscreen();
 
     cdev_init_system();   // Initialize the channel device system
     log(LOG_INFO, "Channel device system ready.");
@@ -192,7 +196,7 @@ void initialize() {
     }
 
     /* Initialize the real time clock */
-    rtc_init();
+    // rtc_init();
 
     if (res = pata_install()) {
         log_num(LOG_ERROR, "FAILED: PATA driver installation", res);
