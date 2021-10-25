@@ -5,7 +5,8 @@
 #ifndef __SOUND_A2560U_H
 #define __SOUND_A2560U_H
 
-#define PSG_PORT    ((volatile unsigned char *)0x00B20100)  /* Control register for the SN76489 */
+#define PSG_PORT    ((volatile unsigned char *)0x00B20130)  /* Control register for the SN76489 */
+#define OPL3_PORT   ((volatile unsigned char *)0x00B20200)  /* Access port for the OPL3 */
 #define CODEC       ((volatile unsigned short *)0x00B20E00) /* Control register for the CODEC */
 
 /*

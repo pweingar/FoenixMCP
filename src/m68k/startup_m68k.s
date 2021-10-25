@@ -1,6 +1,10 @@
             xref ___main
             xref _cli_rerepl
             xref _panic
+            xref _handle_bus_err
+            xref _handle_addr_err
+            xref _handle_inst_err
+            xref _handle_div0_err
 
             xdef _syscall
             xdef ___exit
@@ -13,13 +17,13 @@
 
             dc.l ___STACK           ; 00 - Initial stack pointer
             dc.l coldboot           ; 01 - Initial PC
-            dc.l _handle_bus        ; 02 - Bus error
-            dc.l _handle_address    ; 03 - Address error
-            dc.l _handle_illegal    ; 04 - Illegal instruction
-            dc.l _handle_div0       ; 05 - Zero divide
-            dc.l _handle_chk        ; 06 - CHK instruction
-            dc.l _handle_trapv      ; 07 - TRAPV instruction
-            dc.l _handle_priv       ; 08 - Priviledge error
+            dc.l _handle_bus_err    ; 02 - Bus error
+            dc.l _handle_addr_err   ; 03 - Address error
+            dc.l _handle_inst_err   ; 04 - Illegal instruction
+            dc.l _handle_div0_err   ; 05 - Zero divide
+            dc.l not_impl           ; 06 - CHK instruction
+            dc.l not_impl           ; 07 - TRAPV instruction
+            dc.l not_impl           ; 08 - Priviledge error
             dc.l not_impl           ; 09 - Trace
             dc.l not_impl           ; 10 - Line 1010
             dc.l not_impl           ; 11 - Line 1111
@@ -124,9 +128,9 @@ clrloop:    clr.l (a0)+
             subq.l #4,d0
             bne	clrloop
 
-            ; Set TRAP #13 vector handler
+            ; Set TRAP #15 vector handler
             lea h_trap_15,a0        ; Address of the handler
-            move.l #(13+32)<<2,a1   ; TRAP#13 vector address
+            move.l #(13+32)<<2,a1   ; TRAP#15 vector address
             move.l a0,(a1)          ; Set the vector
 
 callmain:   jsr ___main             ; call __main to transfer to the C code
@@ -159,19 +163,19 @@ autovec2:   movem.l d0-d7/a0-a6,-(a7)
 ;
 int_dispatch:
             lea _g_int_handler,a0           ; Look in the interrupt handler table
-            movea.l (0,a0,d0),a1            ; Get the address of the handler
+            move.l (0,a0,d0),d0             ; Get the address of the handler
             beq intdis_end                  ; If there isn't one, just return
+            movea.l d0,a0
+            jsr (a0)                        ; If there is, call it.
 
-            jsr (a1)                        ; If there is, call it.
-
-intdis_end: movem.l (a7)+,d0-d7/a0-a6       ; Restore the registers
+intdis_end: movem.l (a7)+,d0/a0             ; Restore affected registers
             rte
 
 ;
 ; Interrupt Vector 0x10 -- SuperIO Keyboard
 ;
 interrupt_x10:
-            movem.l d0-d7/a0-a6,-(a7)       ; Save all the registers
+            movem.l d0/a0,-(a7)             ; Save affected registers
             move.w #($10<<2),d0             ; Get the offset to interrupt 0x11
             bra int_dispatch                ; And process the interrupt
 
@@ -179,7 +183,7 @@ interrupt_x10:
 ; Interrupt Vector 0x11 -- A2560K "Mo" keyboard
 ;
 interrupt_x11:
-            movem.l d0-d7/a0-a6,-(a7)       ; Save all the registers
+            movem.l d0/a0,-(a7)             ; Save affected registers
             move.w #($11<<2),d0             ; Get the offset to interrupt 0x11
             bra int_dispatch                ; And process the interrupt
 
@@ -187,18 +191,15 @@ interrupt_x11:
 ; Interrupt Vector 0x12 -- SuperIO Mouse
 ;
 interrupt_x12:
-            movem.l d0-d7/a0-a6,-(a7)       ; Save all the registers
+            movem.l d0/a0,-(a7)             ; Save affected registers
             move.w #($12<<2),d0             ; Get the offset to interrupt 0x11
             bra int_dispatch                ; And process the interrupt
-            ; jsr _mouse_handle_irq
-            ; movem.l (a7)+,d0-d7/a0-a6       ; Restore the registers
-            ; rte
 
 ;
 ; Interrupt Vector 0x1F -- RTC
 ;
 interrupt_x1F:
-            movem.l d0-d7/a0-a6,-(a7)       ; Save all the registers
+            movem.l d0/a0,-(a7)             ; Save affected registers
             move.w #($1f<<2),d0             ; Get the offset to interrupt 0x1f
             bra int_dispatch                ; And process the interrupt
 
@@ -206,7 +207,7 @@ interrupt_x1F:
 ; Interrupt Vector 0x21 -- SDCard Insert
 ;
 interrupt_x21:
-            movem.l d0-d7/a0-a6,-(a7)       ; Save all the registers
+            movem.l d0/a0,-(a7)             ; Save affected registers
             move.w #($21<<2),d0             ; Get the offset to interrupt 0x1f
             bra int_dispatch                ; And process the interrupt
 
@@ -284,84 +285,3 @@ _restart_cli:
             lea ___STACK,sp
             jsr _cli_rerepl
             bra _restart_cli
-
-;
-; Handle a Bus Error by going to the panic screen
-;
-_handle_bus:
-            move.l (2,a7),a0            ; Target address in A0
-            move.l (10,a7),a1           ; PC in A1
-            lea MSG_ERR_BUS,a2
-            bra call_panic
-
-;
-; Handle a Address Error by going to the panic screen
-;
-_handle_address:
-            move.l (2,a7),a0            ; Target address in A0
-            move.l (10,a7),a1           ; PC in A1
-            lea MSG_ERR_ADDRESS,a2
-            bra call_panic
-
-;
-; Handle a Illegal Instruction Error by going to the panic screen
-;
-_handle_illegal:
-            move.l #0,a0                ; Target address is 0 in A0
-            move.l (10,a7),a1           ; PC in A1
-            lea MSG_ERR_ILLEGAL,a2
-            bra call_panic
-
-;
-; Handle a Divide by Zero Error by going to the panic screen
-;
-_handle_div0:
-            move.l #0,a0                ; Target address is 0 in A0
-            move.l (10,a7),a1           ; PC in A1
-            lea MSG_ERR_DIV0,a2
-            bra call_panic
-
-;
-; Handle a CHK Error by going to the panic screen
-;
-_handle_chk:
-            move.l #0,a0                ; Target address is 0 in A0
-            move.l (10,a7),a1           ; PC in A1
-            lea MSG_ERR_CHK,a2
-            bra call_panic
-
-;
-; Handle a TRAPV Error by going to the panic screen
-;
-_handle_trapv:
-            move.l #0,a0                ; Target address is 0 in A0
-            move.l (10,a7),a1           ; PC in A1
-            lea MSG_ERR_TRAPV,a2
-            bra call_panic
-
-;
-; Handle a Privilege Error by going to the panic screen
-;
-_handle_priv:
-            move.l #0,a0                ; Target address is 0 in A0
-            move.l (10,a7),a1           ; PC in A1
-            lea MSG_ERR_PRIV,a2
-            bra call_panic
-
-call_panic:
-            move.l a2,-(a7)
-            move.l a1,-(a7)
-            move.l a0,-(a7)
-            jsr _panic
-panic_loop:
-            bra panic_loop
-
-            data
-
-MSG_ERR_BUS:        dc.b "Bus Error"
-MSG_ERR_ADDRESS:    dc.b "Address Error"
-MSG_ERR_ILLEGAL:    dc.b "Illegal Instruction Error"
-MSG_ERR_DIV0:       dc.b "Divide by Zero Error"
-MSG_ERR_CHK:        dc.b "Range Check Error"
-MSG_ERR_TRAPV:      dc.b "Overflow Error"
-MSG_ERR_PRIV:       dc.b "Privilege Error"

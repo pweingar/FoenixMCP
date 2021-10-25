@@ -15,15 +15,20 @@ void log_init() {
     log_level = 999;
 }
 
+const char * exception_names[] = {
+    "Bus Error",
+    "Address Error",
+    "Illegal Instruction Error",
+    "Divide by Zero Error"
+};
+
 /*
  * Display a panic screen
  *
  * Inputs:
- * code = number indicating the type of violation
- * pc = the value of the program counter at the time of the error
- * address = (optional) the address of the access that caused the issue
+ * message = the error message to show
  */
-void panic(const char * message, unsigned long pc, unsigned long address){
+void panic(unsigned short exception_number) {
     char buffer[80];
     short column = 18;
     short row = 10;
@@ -50,23 +55,19 @@ void panic(const char * message, unsigned long pc, unsigned long address){
     sprintf(buffer, "\xB3                                          \xB3");
     print(0, buffer);
 
-    text_set_xy(0, column, row++);
-    sprintf(buffer, "\xB3 %-40s \xB3", message);
-    print(0, buffer);
+    if (exception_number < 4) {
+        text_set_xy(0, column, row++);
+        sprintf(buffer, "\xB3 #%10x                                    \xB3", exception_number);
+        print(0, buffer);
+    } else {
+        text_set_xy(0, column, row++);
+        sprintf(buffer, "\xB3 Unknown Exception                        \xB3");
+        print(0, buffer);
+    }
 
     text_set_xy(0, column, row++);
     sprintf(buffer, "\xB3                                          \xB3");
     print(0, buffer);
-
-    if (address == 0l) {
-        text_set_xy(0, column, row++);
-        sprintf(buffer, "\xB3 PC: %08X                             \xB3", message);
-        print(0, buffer);
-    } else {
-        text_set_xy(0, column, row++);
-        sprintf(buffer, "\xB3 PC: %08X           ADDRESS: %08X \xB3", pc, address);
-        print(0, buffer);
-    }
 
     text_set_xy(0, column, row++);
     sprintf(buffer, "\xC0\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xD9");
@@ -74,6 +75,22 @@ void panic(const char * message, unsigned long pc, unsigned long address){
 
     /* Wait forever */
     while (1) ;
+}
+
+__interrupt void handle_bus_err() {
+    panic(0);
+}
+
+__interrupt void handle_addr_err() {
+    panic(1);
+}
+
+__interrupt void handle_inst_err() {
+    panic(2);
+}
+
+__interrupt void handle_div0_err() {
+    panic(3);
 }
 
 /*

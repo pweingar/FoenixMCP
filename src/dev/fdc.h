@@ -5,6 +5,8 @@
 #ifndef __FDC_H
 #define __FDC_H
 
+#if MODEL == MODEL_FOENIX_A2560K
+
 #include "types.h"
 
 /*
@@ -97,5 +99,6 @@ extern short fdc_flush();
  */
 extern short fdc_ioctrl(short command, unsigned char * buffer, short size);
 
+#endif
 
 #endif

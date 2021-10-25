@@ -791,7 +791,7 @@ short ps2_mouse_get_packet() {
 
     result = ps2_mouse_command(MOUSE_CMD_REQPACK);
     if (result == -1) {
-        log_num(LOG_ERROR, "MOUSE_CMD_REQPACK: ", result);
+        log_num(LOG_INFO, "MOUSE_CMD_REQPACK: ", result);
         return result;
     }
 
@@ -851,7 +851,7 @@ short mouse_init() {
 
     result = ps2_mouse_command(MOUSE_CMD_RESET);
     if (result == -1) {
-        log_num(LOG_ERROR, "MOUSE_CMD_RESET: ", result);
+        log_num(LOG_INFO, "MOUSE_CMD_RESET: ", result);
         return result;
     }
 
@@ -859,7 +859,7 @@ short mouse_init() {
 
     result = ps2_mouse_command_repeatable(MOUSE_CMD_DISABLE);
     if (result != PS2_RESP_ACK) {
-        log_num(LOG_ERROR, "MOUSE_CMD_DISABLE: ", result);
+        log_num(LOG_INFO, "MOUSE_CMD_DISABLE: ", result);
         return result;
     }
 
@@ -867,7 +867,7 @@ short mouse_init() {
 
     result = ps2_mouse_command_repeatable(MOUSE_CMD_DEFAULTS);
     if (result != PS2_RESP_ACK) {
-        log_num(LOG_ERROR, "MOUSE_CMD_DEFAULTS: ", result);
+        log_num(LOG_INFO, "MOUSE_CMD_DEFAULTS: ", result);
         return result;
     }
 
@@ -875,13 +875,13 @@ short mouse_init() {
 
     result = ps2_mouse_command_repeatable(MOUSE_CMD_SETRES);
     if (result != PS2_RESP_ACK) {
-        log_num(LOG_ERROR, "MOUSE_CMD_SETRES: ", result);
+        log_num(LOG_INFO, "MOUSE_CMD_SETRES: ", result);
         return result;
     }
 
     result = ps2_mouse_command_repeatable(0x00);
     if (result != PS2_RESP_ACK) {
-        log_num(LOG_ERROR, "MOUSE_CMD_SETRES resolution: ", result);
+        log_num(LOG_INFO, "MOUSE_CMD_SETRES resolution: ", result);
         return result;
     }
 
@@ -889,7 +889,7 @@ short mouse_init() {
 
     result = ps2_mouse_command_repeatable(MOUSE_CMD_ENABLE);
     if (result != PS2_RESP_ACK) {
-        log_num(LOG_ERROR, "MOUSE_CMD_ENABLE: ", result);
+        log_num(LOG_INFO, "MOUSE_CMD_ENABLE: ", result);
         return result;
     }
 
@@ -988,7 +988,7 @@ short ps2_init() {
     if (mouse_present) {
         /* Initialize the mouse */
         if (mouse_error = mouse_init()) {
-            log_num(LOG_ERROR, "Unable to initialize mouse", res);
+            log_num(LOG_INFO, "Unable to initialize mouse", res);
         }
     }
 

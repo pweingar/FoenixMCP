@@ -2,6 +2,8 @@
  * Definitions support low level FDC device driver
  */
 
+#if MODEL == MODEL_FOENIX_A2560K
+
 #include "log.h"
 #include "types.h"
 #include "timers.h"
@@ -640,3 +642,5 @@ short fdc_ioctrl(short command, unsigned char * buffer, short size) {
             return 0;
     }
 }
+
+#endif

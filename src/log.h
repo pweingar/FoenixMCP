@@ -16,11 +16,9 @@
  * Display a panic screen
  *
  * Inputs:
- * message = string indicating the type of error
- * pc = the value of the program counter at the time of the error
- * address = (optional) the address of the access that caused the issue
+ * vector = the number of the vector that was called
  */
-extern void panic(const char * message, unsigned long pc, unsigned long address);
+extern void panic(unsigned short exception_number);
 
 /*
  * Set the maximum level of verbosity in logging.

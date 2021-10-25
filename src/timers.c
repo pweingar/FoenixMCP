@@ -1,5 +1,6 @@
 #include "interrupt.h"
 #include "timers.h"
+#include "gabe_reg.h"
 
 long jiffy_count;
 
@@ -9,7 +10,16 @@ long jiffy_count;
  * NOTE: in time, this should be handled by the RTC or another timer.
  */
 void sof_a_handler() {
+    long jc_mod;
+
     jiffy_count++;
+
+    jc_mod = jiffy_count % 60;
+    if (jc_mod == 30) {
+        *GABE_CTRL_REG = *GABE_CTRL_REG | POWER_ON_LED;
+    } else if (jc_mod == 0) {
+        *GABE_CTRL_REG = *GABE_CTRL_REG & ~POWER_ON_LED;
+    }
 }
 
 /*

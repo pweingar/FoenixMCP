@@ -119,21 +119,25 @@ short cmd_testrtc(short channel, int argc, char * argv[]) {
     char buffer[80];
     char * spinner = "|/-\\";
     short count = 0;
+    long ticks;
+
+    *RTC_RATES = 0x0e;          /* Periodic interrupt rate: 250 ms */
+    *RTC_ENABLES = RTC_PIE;     /* Turn on the periodic interrupt */
     int_enable(INT_RTC);
 
-    *RTC_RATES = 0xfe;          /* Periodic interrupt rate: 0.5 s */
-    *RTC_ENABLES = RTC_PIE;     /* Turn on the periodic interrupt */
+    ticks = rtc_get_ticks();
+
+    sprintf(buffer, "Waiting for updated ticks starting from %d\n", ticks);
+    sys_chan_write(channel, buffer, strlen(buffer));
 
     while (1) {
-        if (*RTC_FLAGS & RTC_PF) {
+        if (ticks < rtc_get_ticks()) {
             /* We got the periodic interrupt */
 
-            ScreenText_A[0] = spinner[count];
-            ColorText_A[0] = 0x14;
+            sprintf(buffer, "Tick! %d\n", ticks);
+            sys_chan_write(channel, buffer, strlen(buffer));
 
-            if (count++ >= strlen(spinner) - 1) {
-                count = 0;
-            }
+            ticks = rtc_get_ticks();
         }
     }
 }

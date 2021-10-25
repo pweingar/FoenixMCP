@@ -164,7 +164,7 @@ void initialize() {
     int_init();
 
     /* Initialize the timers */
-    //timers_init();
+    timers_init();
 
 #if MODEL == MODEL_FOENIX_A2560K
     /* Set the power LED to purple */
@@ -175,7 +175,6 @@ void initialize() {
     init_superio();
 #endif
 
-
     /* Mute the PSG */
     psg_mute_all();
 
@@ -185,8 +184,11 @@ void initialize() {
     /* Initialize the SID chips */
     sid_init_all();
 
+    /* Play the SID test bong on the Gideon SID implementation */
+    sid_test_internal();
+
     /* Display the splash screen */
-    load_splashscreen();
+    // load_splashscreen();
 
     cdev_init_system();   // Initialize the channel device system
     log(LOG_INFO, "Channel device system ready.");
@@ -201,7 +203,7 @@ void initialize() {
     }
 
     /* Initialize the real time clock */
-    // rtc_init();
+    rtc_init();
 
     if (res = pata_install()) {
         log_num(LOG_ERROR, "FAILED: PATA driver installation", res);
@@ -245,7 +247,6 @@ void initialize() {
 
     /* Enable all interrupts */
     int_enable_all();
-
 }
 
 int main(int argc, char * argv[]) {
@@ -282,18 +283,18 @@ int main(int argc, char * argv[]) {
 
     initialize();
 
-    timers_init();
-
     sprintf(welcome, "    %s%s\n   %s %s\n  %s  %s\n %s   %s\n%s    %s\n\n", color_bars, title_1, color_bars, title_2, color_bars, title_3, color_bars, title_4, color_bars, title_5);
     sys_chan_write(0, welcome, strlen(welcome));
 
     sprintf(welcome, "Foenix/MCP v%02d.%02d-alpha+%04d\n\nType \"HELP\" or \"?\" for command summary.", VER_MAJOR, VER_MINOR, VER_BUILD);
     sys_chan_write(0, welcome, strlen(welcome));
 
+#if MODEL == MODEL_FOENIX_A2560K
     fdc_init();
     if (fdc_ioctrl(FDC_CTRL_MOTOR_ON, 0, 0)) {
         log(LOG_ERROR, "Could not turn on the floppy drive motor.");
     }
+#endif
 
     cli_repl(0);
 

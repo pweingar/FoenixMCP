@@ -11,6 +11,7 @@
  * Play a sound on the PSG
  */
 short psg_test(short channel, int argc, char * argv[]) {
+    int i;
     long target_time;
 
     psg_tone(0, 34923);
@@ -22,11 +23,15 @@ short psg_test(short channel, int argc, char * argv[]) {
     psg_tone(1, 44000);
     psg_attenuation(1, 0);
 
+    for (i = 0; i < 10000; i++) ;
+
     target_time = timers_jiffies() + 20;
     while (target_time > timers_jiffies()) ;
 
     psg_tone(2, 52325);
     psg_attenuation(2, 0);
+
+    for (i = 0; i < 100000; i++) ;
 
     target_time = timers_jiffies() + 60;
     while (target_time > timers_jiffies()) ;

@@ -22,11 +22,14 @@ void psg_mute_all() {
  *
  * Inputs:
  * voice = the number of the voice (0 - 2)
- * frequency = the frequency
+ * frequency = the frequency in Hz * 100
  */
 void psg_tone(unsigned short voice, int frequency) {
     if (voice < 3) {
-        int n = 357954500 / (32 * frequency);
+        int n = 0;
+        if (frequency != 0) {
+            n = 357954500 / (32 * frequency);
+        }
         *PSG_PORT = (unsigned char)(0x80 | ((voice & 0x03) << 5) | (n & 0x0f));
         *PSG_PORT = (unsigned char)((n & 0x3f0) >> 4);
     }
