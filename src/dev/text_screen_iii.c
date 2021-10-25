@@ -100,8 +100,7 @@ int text_init() {
     chan_a->cursor_position = CursorControlReg_H_A;
     chan_a->border_control = BorderControlReg_L_A;
 
-    *chan_a->master_control = 1;     /* Set to text only mode: 640x480 */
-    // *chan_a->border_control = 0;                    /* Set to no border */
+    *chan_a->master_control = 0x00000001;   /* Set to text only mode: 800x600 */
 
 	chan_a->border_control[0] = 0x00102001;	// Enable
 	chan_a->border_control[1] = 0x00000040;	//Dark Blue

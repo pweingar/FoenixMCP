@@ -420,7 +420,7 @@ short con_open(p_channel chan, uint8_t * path, short mode) {
     /* Initialize the console data for this channel */
 
     con_data = &(chan->data);
-    con_data->control = CON_CTRL_ANSI;
+    con_data->control = 0; // CON_CTRL_ANSI;
     con_data->ansi_buffer_count = 0;
     for (i = 0; i < ANSI_BUFFER_SIZE; i++) {
         con_data->ansi_buffer[i] = 0;

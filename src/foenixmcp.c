@@ -10,9 +10,11 @@
 #include "gabe_reg.h"
 #include "superio.h"
 #include "syscalls.h"
+#include "timers.h"
 #include "dev/block.h"
 #include "dev/channel.h"
 #include "dev/console.h"
+#include "dev/fdc.h"
 #include "dev/text_screen_iii.h"
 #include "dev/pata.h"
 #include "dev/ps2.h"
@@ -145,6 +147,9 @@ void initialize() {
 
     /* Initialize the interrupt system */
     int_init();
+
+    /* Initialize the timers */
+    //timers_init();
 
     /* Set the power LED to purple */
     *RGB_LED_L = 0x00FF;
@@ -373,11 +378,18 @@ int main(int argc, char * argv[]) {
 
     initialize();
 
+    timers_init();
+
     sprintf(welcome, "    %s%s\n   %s %s\n  %s  %s\n %s   %s\n%s    %s\n\n", color_bars, title_1, color_bars, title_2, color_bars, title_3, color_bars, title_4, color_bars, title_5);
     sys_chan_write(0, welcome, strlen(welcome));
 
     sprintf(welcome, "Foenix/MCP v%02d.%02d-alpha+%04d\n\nType \"HELP\" or \"?\" for command summary.", VER_MAJOR, VER_MINOR, VER_BUILD);
     sys_chan_write(0, welcome, strlen(welcome));
+
+    fdc_init();
+    if (fdc_ioctrl(FDC_CTRL_MOTOR_ON, 0, 0)) {
+        log(LOG_ERROR, "Could not turn on the floppy drive motor.");
+    }
 
     cli_repl(0);
 

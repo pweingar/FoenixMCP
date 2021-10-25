@@ -10,9 +10,11 @@
 #include "simpleio.h"
 #include "syscalls.h"
 #include "sys_general.h"
+#include "timers.h"
 #include "cli/cli.h"
 #include "cli/dos_cmds.h"
 #include "cli/mem_cmds.h"
+#include "cli/sound_cmds.h"
 #include "dev/rtc.h"
 
 #define MAX_COMMAND_SIZE    128
@@ -35,6 +37,7 @@ extern short cmd_settime(short channel, int argc, char * argv[]);
 extern short cmd_sysinfo(short channel, int argc, char * argv[]);
 extern short cmd_cls(short channel, int argc, char * argv[]);
 extern short cmd_showint(short channel, int argc, char * argv[]);
+extern short cmd_getjiffies(short channel, int argc, char * argv[]);
 
 /*
  * Variables
@@ -52,6 +55,7 @@ const t_cli_command g_cli_commands[] = {
     { "DISKFILL", "DISKFILL <drive #> <sector #> <byte value>", cmd_diskfill },
     { "DISKREAD", "DISKREAD <drive #> <sector #>", cmd_diskread },
     { "DUMP", "DUMP <addr> [<count>] : print a memory dump", mem_cmd_dump},
+    { "GETJIFFIES", "GETJIFFIES : print the number of jiffies since bootup", cmd_getjiffies },
     { "LABEL", "LABEL <drive#> <label> : set the label of a drive", cmd_label },
     { "LOAD", "LOAD <path> : load a file into memory", cmd_load },
     { "MKDIR", "MKDIR <path> : create a directory", cmd_mkdir },
@@ -71,6 +75,8 @@ const t_cli_command g_cli_commands[] = {
     { "TESTIDE", "TESTIDE : fetches and prints the IDE MBR repeatedly", cmd_testide },
     { "TESTCREATE", "TESTCREATE <path> : tries to create a file", cmd_testcreate },
     { "TYPE", "TYPE <path> : print the contents of a text file", cmd_type },
+    { "TESTPSG", "TESTPSG : play some notes on the PSG", psg_test },
+    { "TESTOPL3", "TESTOPL3 : play a tone on the OPL3", opl3_test },
     { 0, 0 }
 };
 
@@ -84,6 +90,14 @@ int cmd_help(short channel, int argc, char * argv[]) {
         sys_chan_write(channel, command->help, strlen(command->help));
         sys_chan_write(channel, "\n", 2);
     }
+    return 0;
+}
+
+short cmd_getjiffies(short channel, int argc, char * argv[]) {
+    char buffer[80];
+
+    sprintf(buffer, "%d\n", timers_jiffies());
+    sys_chan_write(channel, buffer, strlen(buffer));;
     return 0;
 }
 

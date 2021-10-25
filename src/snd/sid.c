@@ -3,6 +3,7 @@
  */
 
 #include "snd/sid.h"
+#include "sound_reg.h"
 
 /*
  * Return the base address of the given SID chip
