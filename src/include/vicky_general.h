@@ -6,14 +6,13 @@
 #define __vicky_general_h
 
 #include "types.h"
+#include "sys_general.h"
 
-// #if SYSTEM == A2560K
-// /* VICKY registers for the A2560K */
-#include "A2560K/VICKYIII_General.h"
+#if MODEL == MODEL_FOENIX_A2560K
+#include "A2560K/VICKYIII_a2560k.h"
+#elif MODEL == MODEL_FOENIX_A2560U || MODEL == MODEL_FOENIX_A2560U_PLUS
+#include "A2560U/VICKYIII_a2560u.h"
+#endif
 
-// #elif SYSTEM == C256_FMX || SYSTEM == C256_U || SYSTEM == C256_U_PLUS
-// /* VICKY registers for the C256 FMX, U, and U+ */
-// #include "FMX/vicky_general.h"
-// #endif
 
 #endif

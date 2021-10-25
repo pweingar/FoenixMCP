@@ -5,11 +5,14 @@
 #ifndef __GABE_REG_H
 #define __GABE_REG_H
 
+#include "sys_general.h"
+
 #define POWER_ON_LED		0x0001
 #define SDCARD_LED			0x0002
 #define BUZZER_CONTROL		0x0004
 #define MANUAL_RESET		0x8000		// Make sure the word "DEAD" is written in GABE_RESET_ID
 
+#if MODEL == MODEL_FOENIX_A2560K
 #define GABE_CTRL_REG		((volatile unsigned short *)0x00C00000)
 #define GABE_RESET_ID		((volatile unsigned short *)0x00C00002)
 #define GABE_LFSR_REG0		((volatile unsigned short *)0x00C00004)
@@ -44,4 +47,23 @@
 #define GABE_MO_LED_3_G     0x0400      /* LED 2 (caps lock, Rev C) -- Green ON */
 #define GABE_MO_LED_3_R     0x0800      /* LED 2 (caps lock, Rev C) -- Red ON */
 
+#elif MODEL == MODEL_FOENIX_A2560U || MODEL == MODEL_FOENIX_A2560U_PLUS
+
+#define GABE_CTRL_REG		((volatile unsigned short *)0x00B00000)
+#define GABE_RESET_ID		((volatile unsigned short *)0x00B00002)
+#define GABE_LFSR_REG0		((volatile unsigned short *)0x00B00004)
+#define GABE_LFSR_REG1		((volatile unsigned short *)0x00B00006)
+
+#define RGB_LED_L			((volatile unsigned short *)0x00B00008) // Writing Only - A2560K Only - 0x__RR
+#define RGB_LED_H			((volatile unsigned short *)0x00B0000A) // Writing Only - A2560K Only - 0xGGBB
+
+#define GABE_LFSR_DATA		((volatile unsigned short *)0x00B00008) // Read Only
+#define GABE_LFSR_STAT		((volatile unsigned short *)0x00B0000A) // Read Only
+#define GABE_MACHINE_ID	    ((volatile unsigned short *)0x00B0000C) // Machine ID - Read Only
+
+#define GABE_CHIP_SUBREV	((volatile unsigned short *)0x00B0000E)
+#define GABE_CHIP_VERSION   ((volatile unsigned short *)0x00B00010)
+#define GABE_CHIP_NUMBER	((volatile unsigned short *)0x00B00012)
+
+#endif
 #endif

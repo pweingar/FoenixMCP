@@ -4,23 +4,45 @@
 
 #include "log.h"
 #include "interrupt.h"
+#include "gabe_reg.h"
 #include "rtc.h"
 #include "rtc_reg.h"
 #include "simpleio.h"
 
 static long rtc_ticks;
+static long sof_ticks;
+
+/*
+ * Handle SOF interrupts... these are assumed to be about 1/60 sec apart
+ * and will be used to drive the tick counter
+ */
+void sof_handle_int() {
+    int_clear(INT_SOF_A);
+    sof_ticks++;
+}
 
 /*
  * Interrupt handler for the real time clock
  */
 void rtc_handle_int() {
+    char buffer[80];
+    char * spinner = "|/-\\";
+    short count = 0;
+
     unsigned char flags;
 
-    flags = *RTC_FLAGS;
-    if (flags | RTC_PF) {
+    //flags = *RTC_FLAGS;
+    //if (flags | RTC_PF) {
         /* Peridic interrupt: increment the ticks counter */
         rtc_ticks++;
-    }
+
+        long ticks = rtc_ticks % 6000;
+        if (ticks == 3000) {
+            *GABE_CTRL_REG = *GABE_CTRL_REG | POWER_ON_LED;
+        } else if (ticks == 0){
+            *GABE_CTRL_REG = *GABE_CTRL_REG & ~POWER_ON_LED;
+        }
+    //}
 }
 
 /*
@@ -30,25 +52,26 @@ void rtc_init() {
     unsigned char rates;
     unsigned char enables;
 
-    // int_disable(INT_RTC);
-    //
-    // /* Reset the ticks counter */
-    // rtc_ticks = 0;
-    //
-    // /* Set the periodic interrupt to 976.5625 microseconds */
-    // *RTC_RATES = (*RTC_RATES & RTC_RATES_WD) | RTC_RATE_976us;
-    //
-    // /* Enable the periodic interrupt */
-    *RTC_RATES = 0;
+    int_disable(INT_RTC);
+    int_disable(INT_SOF_A);
+
+    /* Reset the ticks counter */
+    sof_ticks = 0;
+
+    /* Set the periodic interrupt to 976.5625 microseconds */
+    *RTC_RATES = 0; //  RTC_RATE_976us;
+
+    /* Enable the periodic interrupt */
+    // *RTC_RATES = 0;
     *RTC_ENABLES = 0; // RTC_PIE;
 
     /* Make sure the RTC is on */
     *RTC_CTRL = RTC_STOP;
 
     /* Register our interrupt handler and clear out any pending interrupts */
-    // int_register(INT_RTC, rtc_handle_int);
-    // int_clear(INT_RTC);
-    // int_enable(INT_RTC);
+    int_register(INT_SOF_A, sof_handle_int);
+    int_clear(INT_SOF_A);
+    int_enable(INT_SOF_A);
 }
 
 /*
@@ -205,6 +228,14 @@ void rtc_get_time(p_time time) {
 }
 
 /*
+ * Get the number of jiffies since the system last reset.
+ * A "jiffy" should be considered to be 1/60 second.
+ */
+long rtc_get_jiffies() {
+    return sof_ticks;
+}
+
+/*
  * Get the number of ticks since the system last booted.
  *
  * NOTE: a tick is almost, but not quite, 1ms. The RTC periodic interrupt
@@ -218,9 +249,7 @@ void rtc_get_time(p_time time) {
 long rtc_get_ticks() {
     long result = 0;
 
-    int_disable(INT_RTC);   /* Make sure we aren't changing the tick counter during the query */
-    result = rtc_ticks;
-    int_enable(INT_RTC);
+    result = sof_ticks;
 
     return rtc_ticks;
 }

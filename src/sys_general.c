@@ -10,6 +10,10 @@
 void sys_get_info(p_sys_info info) {
     unsigned short machine_id = *GABE_MACHINE_ID;
 
+    info->mcp_version = VER_MAJOR;
+    info->mcp_rev = VER_MINOR;
+    info->mcp_build = VER_BUILD;
+
     info->has_floppy = 0;
 
     /* Model, CPU, and the presence of the floppy are set at compile time */

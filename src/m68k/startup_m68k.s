@@ -1,5 +1,6 @@
             xref ___main
             xref _cli_rerepl
+            xref _panic
 
             xdef _syscall
             xdef ___exit
@@ -12,13 +13,13 @@
 
             dc.l ___STACK           ; 00 - Initial stack pointer
             dc.l coldboot           ; 01 - Initial PC
-            dc.l not_impl           ; 02 - Bus error
-            dc.l not_impl           ; 03 - Address error
-            dc.l not_impl           ; 04 - Illegal instruction
-            dc.l not_impl           ; 05 - Zero divide
-            dc.l not_impl           ; 06 - CHK instruction
-            dc.l not_impl           ; 07 - TRAPV instruction
-            dc.l not_impl           ; 08 - Priviledge error
+            dc.l _handle_bus        ; 02 - Bus error
+            dc.l _handle_address    ; 03 - Address error
+            dc.l _handle_illegal    ; 04 - Illegal instruction
+            dc.l _handle_div0       ; 05 - Zero divide
+            dc.l _handle_chk        ; 06 - CHK instruction
+            dc.l _handle_trapv      ; 07 - TRAPV instruction
+            dc.l _handle_priv       ; 08 - Priviledge error
             dc.l not_impl           ; 09 - Trace
             dc.l not_impl           ; 10 - Line 1010
             dc.l not_impl           ; 11 - Line 1111
@@ -92,7 +93,7 @@
             dc.l interrupt_x1F      ; 79 - Interrupt 0x1F - Real Time Clock
 
             ; dc.l interrupt_x20      ; 80 - Interrupt 0x20 - IDE HDD Generated Interrupt
-            ; dc.l interrupt_x21      ; 81 - Interrupt 0x21 - SDCard Insert
+            dc.l interrupt_x21      ; 81 - Interrupt 0x21 - SDCard Insert
             ; dc.l interrupt_x22      ; 82 - Interrupt 0x22 - SDCard Controller
             ; dc.l interrupt_x23      ; 83 - Interrupt 0x23 - Internal OPM
             ; dc.l interrupt_x24      ; 84 - Interrupt 0x24 - External OPN2
@@ -192,13 +193,21 @@ interrupt_x12:
             ; jsr _mouse_handle_irq
             ; movem.l (a7)+,d0-d7/a0-a6       ; Restore the registers
             ; rte
-            
+
 ;
 ; Interrupt Vector 0x1F -- RTC
 ;
 interrupt_x1F:
             movem.l d0-d7/a0-a6,-(a7)       ; Save all the registers
             move.w #($1f<<2),d0             ; Get the offset to interrupt 0x1f
+            bra int_dispatch                ; And process the interrupt
+
+;
+; Interrupt Vector 0x21 -- SDCard Insert
+;
+interrupt_x21:
+            movem.l d0-d7/a0-a6,-(a7)       ; Save all the registers
+            move.w #($21<<2),d0             ; Get the offset to interrupt 0x1f
             bra int_dispatch                ; And process the interrupt
 
 ;
@@ -275,3 +284,84 @@ _restart_cli:
             lea ___STACK,sp
             jsr _cli_rerepl
             bra _restart_cli
+
+;
+; Handle a Bus Error by going to the panic screen
+;
+_handle_bus:
+            move.l (2,a7),a0            ; Target address in A0
+            move.l (10,a7),a1           ; PC in A1
+            lea MSG_ERR_BUS,a2
+            bra call_panic
+
+;
+; Handle a Address Error by going to the panic screen
+;
+_handle_address:
+            move.l (2,a7),a0            ; Target address in A0
+            move.l (10,a7),a1           ; PC in A1
+            lea MSG_ERR_ADDRESS,a2
+            bra call_panic
+
+;
+; Handle a Illegal Instruction Error by going to the panic screen
+;
+_handle_illegal:
+            move.l #0,a0                ; Target address is 0 in A0
+            move.l (10,a7),a1           ; PC in A1
+            lea MSG_ERR_ILLEGAL,a2
+            bra call_panic
+
+;
+; Handle a Divide by Zero Error by going to the panic screen
+;
+_handle_div0:
+            move.l #0,a0                ; Target address is 0 in A0
+            move.l (10,a7),a1           ; PC in A1
+            lea MSG_ERR_DIV0,a2
+            bra call_panic
+
+;
+; Handle a CHK Error by going to the panic screen
+;
+_handle_chk:
+            move.l #0,a0                ; Target address is 0 in A0
+            move.l (10,a7),a1           ; PC in A1
+            lea MSG_ERR_CHK,a2
+            bra call_panic
+
+;
+; Handle a TRAPV Error by going to the panic screen
+;
+_handle_trapv:
+            move.l #0,a0                ; Target address is 0 in A0
+            move.l (10,a7),a1           ; PC in A1
+            lea MSG_ERR_TRAPV,a2
+            bra call_panic
+
+;
+; Handle a Privilege Error by going to the panic screen
+;
+_handle_priv:
+            move.l #0,a0                ; Target address is 0 in A0
+            move.l (10,a7),a1           ; PC in A1
+            lea MSG_ERR_PRIV,a2
+            bra call_panic
+
+call_panic:
+            move.l a2,-(a7)
+            move.l a1,-(a7)
+            move.l a0,-(a7)
+            jsr _panic
+panic_loop:
+            bra panic_loop
+
+            data
+
+MSG_ERR_BUS:        dc.b "Bus Error"
+MSG_ERR_ADDRESS:    dc.b "Address Error"
+MSG_ERR_ILLEGAL:    dc.b "Illegal Instruction Error"
+MSG_ERR_DIV0:       dc.b "Divide by Zero Error"
+MSG_ERR_CHK:        dc.b "Range Check Error"
+MSG_ERR_TRAPV:      dc.b "Overflow Error"
+MSG_ERR_PRIV:       dc.b "Privilege Error"

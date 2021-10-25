@@ -2,6 +2,10 @@
  * Declarations for Mo, the built-in keyboard of the A2560K
  */
 
+#include "sys_general.h"
+
+#if MODEL == MODEL_FOENIX_A2560K
+
 #include "log.h"
 #include "interrupt.h"
 #include "kbd_mo.h"
@@ -428,3 +432,5 @@ unsigned short kbdmo_get_scancode_poll() {
     kbdmo_handle_irq();
     return kbdmo_get_scancode();
 }
+
+#endif

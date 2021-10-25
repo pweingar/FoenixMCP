@@ -718,8 +718,6 @@ void mouse_handle_irq() {
     /* Clear the pending interrupt flag for the mouse */
     int_clear(INT_MOUSE);
 
-    *ScreenText_A = *ScreenText_A + 1;
-
     if ((g_mouse_state == 0) && ((mouse_byte & 0x08) != 0x08)) {
         /*
          * If this is the first byte in the packet, bit 4 must be set
@@ -897,13 +895,16 @@ short mouse_init() {
 
     /* Set up the mouse pointer */
 
+    short src_offset = 0;
+    short dest_offset = 0;
     for (i = 0; i < 256; i++) {
-        short src_offset = 3*i;
-        short dest_offset = 2*i;
-        low_components = Color_Pointer_bin[src_offset+1] << 8 + Color_Pointer_bin[src_offset];
+        low_components = (Color_Pointer_bin[src_offset+1] << 8) + Color_Pointer_bin[src_offset];
         hi_components = Color_Pointer_bin[src_offset+2];
         MousePointer_Mem_A[dest_offset] = low_components;
         MousePointer_Mem_A[dest_offset+1] = hi_components;
+
+        src_offset += 3;
+        dest_offset += 2;
     }
 
     /* Enable the mouse pointer on channel A */

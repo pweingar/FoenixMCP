@@ -27,20 +27,7 @@ short mem_cmd_dump(short channel, int argc, char * argv[]) {
             count = cli_eval_number(argv[2]);
         }
 
-        TRACE("foo");
-
-        for (i = 0; i < count; i++) {
-            if ((i % 16) == 0) {
-                print(channel, "\n");
-                print_hex_32(channel, ((long)address + i));
-                print(channel, ": ");
-            }
-
-            print_hex_8(channel, address[i]);
-            print(channel, " ");
-        }
-
-        print(channel, "\n");
+        dump_buffer(channel, address, count);
 
         return  0;
     } else {

@@ -50,4 +50,10 @@ extern void rtc_get_time(p_time time);
  */
 extern long rtc_get_ticks();
 
+/*
+ * Get the number of jiffies since the system last reset.
+ * A "jiffy" should be considered to be 1/60 second.
+ */
+extern long rtc_get_jiffies();
+
 #endif

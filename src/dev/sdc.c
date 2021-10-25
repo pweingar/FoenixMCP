@@ -3,9 +3,9 @@
  */
 
 #include "log.h"
-// #include "fatfs/ff.h"
 #include "constants.h"
 #include "errors.h"
+#include "gabe_reg.h"
 #include "dev/block.h"
 #include "sdc_reg.h"
 #include "dev/sdc.h"
@@ -51,13 +51,11 @@ short sdc_protected() {
 //  is_on = if 0, turn the LED off, otherwise turn the LED on
 //
 void sdc_set_led(short is_on) {
-    // volatile unsigned char *gabe_control = (unsigned char *)GABE_MSTR_CTRL;
-    //
-    // if (is_on) {
-    //     *gabe_control = *gabe_control | GABE_CTRL_SDC_LED;
-    // } else {
-    //     *gabe_control = *gabe_control & ~GABE_CTRL_SDC_LED;
-    // }
+    if (is_on) {
+        *GABE_CTRL_REG = *GABE_CTRL_REG | SDCARD_LED;
+    } else {
+        *GABE_CTRL_REG = *GABE_CTRL_REG & ~SDCARD_LED;
+    }
 }
 
 //

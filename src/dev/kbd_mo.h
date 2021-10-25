@@ -5,6 +5,10 @@
 #ifndef __KBD_MO_H
 #define __KBD_MO_H
 
+#include "sys_general.h"
+
+#if MODEL == MODEL_FOENIX_A2560K
+
 /*
  * Initialize the PS2 controller and any attached devices
  * Enable keyboard and mouse interrupts as appropriate.
@@ -41,5 +45,7 @@ extern char kbdmo_getc_poll();
 extern unsigned short kbdmo_get_scancode_poll();
 
 extern void kbdmo_handle_irq();
+
+#endif
 
 #endif

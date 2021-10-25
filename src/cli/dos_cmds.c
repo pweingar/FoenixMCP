@@ -116,7 +116,7 @@ short cmd_testide(short screen, int argc, char * argv[]) {
 
         print(screen, "\n\n");
 
-        if (kbdmo_getc_poll()) break;
+        // if (kbdmo_getc_poll()) break;
     }
 }
 

@@ -2,13 +2,19 @@
  * Startup file for the Foenix/MCP
  */
 
+#include <stdlib.h>
 #include <string.h>
 #include "sys_general.h"
 #include "simpleio.h"
 #include "log.h"
 #include "interrupt.h"
 #include "gabe_reg.h"
+
+#if MODEL == MODEL_FOENIX_A2560K
 #include "superio.h"
+#include "dev/kbd_mo.h"
+#endif
+
 #include "syscalls.h"
 #include "timers.h"
 #include "dev/block.h"
@@ -18,7 +24,6 @@
 #include "dev/text_screen_iii.h"
 #include "dev/pata.h"
 #include "dev/ps2.h"
-#include "dev/kbd_mo.h"
 #include "dev/rtc.h"
 #include "dev/sdc.h"
 #include "dev/uart.h"
@@ -28,10 +33,12 @@
 #include "snd/sid.h"
 #include "fatfs/ff.h"
 #include "cli/cli.h"
-/* #include "rsrc/bitmaps/splash_a2560k.h"*/
+// #include "rsrc/bitmaps/splash_a2560k.h"
+// #include "rsrc/bitmaps/splash_a2560u.h"
 
 const char* VolumeStr[FF_VOLUMES] = { "sdc", "fdc", "hdc" };
 
+#if MODEL == MODEL_FOENIX_A2560K
 /*
  * Initialize the SuperIO registers
  */
@@ -84,47 +91,58 @@ const char* VolumeStr[FF_VOLUMES] = { "sdc", "fdc", "hdc" };
  	*LED1_REG = 0x01;
  	*LED2_REG = 0x02;
  }
+#endif
 
-// /*
-//  * Load and display the splash screen
-//  */
-// void load_splashscreen() {
-//     int i;
-//
-//     /* Turn off the screen */
-//     *MasterControlReg_A = VKY3_MCR_BLANK_EN;
-//
-//     /* Copy the splash screen LUT */
-//     for (i = 0; i < sizeof(splash_screen_cmap); i++) {
-//         LUT_0[i] = splash_screen_cmap[i][0];
-//         LUT_0[i+1] = splash_screen_cmap[i][1];
-//         LUT_0[i+2] = splash_screen_cmap[i][2];
-//     }
-//
-//     /* Copy the bitmap to video RAM */
-//     for (i = 0; i < sizeof(splash_screen_bmap); i++) {
-//         VRAM_Bank0[i] = splash_screen_bmap[i];
-//     }
-//
-//     /* Set up the bitmap */
-//     *BM0_Addy_Pointer_Reg = 0;
-//     *BM0_Control_Reg = 1;
-//
-//     /* Turn off the border */
-//     *BorderControlReg_L_A = 0;
-//
-//     /* Display the splashscreen: 320x200 */
-//     *MasterControlReg_A = VKY3_MCR_BITMAP_EN | VKY3_MCR_GRAPH_EN | VKY3_MCR_DOUBLE_EN;
-//
-//     for (i = 0; i < 4096*1024; i++) ;
-// }
+/*
+ * Load and display the splash screen
+ */
+void load_splashscreen() {
+    int i;
 
- void print_error(short channel, char * message, short code) {
-     print(channel, message);
-     print(channel, ": ");
-     print_hex_16(channel, code);
-     print(channel, "\n");
- }
+    /* Turn off the screen */
+    *MasterControlReg_A = VKY3_MCR_BLANK_EN;
+
+    for (i = 0; i < 256; i++) {
+        LUT_0[4*i] = 0;
+        LUT_0[4*i+1] = i;
+        LUT_0[4*i+2] = i;
+        LUT_0[4*i+3] = 0;
+    }
+
+
+    /* Copy the bitmap to video RAM */
+    for (i = 0; i < 320*240; i++) {
+        VRAM_Bank0[i] = i * 0xff; // splash_screen_bmap[i];
+    }
+
+    /* Set up the bitmap */
+    *BM0_Addy_Pointer_Reg = 0;
+    *BM0_Control_Reg = 1;
+
+    /* Turn off the border */
+    *BorderControlReg_L_A = 0;
+
+    /* Set a background color for the bitmap mode */
+    *BackGroundControlReg_A = 0x00800000;
+
+    /* Display the splashscreen: 320x200 */
+    *MasterControlReg_A = 0x000000fD | VKY3_MCR_DOUBLE_EN;
+
+    /* Play the SID test bong on the Gideon SID implementation */
+    sid_test_internal();
+
+    for (i = 0; i < 2048*1024; i++) ;
+
+    /* Initialize the text channels */
+    text_init();
+}
+
+void print_error(short channel, char * message, short code) {
+    print(channel, message);
+    print(channel, ": ");
+    print_hex_16(channel, code);
+    print(channel, "\n");
+}
 
 /*
  * Initialize the kernel systems.
@@ -136,11 +154,8 @@ void initialize() {
     /* Set the logging level */
     log_setlevel(LOG_ERROR);
 
-    /* Hide the mouse */
+    // /* Hide the mouse */
     mouse_set_visible(0);
-
-    /* Display the splash screen */
-    /* load_splashscreen(); */
 
     /* Initialize the text channels */
     text_init();
@@ -151,12 +166,15 @@ void initialize() {
     /* Initialize the timers */
     //timers_init();
 
+#if MODEL == MODEL_FOENIX_A2560K
     /* Set the power LED to purple */
     *RGB_LED_L = 0x00FF;
     *RGB_LED_H = 0x00FF;
 
     /* Initialize the SuperIO chip */
     init_superio();
+#endif
+
 
     /* Mute the PSG */
     psg_mute_all();
@@ -167,8 +185,8 @@ void initialize() {
     /* Initialize the SID chips */
     sid_init_all();
 
-    /* Play the SID test bong on the Gideon SID implementation */
-    sid_test_internal();
+    /* Display the splash screen */
+    load_splashscreen();
 
     cdev_init_system();   // Initialize the channel device system
     log(LOG_INFO, "Channel device system ready.");
@@ -183,7 +201,7 @@ void initialize() {
     }
 
     /* Initialize the real time clock */
-    rtc_init();
+    // rtc_init();
 
     if (res = pata_install()) {
         log_num(LOG_ERROR, "FAILED: PATA driver installation", res);
@@ -205,11 +223,13 @@ void initialize() {
         DEBUG("PS/2 keyboard initialized.");
     }
 
+#if MODEL == MODEL_FOENIX_A2560K
     if (res = kbdmo_init()) {
         log_num(LOG_ERROR, "FAILED: A2560K built-in keyboard initialization", res);
     } else {
         log(LOG_INFO, "A2560K built-in keyboard initialized.");
     }
+#endif
 
     if (res = cli_init()) {
         log_num(LOG_ERROR, "FAILED: CLI initialization", res);
@@ -225,123 +245,7 @@ void initialize() {
 
     /* Enable all interrupts */
     int_enable_all();
-}
 
-void uart_send(short uart, char * message) {
-    int i, j;
-
-    for (i = 0; i < strlen(message); i++) {
-        uart_put(uart, message[i]);
-    }
-}
-
-void uart_test_send(short uart) {
-    while (1) {
-        int j;
-        uart_put(uart, 'a');
-        for (j = 1; j < 10000; j++) ;
-    }
-}
-
-void try_format(short screen, char * path) {
-    FATFS fs;           /* Filesystem object */
-    FIL fil;            /* File object */
-    FRESULT res;        /* API result code */
-    UINT bw;            /* Bytes written */
-    BYTE work[FF_MAX_SS]; /* Work area (larger is better for processing time) */
-
-    /* Format the HDD with default parameters */
-    res = f_mkfs(path, 0, work, sizeof work);
-    if (res) {
-        print(screen, "Could not format drive.\n");
-        return;
-    }
-
-    /* Give a work area to the default drive */
-    f_mount(&fs, path, 0);
-
-    /* Create a file as new */
-    res = f_open(&fil, "hello.txt", FA_CREATE_NEW | FA_WRITE);
-    if (res) {
-        print(screen, "Could not create hello.txt.\n");
-        return;
-    }
-
-    /* Write a message */
-    f_write(&fil, "Hello, World!\r\n", 15, &bw);
-    if (bw != 15) {
-        print(screen, "Error writing file.\n");
-        return;
-    }
-
-    /* Close the file */
-    f_close(&fil);
-
-    /* Unregister work area */
-    f_mount(0, "", 0);
-}
-
-void try_write(short screen, char * path) {
-    FATFS fs;           /* Filesystem object */
-    FIL fil;            /* File object */
-    FRESULT res;        /* API result code */
-    UINT bw;            /* Bytes written */
-
-    /* Give a work area to the default drive */
-    f_mount(&fs, path, 0);
-
-    /* Create a file as new */
-    res = f_open(&fil, "hello.txt", FA_CREATE_NEW | FA_WRITE);
-    if (res) {
-        print(screen, "Could not create hello.txt: ");
-        print_hex_16(screen, res);
-        print(screen, "\n");
-        return;
-    }
-
-    /* Write a message */
-    f_write(&fil, "Hello, World!\r\n", 15, &bw);
-    if (bw != 15) {
-        print(screen, "Error writing file.\n");
-        return;
-    }
-
-    /* Close the file */
-    f_close(&fil);
-
-    /* Unregister work area */
-    f_mount(0, "", 0);
-}
-
-unsigned char test_block_1[512];
-unsigned char test_block_2[512];
-
-void try_bdev_getput(short screen, short dev) {
-    int i;
-    for (i = 0; i < 512; i++) {
-        test_block_1[i] = (unsigned short)i & 0xff;
-    }
-
-    short n = bdev_write(dev, 0x010000, test_block_1, 512);
-    if (n != 512) {
-        print(screen, "Could not write block.\n");
-        return;
-    }
-
-    n = bdev_read(dev, 0x010000, test_block_2, 512);
-    if (n != 512) {
-        print(screen, "Could not read block.\n");
-        return;
-    }
-
-    for (i = 0; i < 512; i++) {
-        if (test_block_1[i] != test_block_2[i]) {
-            print(screen, "Block did not verify.\n");
-            return;
-        }
-    }
-
-    print(screen, "BDEV read/write success.\n");
 }
 
 int main(int argc, char * argv[]) {
@@ -353,7 +257,7 @@ int main(int argc, char * argv[]) {
     const char * title_3 = "\x1b[37m AAAAA  222   555  6666  0   0 U   U";
     const char * title_4 = "\x1b[37m A   A 2         5 6   6 0   0 U   U";
     const char * title_5 = "\x1b[37m A   A 22222 5555   666   000   UUU";
-#elif MODEL == MODEL_FOENIX_A2560U
+#elif MODEL == MODEL_FOENIX_A2560U_PLUS
     const char * title_1 = "\x1b[37m   A   2222  55555  666   000  U   U   +";
     const char * title_2 = "\x1b[37m  A A      2 5     6     0   0 U   U   +";
     const char * title_3 = "\x1b[37m AAAAA  222   555  6666  0   0 U   U +++++";

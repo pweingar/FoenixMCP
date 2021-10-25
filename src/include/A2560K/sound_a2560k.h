@@ -1,5 +1,5 @@
 /*
- * Sound register locations on the A2560K
+ * Sound device register definitions for the A2560K
  */
 
 #ifndef __SOUND_A2560K_H
@@ -7,6 +7,7 @@
 
 #define PSG_PORT    ((volatile unsigned char *)0x00C20100)  /* Control register for the SN76489 */
 #define OPL3_PORT   ((volatile unsigned char *)0x00C20200)  /* Access port for the OPL3 */
+#define CODEC       ((volatile unsigned short *)0x00C20E00) /* Control register for the CODEC */
 
 /*
  * A2560K supports two external, physical SID chips.
