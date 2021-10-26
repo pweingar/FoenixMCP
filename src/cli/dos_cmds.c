@@ -43,7 +43,7 @@ short cmd_diskread(short screen, int argc, char * argv[]) {
         return -2;
     }
 
-    dump_buffer(screen, buffer, 512);
+    dump_buffer(screen, buffer, 512, 1);
 
     return 0;
 }

@@ -79,7 +79,8 @@ extern unsigned char i_to_bcd(unsigned short n);
  * channel = the number of the channel
  * buffer = the byte buffer to print
  * size = the number of bytes to print
+ * labels = 0: none, 1: offset, 2: address
  */
-extern void dump_buffer(short channel, unsigned char * buffer, short size);
+extern void dump_buffer(short channel, unsigned char * buffer, short size, short labels);
 
 #endif

@@ -15,23 +15,18 @@ void log_init() {
     log_level = 999;
 }
 
-const char * exception_names[] = {
-    "Bus Error",
-    "Address Error",
-    "Illegal Instruction Error",
-    "Divide by Zero Error"
-};
+unsigned short panic_number;        /* The number of the kernel panic */
+unsigned long panic_pc;             /* The PC where the issue occurred */
+unsigned long panic_address;        /* The address that was accessed (for some exceptions) */
 
 /*
  * Display a panic screen
- *
- * Inputs:
- * message = the error message to show
  */
-void panic(unsigned short exception_number) {
+void panic() {
     char buffer[80];
     short column = 18;
     short row = 10;
+    short address_expected = 0;
 
     /* Shut off all interrupts */
     int_disable_all();
@@ -48,6 +43,10 @@ void panic(unsigned short exception_number) {
     print(0, buffer);
 
     text_set_xy(0, column, row++);
+    sprintf(buffer, "\xB3                                          \xB3");
+    print(0, buffer);
+
+    text_set_xy(0, column, row++);
     sprintf(buffer, "\xB3 Oh dear, something has gone wrong...     \xB3");
     print(0, buffer);
 
@@ -55,14 +54,56 @@ void panic(unsigned short exception_number) {
     sprintf(buffer, "\xB3                                          \xB3");
     print(0, buffer);
 
-    if (exception_number < 4) {
+    text_set_xy(0, column, row++);
+    switch (panic_number) {
+        case 2:
+            sprintf(buffer, "\xB3 Bus Error                                \xB3");
+            address_expected = 1;
+            break;
+        case 3:
+            sprintf(buffer, "\xB3 Address Error                            \xB3");
+            address_expected = 1;
+            break;
+        case 4:
+            sprintf(buffer, "\xB3 Illegal Instruction Error                \xB3");
+            break;
+        case 5:
+            sprintf(buffer, "\xB3 Division by Zero Error                   \xB3");
+            break;
+        case 6:
+            sprintf(buffer, "\xB3 Range Check Exception                    \xB3");
+            break;
+        case 7:
+            sprintf(buffer, "\xB3 Overflow Exception                       \xB3");
+            break;
+        case 8:
+            sprintf(buffer, "\xB3 Privilege Exception                      \xB3");
+            break;
+        case 24:
+            sprintf(buffer, "\xB3 Spurious Interrupt                       \xB3");
+            break;
+        default:
+            sprintf(buffer, "\xB3 Unknown Exception                        \xB3");
+            break;
+    }
+    print(0, buffer);
+
+    text_set_xy(0, column, row++);
+    sprintf(buffer, "\xB3                                          \xB3");
+    print(0, buffer);
+
+    if (address_expected) {
         text_set_xy(0, column, row++);
-        sprintf(buffer, "\xB3 #%10x                                    \xB3", exception_number);
-        print(0, buffer);
+        print(0, "\xB3 PC: ");
+        print_hex_32(0, panic_pc);
+        print(0, "           Address: ");
+        print_hex_32(0, panic_address);
+        print(0, " \xB3");
     } else {
         text_set_xy(0, column, row++);
-        sprintf(buffer, "\xB3 Unknown Exception                        \xB3");
-        print(0, buffer);
+        print(0, "\xB3 PC: ");
+        print_hex_32(0, panic_pc);
+        print(0, "                             \xB3");
     }
 
     text_set_xy(0, column, row++);
@@ -75,22 +116,6 @@ void panic(unsigned short exception_number) {
 
     /* Wait forever */
     while (1) ;
-}
-
-__interrupt void handle_bus_err() {
-    panic(0);
-}
-
-__interrupt void handle_addr_err() {
-    panic(1);
-}
-
-__interrupt void handle_inst_err() {
-    panic(2);
-}
-
-__interrupt void handle_div0_err() {
-    panic(3);
 }
 
 /*

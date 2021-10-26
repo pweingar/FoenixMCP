@@ -17,35 +17,38 @@ static long sof_ticks;
 void rtc_handle_int() {
     unsigned char flags;
 
-    int_clear(INT_RTC);
-
     flags = *RTC_FLAGS;
-    if (flags | RTC_PF) {
+    //if (flags | RTC_PF) {
         /* Peridic interrupt: increment the ticks counter */
         rtc_ticks++;
-    }
+    //}
+
+    int_clear(INT_RTC);
 }
 
 /*
  * Initialize the RTC
  */
 void rtc_init() {
+    unsigned char flags;
     unsigned char rates;
     unsigned char enables;
 
     int_disable(INT_RTC);
 
+    /* Wait to actually enable PIE until later */
+    *RTC_ENABLES = 0;
+
     /* Set the periodic interrupt to 250 ms */
     *RTC_RATES = 0x0E;
-
-    /* Enable the periodic interrupt */
-    // *RTC_RATES = 0;
-    *RTC_ENABLES = RTC_PIE;
 
     /* Make sure the RTC is on */
     *RTC_CTRL = RTC_STOP;
 
     int_register(INT_RTC, rtc_handle_int);
+    /* Enable the periodic interrupt */
+    flags = *RTC_FLAGS;
+    *RTC_ENABLES = RTC_PIE;
     // int_enable(INT_RTC);
 }
 

@@ -289,12 +289,12 @@ int main(int argc, char * argv[]) {
     sprintf(welcome, "Foenix/MCP v%02d.%02d-alpha+%04d\n\nType \"HELP\" or \"?\" for command summary.", VER_MAJOR, VER_MINOR, VER_BUILD);
     sys_chan_write(0, welcome, strlen(welcome));
 
-#if MODEL == MODEL_FOENIX_A2560K
-    fdc_init();
-    if (fdc_ioctrl(FDC_CTRL_MOTOR_ON, 0, 0)) {
-        log(LOG_ERROR, "Could not turn on the floppy drive motor.");
-    }
-#endif
+// #if MODEL == MODEL_FOENIX_A2560K
+//     fdc_init();
+//     if (fdc_ioctrl(FDC_CTRL_MOTOR_ON, 0, 0)) {
+//         log(LOG_ERROR, "Could not turn on the floppy drive motor.");
+//     }
+// #endif
 
     cli_repl(0);
 

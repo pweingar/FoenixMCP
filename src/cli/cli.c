@@ -46,6 +46,9 @@ extern short cmd_getjiffies(short channel, int argc, char * argv[]);
 extern short cmd_testuart(short channel, int argc, char * argv[]);
 extern short cmd_get_ticks(short channel, int argc, char * argv[]);
 extern short cmd_testrtc(short channel, int argc, char * argv[]);
+extern short cmd_testpanic(short channel, int argc, char * argv[]);
+extern short cmd_setsof(short channel, int argc, char * argv[]);
+extern short cmd_setrtc(short channel, int argc, char * argv[]);
 
 /*
  * Variables
@@ -64,6 +67,8 @@ const t_cli_command g_cli_commands[] = {
     { "DISKREAD", "DISKREAD <drive #> <sector #>", cmd_diskread },
     { "DUMP", "DUMP <addr> [<count>] : print a memory dump", mem_cmd_dump},
     { "GETJIFFIES", "GETJIFFIES : print the number of jiffies since bootup", cmd_getjiffies },
+    { "GETTICKS", "GETTICKS : print number of ticks since reset", cmd_get_ticks },
+    { "GETTIME", "GETTIME : prints the current time", cmd_gettime },
     { "LABEL", "LABEL <drive#> <label> : set the label of a drive", cmd_label },
     { "LOAD", "LOAD <path> : load a file into memory", cmd_load },
     { "MKDIR", "MKDIR <path> : create a directory", cmd_mkdir },
@@ -76,18 +81,19 @@ const t_cli_command g_cli_commands[] = {
     { "PWD", "PWD : prints the current directory", cmd_pwd },
     // { "REN", "REN <old path> <new path> : rename a file or directory", cmd_rename },
     { "RUN", "RUN <path> : execute a binary file",  cmd_run },
-    { "GETTICKS", "GETTICKS : print number of ticks since reset", cmd_get_ticks },
-    { "GETTIME", "GETTIME : prints the current time", cmd_gettime },
+    { "SETSOF", "SETSOF 0|1 : turns SOF interrupt on or off", cmd_setsof },
+    { "SETRTC", "SETRTC 0|1 : turns RTC interrupt on or off", cmd_setrtc },
     { "SETTIME", "SETTIME yyyy-mm-dd HH:MM:SS : sets the current time", cmd_settime },
     { "SHOWINT", "SHOWINT : Show information about the interrupt registers", cmd_showint },
     { "SYSINFO", "SYSINFO : prints information about the system", cmd_sysinfo },
-    { "TESTIDE", "TESTIDE : fetches and prints the IDE MBR repeatedly", cmd_testide },
     { "TESTCREATE", "TESTCREATE <path> : tries to create a file", cmd_testcreate },
+    { "TESTIDE", "TESTIDE : fetches and prints the IDE MBR repeatedly", cmd_testide },
+    { "TESTOPL3", "TESTOPL3 : play a tone on the OPL3", opl3_test },
+    { "TESTPANIC", "TESTPANIC : Do a division by 0 to test the panic screen", cmd_testpanic },
+    { "TESTPSG", "TESTPSG : play some notes on the PSG", psg_test },
     { "TESTRTC", "TESTRTC : poll the RTC for a periodic interrupt", cmd_testrtc },
     { "TESTUART", "TESTUART : echo key presses between terminal and console", cmd_testuart },
     { "TYPE", "TYPE <path> : print the contents of a text file", cmd_type },
-    { "TESTPSG", "TESTPSG : play some notes on the PSG", psg_test },
-    { "TESTOPL3", "TESTOPL3 : play a tone on the OPL3", opl3_test },
     { 0, 0 }
 };
 
@@ -102,6 +108,55 @@ int cmd_help(short channel, int argc, char * argv[]) {
         sys_chan_write(channel, "\n", 2);
     }
     return 0;
+}
+
+short cmd_setsof(short channel, int argc, char * argv[]) {
+    char message[80];
+
+    if (argc > 1) {
+        if (strcmp(argv[1], "1") == 0) {
+            int_enable(INT_SOF_A);
+            sprintf(message, "Start Of Frame interrupt enabled.\n");
+        } else if (strcmp(argv[1], "0") == 0) {
+            int_disable(INT_SOF_A);
+            sprintf(message, "Start Of Frame interrupt disabled.\n");
+        } else {
+            sprintf(message, "USAGE: SETSOF 0|1\n");
+        }
+    } else {
+        sprintf(message, "USAGE: SETSOF 0|1\n");
+    }
+
+    sys_chan_write(channel, message, strlen(message));
+    return 0;
+}
+
+short cmd_setrtc(short channel, int argc, char * argv[]) {
+    char message[80];
+
+    if (argc > 1) {
+        if (strcmp(argv[1], "1") == 0) {
+            unsigned char flags = *RTC_FLAGS;
+            *RTC_ENABLES = RTC_PIE;
+            int_enable(INT_RTC);
+            sprintf(message, "RTC interrupt enabled.\n");
+        } else if (strcmp(argv[1], "0") == 0) {
+            int_disable(INT_RTC);
+            sprintf(message, "RTC interrupt disabled.\n");
+        } else {
+            sprintf(message, "USAGE: SETRTC 0|1\n");
+        }
+    } else {
+        sprintf(message, "USAGE: SETRTC 0|1\n");
+    }
+
+    sys_chan_write(channel, message, strlen(message));
+    return 0;
+}
+
+short cmd_testpanic(short channel, int argc, char * argv[]) {
+    volatile int x = 0;
+    return argc / x;
 }
 
 short cmd_getjiffies(short channel, int argc, char * argv[]) {

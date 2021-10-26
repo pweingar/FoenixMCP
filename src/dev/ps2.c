@@ -712,7 +712,7 @@ char kbd_getc() {
  * Handle an interrupt from the PS/2 mouse port
  */
 void mouse_handle_irq() {
-    unsigned char status = *PS2_STATUS;
+    //unsigned char status = *PS2_STATUS;
     unsigned char mouse_byte = *PS2_DATA_BUF;
 
     /* Clear the pending interrupt flag for the mouse */

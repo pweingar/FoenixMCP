@@ -23,15 +23,11 @@ short psg_test(short channel, int argc, char * argv[]) {
     psg_tone(1, 44000);
     psg_attenuation(1, 0);
 
-    for (i = 0; i < 10000; i++) ;
-
     target_time = timers_jiffies() + 20;
     while (target_time > timers_jiffies()) ;
 
     psg_tone(2, 52325);
     psg_attenuation(2, 0);
-
-    for (i = 0; i < 100000; i++) ;
 
     target_time = timers_jiffies() + 60;
     while (target_time > timers_jiffies()) ;
@@ -46,7 +42,7 @@ short psg_test(short channel, int argc, char * argv[]) {
     return 0;
 }
 
-const unsigned char opl3_data[] = {
+const unsigned char opl3_tone_on[] = {
     0x01,0x00,              /* initialise */
     0x05,0x01,              /* OPL3 mode, necessary for stereo */
     0xc0,0x31,              /* both channel, parallel connection */
@@ -84,23 +80,45 @@ const unsigned char opl3_data[] = {
     0xff
 };
 
+const unsigned char opl3_tone_off[] = {
+    /* block 0, key off */
+    0xb0,0x00,
+
+    /* end of sequence marker */
+    0xff
+};
+
 /*
  * Play a sound on the OPL3
  */
 short opl3_test(short channel, int argc, char * argv[]) {
     short i;
-    unsigned char cmd;
+    unsigned char reg;
     unsigned char data;
+    long target_time;
 
     i = 0;
     while (1) {
-        cmd = opl3_data[i++];
-        if (cmd == 0xff) {
+        reg = opl3_tone_on[i++];
+        if (reg == 0xff) {
             break;
         } else {
-            OPL3_PORT[0] = cmd;
-            data = opl3_data[i++];
-            OPL3_PORT[1] = data;
+            data = opl3_tone_on[i++];
+            OPL3_PORT[reg] = data;
+        }
+    }
+
+    target_time = timers_jiffies() + 60;
+    while (target_time > timers_jiffies()) ;
+
+    i = 0;
+    while (1) {
+        reg = opl3_tone_off[i++];
+        if (reg == 0xff) {
+            break;
+        } else {
+            data = opl3_tone_off[i++];
+            OPL3_PORT[reg] = data;
         }
     }
 

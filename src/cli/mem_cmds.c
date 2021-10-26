@@ -27,7 +27,7 @@ short mem_cmd_dump(short channel, int argc, char * argv[]) {
             count = cli_eval_number(argv[2]);
         }
 
-        dump_buffer(channel, address, count);
+        dump_buffer(channel, address, count, 2);
 
         return  0;
     } else {

@@ -1,10 +1,7 @@
             xref ___main
             xref _cli_rerepl
             xref _panic
-            xref _handle_bus_err
-            xref _handle_addr_err
-            xref _handle_inst_err
-            xref _handle_div0_err
+            xref _panic_number
 
             xdef _syscall
             xdef ___exit
@@ -21,9 +18,9 @@
             dc.l _handle_addr_err   ; 03 - Address error
             dc.l _handle_inst_err   ; 04 - Illegal instruction
             dc.l _handle_div0_err   ; 05 - Zero divide
-            dc.l not_impl           ; 06 - CHK instruction
-            dc.l not_impl           ; 07 - TRAPV instruction
-            dc.l not_impl           ; 08 - Priviledge error
+            dc.l _handle_chk_err    ; 06 - CHK instruction
+            dc.l _handle_trapv_err  ; 07 - TRAPV instruction
+            dc.l _handle_priv_err   ; 08 - Privilege error
             dc.l not_impl           ; 09 - Trace
             dc.l not_impl           ; 10 - Line 1010
             dc.l not_impl           ; 11 - Line 1111
@@ -39,7 +36,7 @@
             dc.l not_impl           ; 21 - Reserved
             dc.l not_impl           ; 22 - Reserved
             dc.l not_impl           ; 23 - Reserved
-            dc.l not_impl           ; 24 - Spurious Interrupt
+            dc.l _handle_spurious   ; 24 - Spurious Interrupt
             dc.l autovec1           ; 25 - Level 1 Interrupt Autovector
             dc.l autovec2           ; 26 - Level 2 Interrupt Autovector
             dc.l not_impl           ; 27 - Level 3 Interrupt Autovector
@@ -82,38 +79,36 @@
             dc.l interrupt_x10      ; 64 - Interrupt 0x10 - SuperIO - PS/2 Keyboard
             dc.l interrupt_x11      ; 65 - Interrupt 0x11 - A2560K Built-in Keyboard (Mo)
             dc.l interrupt_x12      ; 66 - Interrupt 0x12 - SuperIO - PS/2 Mouse
-            ; dc.l interrupt_x13      ; 67 - Interrupt 0x13 - SuperIO - COM1
-            ; dc.l interrupt_x14      ; 68 - Interrupt 0x14 - SuperIO - COM2
-            ; dc.l interrupt_x15      ; 69 - Interrupt 0x15 - SuperIO - LPT1
-            ; dc.l interrupt_x16      ; 70 - Interrupt 0x16 - SuperIO - Floppy Disk Controller
-            ; dc.l interrupt_x17      ; 71 - Interrupt 0x17 - SuperIO - MIDI
-            ; dc.l interrupt_x18      ; 72 - Interrupt 0x18 - Timer 0
-            ; dc.l interrupt_x19      ; 73 - Interrupt 0x19 - Timer 1
-            ; dc.l interrupt_x1A      ; 74 - Interrupt 0x1A - Timer 2
-            ; dc.l interrupt_x1B      ; 76 - Interrupt 0x1B - Timer 3
-            ; dc.l interrupt_x1C      ; 75 - Interrupt 0x1C - Timer 4
-            ; dc.l not_impl           ; 77 - Interrupt 0x1D - Reserved
-            ; dc.l not_impl           ; 78 - Interrupt 0x1E - Reserved
+            dc.l not_impl           ; 67 - Interrupt 0x13 - SuperIO - COM1
+            dc.l not_impl           ; 68 - Interrupt 0x14 - SuperIO - COM2
+            dc.l not_impl           ; 69 - Interrupt 0x15 - SuperIO - LPT1
+            dc.l not_impl           ; 70 - Interrupt 0x16 - SuperIO - Floppy Disk Controller
+            dc.l not_impl           ; 71 - Interrupt 0x17 - SuperIO - MIDI
+            dc.l not_impl           ; 72 - Interrupt 0x18 - Timer 0
+            dc.l not_impl           ; 73 - Interrupt 0x19 - Timer 1
+            dc.l not_impl           ; 74 - Interrupt 0x1A - Timer 2
+            dc.l not_impl           ; 76 - Interrupt 0x1B - Timer 3
+            dc.l not_impl           ; 75 - Interrupt 0x1C - Timer 4
+            dc.l not_impl           ; 77 - Interrupt 0x1D - Reserved
+            dc.l not_impl           ; 78 - Interrupt 0x1E - Reserved
             dc.l interrupt_x1F      ; 79 - Interrupt 0x1F - Real Time Clock
 
-            ; dc.l interrupt_x20      ; 80 - Interrupt 0x20 - IDE HDD Generated Interrupt
-            dc.l interrupt_x21      ; 81 - Interrupt 0x21 - SDCard Insert
-            ; dc.l interrupt_x22      ; 82 - Interrupt 0x22 - SDCard Controller
-            ; dc.l interrupt_x23      ; 83 - Interrupt 0x23 - Internal OPM
-            ; dc.l interrupt_x24      ; 84 - Interrupt 0x24 - External OPN2
-            ; dc.l interrupt_x25      ; 85 - Interrupt 0x25 - External OPL3
-            ; dc.l interrupt_x26      ; 86 - Interrupt 0x26 - Reserved
-            ; dc.l interrupt_x27      ; 87 - Interrupt 0x27 - Reserved
-            ; dc.l interrupt_x28      ; 88 - Interrupt 0x28 - Beatrix Interrupt 0
-            ; dc.l interrupt_x29      ; 89 - Interrupt 0x29 - Beatrix Interrupt 1
-            ; dc.l interrupt_x2A      ; 90 - Interrupt 0x2A - Beatrix Interrupt 2
-            ; dc.l interrupt_x2B      ; 91 - Interrupt 0x2B - Beatrix Interrupt 3
-            ; dc.l interrupt_x2C      ; 92 - Interrupt 0x2C - Reserved
-            ; dc.l interrupt_x2D      ; 93 - Interrupt 0x2D - DAC1 Playback Done Interrupt (48K)
-            ; dc.l interrupt_x2E      ; 94 - Interrupt 0x2E - Reserved
-            ; dc.l interrupt_x2F      ; 95 - Interrupt 0x2F - DAC0 Playback Done Interrupt (44.1K)
-
-            ; TODO: make room for reserved and User Interrupt Vectors
+            dc.l not_impl           ; 80 - Interrupt 0x20 - IDE HDD Generated Interrupt
+            dc.l not_impl           ; 81 - Interrupt 0x21 - SDCard Insert
+            dc.l not_impl           ; 82 - Interrupt 0x22 - SDCard Controller
+            dc.l not_impl           ; 83 - Interrupt 0x23 - Internal OPM
+            dc.l not_impl           ; 84 - Interrupt 0x24 - External OPN2
+            dc.l not_impl           ; 85 - Interrupt 0x25 - External OPL3
+            dc.l not_impl           ; 86 - Interrupt 0x26 - Reserved
+            dc.l not_impl           ; 87 - Interrupt 0x27 - Reserved
+            dc.l not_impl           ; 88 - Interrupt 0x28 - Beatrix Interrupt 0
+            dc.l not_impl           ; 89 - Interrupt 0x29 - Beatrix Interrupt 1
+            dc.l not_impl           ; 90 - Interrupt 0x2A - Beatrix Interrupt 2
+            dc.l not_impl           ; 91 - Interrupt 0x2B - Beatrix Interrupt 3
+            dc.l not_impl           ; 92 - Interrupt 0x2C - Reserved
+            dc.l not_impl           ; 93 - Interrupt 0x2D - DAC1 Playback Done Interrupt (48K)
+            dc.l not_impl           ; 94 - Interrupt 0x2E - Reserved
+            dc.l not_impl           ; 95 - Interrupt 0x2F - DAC0 Playback Done Interrupt (44.1K)
 
             code
 
@@ -168,14 +163,14 @@ int_dispatch:
             movea.l d0,a0
             jsr (a0)                        ; If there is, call it.
 
-intdis_end: movem.l (a7)+,d0/a0             ; Restore affected registers
+intdis_end: movem.l (a7)+,d0-d7/a0-a6       ; Restore affected registers
             rte
 
 ;
 ; Interrupt Vector 0x10 -- SuperIO Keyboard
 ;
 interrupt_x10:
-            movem.l d0/a0,-(a7)             ; Save affected registers
+            movem.l d0-d7/a0-a6,-(a7)       ; Save affected registers
             move.w #($10<<2),d0             ; Get the offset to interrupt 0x11
             bra int_dispatch                ; And process the interrupt
 
@@ -183,7 +178,7 @@ interrupt_x10:
 ; Interrupt Vector 0x11 -- A2560K "Mo" keyboard
 ;
 interrupt_x11:
-            movem.l d0/a0,-(a7)             ; Save affected registers
+            movem.l d0-d7/a0-a6,-(a7)       ; Save affected registers
             move.w #($11<<2),d0             ; Get the offset to interrupt 0x11
             bra int_dispatch                ; And process the interrupt
 
@@ -191,7 +186,7 @@ interrupt_x11:
 ; Interrupt Vector 0x12 -- SuperIO Mouse
 ;
 interrupt_x12:
-            movem.l d0/a0,-(a7)             ; Save affected registers
+            movem.l d0-d7/a0-a6,-(a7)       ; Save affected registers
             move.w #($12<<2),d0             ; Get the offset to interrupt 0x11
             bra int_dispatch                ; And process the interrupt
 
@@ -199,7 +194,7 @@ interrupt_x12:
 ; Interrupt Vector 0x1F -- RTC
 ;
 interrupt_x1F:
-            movem.l d0/a0,-(a7)             ; Save affected registers
+            movem.l d0-d7/a0-a6,-(a7)       ; Save affected registers
             move.w #($1f<<2),d0             ; Get the offset to interrupt 0x1f
             bra int_dispatch                ; And process the interrupt
 
@@ -207,7 +202,7 @@ interrupt_x1F:
 ; Interrupt Vector 0x21 -- SDCard Insert
 ;
 interrupt_x21:
-            movem.l d0/a0,-(a7)             ; Save affected registers
+            movem.l d0-d7/a0-a6,-(a7)       ; Save affected registers
             move.w #($21<<2),d0             ; Get the offset to interrupt 0x1f
             bra int_dispatch                ; And process the interrupt
 
@@ -219,14 +214,96 @@ not_impl:   rte
 ;
 ; Enable all interrupts
 ;
-_int_enable_all:    andi.w #$F8FF,SR
+_int_enable_all:    move.w SR,d0        ; Save the old level for return
+                    andi.w #$0700,d0
+                    lsr.w #8,d0
+                    ext.l d0
+
+                    andi.w #$F8FF,SR    ; Clear the level
                     rts
 
 ;
 ; Disable all interrupts
 ;
-_int_disable_all:   ori.w #$0700,SR
+_int_disable_all:   move.w SR,d0        ; Save the old level for return
+                    andi.w #$0700,d0
+                    lsr.w #8,d0
+                    ext.l d0
+
+                    ori.w #$0700,SR     ; Set the level to 7
                     rts
+
+;
+; Handlers for the various exceptions...
+;
+; These all go to the kernel panic screen after placing the
+; triggering PC address in "panic_pc" and the number of the exception
+; in "panic_number". Bus and address errors will also put the
+; address involved in "panic_address".
+;
+
+_handle_bus_err:
+                    lea _panic_number,a0
+                    lea _panic_pc,a1
+                    lea _panic_address,a2
+                    move.w #2,(a0)
+                    move.l (10,a7),(a1)
+                    move.l (2,a7),(a2)
+                    bra call_panic
+
+_handle_addr_err:
+                    lea _panic_number,a0
+                    lea _panic_pc,a1
+                    lea _panic_address,a2
+                    move.w #3,(a0)
+                    move.l (10,a7),(a1)
+                    move.l (2,a7),(a2)
+                    bra call_panic
+
+_handle_inst_err:
+                    lea _panic_number,a0
+                    lea _panic_pc,a1
+                    move.w #4,(a0)
+                    move.l (2,a7),(a1)
+                    bra call_panic
+
+_handle_div0_err:
+                    lea _panic_number,a0
+                    lea _panic_pc,a1
+                    move.w #5,(a0)
+                    move.l (2,a7),(a1)
+                    bra call_panic
+
+_handle_chk_err:
+                    lea _panic_number,a0
+                    lea _panic_pc,a1
+                    move.w #6,(a0)
+                    move.l (2,a7),(a1)
+                    bra call_panic
+
+_handle_trapv_err:
+                    lea _panic_number,a0
+                    lea _panic_pc,a1
+                    move.w #7,(a0)
+                    move.l (2,a7),(a1)
+                    bra call_panic
+
+_handle_priv_err:
+                    lea _panic_number,a0
+                    lea _panic_pc,a1
+                    move.w #8,(a0)
+                    move.l (2,a7),(a1)
+                    bra call_panic
+
+_handle_spurious:
+                    lea _panic_number,a0
+                    lea _panic_pc,a1
+                    move.w #24,(a0)
+                    move.l (2,a7),(a1)
+                    bra call_panic
+
+call_panic:         jsr _panic
+panic_lock:         bra panic_lock
 
 ;
 ; Function to make a system call based on the number of the system function:
@@ -246,7 +323,6 @@ _syscall:
 
             movem.l (sp)+,d1-d7         ; Restore caller's registers
             rts
-
 
 ;
 ; TRAP#15 handler... transfer control to the C dispatcher
