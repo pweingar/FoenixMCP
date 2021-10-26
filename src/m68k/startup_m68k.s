@@ -351,11 +351,16 @@ h_trap_15:
 ; a1 = location to set user stack pointer
 ;
 _call_user:
-            move.l (4,a7),a0
-            move.l (8,a7),a1
+            move.l (4,a7),a0            ; Get the pointer to the code to start
+            move.l (8,a7),a1            ; Get the pointer to the process's stack
+            move.l (12,a7),d0           ; Get the number of parameters passed
+            move.l (16,a7),a2           ; Get the pointer to the parameters
             andi #$dfff,sr              ; Drop into user mode
             movea.l a1,a7               ; Set the stack
-            jmp (a0)
+
+            move.l a2,-(a7)             ; Push the parameters list
+            move.l d0,-(a7)             ; Push the parameter count
+            jsr (a0)
 
 _restart_cli:
             lea ___STACK,sp

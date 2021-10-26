@@ -425,10 +425,8 @@ short cli_exec(short channel, char * command, int argc, char * argv[]) {
         }
     }
 
-    // Built in command not found..
-    // TODO: search the current drive for an executable file
-    sys_chan_write(channel, cmd_not_found, strlen(cmd_not_found));
-    return -1;
+    /* No built-in command that matched... try to run a binary file */
+    return cmd_run(channel, argc, argv);
 }
 
 char * strtok_r(char * source, const char * delimiter, char ** saveptr) {

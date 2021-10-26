@@ -1,4 +1,5 @@
 #include <ctype.h>
+#include <stdio.h>
 #include <string.h>
 
 #include "syscalls.h"
@@ -153,16 +154,21 @@ short cmd_testcreate(short screen, int argc, char * argv[]) {
     }
 }
 
+/*
+ * Try to run a command from storage.
+ *
+ * Command name is in argv[0].
+ */
 short cmd_run(short screen, int argc, char * argv[]) {
     TRACE("cmd_run");
 
-    if (argc > 1) {
-        short result = proc_run(argv[1]);
-        if (result < 0) {
-            log_num(LOG_ERROR, "Unable to run: ", result);
-            return result;
-        }
+    short result = proc_run(argv[0], argc, argv);
+    if (result < 0) {
+        print(screen, "Command not found...\n");
+        return -1;
     }
+
+    return result;
 }
 
 /*
@@ -249,7 +255,7 @@ short cmd_pwd(short screen, int argc, char * argv[]) {
 /*
  * Rename a file or directory
  */
-extern short cmd_rename(short screen, int argc, char * argv[]) {
+short cmd_rename(short screen, int argc, char * argv[]) {
 
     TRACE("cmd_rename");
 
