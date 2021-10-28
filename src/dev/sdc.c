@@ -6,6 +6,7 @@
 #include "constants.h"
 #include "errors.h"
 #include "gabe_reg.h"
+#include "indicators.h"
 #include "dev/block.h"
 #include "sdc_reg.h"
 #include "dev/sdc.h"
@@ -143,7 +144,8 @@ short sdc_read(long lba, unsigned char * buffer, short size) {
         return DEV_NOMEDIA;
     }
 
-    sdc_set_led(1);                         // Turn on the SDC LED
+    /* Turn on the SDC LED */
+    ind_set(IND_SDC, IND_ON);
 
     // Send the LBA to the SDC
 
@@ -162,7 +164,9 @@ short sdc_read(long lba, unsigned char * buffer, short size) {
         g_sdc_error = *SDC_TRANS_ERROR_REG;     // Check for errors
 
         if (g_sdc_error != 0) {
-            sdc_set_led(0);                     // Turn off the SDC LED
+            /* Turn off the SDC LED */
+            ind_set(IND_SDC, IND_OFF);
+
             return DEV_CANNOT_READ;
 
         } else {
@@ -172,6 +176,9 @@ short sdc_read(long lba, unsigned char * buffer, short size) {
             // Get the number of bytes to be read and make sure there is room
             count = *SDC_RX_FIFO_DATA_CNT_HI << 8 | *SDC_RX_FIFO_DATA_CNT_LO;
             if (count > size) {
+                /* Turn off the SDC LED */
+                ind_set(IND_SDC, IND_OFF);
+
                 return DEV_BOUNDS_ERR;
             }
 
@@ -183,14 +190,22 @@ short sdc_read(long lba, unsigned char * buffer, short size) {
 
             g_sdc_error = *SDC_TRANS_ERROR_REG; // Check for errors
             if (g_sdc_error != 0) {
+                /* Turn off the SDC LED */
+                ind_set(IND_SDC, IND_OFF);
+
                 return DEV_CANNOT_READ;
             } else {
+                /* Turn off the SDC LED */
+                ind_set(IND_SDC, IND_OFF);
+
                 // Success: return the byte count
                 return count;
             }
         }
     } else {
-        sdc_set_led(0);                         // Turn off the SDC LED
+        /* Turn off the SDC LED */
+        ind_set(IND_SDC, IND_OFF);
+
         return DEV_TIMEOUT;
     }
 }
@@ -220,7 +235,8 @@ short sdc_write(long lba, const unsigned char * buffer, short size) {
         return DEV_NOMEDIA;
     }
 
-    sdc_set_led(1);                         // Turn on the SDC LED
+    /* Turn on the SDC LED */
+    ind_set(IND_SDC, IND_ON);
 
     if (size <= SDC_SECTOR_SIZE) {
         // Copy the data to the SDC, if there isn't too much...
@@ -236,6 +252,9 @@ short sdc_write(long lba, const unsigned char * buffer, short size) {
         }
 
     } else {
+        /* Turn off the SDC LED */
+        ind_set(IND_SDC, IND_OFF);
+
         // If size is too big, return a BOUNDS error
         return DEV_BOUNDS_ERR;
     }
@@ -257,15 +276,22 @@ short sdc_write(long lba, const unsigned char * buffer, short size) {
         g_sdc_error = *SDC_TRANS_ERROR_REG;     // Check for errors
 
         if (g_sdc_error != 0) {
-            sdc_set_led(0);                     // Turn off the SDC LED
+            /* Turn off the SDC LED */
+            ind_set(IND_SDC, IND_OFF);
+
             return DEV_CANNOT_WRITE;
 
         } else {
+            /* Turn off the SDC LED */
+            ind_set(IND_SDC, IND_OFF);
+
             // Success: return the byte count
             return size;
         }
     } else {
-        sdc_set_led(0);                         // Turn off the SDC LED
+        /* Turn off the SDC LED */
+        ind_set(IND_SDC, IND_OFF);
+
         return DEV_TIMEOUT;
     }
 }

@@ -6,7 +6,7 @@
 #include "log.h"
 #include "errors.h"
 #include "constants.h"
-// #include "fatfs/ff.h"
+#include "indicators.h"
 #include "dev/block.h"
 #include "dev/pata.h"
 #include "dev/text_screen_iii.h"
@@ -236,12 +236,21 @@ short pata_read(long lba, unsigned char * buffer, short size) {
     TRACE("pata_read");
     log_num(LOG_VERBOSE, "pata_read lba: ", lba);
 
+    /* Turn on the HDD LED */
+    ind_set(IND_HDC, IND_ON);
+
     if (pata_wait_ready_not_busy()) {
+        /* Turn off the HDD LED */
+        ind_set(IND_HDC, IND_OFF);
+
         return DEV_TIMEOUT;
     }
 
     *PATA_HEAD = ((lba >> 24) & 0x07) | 0xe0;       // Upper 3 bits of LBA, Drive 0, LBA mode.
     if (pata_wait_ready_not_busy()) {
+        /* Turn off the HDD LED */
+        ind_set(IND_HDC, IND_OFF);
+
         return DEV_TIMEOUT;
     }
 
@@ -255,10 +264,16 @@ short pata_read(long lba, unsigned char * buffer, short size) {
     // TODO: Wait ~500ns
 
     if (pata_wait_ready_not_busy()) {
+        /* Turn off the HDD LED */
+        ind_set(IND_HDC, IND_OFF);
+
         return DEV_TIMEOUT;
     }
 
     if (pata_wait_data_request()) {
+        /* Turn off the HDD LED */
+        ind_set(IND_HDC, IND_OFF);
+
         return DEV_TIMEOUT;
     }
 
@@ -266,6 +281,9 @@ short pata_read(long lba, unsigned char * buffer, short size) {
     for (i = 0, wptr = (unsigned short *)buffer; i < size; i += 2) {
         *wptr++ = *PATA_DATA_16;
     }
+
+    /* Turn off the HDD LED */
+    ind_set(IND_HDC, IND_OFF);
 
     return i;
 }
@@ -334,13 +352,22 @@ short pata_write(long lba, const unsigned char * buffer, short size) {
     unsigned char status;
     TRACE("pata_write");
 
+    /* Turn on the HDD LED */
+    ind_set(IND_HDC, IND_ON);
+
     if (pata_wait_ready_not_busy()) {
+        /* Turn off the HDD LED */
+        ind_set(IND_HDC, IND_OFF);
+
         return DEV_TIMEOUT;
     }
 
     *PATA_HEAD = ((lba >> 24) & 0x07) | 0xe0;       // Upper 3 bits of LBA, Drive 0, LBA mode.
 
     if (pata_wait_ready_not_busy()) {
+        /* Turn off the HDD LED */
+        ind_set(IND_HDC, IND_OFF);
+
         return DEV_TIMEOUT;
     }
 
@@ -355,6 +382,9 @@ short pata_write(long lba, const unsigned char * buffer, short size) {
     for (i = 0; i < 32000; i++) ;
 
     if (pata_wait_ready_not_busy()) {
+        /* Turn off the HDD LED */
+        ind_set(IND_HDC, IND_OFF);
+
         return DEV_TIMEOUT;
     }
 
@@ -367,6 +397,9 @@ short pata_write(long lba, const unsigned char * buffer, short size) {
     for (i = 0; i < 32000; i++) ;
 
     if (pata_wait_ready_not_busy()) {
+        /* Turn off the HDD LED */
+        ind_set(IND_HDC, IND_OFF);
+
         return DEV_TIMEOUT;
     }
 
@@ -376,13 +409,24 @@ short pata_write(long lba, const unsigned char * buffer, short size) {
     status = *PATA_CMD_STAT;
     if ((status & PATA_STAT_DF) != 0){
         log(LOG_ERROR, "pata_write: device fault");
+
+        /* Turn off the HDD LED */
+        ind_set(IND_HDC, IND_OFF);
+
         return -1;
     }
 
     if ((status & PATA_STAT_ERR) != 0) {
         log(LOG_ERROR, "pata_write: error");
+
+        /* Turn off the HDD LED */
+        ind_set(IND_HDC, IND_OFF);
+
         return -1;
     }
+
+    /* Turn off the HDD LED */
+    ind_set(IND_HDC, IND_OFF);
 
     return size;
 }

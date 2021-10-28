@@ -7,6 +7,7 @@
 #include "sys_general.h"
 #include "simpleio.h"
 #include "log.h"
+#include "indicators.h"
 #include "interrupt.h"
 #include "gabe_reg.h"
 
@@ -160,6 +161,10 @@ void initialize() {
     /* Initialize the text channels */
     text_init();
 
+    /* Initialize the indicators, and turn on the power indicator */
+    ind_init();
+    ind_set(IND_POWER, IND_ON);
+
     /* Initialize the interrupt system */
     int_init();
 
@@ -167,10 +172,6 @@ void initialize() {
     timers_init();
 
 #if MODEL == MODEL_FOENIX_A2560K
-    /* Set the power LED to purple */
-    *RGB_LED_L = 0x00FF;
-    *RGB_LED_H = 0x00FF;
-
     /* Initialize the SuperIO chip */
     init_superio();
 #endif
