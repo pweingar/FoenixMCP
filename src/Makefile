@@ -16,11 +16,11 @@ export CPU=32
 # MODEL_FOENIX_A2560X         8
 # MODEL_FOENIX_A2560U         9
 # MODEL_FOENIX_A2560K         13
-export MODEL=9
+export MODEL=13
 
 export VER_MAJOR = 0
 export VER_MINOR = 1
-export VER_BUILD = 2
+export VER_BUILD = 10
 
 export AS = vasmm68k_mot
 export ASFLAGS = -quiet -Fvobj -nowarn=62

@@ -33,7 +33,7 @@
  * 16-bit register controlling the key of the A2560K built-in keyboard
  */
 
-#define GABE_MO_LEDS        ((volatile unsigned short *)0x00C00006)
+#define GABE_MO_LEDS        ((volatile unsigned short *)0x00C0000C)
 #define GABE_MO_LED_0_B     0x0001      /* LED 0 (Close to DEL key) -- Blue ON */
 #define GABE_MO_LED_0_G     0x0002      /* LED 0 (Close to DEL key) -- Green ON */
 #define GABE_MO_LED_0_R     0x0004      /* LED 0 (Close to DEL key) -- Red ON */

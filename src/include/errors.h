@@ -23,4 +23,6 @@
 #define ERR_OUT_OF_MEMORY   -14     // Unable to allocate more memory
 #define ERR_BAD_BINARY      -15     // Bad binary file format... i.e. binary format does not match expectations
 #define ERR_NOT_EXECUTABLE  -16     // Binary file format does not have a starting address
+#define ERR_NOT_FOUND       -17     // Resource not found
+
 #endif

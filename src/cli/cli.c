@@ -14,6 +14,7 @@
 #include "cli/cli.h"
 #include "cli/dos_cmds.h"
 #include "cli/mem_cmds.h"
+#include "cli/settings.h"
 #include "cli/sound_cmds.h"
 #include "dev/ps2.h"
 #include "dev/rtc.h"
@@ -47,8 +48,6 @@ extern short cmd_testuart(short channel, int argc, char * argv[]);
 extern short cmd_get_ticks(short channel, int argc, char * argv[]);
 extern short cmd_testrtc(short channel, int argc, char * argv[]);
 extern short cmd_testpanic(short channel, int argc, char * argv[]);
-extern short cmd_setsof(short channel, int argc, char * argv[]);
-extern short cmd_setrtc(short channel, int argc, char * argv[]);
 
 /*
  * Variables
@@ -81,8 +80,8 @@ const t_cli_command g_cli_commands[] = {
     { "PWD", "PWD : prints the current directory", cmd_pwd },
     // { "REN", "REN <old path> <new path> : rename a file or directory", cmd_rename },
     { "RUN", "RUN <path> : execute a binary file",  cmd_run },
-    { "SETSOF", "SETSOF 0|1 : turns SOF interrupt on or off", cmd_setsof },
-    { "SETRTC", "SETRTC 0|1 : turns RTC interrupt on or off", cmd_setrtc },
+    { "SET", "SET <name> <value> : set the value of a setting", cli_cmd_set },
+    { "GET", "GET <name> : get the value of a setting", cli_cmd_get },
     { "SETTIME", "SETTIME yyyy-mm-dd HH:MM:SS : sets the current time", cmd_settime },
     { "SHOWINT", "SHOWINT : Show information about the interrupt registers", cmd_showint },
     { "SYSINFO", "SYSINFO : prints information about the system", cmd_sysinfo },
@@ -107,50 +106,6 @@ int cmd_help(short channel, int argc, char * argv[]) {
         sys_chan_write(channel, command->help, strlen(command->help));
         sys_chan_write(channel, "\n", 2);
     }
-    return 0;
-}
-
-short cmd_setsof(short channel, int argc, char * argv[]) {
-    char message[80];
-
-    if (argc > 1) {
-        if (strcmp(argv[1], "1") == 0) {
-            int_enable(INT_SOF_A);
-            sprintf(message, "Start Of Frame interrupt enabled.\n");
-        } else if (strcmp(argv[1], "0") == 0) {
-            int_disable(INT_SOF_A);
-            sprintf(message, "Start Of Frame interrupt disabled.\n");
-        } else {
-            sprintf(message, "USAGE: SETSOF 0|1\n");
-        }
-    } else {
-        sprintf(message, "USAGE: SETSOF 0|1\n");
-    }
-
-    sys_chan_write(channel, message, strlen(message));
-    return 0;
-}
-
-short cmd_setrtc(short channel, int argc, char * argv[]) {
-    char message[80];
-
-    if (argc > 1) {
-        if (strcmp(argv[1], "1") == 0) {
-            unsigned char flags = *RTC_FLAGS;
-            *RTC_ENABLES = RTC_PIE;
-            int_enable(INT_RTC);
-            sprintf(message, "RTC interrupt enabled.\n");
-        } else if (strcmp(argv[1], "0") == 0) {
-            int_disable(INT_RTC);
-            sprintf(message, "RTC interrupt disabled.\n");
-        } else {
-            sprintf(message, "USAGE: SETRTC 0|1\n");
-        }
-    } else {
-        sprintf(message, "USAGE: SETRTC 0|1\n");
-    }
-
-    sys_chan_write(channel, message, strlen(message));
     return 0;
 }
 
@@ -614,5 +569,6 @@ long cli_eval_number(const char * arg) {
 //  0 on success, negative number on error
 //
 short cli_init() {
+    cli_set_init();
     return 0;
 }

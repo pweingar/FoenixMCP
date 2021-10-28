@@ -6,7 +6,7 @@
 #include "vicky_general.h"
 #include "text_screen_iii.h"
 #include "simpleio.h"
-#include "rsrc/font/foenix_st_8_8.h"
+#include "rsrc/font/MSX_CP437_8x8.h"
 
 #define MAX_TEXT_CHANNELS 2
 
@@ -132,45 +132,45 @@ int text_init() {
     /* Set the font for channel A */
 
     for (i = 0; i < 0x800; i++) {
-        unsigned char b = foenix_st_8x8[i];
+        unsigned char b = MSX_CP437_8x8_bin[i];
         VICKY_TXT_FONT_A[i] = b;
     }
 
     text_set_border(0, 1, 0x20, 0x10, 0x00008080);
     text_setsizes(0);
     text_set_color(0, 0xf, 4);
-    text_set_cursor(0, 0xF3, 0xB1, 1, 1);
+    text_set_cursor(0, 0xF3, 0x7F, 1, 1);
     text_set_xy(0, 0, 0);
     text_clear(0, 2);
 
-// #if MODEL == MODEL_FOENIX_A2560K
-//
-//     chan_b->master_control = MasterControlReg_B;
-//     chan_b->text_cells = ScreenText_B;
-//     chan_b->color_cells = ColorText_B;
-//     chan_b->cursor_settings = CursorControlReg_L_B;
-//     chan_b->cursor_position = CursorControlReg_H_B;
-//     chan_b->border_control = BorderControlReg_L_B;
-//
-//     *chan_b->master_control = 1;     /* Set to text only mode: 640x480 */
-//
-//     chan_b->border_control[0] = 0x00102000;	// Enable
-// 	chan_b->border_control[1] = 0x00400000;	//Dark Red
-//
-//     text_setsizes(1);
-//     text_set_color(1, 4, 3);
-//     text_clear(1, 2);
-//     text_set_cursor(1, 0xF3, 0xB1, 1, 1);
-//     text_set_xy(1, 0, 0);
-//
-//     /* Set the font for channel B */
-//
-//     for (i = 0; i < 0x800; i++) {
-//         unsigned char b = foenix_st_8x8[i];
-//         VICKY_TXT_FONT_B[i] = b;
-//     }
-//
-// #endif
+#if MODEL == MODEL_FOENIX_A2560K
+
+    chan_b->master_control = MasterControlReg_B;
+    chan_b->text_cells = ScreenText_B;
+    chan_b->color_cells = ColorText_B;
+    chan_b->cursor_settings = CursorControlReg_L_B;
+    chan_b->cursor_position = CursorControlReg_H_B;
+    chan_b->border_control = BorderControlReg_L_B;
+
+    *chan_b->master_control = 1;     /* Set to text only mode: 640x480 */
+
+    chan_b->border_control[0] = 0x00102000;	// Enable
+	chan_b->border_control[1] = 0x00400000;	//Dark Red
+
+    text_setsizes(1);
+    text_set_color(1, 4, 3);
+    text_clear(1, 2);
+    text_set_cursor(1, 0xF3, 0x7F, 1, 1);
+    text_set_xy(1, 0, 0);
+
+    /* Set the font for channel B */
+
+    for (i = 0; i < 0x800; i++) {
+        unsigned char b = MSX_CP437_8x8_bin[i];
+        VICKY_TXT_FONT_B[i] = b;
+    }
+
+#endif
 
     return 0;
 }

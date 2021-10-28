@@ -280,6 +280,13 @@ int main(int argc, char * argv[]) {
 
     char welcome[255];
     short result;
+    short i;
+
+    volatile char * dumpster = 0x0A0000;
+
+    for (i = 0; i < 10; i++) {
+        dumpster[i] = 'A';
+    }
 
     initialize();
 

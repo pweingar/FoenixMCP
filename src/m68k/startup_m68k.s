@@ -137,7 +137,8 @@ ___exit:
 ;
 ; Autovector #1: Used by VICKY III Channel B interrupts
 ;
-autovec1:   movem.l d0-d7/a0-a6,-(a7)
+autovec1:   ori.w #$0700,SR                 ; Set the level to 7
+            movem.l d0-d7/a0-a6,-(a7)
             jsr _int_vicky_channel_b        ; Call the dispatcher for Channel B interrupts
             movem.l (a7)+,d0-d7/a0-a6
             rte
@@ -145,7 +146,8 @@ autovec1:   movem.l d0-d7/a0-a6,-(a7)
 ;
 ; Autovector #1: Used by VICKY III Channel A interrupts
 ;
-autovec2:   movem.l d0-d7/a0-a6,-(a7)
+autovec2:   ori.w #$0700,SR                 ; Set the level to 7
+            movem.l d0-d7/a0-a6,-(a7)
             jsr _int_vicky_channel_a        ; Call the dispatcher for Channel A interrupts
             movem.l (a7)+,d0-d7/a0-a6
             rte
@@ -170,6 +172,7 @@ intdis_end: movem.l (a7)+,d0-d7/a0-a6       ; Restore affected registers
 ; Interrupt Vector 0x10 -- SuperIO Keyboard
 ;
 interrupt_x10:
+            ori.w #$0700,SR                 ; Set the level to 7
             movem.l d0-d7/a0-a6,-(a7)       ; Save affected registers
             move.w #($10<<2),d0             ; Get the offset to interrupt 0x11
             bra int_dispatch                ; And process the interrupt
@@ -178,6 +181,7 @@ interrupt_x10:
 ; Interrupt Vector 0x11 -- A2560K "Mo" keyboard
 ;
 interrupt_x11:
+            ori.w #$0700,SR                 ; Set the level to 7
             movem.l d0-d7/a0-a6,-(a7)       ; Save affected registers
             move.w #($11<<2),d0             ; Get the offset to interrupt 0x11
             bra int_dispatch                ; And process the interrupt
@@ -186,6 +190,7 @@ interrupt_x11:
 ; Interrupt Vector 0x12 -- SuperIO Mouse
 ;
 interrupt_x12:
+            ori.w #$0700,SR                 ; Set the level to 7
             movem.l d0-d7/a0-a6,-(a7)       ; Save affected registers
             move.w #($12<<2),d0             ; Get the offset to interrupt 0x11
             bra int_dispatch                ; And process the interrupt
@@ -194,6 +199,7 @@ interrupt_x12:
 ; Interrupt Vector 0x1F -- RTC
 ;
 interrupt_x1F:
+            ori.w #$0700,SR                 ; Set the level to 7
             movem.l d0-d7/a0-a6,-(a7)       ; Save affected registers
             move.w #($1f<<2),d0             ; Get the offset to interrupt 0x1f
             bra int_dispatch                ; And process the interrupt
@@ -202,6 +208,7 @@ interrupt_x1F:
 ; Interrupt Vector 0x21 -- SDCard Insert
 ;
 interrupt_x21:
+            ori.w #$0700,SR                 ; Set the level to 7
             movem.l d0-d7/a0-a6,-(a7)       ; Save affected registers
             move.w #($21<<2),d0             ; Get the offset to interrupt 0x1f
             bra int_dispatch                ; And process the interrupt

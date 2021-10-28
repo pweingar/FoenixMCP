@@ -29,7 +29,7 @@ void timers_init() {
     jiffy_count = 0;
 
     int_register(INT_SOF_A, sof_a_handler);
-    int_enable(INT_SOF_A);
+    // int_enable(INT_SOF_A);
 }
 
 /*

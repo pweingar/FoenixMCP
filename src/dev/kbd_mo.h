@@ -46,6 +46,38 @@ extern unsigned short kbdmo_get_scancode_poll();
 
 extern void kbdmo_handle_irq();
 
+/*
+ * Set the color of the LED for the capslock
+ *
+ * Inputs:
+ * colors = color specification, three bits: 0x_____RGB
+ */
+extern void kbdmo_set_caps_led(short colors);
+
+/*
+ * Set the color of the LED for the floppy drive
+ *
+ * Inputs:
+ * colors = color specification, three bits: 0x_____RGB
+ */
+extern void kbdmo_set_fdc_led(short colors);
+
+/*
+ * Set the color of the LED for the SD card slot
+ *
+ * Inputs:
+ * colors = color specification, three bits: 0x_____RGB
+ */
+extern void kbdmo_set_sdc_led(short colors);
+
+/*
+ * Set the color of the LED for the IDE hard drive
+ *
+ * Inputs:
+ * colors = color specification, three bits: 0x_____RGB
+ */
+extern void kbdmo_set_hdc_led(short colors);
+
 #endif
 
 #endif
