@@ -13,14 +13,17 @@
 #include "syscalls.h"
 #include "interrupt.h"
 #include "rtc_reg.h"
+#include "dev/rtc.h"
 
 #define MAX_SETTING_NAME    64
+#define MAX_SETTING_HELP    80
 
 /*
  * Structure to hold a setting
  */
 typedef struct s_setting {
     char name[MAX_SETTING_NAME];        /* Name of the setting (in upper case) */
+    char help[MAX_SETTING_HELP];        /* Help line for this setting */
     cli_setter setter;                  /* The function to set the value of the setting */
     cli_getter getter;                  /* The function to get the value of the setting */
     struct s_setting * next;            /* Pointer to the next registered setting */
@@ -56,7 +59,7 @@ void cli_name_upper(char * name_upper, const char *name) {
  * Returns:
  * 0 on success, any other number is an error
  */
-short cli_set_register(const char * name, cli_setter setter, cli_getter getter) {
+short cli_set_register(const char * name, const char * help, cli_setter setter, cli_getter getter) {
     p_setting setting = (p_setting)malloc(sizeof(t_setting));
     if (setting == 0) {
         /* Could not allocate the setting record... return an error */
@@ -65,6 +68,7 @@ short cli_set_register(const char * name, cli_setter setter, cli_getter getter) 
     } else {
         /* Set the fields for the setting */
         cli_name_upper(setting->name, name);
+        strncpy(setting->help, help);
         setting->setter = setter;
         setting->getter = getter;
         setting->next = 0;
@@ -159,6 +163,24 @@ short cli_get_value(short channel, const char * name, char * buffer, short size)
 }
 
 /*
+ * Print help information about the SET command
+ */
+void cli_set_help(short channel) {
+    char message[80];
+    p_setting setting;
+
+    sprintf(message, "SET/GET command supported settings:\n");
+    sys_chan_write(channel, message, strlen(message));
+
+    for (setting = cli_first_setting; setting != 0; setting = setting->next) {
+        sys_chan_write(channel, setting->help, strlen(setting->help));
+        sys_chan_write(channel, "\n", 1);
+    }
+
+    return 0;
+}
+
+/*
  * Command to set the value of a setting
  */
 short cli_cmd_set(short channel, int argc, char * argv[]) {
@@ -171,6 +193,9 @@ short cli_cmd_set(short channel, int argc, char * argv[]) {
             return 0;
         }
         return result;
+
+    } else if ((argc == 2) && ((strcmp(argv[1], "HELP") == 0) || (strcmp(argv[1], "help") == 0) || (strcmp(argv[1], "?") == 0)) {
+        cli_set_help(channel);
 
     } else {
         print(channel, "USAGE: SET <name> <value>\n");
@@ -186,15 +211,21 @@ short cli_cmd_get(short channel, int argc, char * argv[]) {
     short result;
 
     if (argc == 2) {
-        result = cli_get_value(channel, argv[1], buffer, 128);
-        if (result == 0) {
-            print(channel, buffer);
-            print(channel, "\n");
-            return 0;
+
+        if ((strcmp(argv[1], "HELP") == 0) || (strcmp(argv[1], "help") == 0) || (strcmp(argv[1], "?") == 0)) {
+            cli_set_help(channel);
 
         } else {
-            print(channel, "Unable to get value.\n");
-            return result;
+            result = cli_get_value(channel, argv[1], buffer, 128);
+            if (result == 0) {
+                print(channel, buffer);
+                print(channel, "\n");
+                return 0;
+
+            } else {
+                print(channel, "Unable to get value.\n");
+                return result;
+            }
         }
 
     } else {
@@ -250,13 +281,122 @@ short cli_rtc_set(short channel, const char * value) {
 
     sys_chan_write(channel, message, strlen(message));
     return 0;
-
 }
 
 /*
  * RTC getter
  */
 short cli_rtc_get(short channel, char * buffer, short size) {
+    return 0;
+}
+
+short atoi_n(char * text, short n) {
+    short result = 0;
+    short i;
+
+    for (i = 0; i < n; i++) {
+        result = result * 10;
+        result = result + (text[i] - '0');
+    }
+
+    return result;
+}
+
+/*
+ * DATE setter
+ */
+short cli_date_set(short channel, const char * date) {
+    t_time date_time;
+    short i;
+    const char * usage = "USAGE: SET DATE yyyy-mm-dd\n";
+
+    rtc_get_time(&date_time);
+    date_time.is_24hours = 1;
+    date_time.is_pm = 0;
+
+    /* Validate date is correct format */
+
+    for (i = 0; i < 10; i++) {
+        if ((i == 4) || (i == 7)) {
+            if (date[i] != '-') {
+                sys_chan_write(channel, usage, strlen(usage));
+                return -1;
+            }
+        } else {
+            if ((date[i] < '0') || (date[i] > '9')) {
+                sys_chan_write(channel, usage, strlen(usage));
+                return -1;
+            }
+        }
+    }
+
+    date_time.year = atoi_n(&date[0], 4);
+    date_time.month = atoi_n(&date[5], 2);
+    date_time.day = atoi_n(&date[8], 2);
+
+    rtc_set_time(&date_time);
+
+    return 0;
+}
+
+/*
+ * DATE getter
+ */
+short cli_date_get(short channel, const char * value) {
+    t_time time;
+
+    rtc_get_time(&time);
+    sprintf(value, "%04d-%02d-%02d\n", time.year, time.month, time.day);
+
+    return 0;
+}
+
+/*
+ * TIME setter
+ */
+short cli_time_set(short channel, const char * time) {
+    t_time date_time;
+    short i;
+    const char * usage = "USAGE: SET TIME HH:MM:SS\n";
+
+    rtc_get_time(&date_time);
+    date_time.is_24hours = 1;
+    date_time.is_pm = 0;
+
+    /* Validate time is correct format */
+
+    for (i = 0; i < 8; i++) {
+        if ((i == 2) || (i == 5)) {
+            if (time[i] != ':') {
+                sys_chan_write(channel, usage, strlen(usage));
+                return -1;
+            }
+        } else {
+            if ((time[i] < '0') || (time[i] > '9')) {
+                sys_chan_write(channel, usage, strlen(usage));
+                return -1;
+            }
+        }
+    }
+
+    date_time.hour = atoi_n(&time[0], 2);
+    date_time.minute = atoi_n(&time[3], 2);
+    date_time.second = atoi_n(&time[6], 2);
+
+    rtc_set_time(&date_time);
+
+    return 0;
+}
+
+/*
+ * TIME getter
+ */
+short cli_time_get(short channel, const char * value) {
+    t_time time;
+
+    rtc_get_time(&time);
+    sprintf(value, "%02d:%02d:%02d\n", time.hour, time.minute, time.second);
+
     return 0;
 }
 
@@ -267,7 +407,8 @@ void cli_set_init() {
     cli_first_setting = 0;
     cli_last_setting = 0;
 
-    cli_set_register("SOF", cli_sof_set, cli_sof_get);      /* Register "SOF" setting */
-    cli_set_register("RTC", cli_rtc_set, cli_rtc_get);      /* Register "RTC" setting */
-
+    cli_set_register("DATE", "DATE yyyy-mm-dd -- set the date in the realtime clock", cli_date_set, cli_date_get);      /* Register "DATE" setting */
+    cli_set_register("RTC", "RTC 1|0 -- Enable or disable the realtime clock interrupt", cli_rtc_set, cli_rtc_get);     /* Register "RTC" setting */
+    cli_set_register("SOF", "SOF 1|0 -- Enable or disable the Start of Frame interrupt", cli_sof_set, cli_sof_get);     /* Register "SOF" setting */
+    cli_set_register("TIME", "TIME HH:MM:SS -- set the time in the realtime clock", cli_time_set, cli_time_get);        /* Register "TIME" setting */
 }

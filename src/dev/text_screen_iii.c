@@ -80,6 +80,7 @@ const unsigned short bg_color_lut [32] = {
  * Initialize the text screen driver
  */
 int text_init() {
+    short need_hires = 0;
     int i, x;
     p_text_channel chan_a = &text_channel[0];
 
@@ -115,7 +116,9 @@ int text_init() {
 #endif
 	}
 
-    /* TODO: initialize everything... only do a screen if it's present */
+    /* Initialize everything... only do a screen if it's present */
+
+    need_hires = ((*VKY3_DIP_REG & VKY3_DIP_HIRES) == VKY3_DIP_HIRES) ? 0 : 1;
 
     chan_a->master_control = MasterControlReg_A;
     chan_a->text_cells = ScreenText_A;
@@ -124,7 +127,11 @@ int text_init() {
     chan_a->cursor_position = CursorControlReg_H_A;
     chan_a->border_control = BorderControlReg_L_A;
 
-    *chan_a->master_control = VKY3_MCR_TEXT_EN;             /* Set to text only mode: 640x480 */
+    if (need_hires) {
+        *chan_a->master_control = VKY3_MCR_800x600 | VKY3_MCR_TEXT_EN;      /* Set to text only mode: 800x600 */
+    } else {
+        *chan_a->master_control = VKY3_MCR_640x480 | VKY3_MCR_TEXT_EN;      /* Set to text only mode: 640x480 */
+    }
 
 	chan_a->border_control[0] = 0x00102001;	// Enable
 	chan_a->border_control[1] = 0x00000040;	//Dark Blue
@@ -152,7 +159,11 @@ int text_init() {
     chan_b->cursor_position = CursorControlReg_H_B;
     chan_b->border_control = BorderControlReg_L_B;
 
-    *chan_b->master_control = 1;     /* Set to text only mode: 640x480 */
+    if (need_hires) {
+        *chan_b->master_control = VKY3_MCR_800x600 | VKY3_MCR_TEXT_EN;      /* Set to text only mode: 800x600 */
+    } else {
+        *chan_b->master_control = VKY3_MCR_640x480 | VKY3_MCR_TEXT_EN;      /* Set to text only mode: 640x480 */
+    }
 
     chan_b->border_control[0] = 0x00102000;	// Enable
 	chan_b->border_control[1] = 0x00400000;	//Dark Red

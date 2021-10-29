@@ -38,8 +38,6 @@ typedef struct s_cli_command {
     cli_cmd_handler handler;
 } t_cli_command, *p_cli_command;
 
-extern short cmd_gettime(short channel, int argc, char * argv[]);
-extern short cmd_settime(short channel, int argc, char * argv[]);
 extern short cmd_sysinfo(short channel, int argc, char * argv[]);
 extern short cmd_cls(short channel, int argc, char * argv[]);
 extern short cmd_showint(short channel, int argc, char * argv[]);
@@ -67,7 +65,6 @@ const t_cli_command g_cli_commands[] = {
     { "DUMP", "DUMP <addr> [<count>] : print a memory dump", mem_cmd_dump},
     { "GETJIFFIES", "GETJIFFIES : print the number of jiffies since bootup", cmd_getjiffies },
     { "GETTICKS", "GETTICKS : print number of ticks since reset", cmd_get_ticks },
-    { "GETTIME", "GETTIME : prints the current time", cmd_gettime },
     { "LABEL", "LABEL <drive#> <label> : set the label of a drive", cmd_label },
     { "LOAD", "LOAD <path> : load a file into memory", cmd_load },
     { "MKDIR", "MKDIR <path> : create a directory", cmd_mkdir },
@@ -82,7 +79,6 @@ const t_cli_command g_cli_commands[] = {
     { "RUN", "RUN <path> : execute a binary file",  cmd_run },
     { "SET", "SET <name> <value> : set the value of a setting", cli_cmd_set },
     { "GET", "GET <name> : get the value of a setting", cli_cmd_get },
-    { "SETTIME", "SETTIME yyyy-mm-dd HH:MM:SS : sets the current time", cmd_settime },
     { "SHOWINT", "SHOWINT : Show information about the interrupt registers", cmd_showint },
     { "SYSINFO", "SYSINFO : prints information about the system", cmd_sysinfo },
     { "TESTCREATE", "TESTCREATE <path> : tries to create a file", cmd_testcreate },
@@ -226,105 +222,6 @@ short cmd_sysinfo(short channel, int argc, char * argv[]) {
     print(channel, buffer);
 
     print(channel, "\n");
-
-    return 0;
-}
-
-short cmd_gettime(short channel, int argc, char * argv[]) {
-    char time_string[128];
-    t_time time;
-
-    rtc_get_time(&time);
-    sprintf(time_string, "%04d-%02d-%02d %02d:%02d:%02d\n", time.year, time.month, time.day, time.hour, time.minute, time.second);
-    print(channel, time_string);
-
-    return 0;
-}
-
-short atoi_n(char * text, short n) {
-    short result = 0;
-    short i;
-
-    for (i = 0; i < n; i++) {
-        result = result * 10;
-        result = result + (text[i] - '0');
-    }
-
-    return result;
-}
-
-/*
- * Set the date and time in the RTC
- *
- * SETTIME yyyy-mm-dd HH:MM:SS
- */
-short cmd_settime(short screen, int argc, char * argv[]) {
-    char * date;
-    char * time
-    t_time date_time;
-    short i;
-
-    date_time.year = 2021;
-    date_time.month = 10;
-    date_time.day = 4;
-    date_time.hour = 9;
-    date_time.minute = 15;
-    date_time.second = 0;
-    date_time.is_24hours = 1;
-    date_time.is_pm = 0;
-
-    if (argc != 3) {
-        print(screen, "USAGE: SETTIME yyyy-mm-dd HH:MM:SS\n");
-        return -1;
-    }
-
-    date = argv[1];
-    time = argv[2];
-
-    /* Validate date is correct format */
-
-    for (i = 0; i < 10; i++) {
-        if ((i == 4) || (i == 7)) {
-            if (date[i] != '-') {
-                print(screen, "USAGE: SETTIME yyyy-mm-dd HH:MM:SS\n");
-                print(screen, "                   ^");
-                return -1;
-            }
-        } else {
-            if ((date[i] < '0') || (date[i] > '9')) {
-                print(screen, "USAGE: SETTIME yyyy-mm-dd HH:MM:SS\n");
-                print(screen, "               ^");
-                return -1;
-            }
-        }
-    }
-
-    /* Validate time is correct format */
-
-    for (i = 0; i < 8; i++) {
-        if ((i == 2) || (i == 5)) {
-            if (time[i] != ':') {
-                print(screen, "USAGE: SETTIME yyyy-mm-dd HH:MM:SS\n");
-                print(screen, "                            ^");
-                return -1;
-            }
-        } else {
-            if ((time[i] < '0') || (date[i] > '9')) {
-                print(screen, "USAGE: SETTIME yyyy-mm-dd HH:MM:SS\n");
-                print(screen, "                          ^");
-                return -1;
-            }
-        }
-    }
-
-    date_time.year = atoi_n(&date[0], 4);
-    date_time.month = atoi_n(&date[5], 2);
-    date_time.day = atoi_n(&date[8], 2);
-    date_time.hour = atoi_n(&time[0], 2);
-    date_time.minute = atoi_n(&time[3], 2);
-    date_time.second = atoi_n(&time[6], 2);
-
-    rtc_set_time(&date_time);
 
     return 0;
 }

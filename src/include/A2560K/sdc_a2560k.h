@@ -5,7 +5,9 @@
 #ifndef __SDC_A2560K_H
 #define __SDC_A2560K_H
 
-
+#define GABE_SDC_REG            ((volatile unsigned short *)0x00C0051A)
+#define GABE_SDC_PRESENT        0x0010      /* Is an SD card present? --- 0:Yes, 1:No */
+#define GABE_SDC_WPROT          0x0020      /* Is the SD card write protected? --- 0:Yes, 1:No */
 
 #define SDC_VERSION_REG         ((unsigned char *)0x00C00300)
 #define SDC_CONTROL_REG         ((unsigned char *)0x00C00301)
