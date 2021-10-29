@@ -197,15 +197,31 @@ extern void int_init();
  * Enable all interrupts
  *
  * NOTE: this is actually provided in the low level assembly
+ *
+ * Returns:
+ * a machine dependent representation of the interrupt masking prior to enabling
  */
-extern void int_enable_all();
+extern short int_enable_all();
 
 /*
  * Disable all interrupts
  *
  * NOTE: this is actually provided in the low level assembly
+ *
+ * Returns:
+ * a machine dependent representation of the interrupt masking prior to disabling
  */
-extern void int_disable_all();
+extern short int_disable_all();
+
+/*
+ * Restore interrupt masking state returned by a previous call to int_enable/int_disable
+ *
+ * NOTE: this is actually provided in the low level assembly
+ *
+ * Inputs:
+ * int_mask = machine dependent representation of the interrupt masking
+ */
+extern void int_restore(short int_mask);
 
 /*
  * Disable an interrupt by masking it

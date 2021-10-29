@@ -20,7 +20,7 @@
  * Syscall function numbers
  */
 
-/* Miscellaneous control calls */
+/* Core calls */
 
 #define KFN_EXIT                0x00    /* Quick the current program and return to the command line */
 #define KFN_WARMBOOT            0x01    /* Do a soft re-initialization */
@@ -72,13 +72,13 @@
 #define KFN_RUN                 0x3C    /* Load an execute a binary file */
 #define KFN_LOAD_REGISTER       0x3D    /* Register a file type handler for executable binaries */
 
-/* Timer calls */
+/* Misc calls */
 
-#define KFN_DELAY               0x40    /* Block for a certain amount of time */
-#define KFN_SET_ALARM           0x41    /* Set an alarm for a certain amount of time */
-#define KFN_GET_TIMECODE        0x42    /* Gets the current time code (increments since boot) */
-#define KFN_SET_DATETIME        0x43    /* Set the real time clock date-time */
-#define KFN_GET_DATETIME        0x44    /* Get the real time clock date-time */
+#define KFN_GET_TIMECODE        0x40    /* Gets the current time code (increments since boot) */
+#define KFN_SET_DATETIME        0x41    /* Set the real time clock date-time */
+#define KFN_GET_DATETIME        0x42    /* Get the real time clock date-time */
+#define KFN_KBD_SCANCODE        0x43    /* Get the next scan code from the keyboard */
+#define KFN_KBD_SETLAYOUT       0x44    /* Set the translation tables for the keyboard */
 
 /*
  * Call into the kernel (provided by assembly)

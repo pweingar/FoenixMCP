@@ -37,7 +37,7 @@
 // #include "rsrc/bitmaps/splash_a2560k.h"
 // #include "rsrc/bitmaps/splash_a2560u.h"
 
-const char* VolumeStr[FF_VOLUMES] = { "sdc", "fdc", "hdc" };
+const char* VolumeStr[FF_VOLUMES] = { "sd", "fd", "hd" };
 
 #if MODEL == MODEL_FOENIX_A2560K
 /*
@@ -282,12 +282,6 @@ int main(int argc, char * argv[]) {
     char welcome[255];
     short result;
     short i;
-
-    volatile char * dumpster = 0x0A0000;
-
-    for (i = 0; i < 10; i++) {
-        dumpster[i] = 'A';
-    }
 
     initialize();
 

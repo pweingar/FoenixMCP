@@ -58,9 +58,8 @@ short fatfs_to_foenix(FRESULT r) {
     if (r == 0) {
         return 0;
     } else {
-        /* TODO: flesh this out */
-        log_num(LOG_DEBUG, "FATFS: ", r);
-        return -1;
+        /* Convert FatFS error numbers to Foenix error numbers */
+        return (FSYS_ERR_DISK_ERR - (short)r + 1);
     }
 }
 

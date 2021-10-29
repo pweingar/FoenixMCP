@@ -241,6 +241,20 @@ _int_disable_all:   move.w SR,d0        ; Save the old level for return
                     rts
 
 ;
+; Restore interrupt priority
+;
+_int_restore:       move.w (4,sp),d0    ; Get the priority into d0
+                    andi.w #3,d0
+                    lsl.w #8,d0
+
+                    move.w sr,d1        ; Get the current SR into d1
+                    andi.w #$F8FF,d1    ; Clear the old priority
+                    or.w d0,d1          ; And set it to the current
+                    move.w d1,sr        ; And set the level
+
+                    rts
+
+;
 ; Handlers for the various exceptions...
 ;
 ; These all go to the kernel panic screen after placing the
