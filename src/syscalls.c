@@ -309,3 +309,11 @@ short sys_bdev_flush(short dev) {
 short sys_bdev_ioctrl(short dev, short command, unsigned char * buffer, short size) {
     return syscall(KFN_BDEV_IOCTRL, dev, command, buffer, size);
 }
+
+/*
+ * Miscellaneous
+ */
+
+const char * sys_err_message(short err_number) {
+    return (const char *)syscall(KFN_ERR_MESSAGE, (short)err_number);
+}

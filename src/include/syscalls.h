@@ -29,8 +29,8 @@
 #define KFN_INT_DISABLE         0x04    /* Disable an interrupt */
 #define KFN_INT_ENABLE_ALL      0x05    /* Enable all interrupts */
 #define KFN_INT_DISABLE_ALL     0x06    /* Disable all interrupts */
-#define KFN_INT_CLEAR           0x05    /* Clear (acknowledge) an interrupt */
-#define KFN_INT_PENDING         0x06    /* Return true if the interrupt is pending */
+#define KFN_INT_CLEAR           0x07    /* Clear (acknowledge) an interrupt */
+#define KFN_INT_PENDING         0x08    /* Return true if the interrupt is pending */
 
 /* Channel system calls */
 
@@ -79,6 +79,7 @@
 #define KFN_GET_DATETIME        0x42    /* Get the real time clock date-time */
 #define KFN_KBD_SCANCODE        0x43    /* Get the next scan code from the keyboard */
 #define KFN_KBD_SETLAYOUT       0x44    /* Set the translation tables for the keyboard */
+#define KFN_ERR_MESSAGE         0x45    /* Return an error description, given an error number */
 
 /*
  * Call into the kernel (provided by assembly)
@@ -348,5 +349,11 @@ extern short sys_bdev_flush(short dev);
 //  0 on success, any negative number is an error code
 //
 extern short sys_bdev_ioctrl(short dev, short command, unsigned char * buffer, short size);
+
+/*
+ * Miscellaneous
+ */
+
+extern const char * sys_err_message(short err_number);
 
 #endif
