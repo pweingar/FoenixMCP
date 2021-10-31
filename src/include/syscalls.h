@@ -69,17 +69,20 @@
 #define KFN_MKDIR               0x39    /* Create a directory */
 #define KFN_LOAD                0x3A    /* Load a file into memory */
 #define KFN_SAVE                0x3B    /* Save a block of memory to a file */
-#define KFN_RUN                 0x3C    /* Load an execute a binary file */
-#define KFN_LOAD_REGISTER       0x3D    /* Register a file type handler for executable binaries */
+#define KFN_LOAD_REGISTER       0x3C    /* Register a file type handler for executable binaries */
+
+/* Process and memory calls */
+
+#define KFN_RUN                 0x40    /* Load an execute a binary file */
 
 /* Misc calls */
 
-#define KFN_GET_TIMECODE        0x40    /* Gets the current time code (increments since boot) */
-#define KFN_SET_DATETIME        0x41    /* Set the real time clock date-time */
-#define KFN_GET_DATETIME        0x42    /* Get the real time clock date-time */
-#define KFN_KBD_SCANCODE        0x43    /* Get the next scan code from the keyboard */
-#define KFN_KBD_SETLAYOUT       0x44    /* Set the translation tables for the keyboard */
-#define KFN_ERR_MESSAGE         0x45    /* Return an error description, given an error number */
+#define KFN_TIME_TICKS          0x50    /* Gets the current time code (increments since boot) */
+#define KFN_TIME_SETRTC         0x51    /* Set the real time clock date-time */
+#define KFN_TIME_GETRTC         0x52    /* Get the real time clock date-time */
+#define KFN_KBD_SCANCODE        0x53    /* Get the next scan code from the keyboard */
+#define KFN_KBD_SETLAYOUT       0x54    /* Set the translation tables for the keyboard */
+#define KFN_ERR_MESSAGE         0x55    /* Return an error description, given an error number */
 
 /*
  * Call into the kernel (provided by assembly)

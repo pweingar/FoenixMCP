@@ -158,9 +158,6 @@ unsigned long syscall_dispatch(int32_t function, int32_t param0, int32_t param1,
                 case KFN_SAVE:
                     return -1;
 
-                case KFN_RUN:
-                    return proc_run((char *)param0, (int)param1, (char *)param2);
-
                 case KFN_LOAD_REGISTER:
                     return fsys_register_loader((char *)param0, (p_file_loader)param1);
 
@@ -171,7 +168,14 @@ unsigned long syscall_dispatch(int32_t function, int32_t param0, int32_t param1,
             break;
 
         case 0x40:
-            /* Time functions */
+            /* Process and Memory functions */
+            case KFN_RUN:
+                return proc_run((char *)param0, (int)param1, (char *)param2);
+
+            break;
+
+        case 0x50:
+            /* Misc functions */
             switch (function) {
                 case KFN_GET_TIMECODE:
                     return rtc_get_jiffies();
