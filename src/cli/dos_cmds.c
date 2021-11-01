@@ -210,13 +210,10 @@ short cmd_dir(short screen, int argc, char * argv[]) {
     char * path = "";
     char label[40];
 
-    log_num(LOG_INFO, "cmd_dir: ", argc);
-
     if (argc > 1) {
         path = argv[1];
     }
 
-    log3(LOG_INFO, "Attempting to read directory for [", path, "]\n");
     short dir = fsys_opendir(path);
     if (dir >= 0) {
         result = fsys_getlabel(path, label);

@@ -222,14 +222,6 @@ void test_help(short screen) {
     }
 }
 
-inline int min(int x1, int x2) {
-    if (x1 < x2) {
-        return x1;
-    } else {
-        return x2;
-    }
-}
-
 /*
  * Test command
  */

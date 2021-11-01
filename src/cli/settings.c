@@ -7,6 +7,8 @@
 #include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include "log.h"
 #include "errors.h"
 #include "settings.h"
 #include "simpleio.h"
@@ -14,6 +16,8 @@
 #include "interrupt.h"
 #include "rtc_reg.h"
 #include "dev/rtc.h"
+#include "dev/text_screen_iii.h"
+#include "vicky_general.h"
 
 #define MAX_SETTING_NAME    64
 #define MAX_SETTING_HELP    80
@@ -342,7 +346,7 @@ short cli_date_set(short channel, const char * date) {
 /*
  * DATE getter
  */
-short cli_date_get(short channel, const char * value) {
+short cli_date_get(short channel, char * value) {
     t_time time;
 
     rtc_get_time(&time);
@@ -391,12 +395,53 @@ short cli_time_set(short channel, const char * time) {
 /*
  * TIME getter
  */
-short cli_time_get(short channel, const char * value) {
+short cli_time_get(short channel, char * value) {
     t_time time;
 
     rtc_get_time(&time);
     sprintf(value, "%02d:%02d:%02d\n", time.hour, time.minute, time.second);
 
+    return 0;
+}
+
+/*
+ * Font setter -- SET FONT <path>
+ */
+short cli_font_set(short screen, const char * value) {
+    /* Open the file */
+    short chan = fsys_open(value, 0x01);
+    if (chan > 0) {
+        int i;
+        for (i = 0; i < 8 * 256; i++) {
+            short b = sys_chan_read_b(chan);
+            if (b >= 0) {
+                VICKY_TXT_FONT_A[i] = (unsigned char)b;
+            } else {
+                char message[80];
+
+                /* Reset the text screen */
+                text_init();
+                fsys_close(chan);
+
+                sprintf(message, "Unable to read font file: %d\n", b);
+                sys_chan_write(screen, message, strlen(message));
+                return -1;
+            }
+        }
+
+        fsys_close(chan);
+    } else {
+        print(screen, "Could not load font file.\n");
+        return -1;
+    }
+}
+
+/*
+ * Font setter -- GET FONT <path>
+ */
+short cli_font_get(short channel, char * value) {
+    /* We don't keep the font path */
+    *value = 0;
     return 0;
 }
 
@@ -407,8 +452,9 @@ void cli_set_init() {
     cli_first_setting = 0;
     cli_last_setting = 0;
 
-    cli_set_register("DATE", "DATE yyyy-mm-dd -- set the date in the realtime clock", cli_date_set, cli_date_get);      /* Register "DATE" setting */
-    cli_set_register("RTC", "RTC 1|0 -- Enable or disable the realtime clock interrupt", cli_rtc_set, cli_rtc_get);     /* Register "RTC" setting */
-    cli_set_register("SOF", "SOF 1|0 -- Enable or disable the Start of Frame interrupt", cli_sof_set, cli_sof_get);     /* Register "SOF" setting */
-    cli_set_register("TIME", "TIME HH:MM:SS -- set the time in the realtime clock", cli_time_set, cli_time_get);        /* Register "TIME" setting */
+    cli_set_register("DATE", "DATE yyyy-mm-dd -- set the date in the realtime clock", cli_date_set, cli_date_get);
+    cli_set_register("RTC", "RTC 1|0 -- Enable or disable the realtime clock interrupt", cli_rtc_set, cli_rtc_get);
+    cli_set_register("SOF", "SOF 1|0 -- Enable or disable the Start of Frame interrupt", cli_sof_set, cli_sof_get);
+    cli_set_register("TIME", "TIME HH:MM:SS -- set the time in the realtime clock", cli_time_set, cli_time_get);
+    cli_set_register("FONT", "FONT <path> -- set a font for the display", cli_font_set, cli_font_get);
 }

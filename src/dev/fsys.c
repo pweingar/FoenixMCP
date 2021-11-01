@@ -264,7 +264,45 @@ short fsys_readdir(short dir, p_file_info file) {
  * the directory handle to use for subsequent calls if >= 0, error if negative
  */
 short fsys_findfirst(const char * path, const char * pattern, p_file_info file) {
-    return -1;
+    FILINFO finfo;
+    FRESULT fres;
+    short dir;
+    short i;
+
+    /* Allocate a directory handle */
+    for (i = 0; i < MAX_DIRECTORIES; i++) {
+        if (g_dir_state[i] == 0) {
+            dir = i;
+            break;
+        }
+    }
+
+    if (dir < 0) {
+        return ERR_OUT_OF_HANDLES;
+
+    } else {
+        if (fres != FR_OK) {
+            return fatfs_to_foenix(fres);
+
+        } else {
+            int i;
+
+            /* Copy file information into the kernel table */
+            file->size = finfo.fsize;
+            file->date = finfo.fdate;
+            file->time = finfo.ftime;
+            file->attributes = finfo.fattrib;
+
+            for (i = 0; i < MAX_PATH_LEN; i++) {
+                file->name[i] = finfo.fname[i];
+                if (file->name[i] == 0) {
+                    break;
+                }
+            }
+
+            return dir;
+        }
+    }
 }
 
 /**
@@ -278,7 +316,35 @@ short fsys_findfirst(const char * path, const char * pattern, p_file_info file) 
  * 0 on success, error if negative
  */
 short fsys_findnext(short dir, p_file_info file) {
-    return -1;
+    FILINFO finfo;
+    FRESULT fres;
+
+    if (g_dir_state[dir]) {
+        fres = f_findnext(&g_dir_state[dir], &finfo);
+        if (fres != FR_OK) {
+            return fatfs_to_foenix(fres);
+
+        } else {
+            int i;
+
+            /* Copy file information into the kernel table */
+            file->size = finfo.fsize;
+            file->date = finfo.fdate;
+            file->time = finfo.ftime;
+            file->attributes = finfo.fattrib;
+
+            for (i = 0; i < MAX_PATH_LEN; i++) {
+                file->name[i] = finfo.fname[i];
+                if (file->name[i] == 0) {
+                    break;
+                }
+            }
+
+            return 0
+        }
+    } else {
+        return ERR_BAD_HANDLE;
+    }
 }
 
 /**
@@ -337,7 +403,14 @@ short fsys_delete(const char * path) {
  * 0 on success, negative number on failure.
  */
 short fsys_rename(const char * old_path, const char * new_path) {
-    return -1;
+    FRESULT fres;
+
+    fres = f_rename(old_path, new_path);
+    if (fres != 0) {
+        return fatfs_to_foenix(fres);
+    } else {
+        return 0;
+    }
 }
 
 /**
@@ -451,6 +524,25 @@ short fchan_readline(t_channel * chan, unsigned char * buffer, short size) {
  * read a single byte from the device
  */
 short fchan_read_b(t_channel * chan) {
+    FRESULT result;
+    FIL * file;
+    short total_read;
+    char buffer[2];
+
+    log(LOG_TRACE, "fchan_read");
+
+    file = fchan_to_file(chan);
+    if (file) {
+        result = f_read(file, buffer, 1, &total_read);
+        if (result == FR_OK) {
+            return (short)(buffer[0] & 0x00ff);
+        } else {
+            return fatfs_to_foenix(result);
+        }
+    }
+
+    return ERR_BADCHANNEL;
+
     return 0;
 }
 
