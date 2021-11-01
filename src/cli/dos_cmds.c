@@ -86,65 +86,6 @@ short cmd_diskfill(short screen, int argc, char * argv[]) {
     return cmd_diskread(screen, argc, argv);
 }
 
-/*
- * Test the IDE interface by reading the MBR
- */
-short cmd_testide(short screen, int argc, char * argv[]) {
-    unsigned char buffer[512];
-    short i;
-    short scancode;
-    short n = 0;
-
-    while (1) {
-        n = bdev_read(BDEV_HDC, 0, buffer, 512);
-        if (n <= 0) {
-            err_print(screen, "Unable to read MBR", n);
-            return n;
-        }
-
-        for (i = 0; i < n; i++) {
-            if ((i % 16) == 0) {
-                print(screen, "\n");
-            }
-
-            print_hex_8(screen, buffer[i]);
-            print(screen, " ");
-        }
-
-        print(screen, "\n\n");
-
-        // if (kbdmo_getc_poll()) break;
-    }
-}
-
-/*
- * Test file creation
- */
-short cmd_testcreate(short screen, int argc, char * argv[]) {
-    short n;
-
-    if (argc > 1) {
-        short channel = fsys_open(argv[1], FA_CREATE_NEW | FA_WRITE);
-        if (channel >= 0) {
-            char * message = "Hello, world!\n";
-            n = chan_write(channel, message, strlen(message));
-            if (n <= 0) {
-                err_print(screen, "Unable to write to file", n);
-            }
-
-            fsys_close(channel);
-            return 0;
-
-        } else {
-            err_print(screen, "Unable to open to file", channel);
-            return -1;
-        }
-
-    } else {
-        print(screen, "USAGE: TESTCREATE <path>\n");
-        return -1;
-    }
-}
 
 /*
  * Try to run a command from storage.

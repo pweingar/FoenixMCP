@@ -16,6 +16,7 @@
 #include "cli/mem_cmds.h"
 #include "cli/settings.h"
 #include "cli/sound_cmds.h"
+#include "cli/test_cmds.h"
 #include "dev/ps2.h"
 #include "dev/rtc.h"
 #include "dev/uart.h"
@@ -42,10 +43,7 @@ extern short cmd_sysinfo(short channel, int argc, char * argv[]);
 extern short cmd_cls(short channel, int argc, char * argv[]);
 extern short cmd_showint(short channel, int argc, char * argv[]);
 extern short cmd_getjiffies(short channel, int argc, char * argv[]);
-extern short cmd_testuart(short channel, int argc, char * argv[]);
 extern short cmd_get_ticks(short channel, int argc, char * argv[]);
-extern short cmd_testrtc(short channel, int argc, char * argv[]);
-extern short cmd_testpanic(short channel, int argc, char * argv[]);
 
 /*
  * Variables
@@ -81,14 +79,7 @@ const t_cli_command g_cli_commands[] = {
     { "GET", "GET <name> : get the value of a setting", cli_cmd_get },
     { "SHOWINT", "SHOWINT : Show information about the interrupt registers", cmd_showint },
     { "SYSINFO", "SYSINFO : prints information about the system", cmd_sysinfo },
-    { "TESTCREATE", "TESTCREATE <path> : tries to create a file", cmd_testcreate },
-    { "TESTIDE", "TESTIDE : fetches and prints the IDE MBR repeatedly", cmd_testide },
-    { "TESTMEM", "TESTMEM : Test core RAM", mem_test },
-    { "TESTOPL3", "TESTOPL3 : play a tone on the OPL3", opl3_test },
-    { "TESTPANIC", "TESTPANIC : Do a division by 0 to test the panic screen", cmd_testpanic },
-    { "TESTPSG", "TESTPSG : play some notes on the PSG", psg_test },
-    { "TESTRTC", "TESTRTC : poll the RTC for a periodic interrupt", cmd_testrtc },
-    { "TESTUART", "TESTUART : echo key presses between terminal and console", cmd_testuart },
+    { "TEST", "TEST <feature> : run a test about a feature", cmd_test },
     { "TYPE", "TYPE <path> : print the contents of a text file", cmd_type },
     { 0, 0 }
 };
@@ -106,47 +97,12 @@ int cmd_help(short channel, int argc, char * argv[]) {
     return 0;
 }
 
-short cmd_testpanic(short channel, int argc, char * argv[]) {
-    volatile int x = 0;
-    return argc / x;
-}
-
 short cmd_getjiffies(short channel, int argc, char * argv[]) {
     char buffer[80];
 
     sprintf(buffer, "%d\n", timers_jiffies());
     sys_chan_write(channel, buffer, strlen(buffer));;
     return 0;
-}
-
-/*
- * Try using the RTC periodic interrupt in polled mode
- */
-short cmd_testrtc(short channel, int argc, char * argv[]) {
-    char buffer[80];
-    char * spinner = "|/-\\";
-    short count = 0;
-    long ticks;
-
-    *RTC_RATES = 0x0e;          /* Periodic interrupt rate: 250 ms */
-    *RTC_ENABLES = RTC_PIE;     /* Turn on the periodic interrupt */
-    int_enable(INT_RTC);
-
-    ticks = rtc_get_ticks();
-
-    sprintf(buffer, "Waiting for updated ticks starting from %d\n", ticks);
-    sys_chan_write(channel, buffer, strlen(buffer));
-
-    while (1) {
-        if (ticks < rtc_get_ticks()) {
-            /* We got the periodic interrupt */
-
-            sprintf(buffer, "Tick! %d\n", ticks);
-            sys_chan_write(channel, buffer, strlen(buffer));
-
-            ticks = rtc_get_ticks();
-        }
-    }
 }
 
 /*
@@ -158,31 +114,6 @@ short cmd_get_ticks(short channel, int argc, char * argv[]) {
     sprintf(buffer, "%d\n", rtc_get_ticks());
     sys_chan_write(channel, buffer, strlen(buffer));
     return 0;
-}
-
-short cmd_testuart(short channel, int argc, char * argv[]) {
-    char c;
-    char buffer[80];
-
-    uart_init(0);
-    uart_setbps(0, UART_115200);
-    uart_setlcr(0, LCR_DATABITS_8 | LCR_STOPBIT_1 | LCR_PARITY_NONE);
-
-    sprintf(buffer, "COM1: 115200, no parity, 1 stop bit, 8 data bits\nPress ESC to finish.\n");
-    sys_chan_write(0, buffer, strlen(buffer));
-
-    while (1) {
-        c = kbd_getc();
-        if (c != 0) {
-            if (c == 0x1b) {
-                return 0;
-            }
-            uart_put(0, c);
-        } else if (uart_has_bytes(0)) {
-            c = uart_get(0);
-            sys_chan_write_b(channel, c);
-        }
-    }
 }
 
 /*

@@ -6,16 +6,6 @@
 #define __DOS_CMDS_H
 
 /*
- * Test the IDE interface by reading the MBR
- */
-extern short cmd_testide(short screen, int argc, char * argv[]);
-
-/*
- * Test file creation
- */
-extern short cmd_testcreate(short screen, int argc, char * argv[]);
-
-/*
  * Execute a binary file
  */
 extern short cmd_run(short screen, int argc, char * argv[]);

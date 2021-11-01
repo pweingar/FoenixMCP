@@ -6,11 +6,6 @@
 #define __MEM_CMDS_H
 
 /*
- * Test the memory
- */
-extern short mem_test(short channel, int argc, char * argv[]);
-
-/*
  * Print out the contents of a block of memory
  *
  * DUMP <address> [<count>]
