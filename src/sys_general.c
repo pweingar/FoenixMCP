@@ -16,6 +16,13 @@ void sys_get_info(p_sys_info info) {
 
     info->has_floppy = 0;
 
+#if MODEL == MODEL_FOENIX_A2560K
+    info->model = MODEL_FOENIX_A2560K;
+    info->model_name = "Foenix A2560K";
+    info->cpu_name = "m68000";
+    info->has_floppy = 1;
+#else
+
     /* Model, CPU, and the presence of the floppy are set at compile time */
     switch (machine_id & 0x000f) {
         case 0x00:
@@ -35,13 +42,6 @@ void sys_get_info(p_sys_info info) {
             info->model = MODEL_FOENIX_C256U_PLUS;
             info->model_name = "Foenix C256U+";
             info->cpu_name = "WDC 65816";
-            break;
-
-        case 0x0B:
-            info->model = MODEL_FOENIX_A2560K;
-            info->model_name = "Foenix A2560K";
-            info->cpu_name = "m68000";
-            info->has_floppy = 1;
             break;
 
         case 0x09:
@@ -69,6 +69,7 @@ void sys_get_info(p_sys_info info) {
             info->cpu = 0xffff;
             break;
     }
+#endif
 
     info->gabe_number = *GABE_CHIP_NUMBER;
     info->gabe_version = *GABE_CHIP_VERSION;
@@ -101,6 +102,22 @@ void sys_get_info(p_sys_info info) {
             //     /* TODO: detect card and set screen number and/or ethernet accordingly */
             //     ;
             // }
+            break;
+    }
+
+    /* Set the memory */
+    switch (info->model) {
+        case MODEL_FOENIX_A2560K:
+            info->system_ram_size = 0x800000;
+            break;
+
+        case MODEL_FOENIX_A2560U_PLUS:
+        case MODEL_FOENIX_C256U_PLUS:
+            info->system_ram_size = 0x400000;
+            break;
+
+        default:
+            info->system_ram_size = 0x200000;
             break;
     }
 }

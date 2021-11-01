@@ -177,14 +177,14 @@ unsigned long syscall_dispatch(int32_t function, int32_t param0, int32_t param1,
         case 0x50:
             /* Misc functions */
             switch (function) {
-                case KFN_GET_TIMECODE:
+                case KFN_TIME_TICKS:
                     return rtc_get_jiffies();
 
-                case KFN_SET_DATETIME:
+                case KFN_TIME_SETRTC:
                     rtc_set_time((p_time)param0);
                     return 0;
 
-                case KFN_GET_DATETIME:
+                case KFN_TIME_GETRTC:
                     rtc_get_time((p_time)param0);
                     return 0;
 

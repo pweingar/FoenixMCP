@@ -43,7 +43,7 @@ typedef struct s_sys_info {
     unsigned short gabe_version;
     unsigned short gabe_subrev;
     unsigned short vicky_rev;   /* Code for the VICKY revision number */
-    int system_ram_size;        /* The number of bytes of system RAM on the board */
+    long system_ram_size;       /* The number of bytes of system RAM on the board */
     bool has_floppy;            /* TRUE if the board has a floppy drive installed */
     bool has_hard_drive;        /* TRUE if the board has a PATA device installed */
     bool has_expansion_card;    /* TRUE if an expansion card is installed on the device */

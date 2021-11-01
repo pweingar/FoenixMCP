@@ -83,6 +83,7 @@ const t_cli_command g_cli_commands[] = {
     { "SYSINFO", "SYSINFO : prints information about the system", cmd_sysinfo },
     { "TESTCREATE", "TESTCREATE <path> : tries to create a file", cmd_testcreate },
     { "TESTIDE", "TESTIDE : fetches and prints the IDE MBR repeatedly", cmd_testide },
+    { "TESTMEM", "TESTMEM : Test core RAM", mem_test },
     { "TESTOPL3", "TESTOPL3 : play a tone on the OPL3", opl3_test },
     { "TESTPANIC", "TESTPANIC : Do a division by 0 to test the panic screen", cmd_testpanic },
     { "TESTPSG", "TESTPSG : play some notes on the PSG", psg_test },
@@ -207,6 +208,9 @@ short cmd_sysinfo(short channel, int argc, char * argv[]) {
 
     print(channel, "\nCPU: ");
     print(channel, info.cpu_name);
+
+    print(channel, "\nMemory: ");
+    print_hex_32(channel, info.system_ram_size);
 
     print(channel, "\nGABE version: ");
     print_hex_16(channel, info.gabe_number);
