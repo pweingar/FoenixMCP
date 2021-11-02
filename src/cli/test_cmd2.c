@@ -7,9 +7,11 @@
 
 #include "cli.h"
 #include "cli/test_cmds.h"
+#include "cli/sound_cmds.h"
 #include "dev/block.h"
 #include "dev/channel.h"
 #include "dev/fsys.h"
+#include "dev/lpt.h"
 #include "dev/rtc.h"
 #include "dev/uart.h"
 #include "fatfs/ff.h"
@@ -19,6 +21,29 @@
 #include "syscalls.h"
 #include "sys_general.h"
 #include "uart_reg.h"
+
+#define LPT_DATA_PORT   ((volatile unsigned char *)0x00C02378)
+
+#define LPT_STAT_PORT   ((volatile unsigned char *)0x00C02379)
+#define LPT_STAT_BUSY   0x80
+#define LPT_STAT_ACK    0x40
+#define LPT_STAT_PO     0x20
+#define LPT_STAT_SELECT 0x10
+#define LPT_STAT_ERROR  0x08
+#define LPT_STAT_IRQ    0x04
+
+#define LPT_CTRL_PORT   ((volatile unsigned char *)0x00C0237A)
+#define LPT_CTRL_STROBE 0x01
+#define LPT_CTRL_AL     0x02
+#define LPT_CTRL_INIT   0x04
+#define LPT_CTRL_SELECT 0x08
+#define LPT_CTRL_IRQE   0x10
+#define LPT_CTRL_BI     0x20
+
+#define LPT_INIT_ON     0x08            /* Start the printer initialization process */
+#define LPT_INIT_OFF    0x0C            /* Stop the printer initialization process */
+#define LPT_STROBE_ON   0x0F            /* Strobe the printer */
+#define LPT_STROBE_OFF  0x0E            /* Drop the strobe to the printer */
 
 typedef struct s_cli_test_feature {
     const char * name;
@@ -201,12 +226,95 @@ short cli_test_create(short screen, int argc, char * argv[]) {
     }
 }
 
+short cli_test_lpt(short screen, int argc, char * argv[]) {
+    char message[80];
+    unsigned char scancode;
+
+    sprintf(message, "Test parallel port:\nF1: DATA=00  F2: DATA=FF  F3: STRB=1  F4: STRB=0\n");
+    sys_chan_write(screen, message, strlen(message));
+    sprintf(message, "F5: INIT=1  F6: INIT=0  F7: SEL=1  F8: SEL=0\nESC: Quit");
+    sys_chan_write(screen, message, strlen(message));
+
+    while (1) {
+        scancode = sys_kbd_scancode();
+        switch (scancode) {
+            case 0x3B:      /* F1 */
+                *LPT_DATA_PORT = 0;
+                break;
+
+            case 0x3C:      /* F2 */
+                *LPT_DATA_PORT = 0xff;
+                break;
+
+            case 0x3D:      /* F3 */
+                *LPT_CTRL_PORT = LPT_CTRL_STROBE;
+                break;
+
+            case 0x3E:      /* F4 */
+                *LPT_CTRL_PORT = 0;
+                break;
+
+            case 0x3F:      /* F5 */
+                *LPT_CTRL_PORT = 0;
+                break;
+
+            case 0x40:      /* F6 */
+                *LPT_CTRL_PORT = LPT_CTRL_INIT;
+                break;
+
+            case 0x41:      /* F7 */
+                *LPT_CTRL_PORT = LPT_CTRL_SELECT;
+                break;
+
+            case 0x42:      /* F8 */
+                *LPT_CTRL_PORT = 0;
+                break;
+
+            case 0x1B:      /* ESC */
+                return 0;
+
+            default:
+                break;
+        }
+    }
+
+    return 0;
+}
+
+short cmd_test_print(short screen, int argc, char * argv[]) {
+    const char * test_pattern = "0123456789ABCDEFGHIJKLMNOPQRTSUVWZXYZ\r\n";
+
+    char message[80];
+    unsigned short scancode = 0;
+
+    sprintf(message, "Initializing printer...\n");
+    sys_chan_write(screen, message, strlen(message));
+
+    lpt_initialize();
+
+    sprintf(message, "Sending test patterns to printer (ESC to quit)...\n");
+    sys_chan_write(screen, message, strlen(message));
+
+    while (scancode != 0x01) {
+        scancode = sys_kbd_scancode();
+        lpt_write(0, test_pattern, strlen(test_pattern));
+    }
+
+    return 0;
+}
+
 static t_cli_test_feature cli_test_features[] = {
     {"CREATE", "CREATE <path>: test creating a file", cli_test_create},
     {"IDE", "IDE: test reading the MBR of the IDE drive", cli_test_ide},
     {"PANIC", "PANIC: test the kernel panic mechanism", cli_test_panic},
     {"RTC", "RTC: test the real time clock periodic interrupt", cli_test_rtc},
+    {"LPT", "LPT: test the parallel port", cli_test_lpt},
     {"MEM", "MEM: test reading and writing memory", cli_mem_test},
+    {"MIDILOOP", "MIDILOOP: perform a loopback test on the MIDI ports", midi_loop_test},
+    {"MIDIRX", "MIDIRX: perform a receive test on the MIDI ports", midi_rx_test},
+    {"OPL3", "OPL3: test the OPL3 sound chip", opl3_test},
+    {"PSG", "PSG: test the PSG sound chip", psg_test},
+    {"PRINT", "PRINT: sent text to the printer", cmd_test_print},
     {"UART", "UART: test the serial port", cli_test_uart},
     {0, 0}
 };

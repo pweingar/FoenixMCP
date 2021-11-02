@@ -32,11 +32,9 @@
 short lpt_delay() {
     int i;
     short x;
-    for (i = 0, x = 0; i < 65535; i++) {
+    for (i = 0, x = 0; i < 10; i++) {
         x++;
     }
-
-    DEBUG(".");
     return x;
 }
 

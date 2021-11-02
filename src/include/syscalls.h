@@ -354,6 +354,11 @@ extern short sys_bdev_flush(short dev);
 extern short sys_bdev_ioctrl(short dev, short command, unsigned char * buffer, short size);
 
 /*
+ * Return the next scan code from the keyboard... 0 if nothing pending
+ */
+extern unsigned short sys_kbd_scancode();
+
+/*
  * Miscellaneous
  */
 

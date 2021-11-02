@@ -13,6 +13,13 @@
 #include "dev/block.h"
 #include "dev/fsys.h"
 #include "dev/rtc.h"
+#include "sys_general.h"
+
+#if MODEL == MODEL_FOENIX_A2560K
+#include "dev/kbd_mo.h"
+#else
+#include "dev/ps2.h"
+#endif
 
 /*
  * Determine the correct system function implementation and call it.
@@ -187,6 +194,13 @@ unsigned long syscall_dispatch(int32_t function, int32_t param0, int32_t param1,
                 case KFN_TIME_GETRTC:
                     rtc_get_time((p_time)param0);
                     return 0;
+
+                case KFN_KBD_SCANCODE:
+#if MODEL == MODEL_FOENIX_A2560K
+                    return kbdmo_get_scancode();
+#else
+                    return kbd_get_scancode();
+#endif
 
                 case KFN_ERR_MESSAGE:
                     return (unsigned long)err_message((short)param0);

@@ -314,6 +314,13 @@ short sys_bdev_ioctrl(short dev, short command, unsigned char * buffer, short si
  * Miscellaneous
  */
 
+/*
+ * Return the next scan code from the keyboard... 0 if nothing pending
+ */
+unsigned short sys_kbd_scancode() {
+    return syscall(KFN_KBD_SCANCODE);
+}
+
 const char * sys_err_message(short err_number) {
     return (const char *)syscall(KFN_ERR_MESSAGE, (short)err_number);
 }

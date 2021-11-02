@@ -118,7 +118,7 @@ int text_init() {
 
     /* Initialize everything... only do a screen if it's present */
 
-    need_hires = ((*VKY3_DIP_REG & VKY3_DIP_HIRES) == VKY3_DIP_HIRES) ? 1 : 0;
+    // need_hires = ((*VKY3_DIP_REG & VKY3_DIP_HIRES) == VKY3_DIP_HIRES) ? 1 : 0;
 
     chan_a->master_control = MasterControlReg_A;
     chan_a->text_cells = ScreenText_A;

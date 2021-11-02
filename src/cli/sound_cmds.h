@@ -15,4 +15,14 @@ extern short psg_test(short channel, int argc, char * argv[]);
  */
 extern short opl3_test(short channel, int argc, char * argv[]);
 
+/*
+ * Perform a receive test on the MIDI ports
+ */
+extern short midi_rx_test(short channel, int argc, char * argv[]);
+
+/*
+ * Perform a loopback test on the MIDI ports
+ */
+extern short midi_loop_test(short channel, int argc, char * argv[]);
+
 #endif

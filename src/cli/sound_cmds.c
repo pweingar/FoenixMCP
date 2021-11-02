@@ -6,6 +6,7 @@
 #include "sound_cmds.h"
 #include "sound_reg.h"
 #include "snd/psg.h"
+#include "dev/midi.h"
 
 /*
  * Play a sound on the PSG
@@ -121,6 +122,83 @@ short opl3_test(short channel, int argc, char * argv[]) {
             OPL3_PORT[reg] = data;
         }
     }
+
+    return 0;
+}
+
+/*
+ * Perform a receive test on the MIDI ports
+ */
+short midi_rx_test(short channel, int argc, char * argv[]) {
+    char message[80];
+    unsigned short scancode = 0;
+    int i;
+
+    midi_init();
+
+    sprintf(message, "Press '1' to start, and 'ESC' to exit test.\n");
+    sys_chan_write(channel, message, strlen(message));
+
+    while (sys_kbd_scancode() != 0x02) ;
+
+    i = 0;
+    while (scancode != 0x01) {
+        unsigned char input = midi_get_poll();
+        if ((input != 0xf8) && (input != 0xfe)) {
+            if ((i % 16) == 0) {
+                sprintf(message, "\n%02X", input);
+                sys_chan_write(channel, message, strlen(message));
+            } else {
+                sprintf(message, " %02X", input);
+                sys_chan_write(channel, message, strlen(message));
+            }
+
+            i++;
+        }
+
+        scancode = sys_kbd_scancode();
+    }
+
+    sys_chan_write(channel, "\n", 1);
+
+    return 0;
+}
+
+
+/*
+ * Perform a loopback test on the MIDI ports
+ */
+short midi_loop_test(short channel, int argc, char * argv[]) {
+    char message[80];
+    unsigned short scancode = 0;
+    unsigned char output;
+
+    midi_init();
+
+    sprintf(message, "Plug a MIDI loopback cable between MIDI IN and MIDI OUT.\nThen press '1' to start.\n");
+    sys_chan_write(channel, message, strlen(message));
+
+    sprintf(message, "Press ESC to exit test.\n");
+    sys_chan_write(channel, message, strlen(message));
+
+    while (sys_kbd_scancode() != 0x02) ;
+
+    output = 0xF8;
+    while (scancode != 0x01) {
+        sprintf(message, "Sending: ");
+        sys_chan_write(channel, message, strlen(message));
+        midi_put(output);
+        sprintf(message, "%02X --> ", output);
+        sys_chan_write(channel, message, strlen(message));
+
+        unsigned char input = midi_get_poll();
+        sprintf(message, "%02X\n", input);
+        sys_chan_write(channel, message, strlen(message));
+
+        scancode = sys_kbd_scancode();
+    }
+
+    sys_chan_write(channel, "\n", 1);
 
     return 0;
 }
