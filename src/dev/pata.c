@@ -10,7 +10,15 @@
 #include "dev/block.h"
 #include "dev/pata.h"
 #include "dev/text_screen_iii.h"
+#include "dev/rtc.h"
 #include "pata_reg.h"
+
+//
+// Constants
+//
+
+#define PATA_TIMEOUT_MS 300
+#define PATA_WAIT_MS    100
 
 //
 // Variables
@@ -30,16 +38,22 @@ short g_pata_status = PATA_STAT_NOINIT;     // Status of the PATA interface
 //  0 on success (PATA drive is no longer busy), DEV_TIMEOUT on timeout
 //
 short pata_wait_not_busy() {
-    short count = MAX_TRIES_BUSY;
+    long target_ticks;
+    long ticks;
     char status;
 
     TRACE("pata_wait_not_busy");
 
+    target_ticks = rtc_get_ticks() + PATA_TIMEOUT_MS;
     do {
         status = *PATA_CMD_STAT;
-    } while ((status & PATA_STAT_BSY) && (count-- > 0));
+        ticks = rtc_get_ticks();
+    } while ((status & PATA_STAT_BSY) && (target_ticks > ticks));
 
-    if (count == 0) {
+    if (target_ticks <= ticks) {
+        log(LOG_ERROR, "pata_wait_not_busy: timeout");
+        log_num(LOG_ERROR, "target_ticks: ", (int)target_ticks);
+        log_num(LOG_ERROR, "ticks: ", (int)ticks);
         return DEV_TIMEOUT;
     } else {
         return 0;
@@ -53,16 +67,20 @@ short pata_wait_not_busy() {
 //  0 on success (PATA drive is ready), DEV_TIMEOUT on timeout
 //
 short pata_wait_ready() {
-    short count = MAX_TRIES_BUSY;
+    long target_ticks;
+    long ticks;
     char status;
 
     TRACE("pata_wait_ready");
 
+    target_ticks = rtc_get_ticks() + PATA_TIMEOUT_MS;
     do {
         status = *PATA_CMD_STAT;
-    } while (((status & PATA_STAT_DRDY) == 0) && (count-- > 0));
+        ticks = rtc_get_ticks();
+    } while (((status & PATA_STAT_DRDY) == 0) && (target_ticks > ticks));
 
-    if (count == 0) {
+    if (target_ticks <= ticks) {
+        log(LOG_ERROR, "pata_wait_ready: timeout");
         return DEV_TIMEOUT;
     } else {
         return 0;
@@ -76,7 +94,8 @@ short pata_wait_ready() {
 //  0 on success (PATA drive is ready and not busy), DEV_TIMEOUT on timeout
 //
 short pata_wait_ready_not_busy() {
-    short count = MAX_TRIES_BUSY;
+    long target_ticks;
+    long ticks;
     char status;
 
     TRACE("pata_wait_ready_not_busy");
@@ -85,11 +104,17 @@ short pata_wait_ready_not_busy() {
     //     status = *PATA_CMD_STAT;
     // } while (((status & (PATA_STAT_DRDY | PATA_STAT_BSY)) != PATA_STAT_DRDY) && (count-- > 0));
 
+    target_ticks = rtc_get_ticks() + PATA_TIMEOUT_MS;
     do {
-        while ((*PATA_CMD_STAT & PATA_STAT_DRDY) != PATA_STAT_DRDY);
-    } while ((*PATA_CMD_STAT & PATA_STAT_BSY) == PATA_STAT_BSY);
+        while (((*PATA_CMD_STAT & PATA_STAT_DRDY) != PATA_STAT_DRDY) && (target_ticks > ticks)) {
+            ticks = rtc_get_ticks();
+        }
+    } while (((*PATA_CMD_STAT & PATA_STAT_BSY) == PATA_STAT_BSY) && (target_ticks > ticks));
 
-    if (count == 0) {
+    if (target_ticks <= ticks) {
+        log(LOG_ERROR, "pata_wait_ready_not_busy: timeout");
+        log_num(LOG_ERROR, "target_ticks: ", (int)target_ticks);
+        log_num(LOG_ERROR, "ticks: ", (int)ticks);
         return DEV_TIMEOUT;
     } else {
         return 0;
@@ -103,16 +128,20 @@ short pata_wait_ready_not_busy() {
 //  0 on success (PATA drive is ready to transfer data), DEV_TIMEOUT on timeout
 //
 short pata_wait_data_request() {
-    short count = MAX_TRIES_BUSY;
+    long target_ticks;
+    long ticks;
     char status;
 
     TRACE("pata_wait_data_request");
 
+    target_ticks = rtc_get_ticks() + PATA_TIMEOUT_MS;
     do {
         status = *PATA_CMD_STAT;
-    } while (((status & PATA_STAT_DRQ) != PATA_STAT_DRQ) && (count-- > 0));
+        ticks = rtc_get_ticks();
+    } while (((status & PATA_STAT_DRQ) != PATA_STAT_DRQ) && (target_ticks > ticks));
 
-    if (count == 0) {
+    if (target_ticks <= ticks) {
+        log(LOG_ERROR, "pata_wait_data_request: timeout");
         return DEV_TIMEOUT;
     } else {
         return 0;
@@ -289,6 +318,7 @@ short pata_read(long lba, unsigned char * buffer, short size) {
 }
 
 short pata_flush_cache() {
+    long target_ticks;
     short i;
     unsigned short *wptr;
     unsigned char status;
@@ -314,8 +344,9 @@ short pata_flush_cache() {
 
     *PATA_CMD_STAT = 0xE7; // PATA_CMD_FLUSH_CACHE;
 
-    // Give the controller some time...
-    for (i = 0; i < 32000; i++) ;
+    // Give the controller some time (100ms?)...
+    target_ticks = rtc_get_ticks() + PATA_WAIT_MS;
+    while (target_ticks > rtc_get_ticks()) ;
 
     if (pata_wait_ready_not_busy()) {
         return DEV_TIMEOUT;
@@ -347,6 +378,7 @@ short pata_flush_cache() {
 //  number of chars written, any negative number is an error code
 //
 short pata_write(long lba, const unsigned char * buffer, short size) {
+    long target_ticks;
     short i;
     unsigned short *wptr;
     unsigned char status;
@@ -378,8 +410,9 @@ short pata_write(long lba, const unsigned char * buffer, short size) {
 
     *PATA_CMD_STAT = PATA_CMD_WRITE_SECTOR;         // Issue the WRITE command
 
-    // Give the controller some time...
-    for (i = 0; i < 32000; i++) ;
+    // Give the controller some time (100ms?)...
+    target_ticks = rtc_get_ticks() + PATA_WAIT_MS;
+    while (target_ticks > rtc_get_ticks()) ;
 
     if (pata_wait_ready_not_busy()) {
         /* Turn off the HDD LED */

@@ -195,7 +195,7 @@ extern short fsys_rename(const char * old_path, const char * new_path);
  * Returns:
  * 0 on success, negative number on failure.
  */
-extern short fsys_setcwd(const char * path);
+extern short fsys_set_cwd(const char * path);
 
 /**
  * Get the current working drive and directory
@@ -207,7 +207,7 @@ extern short fsys_setcwd(const char * path);
  * Returns:
  * 0 on success, negative number on failure.
  */
-extern short fsys_getcwd(char * path, short size);
+extern short fsys_get_cwd(char * path, short size);
 
 /*
  * Load a file into memory at the designated destination address.

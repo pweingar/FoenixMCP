@@ -79,6 +79,20 @@
 #define LSR_ERR_OVERRUN         0x02        /* Overrun error */
 #define LSR_DATA_AVAIL          0x01        /* Data is ready in the receive buffer */
 
+#if MODEL == MODEL_FOENIX_A2560U || MODEL == MODEL_FOENIX_A2560U_PLUS
+
+#define UART_300                536         /* Code for 300 bps */
+#define UART_1200               134          /* Code for 1200 bps */
+#define UART_2400               67          /* Code for 2400 bps */
+#define UART_4800               34          /* Code for 4800 bps */
+#define UART_9600               17          /* Code for 9600 bps */
+#define UART_19200              8           /* Code for 19200 bps */
+#define UART_38400              4           /* Code for 28400 bps */
+#define UART_57600              3           /* Code for 57600 bps */
+#define UART_115200             1           /* Code for 115200 bps */
+
+#else
+
 #define UART_300                384         /* Code for 300 bps */
 #define UART_1200               96          /* Code for 1200 bps */
 #define UART_2400               48          /* Code for 2400 bps */
@@ -88,5 +102,9 @@
 #define UART_38400              3           /* Code for 28400 bps */
 #define UART_57600              2           /* Code for 57600 bps */
 #define UART_115200             1           /* Code for 115200 bps */
+
+#endif
+
+
 
 #endif

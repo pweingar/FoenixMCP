@@ -312,6 +312,8 @@ static t_cli_test_feature cli_test_features[] = {
     {"MEM", "MEM: test reading and writing memory", cli_mem_test},
     {"MIDILOOP", "MIDILOOP: perform a loopback test on the MIDI ports", midi_loop_test},
     {"MIDIRX", "MIDIRX: perform a receive test on the MIDI ports", midi_rx_test},
+    {"MIDITX", "MIDITX: send a note to a MIDI keyboard", midi_tx_test},
+    {"OPL2", "OPL2: test the OPL2 sound chip", opl2_test},
     {"OPL3", "OPL3: test the OPL3 sound chip", opl3_test},
     {"PSG", "PSG: test the PSG sound chip", psg_test},
     {"PRINT", "PRINT: sent text to the printer", cmd_test_print},

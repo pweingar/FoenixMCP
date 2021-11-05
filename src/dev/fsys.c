@@ -177,7 +177,7 @@ short fsys_opendir(const char * path) {
         /* Try to open the directory */
         if (path[0] == 0) {
             char cwd[128];
-            fsys_getcwd(cwd, 128);
+            fsys_get_cwd(cwd, 128);
             fres = f_opendir(&g_directory[dir], cwd);
         } else {
             fres = f_opendir(&g_directory[dir], path);
@@ -422,14 +422,14 @@ short fsys_rename(const char * old_path, const char * new_path) {
  * Returns:
  * 0 on success, negative number on failure.
  */
-short fsys_setcwd(const char * path) {
+short fsys_set_cwd(const char * path) {
     FRESULT result;
 
     result = f_chdir(path);
     if (result == FR_OK) {
         return 0;
     } else {
-        log_num(LOG_ERROR, "fsys_setcwd error: ", result);
+        log_num(LOG_ERROR, "fsys_set_cwd error: ", result);
         return fatfs_to_foenix(result);
     }
 }
@@ -444,7 +444,7 @@ short fsys_setcwd(const char * path) {
  * Returns:
  * 0 on success, negative number on failure.
  */
-short fsys_getcwd(char * path, short size) {
+short fsys_get_cwd(char * path, short size) {
     FRESULT result;
 
     f_chdrive("");
@@ -452,7 +452,7 @@ short fsys_getcwd(char * path, short size) {
     if (result == FR_OK) {
         return 0;
     } else {
-        log_num(LOG_ERROR, "fsys_getcwd error: ", result);
+        log_num(LOG_ERROR, "fsys_get_cwd error: ", result);
         return fatfs_to_foenix(result);
     }
 }

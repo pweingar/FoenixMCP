@@ -22,6 +22,11 @@ typedef struct s_time {
 extern void rtc_init();
 
 /*
+ * Make sure the RTC tick counter is enabled
+ */
+extern void rtc_enable_ticks();
+
+/*
  * Set the time on the RTC
  *
  * Inputs:
@@ -49,11 +54,5 @@ extern void rtc_get_time(p_time time);
  * the number of ticks since the last reset
  */
 extern long rtc_get_ticks();
-
-/*
- * Get the number of jiffies since the system last reset.
- * A "jiffy" should be considered to be 1/60 second.
- */
-extern long rtc_get_jiffies();
 
 #endif

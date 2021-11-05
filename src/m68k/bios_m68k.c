@@ -162,8 +162,17 @@ unsigned long syscall_dispatch(int32_t function, int32_t param0, int32_t param1,
                 case KFN_LOAD:
                     return fsys_load((char *)param0, (long)param1, (long *)param2);
 
-                case KFN_SAVE:
-                    return -1;
+                case KFN_GET_LABEL:
+                    return fsys_getlabel((char *)param0, (char *)param1);
+
+                case KFN_SET_LABEL:
+                    return fsys_setlabel((short)param0, (char *)param1);
+
+                case KFN_GET_CWD:
+                    return fsys_get_cwd((char *)param0);
+
+                case KFN_SET_CWD:
+                    return fsys_set_cwd((char *)param0);
 
                 case KFN_LOAD_REGISTER:
                     return fsys_register_loader((char *)param0, (p_file_loader)param1);
@@ -185,7 +194,7 @@ unsigned long syscall_dispatch(int32_t function, int32_t param0, int32_t param1,
             /* Misc functions */
             switch (function) {
                 case KFN_TIME_TICKS:
-                    return rtc_get_jiffies();
+                    return rtc_get_ticks();
 
                 case KFN_TIME_SETRTC:
                     rtc_set_time((p_time)param0);

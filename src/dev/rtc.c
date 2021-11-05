@@ -9,7 +9,6 @@
 #include "rtc_reg.h"
 
 static long rtc_ticks;
-static long sof_ticks;
 
 /*
  * Interrupt handler for the real time clock
@@ -18,10 +17,8 @@ void rtc_handle_int() {
     unsigned char flags;
 
     flags = *RTC_FLAGS;
-    //if (flags | RTC_PF) {
-        /* Peridic interrupt: increment the ticks counter */
-        rtc_ticks++;
-    //}
+    /* Peridic interrupt: increment the ticks counter */
+    rtc_ticks++;
 
     int_clear(INT_RTC);
 }
@@ -34,22 +31,32 @@ void rtc_init() {
     unsigned char rates;
     unsigned char enables;
 
+    log(LOG_TRACE, "rtc_init");
+
     int_disable(INT_RTC);
 
-    /* Wait to actually enable PIE until later */
-    *RTC_ENABLES = 0;
-
-    /* Set the periodic interrupt to 250 ms */
-    *RTC_RATES = 0x0E;
+    /* Set the periodic interrupt to 976 microsecs */
+    *RTC_RATES = RTC_RATE_976us;
 
     /* Make sure the RTC is on */
     *RTC_CTRL = RTC_STOP;
 
     int_register(INT_RTC, rtc_handle_int);
+
     /* Enable the periodic interrupt */
     flags = *RTC_FLAGS;
     *RTC_ENABLES = RTC_PIE;
-    // int_enable(INT_RTC);
+
+    int_enable(INT_RTC);
+}
+
+/*
+ * Make sure the RTC tick counter is enabled
+ */
+void rtc_enable_ticks() {
+    unsigned char flags = *RTC_FLAGS;
+    *RTC_ENABLES = RTC_PIE;
+    int_enable(INT_RTC);
 }
 
 /*
@@ -203,14 +210,6 @@ void rtc_get_time(p_time time) {
     time->is_pm = ((hour_bcd & 0x80) == 0x80) ? 1 : 0;
     time->minute = bcd_to_i(minute_bcd);
     time->second = bcd_to_i(second_bcd);
-}
-
-/*
- * Get the number of jiffies since the system last reset.
- * A "jiffy" should be considered to be 1/60 second.
- */
-long rtc_get_jiffies() {
-    return sof_ticks;
 }
 
 /*

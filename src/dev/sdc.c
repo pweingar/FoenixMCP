@@ -9,8 +9,15 @@
 #include "indicators.h"
 #include "dev/block.h"
 #include "sdc_reg.h"
+#include "dev/rtc.h"
 #include "dev/sdc.h"
 #include "dev/text_screen_iii.h"
+
+//
+// Constants
+//
+
+#define SDC_TIMEOUT_MS 300
 
 unsigned char g_sdc_status = SDC_STAT_NOINIT;
 unsigned char g_sdc_error = 0;
@@ -66,11 +73,13 @@ void sdc_set_led(short is_on) {
 //  0 on success, DEV_TIMEOUT on timeout
 //
 short sdc_wait_busy() {
+    long timer_ticks;
     int retry_count = MAX_TRIES_BUSY;
     unsigned char status;
 
+    timer_ticks = rtc_get_ticks() + SDC_TIMEOUT_MS;
     do {
-        if (retry_count-- == 0) {
+        if (rtc_get_ticks() > timer_ticks) {
             // If we have run out of tries, return a TIMEOUT error
             return DEV_TIMEOUT;
         }

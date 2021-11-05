@@ -150,7 +150,7 @@ short cmd_cd(short screen, int argc, char * argv[]) {
     TRACE("cmd_cd");
 
     if (argc > 1) {
-        short result = fsys_setcwd(argv[1]);
+        short result = fsys_set_cwd(argv[1]);
         if (result < 0) {
             err_print(screen, "Unable to change directory", result);
             return result;
@@ -175,7 +175,7 @@ short cmd_pwd(short screen, int argc, char * argv[]) {
 
     TRACE("cmd_pwd");
 
-    short result = fsys_getcwd(buffer, 128);
+    short result = fsys_get_cwd(buffer, 128);
     if (result < 0) {
         err_print(screen, "Unable to get current directory", result);
         return result;

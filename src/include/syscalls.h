@@ -68,8 +68,11 @@
 #define KFN_RENAME              0x38    /* Rename a file */
 #define KFN_MKDIR               0x39    /* Create a directory */
 #define KFN_LOAD                0x3A    /* Load a file into memory */
-#define KFN_SAVE                0x3B    /* Save a block of memory to a file */
-#define KFN_LOAD_REGISTER       0x3C    /* Register a file type handler for executable binaries */
+#define KFN_GET_LABEL           0x3B    /* Read the label of a volume */
+#define KFN_SET_LABEL           0x3C    /* Set the label of a volume */
+#define KFN_SET_CWD             0x3D    /* Set the current working directory */
+#define KFN_GET_CWD             0x3E    /* Get the current working directory */
+#define KFN_LOAD_REGISTER       0x3F    /* Register a file type handler for executable binaries */
 
 /* Process and memory calls */
 
@@ -353,14 +356,260 @@ extern short sys_bdev_flush(short dev);
 //
 extern short sys_bdev_ioctrl(short dev, short command, unsigned char * buffer, short size);
 
+
 /*
- * Return the next scan code from the keyboard... 0 if nothing pending
+ * File System Calls
  */
-extern unsigned short sys_kbd_scancode();
+
+/**
+ * Attempt to open a file given the path to the file and the mode.
+ *
+ * Inputs:
+ * path = the ASCIIZ string containing the path to the file.
+ * mode = the mode (e.g. r/w/create)
+ *
+ * Returns:
+ * the channel ID for the open file (negative if error)
+ */
+extern short sys_fsys_open(const char * path, short mode);
+
+/**
+ * Close access to a previously open file.
+ *
+ * Inputs:
+ * fd = the channel ID for the file
+ *
+ * Returns:
+ * 0 on success, negative number on failure
+ */
+extern short sys_fsys_close(short fd);
+
+/**
+ * Attempt to open a directory for scanning
+ *
+ * Inputs:
+ * path = the path to the directory to open
+ *
+ * Returns:
+ * the handle to the directory if >= 0. An error if < 0
+ */
+extern short sys_fsys_opendir(const char * path);
+
+/**
+ * Close access to a previously open file.
+ *
+ * Inputs:
+ * fd = the channel ID for the file
+ *
+ * Returns:
+ * 0 on success, negative number on failure
+ */
+extern short sys_fsys_close(short fd);
+
+/**
+ * Attempt to open a directory for scanning
+ *
+ * Inputs:
+ * path = the path to the directory to open
+ *
+ * Returns:
+ * the handle to the directory if >= 0. An error if < 0
+ */
+extern short sys_fsys_opendir(const char * path);
+
+/**
+ * Close a previously open directory
+ *
+ * Inputs:
+ * dir = the directory handle to close
+ *
+ * Returns:
+ * 0 on success, negative number on error
+ */
+extern short sys_fsys_closedir(short dir);
+
+/**
+ * Attempt to read an entry from an open directory
+ *
+ * Inputs:
+ * dir = the handle of the open directory
+ * file = pointer to the t_file_info structure to fill out.
+ *
+ * Returns:
+ * 0 on success, negative number on failure
+ */
+extern short sys_fsys_readdir(short dir, p_file_info file);
+
+/**
+ * Open a directory given the path and search for the first file matching the pattern.
+ *
+ * Inputs:
+ * path = the path to the directory to search
+ * pattern = the file name pattern to search for
+ * file = pointer to the t_file_info structure to fill out
+ *
+ * Returns:
+ * the directory handle to use for subsequent calls if >= 0, error if negative
+ */
+extern short sys_fsys_findfirst(const char * path, const char * pattern, p_file_info file);
+
+/**
+ * Open a directory given the path and search for the first file matching the pattern.
+ *
+ * Inputs:
+ * dir = the handle to the directory (returned by fsys_findfirst) to search
+ * file = pointer to the t_file_info structure to fill out
+ *
+ * Returns:
+ * 0 on success, error if negative
+ */
+extern short sys_fsys_findnext(short dir, p_file_info file);
+
+/*
+ * Get the label for the drive holding the path
+ *
+ * Inputs:
+ * path = path to the drive
+ * label = buffer that will hold the label... should be at least 35 bytes
+ */
+extern short sys_fsys_get_label(const char * path, char * label);
+
+/*
+ * Set the label for the drive holding the path
+ *
+ * Inputs:
+ * drive = drive number
+ * label = buffer that holds the label
+ */
+extern short sys_fsys_set_label(short drive, const char * label);
+
+/**
+ * Create a directory
+ *
+ * Inputs:
+ * path = the path of the directory to create.
+ *
+ * Returns:
+ * 0 on success, negative number on failure.
+ */
+extern short sys_fsys_mkdir(const char * path);
+
+/**
+ * Delete a file or directory
+ *
+ * Inputs:
+ * path = the path of the file or directory to delete.
+ *
+ * Returns:
+ * 0 on success, negative number on failure.
+ */
+extern short sys_fsys_delete(const char * path);
+
+/**
+ * Rename a file or directory
+ *
+ * Inputs:
+ * old_path = the current path to the file
+ * new_path = the new path for the file
+ *
+ * Returns:
+ * 0 on success, negative number on failure.
+ */
+extern short sys_fsys_rename(const char * old_path, const char * new_path);
+
+/**
+ * Change the current working directory (and drive)
+ *
+ * Inputs:
+ * path = the path that should be the new current
+ *
+ * Returns:
+ * 0 on success, negative number on failure.
+ */
+extern short sys_fsys_setcwd(const char * path);
+
+/**
+ * Get the current working drive and directory
+ *
+ * Inputs:
+ * path = the buffer in which to store the directory
+ * size = the size of the buffer in bytes
+ *
+ * Returns:
+ * 0 on success, negative number on failure.
+ */
+extern short sys_fsys_getcwd(char * path, short size);
+
+/*
+ * Load a file into memory at the designated destination address.
+ *
+ * If destination = 0, the file must be in a recognized binary format
+ * that specifies its own loading address.
+ *
+ * Inputs:
+ * path = the path to the file to load
+ * destination = the destination address (0 for use file's address)
+ * start = pointer to the long variable to fill with the starting address
+ *         (0 if not an executable, any other number if file is executable
+ *         with a known starting address)
+ *
+ * Returns:
+ * 0 on success, negative number on error
+ */
+extern short sys_fsys_load(const char * path, long destination, long * start);
+
+/*
+ * Register a file loading routine
+ *
+ * A file loader, takes a channel number to load from and returns a
+ * short that is the status of the load.
+ *
+ * Inputs:
+ * extension = the file extension to map to
+ * loader = pointer to the file load routine to add
+ *
+ * Returns:
+ * 0 on success, negative number on error
+ */
+extern short sys_fsys_register_loader(const char * extension, p_file_loader loader);
 
 /*
  * Miscellaneous
  */
+
+/*
+ * Get the number of ticks since the system last booted.
+ *
+ * NOTE: a tick is almost, but not quite, 1ms. The RTC periodic interrupt
+ *       period does not line up with a 1ms timer, but it comes close.
+ *       Therefore, a tick will be 976.5625 microseconds... a little faster
+ *       than 1ms.
+ *
+ * Returns:
+ * the number of ticks since the last reset
+ */
+extern long sys_rtc_get_ticks();
+
+/*
+ * Set the time on the RTC
+ *
+ * Inputs:
+ * time = pointer to a t_time record containing the correct time
+ */
+extern void sys_rtc_set_time(p_time time);
+
+/*
+ * Get the time on the RTC
+ *
+ * Inputs:
+ * time = pointer to a t_time record in which to put the current time
+ */
+extern void sys_rtc_get_time(p_time time);
+
+/*
+ * Return the next scan code from the keyboard... 0 if nothing pending
+ */
+extern unsigned short sys_kbd_scancode();
 
 extern const char * sys_err_message(short err_number);
 

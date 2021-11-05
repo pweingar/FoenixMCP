@@ -8,10 +8,11 @@
 #include "interrupt.h"
 #include "vicky_general.h"
 #include "dev/ps2.h"
+#include "dev/rtc.h"
 #include "dev/text_screen_iii.h"
 #include "rsrc/bitmaps/mouse_pointer.h"
 
-#define PS2_RETRY_MAX   20000       /* For timeout purposes when sending a command */
+#define PS2_TIMEOUT_MS  400
 #define PS2_RESEND_MAX  50          /* Number of times we'll repeat a command on receiving a 0xFE reply */
 
 /*
@@ -252,10 +253,13 @@ char g_us_sc_ctrl_shift[] = {
  *  0 if successful, -1 if there was no response after PS2_RETRY_MAX tries
  */
 short ps2_wait_out() {
-    short count = 0;
+    long target_ticks;
 
+    log(LOG_TRACE, "ps2_wait_out");
+
+    target_ticks = rtc_get_ticks() + PS2_TIMEOUT_MS;
     while ((*PS2_STATUS & PS2_STAT_OBF) == 0) {
-        if (count++ > PS2_RETRY_MAX) {
+        if (rtc_get_ticks() > target_ticks) {
             return -1;
         }
     }
@@ -270,10 +274,13 @@ short ps2_wait_out() {
  *  0 if successful, -1 if there was no response after PS2_RETRY_MAX tries
  */
 short ps2_wait_in() {
-    short count = 0;
+    long target_ticks;
 
+    log(LOG_TRACE, "ps2_wait_in");
+
+    target_ticks = rtc_get_ticks() + PS2_TIMEOUT_MS;
     while ((*PS2_STATUS & PS2_STAT_IBF) != 0) {
-        if (count++ > PS2_RETRY_MAX) {
+        if (rtc_get_ticks() > target_ticks) {
             return -1;
         }
     }

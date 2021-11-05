@@ -12,4 +12,17 @@
  */
 extern void init_codec();
 
+/*
+ * Set the master digital volume
+ *
+ * Inputs:
+ * vol = level of attenuation (0xff = full volume, 0x00 = mute)
+ */
+void codec_set_volume(unsigned char vol);
+
+/*
+ * Return the current volume
+ */
+extern unsigned char codec_get_volume();
+
 #endif

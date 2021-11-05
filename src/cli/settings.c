@@ -17,6 +17,7 @@
 #include "rtc_reg.h"
 #include "dev/rtc.h"
 #include "dev/text_screen_iii.h"
+#include "snd/codec.h"
 #include "vicky_general.h"
 
 #define MAX_SETTING_NAME    64
@@ -446,6 +447,23 @@ short cli_font_get(short channel, char * value) {
 }
 
 /*
+ * Volume setter -- SET VOLUME <value>
+ */
+short cli_volume_set(short channel, char * value) {
+    unsigned char volume = (unsigned char)cli_eval_number(value);
+    codec_set_volume(volume);
+    return 0;
+}
+
+/*
+ * Volume getter -- GET VOLUME
+ */
+short cli_volume_get(short channel, char * value) {
+    sprintf(value, "%d", codec_get_volume());
+    return 0;
+}
+
+/*
  * Initialize the settings tables
  */
 void cli_set_init() {
@@ -457,4 +475,5 @@ void cli_set_init() {
     cli_set_register("SOF", "SOF 1|0 -- Enable or disable the Start of Frame interrupt", cli_sof_set, cli_sof_get);
     cli_set_register("TIME", "TIME HH:MM:SS -- set the time in the realtime clock", cli_time_set, cli_time_get);
     cli_set_register("FONT", "FONT <path> -- set a font for the display", cli_font_set, cli_font_get);
+    cli_set_register("VOLUME", "VOLUME <0 - 255> -- set the master volume", cli_volume_set, cli_volume_get);
 }

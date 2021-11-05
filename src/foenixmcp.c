@@ -56,7 +56,7 @@ const char* VolumeStr[FF_VOLUMES] = { "sd", "fd", "hd" };
  	*GP20_REG = 0x00;
  	*GP24_REG = 0x01;
  	*GP25_REG = 0x05;
- 	*GP24_REG = 0x84;
+ 	*GP26_REG = 0x84;
 
  	*GP30_REG = 0x01;
  	*GP31_REG = 0x01;
@@ -168,8 +168,8 @@ void initialize() {
     /* Initialize the interrupt system */
     int_init();
 
-    /* Initialize the timers */
-    timers_init();
+    /* Initialize the real time clock */
+    rtc_init();
 
 #if MODEL == MODEL_FOENIX_A2560K
     /* Initialize the SuperIO chip */
@@ -203,8 +203,11 @@ void initialize() {
         log(LOG_INFO, "Console installed.");
     }
 
-    /* Initialize the real time clock */
-    rtc_init();
+    /* Enable all interrupts */
+    int_enable_all();
+
+    /* Make sure the RTC tick counter is going */
+    rtc_enable_ticks();
 
     if (res = pata_install()) {
         log_num(LOG_ERROR, "FAILED: PATA driver installation", res);
@@ -245,9 +248,6 @@ void initialize() {
     } else {
         log(LOG_INFO, "File system initialized.");
     }
-
-    /* Enable all interrupts */
-    int_enable_all();
 }
 
 int main(int argc, char * argv[]) {
