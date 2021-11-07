@@ -9,9 +9,9 @@
 #include "sys_general.h"
 
 #if MODEL == MODEL_FOENIX_A2560K
-#include "A2560K/PATA_a2560k.h"
+#include "A2560K/pata_a2560k.h"
 #elif MODEL == MODEL_FOENIX_A2560U || MODEL == MODEL_FOENIX_A2560U_PLUS
-#include "A2560U/PATA_a2560u.h"
+#include "A2560U/pata_a2560u.h"
 #endif
 
 /*

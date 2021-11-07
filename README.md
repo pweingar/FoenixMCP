@@ -37,6 +37,7 @@ Building this project requires the [VBCC](http://www.compilers.de/vbcc.html) com
 ```MAKE``` utility. Using your command line, go into the ```src``` directory and type:
 
 ```
+export VBCC = <use-your-projects-dir>/FoenixMCP/vbcc
 make all
 ```
 to build the kernel.
