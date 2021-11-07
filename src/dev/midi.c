@@ -5,6 +5,9 @@
 #include "midi_reg.h"
 #include "dev/midi.h"
 #include "simpleio.h"
+#include "sys_general.h"
+
+#if MODEL == MODEL_FOENIX_A2560K
 
 /*
  * Return true if there is data waiting to be read
@@ -75,3 +78,5 @@ unsigned char midi_get_poll() {
     while (midi_input_not_ready()) ;
     return *MIDI_DATA;
 }
+
+#endif

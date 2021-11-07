@@ -132,6 +132,7 @@ short opl3_test(short channel, int argc, char * argv[]) {
  * Perform a transmit test on the MIDI ports
  */
 short midi_tx_test(short channel, int argc, char * argv[]) {
+#if MODEL == MODEL_FOENIX_A2560K
     const char note_on[] = { 0x90, 0x3c, 0xff };
     const char note_off[] = { 0x80, 0x3c, 0x00 };
     char message[80];
@@ -149,7 +150,7 @@ short midi_tx_test(short channel, int argc, char * argv[]) {
     for (i = 0; i < 3; i++) {
         midi_put(note_off[i]);
     }
-
+#endif
     return 0;
 }
 
@@ -157,6 +158,7 @@ short midi_tx_test(short channel, int argc, char * argv[]) {
  * Perform a receive test on the MIDI ports
  */
 short midi_rx_test(short channel, int argc, char * argv[]) {
+#if MODEL == MODEL_FOENIX_A2560K
     char message[80];
     unsigned short scancode = 0;
     int i;
@@ -187,7 +189,7 @@ short midi_rx_test(short channel, int argc, char * argv[]) {
     }
 
     sys_chan_write(channel, "\n", 1);
-
+#endif
     return 0;
 }
 
@@ -196,6 +198,7 @@ short midi_rx_test(short channel, int argc, char * argv[]) {
  * Perform a loopback test on the MIDI ports
  */
 short midi_loop_test(short channel, int argc, char * argv[]) {
+#if MODEL == MODEL_FOENIX_A2560K
     char message[80];
     unsigned short scancode = 0;
     unsigned char output;
@@ -231,7 +234,7 @@ short midi_loop_test(short channel, int argc, char * argv[]) {
     }
 
     sys_chan_write(channel, "\n", 1);
-
+#endif
     return 0;
 }
 

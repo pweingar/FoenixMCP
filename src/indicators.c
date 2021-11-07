@@ -80,6 +80,23 @@ void ind_set_sdc(short state) {
 void ind_set_hdc(short state) {
     kbdmo_set_hdc_led(ind_state_color(state));
 }
+#else
+
+void ind_set_power(short state) {
+    ;
+}
+
+void ind_set_fdc(short state) {
+    ;
+}
+
+void ind_set_sdc(short state) {
+    ;
+}
+
+void ind_set_hdc(short state) {
+    ;
+}
 #endif
 
 /*

@@ -81,15 +81,15 @@
 
 #if MODEL == MODEL_FOENIX_A2560U || MODEL == MODEL_FOENIX_A2560U_PLUS
 
-#define UART_300                536         /* Code for 300 bps */
-#define UART_1200               134          /* Code for 1200 bps */
-#define UART_2400               67          /* Code for 2400 bps */
-#define UART_4800               34          /* Code for 4800 bps */
-#define UART_9600               17          /* Code for 9600 bps */
-#define UART_19200              8           /* Code for 19200 bps */
-#define UART_38400              4           /* Code for 28400 bps */
-#define UART_57600              3           /* Code for 57600 bps */
-#define UART_115200             1           /* Code for 115200 bps */
+#define UART_300                4352        /* Code for 300 bps */
+#define UART_1200               1088        /* Code for 1200 bps */
+#define UART_2400               544         /* Code for 2400 bps */
+#define UART_4800               272         /* Code for 4800 bps */
+#define UART_9600               134         /* Code for 9600 bps */
+#define UART_19200              67          /* Code for 19200 bps */
+#define UART_38400              34          /* Code for 28400 bps */
+#define UART_57600              22          /* Code for 57600 bps */
+#define UART_115200             11          /* Code for 115200 bps */
 
 #else
 

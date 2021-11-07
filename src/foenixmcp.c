@@ -35,7 +35,7 @@
 #include "fatfs/ff.h"
 #include "cli/cli.h"
 // #include "rsrc/bitmaps/splash_a2560k.h"
-// #include "rsrc/bitmaps/splash_a2560u.h"
+#include "rsrc/bitmaps/splash_a2560u.h"
 
 const char* VolumeStr[FF_VOLUMES] = { "sd", "fd", "hd" };
 
@@ -98,22 +98,28 @@ const char* VolumeStr[FF_VOLUMES] = { "sd", "fd", "hd" };
  * Load and display the splash screen
  */
 void load_splashscreen() {
+    long target_ticks;
     int i;
+    unsigned char * pixels;
+    unsigned char * vram = VRAM_Bank0;
 
     /* Turn off the screen */
     *MasterControlReg_A = VKY3_MCR_BLANK_EN;
 
     for (i = 0; i < 256; i++) {
-        LUT_0[4*i] = 0;
-        LUT_0[4*i+1] = i;
-        LUT_0[4*i+2] = i;
-        LUT_0[4*i+3] = 0;
+        LUT_0[4*i] = splashscreen_lut[4*i];
+        LUT_0[4*i+1] = splashscreen_lut[4*i+1];
+        LUT_0[4*i+2] = splashscreen_lut[4*i+2];
+        LUT_0[4*i+3] = splashscreen_lut[4*i+3];
     }
 
-
     /* Copy the bitmap to video RAM */
-    for (i = 0; i < 320*240; i++) {
-        VRAM_Bank0[i] = i * 0xff; // splash_screen_bmap[i];
+    for (pixels = splashscreen_pix; *pixels != 0;) {
+        unsigned char count = *pixels++;
+        unsigned char pixel = *pixels++;
+        for (i = 0; i < count; i++) {
+            *vram++ = pixel;
+        }
     }
 
     /* Set up the bitmap */
@@ -126,13 +132,14 @@ void load_splashscreen() {
     /* Set a background color for the bitmap mode */
     *BackGroundControlReg_A = 0x00800000;
 
-    /* Display the splashscreen: 320x200 */
-    *MasterControlReg_A = 0x000000fD | VKY3_MCR_DOUBLE_EN;
+    /* Display the splashscreen: 640x480 */
+    *MasterControlReg_A = VKY3_MCR_GRAPH_EN | VKY3_MCR_BITMAP_EN;
 
     /* Play the SID test bong on the Gideon SID implementation */
     sid_test_internal();
 
-    for (i = 0; i < 2048*1024; i++) ;
+    target_ticks = rtc_get_ticks() + 10000;
+    while (target_ticks > rtc_get_ticks()) ;
 
     /* Initialize the text channels */
     text_init();
@@ -168,9 +175,6 @@ void initialize() {
     /* Initialize the interrupt system */
     int_init();
 
-    /* Initialize the real time clock */
-    rtc_init();
-
 #if MODEL == MODEL_FOENIX_A2560K
     /* Initialize the SuperIO chip */
     init_superio();
@@ -185,12 +189,6 @@ void initialize() {
     /* Initialize the SID chips */
     sid_init_all();
 
-    /* Play the SID test bong on the Gideon SID implementation */
-    sid_test_internal();
-
-    /* Display the splash screen */
-    // load_splashscreen();
-
     cdev_init_system();   // Initialize the channel device system
     log(LOG_INFO, "Channel device system ready.");
 
@@ -203,11 +201,17 @@ void initialize() {
         log(LOG_INFO, "Console installed.");
     }
 
+    /* Initialize the real time clock */
+    rtc_init();
+
     /* Enable all interrupts */
     int_enable_all();
 
     /* Make sure the RTC tick counter is going */
     rtc_enable_ticks();
+
+    /* Display the splash screen */
+    load_splashscreen();
 
     if (res = pata_install()) {
         log_num(LOG_ERROR, "FAILED: PATA driver installation", res);
@@ -248,6 +252,8 @@ void initialize() {
     } else {
         log(LOG_INFO, "File system initialized.");
     }
+
+    int_disable(INT_RTC);
 }
 
 int main(int argc, char * argv[]) {

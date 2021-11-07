@@ -21,6 +21,7 @@
 #include "syscalls.h"
 #include "sys_general.h"
 #include "uart_reg.h"
+#include "vicky_general.h"
 
 #define LPT_DATA_PORT   ((volatile unsigned char *)0x00C02378)
 
@@ -55,6 +56,28 @@ typedef struct s_cli_test_feature {
  * Tests...
  */
 
+short cli_test_bitmap(short channel, int argc, char * argv[]) {
+    int i,m,p;
+    unsigned char j;
+    unsigned short k;
+
+    *MasterControlReg_A = VKY3_MCR_BITMAP_EN | VKY3_MCR_GRAPH_EN;   // Enable bitmap graphics
+    *BM0_Control_Reg = 0x00000001;      // Enable BM0
+    *BM0_Addy_Pointer_Reg = 0x00000000; //Pointing to Starting of VRAM Bank A
+    // *BorderControlReg_L = 0x00000800;   // Enable
+    k = 0;
+    for (i = 0; i< 256; i++) {
+        LUT_0[4*i] = i;
+        LUT_0[4*i+1] = i;
+        LUT_0[4*i+2] = i;
+        LUT_0[4*i+3] = 0;
+    }
+
+    for (i = 0; i< 640 * 480; i++) {
+        VRAM_Bank0[i] = i & 0xff;
+    }
+}
+
 short cli_test_uart(short channel, int argc, char * argv[]) {
     char c;
     char buffer[80];
@@ -63,7 +86,7 @@ short cli_test_uart(short channel, int argc, char * argv[]) {
     uart_setbps(0, UART_115200);
     uart_setlcr(0, LCR_DATABITS_8 | LCR_STOPBIT_1 | LCR_PARITY_NONE);
 
-    sprintf(buffer, "COM1: 115200, no parity, 1 stop bit, 8 data bits\nPress ESC to finish.\n");
+    sprintf(buffer, "COM1: 115200, no parity, 1 stop bit, 8 data bits\nPress ESC to finish (%d).\n", UART_115200);
     sys_chan_write(0, buffer, strlen(buffer));
 
     while (1) {
@@ -227,6 +250,7 @@ short cli_test_create(short screen, int argc, char * argv[]) {
 }
 
 short cli_test_lpt(short screen, int argc, char * argv[]) {
+#if MODEL == MODEL_FOENIX_A2560K
     char message[80];
     unsigned char scancode;
 
@@ -277,11 +301,12 @@ short cli_test_lpt(short screen, int argc, char * argv[]) {
                 break;
         }
     }
-
+#endif
     return 0;
 }
 
 short cmd_test_print(short screen, int argc, char * argv[]) {
+#if MODEL == MODEL_FOENIX_A2560K
     const char * test_pattern = "0123456789ABCDEFGHIJKLMNOPQRTSUVWZXYZ\r\n";
 
     char message[80];
@@ -299,11 +324,12 @@ short cmd_test_print(short screen, int argc, char * argv[]) {
         scancode = sys_kbd_scancode();
         lpt_write(0, test_pattern, strlen(test_pattern));
     }
-
+#endif
     return 0;
 }
 
 static t_cli_test_feature cli_test_features[] = {
+    {"BITMAP", "BITMAP: test the bitmap screen", cli_test_bitmap},
     {"CREATE", "CREATE <path>: test creating a file", cli_test_create},
     {"IDE", "IDE: test reading the MBR of the IDE drive", cli_test_ide},
     {"PANIC", "PANIC: test the kernel panic mechanism", cli_test_panic},
