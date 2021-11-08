@@ -13,13 +13,6 @@ void sof_a_handler() {
     long jc_mod;
 
     jiffy_count++;
-
-    jc_mod = jiffy_count % 60;
-    if (jc_mod == 30) {
-        *GABE_CTRL_REG = *GABE_CTRL_REG | POWER_ON_LED;
-    } else if (jc_mod == 0) {
-        *GABE_CTRL_REG = *GABE_CTRL_REG & ~POWER_ON_LED;
-    }
 }
 
 /*
@@ -29,7 +22,7 @@ void timers_init() {
     jiffy_count = 0;
 
     int_register(INT_SOF_A, sof_a_handler);
-    // int_enable(INT_SOF_A);
+    int_enable(INT_SOF_A);
 }
 
 /*

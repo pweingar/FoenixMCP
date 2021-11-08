@@ -17,8 +17,8 @@
 // Constants
 //
 
-#define PATA_TIMEOUT_MS 300
-#define PATA_WAIT_MS    100
+#define PATA_TIMEOUT_JF 20                  /* Timeout in jiffies: 1/60th second */
+#define PATA_WAIT_JF    10                  /* Delay in jiffies: 1/60th second */
 
 //
 // Variables
@@ -44,10 +44,10 @@ short pata_wait_not_busy() {
 
     TRACE("pata_wait_not_busy");
 
-    target_ticks = rtc_get_ticks() + PATA_TIMEOUT_MS;
+    target_ticks = rtc_get_jiffies() + PATA_TIMEOUT_JF;
     do {
         status = *PATA_CMD_STAT;
-        ticks = rtc_get_ticks();
+        ticks = rtc_get_jiffies();
     } while ((status & PATA_STAT_BSY) && (target_ticks > ticks));
 
     if (target_ticks <= ticks) {
@@ -73,10 +73,10 @@ short pata_wait_ready() {
 
     TRACE("pata_wait_ready");
 
-    target_ticks = rtc_get_ticks() + PATA_TIMEOUT_MS;
+    target_ticks = rtc_get_jiffies() + PATA_TIMEOUT_JF;
     do {
         status = *PATA_CMD_STAT;
-        ticks = rtc_get_ticks();
+        ticks = rtc_get_jiffies();
     } while (((status & PATA_STAT_DRDY) == 0) && (target_ticks > ticks));
 
     if (target_ticks <= ticks) {
@@ -104,10 +104,10 @@ short pata_wait_ready_not_busy() {
     //     status = *PATA_CMD_STAT;
     // } while (((status & (PATA_STAT_DRDY | PATA_STAT_BSY)) != PATA_STAT_DRDY) && (count-- > 0));
 
-    target_ticks = rtc_get_ticks() + PATA_TIMEOUT_MS;
+    target_ticks = rtc_get_jiffies() + PATA_TIMEOUT_JF;
     do {
         while (((*PATA_CMD_STAT & PATA_STAT_DRDY) != PATA_STAT_DRDY) && (target_ticks > ticks)) {
-            ticks = rtc_get_ticks();
+            ticks = rtc_get_jiffies();
         }
     } while (((*PATA_CMD_STAT & PATA_STAT_BSY) == PATA_STAT_BSY) && (target_ticks > ticks));
 
@@ -134,10 +134,10 @@ short pata_wait_data_request() {
 
     TRACE("pata_wait_data_request");
 
-    target_ticks = rtc_get_ticks() + PATA_TIMEOUT_MS;
+    target_ticks = rtc_get_jiffies() + PATA_TIMEOUT_JF;
     do {
         status = *PATA_CMD_STAT;
-        ticks = rtc_get_ticks();
+        ticks = rtc_get_jiffies();
     } while (((status & PATA_STAT_DRQ) != PATA_STAT_DRQ) && (target_ticks > ticks));
 
     if (target_ticks <= ticks) {
@@ -345,8 +345,8 @@ short pata_flush_cache() {
     *PATA_CMD_STAT = 0xE7; // PATA_CMD_FLUSH_CACHE;
 
     // Give the controller some time (100ms?)...
-    target_ticks = rtc_get_ticks() + PATA_WAIT_MS;
-    while (target_ticks > rtc_get_ticks()) ;
+    target_ticks = rtc_get_jiffies() + PATA_WAIT_JF;
+    while (target_ticks > rtc_get_jiffies()) ;
 
     if (pata_wait_ready_not_busy()) {
         return DEV_TIMEOUT;
@@ -411,8 +411,8 @@ short pata_write(long lba, const unsigned char * buffer, short size) {
     *PATA_CMD_STAT = PATA_CMD_WRITE_SECTOR;         // Issue the WRITE command
 
     // Give the controller some time (100ms?)...
-    target_ticks = rtc_get_ticks() + PATA_WAIT_MS;
-    while (target_ticks > rtc_get_ticks()) ;
+    target_ticks = rtc_get_jiffies() + PATA_WAIT_JF;
+    while (target_ticks > rtc_get_jiffies()) ;
 
     if (pata_wait_ready_not_busy()) {
         /* Turn off the HDD LED */

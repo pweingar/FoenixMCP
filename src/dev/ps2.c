@@ -12,7 +12,7 @@
 #include "dev/text_screen_iii.h"
 #include "rsrc/bitmaps/mouse_pointer.h"
 
-#define PS2_TIMEOUT_MS  400
+#define PS2_TIMEOUT_JF  10          /* Timeout in jiffies: 1/60 second units */
 #define PS2_RESEND_MAX  50          /* Number of times we'll repeat a command on receiving a 0xFE reply */
 
 /*
@@ -257,9 +257,9 @@ short ps2_wait_out() {
 
     log(LOG_TRACE, "ps2_wait_out");
 
-    target_ticks = rtc_get_ticks() + PS2_TIMEOUT_MS;
+    target_ticks = rtc_get_jiffies() + PS2_TIMEOUT_JF;
     while ((*PS2_STATUS & PS2_STAT_OBF) == 0) {
-        if (rtc_get_ticks() > target_ticks) {
+        if (rtc_get_jiffies() > target_ticks) {
             return -1;
         }
     }
@@ -278,9 +278,9 @@ short ps2_wait_in() {
 
     log(LOG_TRACE, "ps2_wait_in");
 
-    target_ticks = rtc_get_ticks() + PS2_TIMEOUT_MS;
+    target_ticks = rtc_get_jiffies() + PS2_TIMEOUT_JF;
     while ((*PS2_STATUS & PS2_STAT_IBF) != 0) {
-        if (rtc_get_ticks() > target_ticks) {
+        if (rtc_get_jiffies() > target_ticks) {
             return -1;
         }
     }

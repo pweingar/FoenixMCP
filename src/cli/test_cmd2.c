@@ -121,19 +121,19 @@ short cli_test_rtc(short channel, int argc, char * argv[]) {
     *RTC_ENABLES = RTC_PIE;     /* Turn on the periodic interrupt */
     int_enable(INT_RTC);
 
-    ticks = rtc_get_ticks();
+    ticks = sys_time_jiffies();
 
     sprintf(buffer, "Waiting for updated ticks starting from %d\n", ticks);
     sys_chan_write(channel, buffer, strlen(buffer));
 
     while (1) {
-        if (ticks < rtc_get_ticks()) {
+        if (ticks < sys_time_jiffies()) {
             /* We got the periodic interrupt */
 
             sprintf(buffer, "Tick! %d\n", ticks);
             sys_chan_write(channel, buffer, strlen(buffer));
 
-            ticks = rtc_get_ticks();
+            ticks = sys_time_jiffies();
         }
     }
 }
@@ -333,7 +333,6 @@ static t_cli_test_feature cli_test_features[] = {
     {"CREATE", "CREATE <path>: test creating a file", cli_test_create},
     {"IDE", "IDE: test reading the MBR of the IDE drive", cli_test_ide},
     {"PANIC", "PANIC: test the kernel panic mechanism", cli_test_panic},
-    {"RTC", "RTC: test the real time clock periodic interrupt", cli_test_rtc},
     {"LPT", "LPT: test the parallel port", cli_test_lpt},
     {"MEM", "MEM: test reading and writing memory", cli_mem_test},
     {"MIDILOOP", "MIDILOOP: perform a loopback test on the MIDI ports", midi_loop_test},

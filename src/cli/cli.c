@@ -111,7 +111,7 @@ short cmd_getjiffies(short channel, int argc, char * argv[]) {
 short cmd_get_ticks(short channel, int argc, char * argv[]) {
     char buffer[80];
 
-    sprintf(buffer, "%d\n", rtc_get_ticks());
+    sprintf(buffer, "%d\n", rtc_get_jiffies());
     sys_chan_write(channel, buffer, strlen(buffer));
     return 0;
 }

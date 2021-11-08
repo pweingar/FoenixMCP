@@ -273,13 +273,13 @@ short cli_rtc_set(short channel, const char * value) {
     char message[80];
 
     if (strcmp(value, "1") == 0) {
-        unsigned char flags = *RTC_FLAGS;
-        *RTC_ENABLES = RTC_PIE;
-        int_enable(INT_RTC);
+        rtc_enable_ticks();
         sprintf(message, "RTC interrupt enabled.\n");
+
     } else if (strcmp(value, "0") == 0) {
         int_disable(INT_RTC);
         sprintf(message, "RTC interrupt disabled.\n");
+
     } else {
         sprintf(message, "USAGE: SET RTC 0|1\n");
     }
@@ -471,8 +471,8 @@ void cli_set_init() {
     cli_last_setting = 0;
 
     cli_set_register("DATE", "DATE yyyy-mm-dd -- set the date in the realtime clock", cli_date_set, cli_date_get);
-    cli_set_register("RTC", "RTC 1|0 -- Enable or disable the realtime clock interrupt", cli_rtc_set, cli_rtc_get);
-    cli_set_register("SOF", "SOF 1|0 -- Enable or disable the Start of Frame interrupt", cli_sof_set, cli_sof_get);
+    // cli_set_register("RTC", "RTC 1|0 -- Enable or disable the realtime clock interrupt", cli_rtc_set, cli_rtc_get);
+    // cli_set_register("SOF", "SOF 1|0 -- Enable or disable the Start of Frame interrupt", cli_sof_set, cli_sof_get);
     cli_set_register("TIME", "TIME HH:MM:SS -- set the time in the realtime clock", cli_time_set, cli_time_get);
     cli_set_register("FONT", "FONT <path> -- set a font for the display", cli_font_set, cli_font_get);
     cli_set_register("VOLUME", "VOLUME <0 - 255> -- set the master volume", cli_volume_set, cli_volume_get);

@@ -542,18 +542,17 @@ short sys_fsys_register_loader(const char * extension, p_file_loader loader) {
  */
 
 /*
- * Get the number of ticks since the system last booted.
+ * Get the number of jiffies since the system last booted.
  *
- * NOTE: a tick is almost, but not quite, 1ms. The RTC periodic interrupt
- *       period does not line up with a 1ms timer, but it comes close.
- *       Therefore, a tick will be 976.5625 microseconds... a little faster
- *       than 1ms.
+ * NOTE: a jiffie is 1/60 of a second. This timer will not be
+ *       100% precise, so it should be used for timeout purposes
+ *       where precision is not critical.
  *
  * Returns:
- * the number of ticks since the last reset
+ * the number of jiffies since the last reset
  */
-long sys_rtc_get_ticks() {
-    return syscall(KFN_TIME_TICKS);
+extern long sys_time_jiffies() {
+    return syscall(KFN_TIME_JIFFIES);
 }
 
 /*

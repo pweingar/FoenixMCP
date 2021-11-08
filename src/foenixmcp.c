@@ -135,11 +135,12 @@ void load_splashscreen() {
     /* Display the splashscreen: 640x480 */
     *MasterControlReg_A = VKY3_MCR_GRAPH_EN | VKY3_MCR_BITMAP_EN;
 
+    target_ticks = rtc_get_jiffies() + 300;
+
     /* Play the SID test bong on the Gideon SID implementation */
     sid_test_internal();
 
-    target_ticks = rtc_get_ticks() + 10000;
-    while (target_ticks > rtc_get_ticks()) ;
+    while (target_ticks > rtc_get_jiffies()) ;
 
     /* Initialize the text channels */
     text_init();
@@ -201,14 +202,14 @@ void initialize() {
         log(LOG_INFO, "Console installed.");
     }
 
+    /* Initialize the timers the MCP uses */
+    timers_init();
+
     /* Initialize the real time clock */
     rtc_init();
 
     /* Enable all interrupts */
     int_enable_all();
-
-    /* Make sure the RTC tick counter is going */
-    rtc_enable_ticks();
 
     /* Display the splash screen */
     load_splashscreen();
@@ -252,8 +253,6 @@ void initialize() {
     } else {
         log(LOG_INFO, "File system initialized.");
     }
-
-    int_disable(INT_RTC);
 }
 
 int main(int argc, char * argv[]) {

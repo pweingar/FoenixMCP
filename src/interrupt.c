@@ -157,16 +157,18 @@ void int_vicky_channel_a() {
 	unsigned short mask = 1;
 	unsigned short pending = *PENDING_GRP0 & 0xff;
 
+	/* Acknowledge all the pending interrupts:
+	 * NOTE: we have to do this, even if there is no handler for the interrupt */
+	*PENDING_GRP0 = 0x00ff;
+
 	if (pending != 0) {
 		for (n = 0; n < 8; n++) {
 			if (pending & mask) {
 				p_int_handler handler = g_int_handler[n];
+
 				if (handler) {
 					/* If we got a handler, call it */
 					handler();
-
-					/* And acknowledge the interrupt */
-					int_clear(n);
 				}
 			}
 
@@ -184,6 +186,10 @@ void int_vicky_channel_b() {
 	unsigned short mask = 1;
 	unsigned short pending = (*PENDING_GRP0 >> 8) & 0xff;
 
+	/* Acknowledge all the pending interrupts:
+	 * NOTE: we have to do this, even if there is no handler for the interrupt */
+	*PENDING_GRP0 = 0xff00;
+
 	if (pending != 0) {
 		for (n = 8; n < 16; n++) {
 			if (pending & mask) {
@@ -191,9 +197,6 @@ void int_vicky_channel_b() {
 				if (handler) {
 					/* If we got a handler, call it */
 					handler();
-
-					/* And acknowledge the interrupt */
-					int_clear(n);
 				}
 			}
 

@@ -17,7 +17,7 @@
 // Constants
 //
 
-#define SDC_TIMEOUT_MS 300
+#define SDC_TIMEOUT_JF 20           /* Timeout in jiffies (1/60 second) */
 
 unsigned char g_sdc_status = SDC_STAT_NOINIT;
 unsigned char g_sdc_error = 0;
@@ -77,9 +77,9 @@ short sdc_wait_busy() {
     int retry_count = MAX_TRIES_BUSY;
     unsigned char status;
 
-    timer_ticks = rtc_get_ticks() + SDC_TIMEOUT_MS;
+    timer_ticks = rtc_get_jiffies() + SDC_TIMEOUT_JF;
     do {
-        if (rtc_get_ticks() > timer_ticks) {
+        if (rtc_get_jiffies() > timer_ticks) {
             // If we have run out of tries, return a TIMEOUT error
             return DEV_TIMEOUT;
         }

@@ -53,6 +53,9 @@
 #define RTC_RATES_WD    0xf0
 #define RTC_RATES_RS    0x0f
 #define RTC_RATE_976us  0x06
+#define RTC_RATE_4ms    0x04
+#define RTC_RATE_15ms   0x0A
+
 
 /* Enable bits */
 #define RTC_AIE         0x08

@@ -19,20 +19,20 @@ short psg_test(short channel, int argc, char * argv[]) {
     psg_tone(0, 34923);
     psg_attenuation(0, 0);
 
-    target_time = rtc_get_ticks() + 300;
-    while (target_time > rtc_get_ticks()) ;
+    target_time = sys_time_jiffies() + 6;
+    while (target_time > sys_time_jiffies()) ;
 
     psg_tone(1, 44000);
     psg_attenuation(1, 0);
 
-    target_time = rtc_get_ticks() + 300;
-    while (target_time > rtc_get_ticks()) ;
+    target_time = sys_time_jiffies() + 6;
+    while (target_time > sys_time_jiffies()) ;
 
     psg_tone(2, 52325);
     psg_attenuation(2, 0);
 
-    target_time = rtc_get_ticks() + 1000;
-    while (target_time > rtc_get_ticks()) ;
+    target_time = sys_time_jiffies() + 60;
+    while (target_time > sys_time_jiffies()) ;
 
     psg_attenuation(0, 15);
     psg_tone(0, 0);
@@ -110,8 +110,8 @@ short opl3_test(short channel, int argc, char * argv[]) {
         }
     }
 
-    target_time = rtc_get_ticks() + 1000;
-    while (target_time > rtc_get_ticks()) ;
+    target_time = sys_time_jiffies() + 60;
+    while (target_time > sys_time_jiffies()) ;
 
     i = 0;
     while (1) {
@@ -492,8 +492,8 @@ short opl2_test(short channel, int argc, char * argv[]) {
         OPN2_INT_BASE[OPN2_28_KEY_ON_OFF] = i;
     }
 
-    long target_ticks = rtc_get_ticks();
-    while (target_ticks > rtc_get_ticks() + 300) ;
+    long target_ticks = sys_time_jiffies();
+    while (target_ticks > sys_time_jiffies() + 300) ;
 
     for (i = 0x00; i < 0x07; i++) {
         OPN2_INT_BASE[OPN2_28_KEY_ON_OFF] = i;
