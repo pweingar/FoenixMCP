@@ -21,66 +21,66 @@ D:\Projects\FoenixMCP\VBCC\targets\m68k-foenix\lib\libvc.a (strchr.o) needed due
 
 Files:
   startup_m68k.o:  vectors 0(180), CODE 10000(22a) hex
-  D:\Projects\FoenixMCP\VBCC\targets\m68k-foenix\lib\libvc.a (_main.o):  CODE 1022c(be), DATA 261d4(4), BSS 29408(4) hex
-  foenixmcp.o:  CODE 102ec(72b), DATA 261d8(2760) hex
+  D:\Projects\FoenixMCP\VBCC\targets\m68k-foenix\lib\libvc.a (_main.o):  CODE 1022c(be), DATA 26304(4), BSS 29538(4) hex
+  foenixmcp.o:  CODE 102ec(72b), DATA 26308(2760) hex
   D:\Projects\FoenixMCP\VBCC\targets\m68k-foenix\lib\libvc.a (sprintf.o):  CODE 10a18(60) hex
   D:\Projects\FoenixMCP\VBCC\targets\m68k-foenix\lib\libvc.a (fputc.o):  CODE 10a78(64) hex
   D:\Projects\FoenixMCP\VBCC\targets\m68k-foenix\lib\libvc.a (_putbuf.o):  CODE 10adc(15a) hex
   D:\Projects\FoenixMCP\VBCC\targets\m68k-foenix\lib\libvc.a (__write.o):  CODE 10c38(6) hex
   D:\Projects\FoenixMCP\VBCC\targets\m68k-foenix\lib\libvc.a (_flushbuf.o):  CODE 10c40(c0) hex
-  D:\Projects\FoenixMCP\VBCC\targets\m68k-foenix\lib\libvc.a (malloc.o):  CODE 10d00(fe), DATA 28938(c), BSS 2940c(1) hex
+  D:\Projects\FoenixMCP\VBCC\targets\m68k-foenix\lib\libvc.a (malloc.o):  CODE 10d00(fe), DATA 28a68(c), BSS 2953c(1) hex
   D:\Projects\FoenixMCP\VBCC\targets\m68k-foenix\lib\libvc.a (_chkabort.o):  CODE 10e00(2) hex
   D:\Projects\FoenixMCP\VBCC\targets\m68k-foenix\lib\libvc.a (vfprintf.o):  CODE 10e04(9cc) hex
   D:\Projects\FoenixMCP\VBCC\targets\m68k-foenix\lib\libvc.a (_divuint64.o):  CODE 117d0(f0) hex
-  D:\Projects\FoenixMCP\VBCC\targets\m68k-foenix\lib\libvc.a (_clz_tab.o):  DATA 28944(100) hex
+  D:\Projects\FoenixMCP\VBCC\targets\m68k-foenix\lib\libvc.a (_clz_tab.o):  DATA 28a74(100) hex
   D:\Projects\FoenixMCP\VBCC\targets\m68k-foenix\lib\libvc.a (_lmath.o):  CODE 118c0(f6) hex
   D:\Projects\FoenixMCP\VBCC\targets\m68k-foenix\lib\libvc.a (_divu64by32.o):  CODE 119b8(112) hex
   D:\Projects\FoenixMCP\VBCC\targets\m68k-foenix\lib\libvc.a (_moduint64.o):  CODE 11acc(f2) hex
   D:\Projects\FoenixMCP\VBCC\targets\m68k-foenix\lib\libvc.a (_ctype_.o):  CODE 11bc0(104) hex
   D:\Projects\FoenixMCP\VBCC\targets\m68k-foenix\lib\libvc.a (localeconv.o):  CODE 11cc4(5d) hex
   indicators.o:  CODE 11d24(6a) hex
-  interrupt.o:  CODE 11d90(2a2), BSS 29410(c0) hex
-  log.o:  CODE 12034(c66), DATA 28a44(9a), BSS 294d0(c) hex
-  memory.o:  CODE 12c9c(342), BSS 294dc(100) hex
-  proc.o:  CODE 12fe0(18c), BSS 295dc(4) hex
+  interrupt.o:  CODE 11d90(2a2), BSS 29540(c0) hex
+  log.o:  CODE 12034(c66), DATA 28b74(9a), BSS 29600(c) hex
+  memory.o:  CODE 12c9c(342), BSS 2960c(100) hex
+  proc.o:  CODE 12fe0(18c), BSS 2970c(4) hex
   ring_buffer.o:  CODE 1316c(c6) hex
   simpleio.o:  CODE 13234(411) hex
   D:\Projects\FoenixMCP\VBCC\targets\m68k-foenix\lib\libvc.a (isgraph.o):  CODE 13648(1e) hex
   sys_general.o:  CODE 13668(1f3) hex
   syscalls.o:  CODE 1385c(5f4) hex
-  timers.o:  CODE 13e50(30), BSS 295e0(4) hex
+  timers.o:  CODE 13e50(30), BSS 29710(4) hex
   bios_m68k.o:  CODE 13e80(5ca) hex
-  block.o:  CODE 1444c(3f0), BSS 295e4(f0) hex
-  channel.o:  CODE 1483c(97c), BSS 296d4(3f0) hex
+  block.o:  CODE 1444c(3f0), BSS 29714(f0) hex
+  channel.o:  CODE 1483c(97c), BSS 29804(3f0) hex
   console.o:  CODE 151b8(bca) hex
   fdc.o:  symbols only
-  fsys.o:  CODE 15d84(1701), BSS 29ac4(2d3c) hex
+  fsys.o:  CODE 15d84(1701), BSS 29bf4(2d3c) hex
   D:\Projects\FoenixMCP\VBCC\targets\m68k-foenix\lib\libvc.a (free.o):  CODE 17488(cc) hex
   kbd_mo.o:  symbols only
   lpt.o:  symbols only
   midi.o:  symbols only
-  pata.o:  CODE 17554(b0c), DATA 28ae0(6), BSS 2c800(200) hex
-  ps2.o:  CODE 18060(18bc), DATA 28ae8(5c), BSS 2ca00(234) hex
-  rtc.o:  CODE 1991c(89c), BSS 2cc34(4) hex
-  sdc.o:  CODE 1a1b8(524), DATA 28b44(5) hex
-  text_screen_iii.o:  CODE 1a6dc(e00), DATA 28b4c(800), BSS 2cc38(5c) hex
+  pata.o:  CODE 17554(b0c), DATA 28c10(6), BSS 2c930(200) hex
+  ps2.o:  CODE 18060(18bc), DATA 28c18(5c), BSS 2cb30(234) hex
+  rtc.o:  CODE 1991c(89c), BSS 2cd64(4) hex
+  sdc.o:  CODE 1a1b8(524), DATA 28c74(5) hex
+  text_screen_iii.o:  CODE 1a6dc(e00), DATA 28c7c(800), BSS 2cd68(5c) hex
   uart.o:  CODE 1b4dc(1fa) hex
   c256_diskio.o:  CODE 1b6d8(1bb) hex
-  ff.o:  CODE 1b894(5cc0), BSS 2cc94(214) hex
+  ff.o:  CODE 1b894(5cc0), BSS 2cdc4(214) hex
   D:\Projects\FoenixMCP\VBCC\targets\m68k-foenix\lib\libvc.a (strchr.o):  CODE 21554(2c) hex
   D:\Projects\FoenixMCP\VBCC\targets\m68k-foenix\lib\libvc.a (memcmp.o):  CODE 21580(3a) hex
   ffsystem.o:  symbols only
   ffunicode.o:  CODE 215bc(558) hex
-  codec.o:  CODE 21b14(b8), DATA 2934c(4), BSS 2cea8(4) hex
+  codec.o:  CODE 21b14(b8), DATA 2947c(4), BSS 2cfd8(4) hex
   psg.o:  CODE 21bcc(d4) hex
   sid.o:  CODE 21ca0(22a) hex
-  cli.o:  CODE 21ecc(1190), DATA 29350(2) hex
+  cli.o:  CODE 21ecc(1190), DATA 29480(2) hex
   dos_cmds.o:  CODE 2305c(d55) hex
   mem_cmds.o:  CODE 23db4(3ff) hex
-  settings.o:  CODE 241b4(ce7), BSS 2ceac(8) hex
-  sound_cmds.o:  CODE 24e9c(777) hex
-  test_cmd2.o:  CODE 25614(baf), DATA 29354(b4) hex
-  INITEXIT:  .dtors 261c4(8), .ctors 261cc(8) hex
+  settings.o:  CODE 241b4(e17), BSS 2cfdc(8) hex
+  sound_cmds.o:  CODE 24fcc(777) hex
+  test_cmd2.o:  CODE 25744(baf), DATA 29484(b4) hex
+  INITEXIT:  .dtors 262f4(8), .ctors 262fc(8) hex
 
 
 Section mapping (numbers in hex):
@@ -88,7 +88,7 @@ Section mapping (numbers in hex):
   00000000 vectors  (size 180)
            00000000 - 00000180 startup_m68k.o(vectors)
 ------------------------------
-  00010000 text  (size 161c3, allocated 161c2)
+  00010000 text  (size 162f3, allocated 162f2)
            00010000 - 0001022a startup_m68k.o(CODE)
            0001022c - 000102ea _main.o(CODE)
            000102ec - 00010a17 foenixmcp.o(CODE)
@@ -140,48 +140,48 @@ Section mapping (numbers in hex):
            00021ecc - 0002305c cli.o(CODE)
            0002305c - 00023db1 dos_cmds.o(CODE)
            00023db4 - 000241b3 mem_cmds.o(CODE)
-           000241b4 - 00024e9b settings.o(CODE)
-           00024e9c - 00025613 sound_cmds.o(CODE)
-           00025614 - 000261c3 test_cmd2.o(CODE)
+           000241b4 - 00024fcb settings.o(CODE)
+           00024fcc - 00025743 sound_cmds.o(CODE)
+           00025744 - 000262f3 test_cmd2.o(CODE)
 ------------------------------
-  000261c4 .dtors  (size 8, allocated 0)
-           000261c4 - 000261cc INITEXIT(.dtors)
+  000262f4 .dtors  (size 8, allocated 0)
+           000262f4 - 000262fc INITEXIT(.dtors)
 ------------------------------
-  000261cc .ctors  (size 8, allocated 0)
-           000261cc - 000261d4 INITEXIT(.ctors)
+  000262fc .ctors  (size 8, allocated 0)
+           000262fc - 00026304 INITEXIT(.ctors)
 ------------------------------
-  000261d4 data  (size 3234, allocated 3228)
-           000261d4 - 000261d8 _main.o(DATA)
-           000261d8 - 00028938 foenixmcp.o(DATA)
-           00028938 - 00028944 malloc.o(DATA)
-           00028944 - 00028a44 _clz_tab.o(DATA)
-           00028a44 - 00028ade log.o(DATA)
-           00028ae0 - 00028ae6 pata.o(DATA)
-           00028ae8 - 00028b44 ps2.o(DATA)
-           00028b44 - 00028b49 sdc.o(DATA)
-           00028b4c - 0002934c text_screen_iii.o(DATA)
-           0002934c - 00029350 codec.o(DATA)
-           00029350 - 00029352 cli.o(DATA)
-           00029354 - 00029408 test_cmd2.o(DATA)
+  00026304 data  (size 3234, allocated 3228)
+           00026304 - 00026308 _main.o(DATA)
+           00026308 - 00028a68 foenixmcp.o(DATA)
+           00028a68 - 00028a74 malloc.o(DATA)
+           00028a74 - 00028b74 _clz_tab.o(DATA)
+           00028b74 - 00028c0e log.o(DATA)
+           00028c10 - 00028c16 pata.o(DATA)
+           00028c18 - 00028c74 ps2.o(DATA)
+           00028c74 - 00028c79 sdc.o(DATA)
+           00028c7c - 0002947c text_screen_iii.o(DATA)
+           0002947c - 00029480 codec.o(DATA)
+           00029480 - 00029482 cli.o(DATA)
+           00029484 - 00029538 test_cmd2.o(DATA)
 ------------------------------
-  00029408 bss  (size 3aac, allocated 0)
-           00029408 - 0002940c _main.o(BSS)
-           0002940c - 0002940d malloc.o(BSS)
-           00029410 - 000294d0 interrupt.o(BSS)
-           000294d0 - 000294dc log.o(BSS)
-           000294dc - 000295dc memory.o(BSS)
-           000295dc - 000295e0 proc.o(BSS)
-           000295e0 - 000295e4 timers.o(BSS)
-           000295e4 - 000296d4 block.o(BSS)
-           000296d4 - 00029ac4 channel.o(BSS)
-           00029ac4 - 0002c800 fsys.o(BSS)
-           0002c800 - 0002ca00 pata.o(BSS)
-           0002ca00 - 0002cc34 ps2.o(BSS)
-           0002cc34 - 0002cc38 rtc.o(BSS)
-           0002cc38 - 0002cc94 text_screen_iii.o(BSS)
-           0002cc94 - 0002cea8 ff.o(BSS)
-           0002cea8 - 0002ceac codec.o(BSS)
-           0002ceac - 0002ceb4 settings.o(BSS)
+  00029538 bss  (size 3aac, allocated 0)
+           00029538 - 0002953c _main.o(BSS)
+           0002953c - 0002953d malloc.o(BSS)
+           00029540 - 00029600 interrupt.o(BSS)
+           00029600 - 0002960c log.o(BSS)
+           0002960c - 0002970c memory.o(BSS)
+           0002970c - 00029710 proc.o(BSS)
+           00029710 - 00029714 timers.o(BSS)
+           00029714 - 00029804 block.o(BSS)
+           00029804 - 00029bf4 channel.o(BSS)
+           00029bf4 - 0002c930 fsys.o(BSS)
+           0002c930 - 0002cb30 pata.o(BSS)
+           0002cb30 - 0002cd64 ps2.o(BSS)
+           0002cd64 - 0002cd68 rtc.o(BSS)
+           0002cd68 - 0002cdc4 text_screen_iii.o(BSS)
+           0002cdc4 - 0002cfd8 ff.o(BSS)
+           0002cfd8 - 0002cfdc codec.o(BSS)
+           0002cfdc - 0002cfe4 settings.o(BSS)
 
 
 Symbols of vectors:
@@ -190,910 +190,914 @@ Symbols of vectors:
   0x00b00104 PENDING_GRP2: local abs, size 0
 
 Symbols of text:
-  0x00000000 l9: local abs, size 0
-  0x00000000 l49: local abs, size 0
-  0x00000000 l173: local abs, size 0
-  0x00000000 l179: local abs, size 0
-  0x00000000 l183: local abs, size 0
-  0x00000000 l171: local abs, size 0
-  0x00000000 l693: local abs, size 0
-  0x00000000 l6: local abs, size 0
-  0x00000000 l185: local abs, size 0
-  0x00000000 l125: local abs, size 0
-  0x00000000 l4: local abs, size 0
-  0x00000000 l24: local abs, size 0
-  0x00000000 l6: local abs, size 0
-  0x00000000 l206: local abs, size 0
-  0x00000000 l208: local abs, size 0
-  0x00000000 l200: local abs, size 0
-  0x00000000 l8: local abs, size 0
-  0x00000000 l88: local abs, size 0
-  0x00000000 l90: local abs, size 0
-  0x00000000 l90: local abs, size 0
-  0x00000000 l251: local abs, size 0
-  0x00000000 l92: local abs, size 0
-  0x00000000 l8: local abs, size 0
-  0x00000000 l6: local abs, size 0
-  0x00000000 l30: local abs, size 0
-  0x00000000 l198: local abs, size 0
-  0x00000000 l695: local abs, size 0
-  0x00000000 l110: local abs, size 0
-  0x00000000 l135: local abs, size 0
-  0x00000000 second: local abs, size 0
-  0x00000000 l340: local abs, size 0
-  0x00000000 l123: local abs, size 0
-  0x00000000 l18: local abs, size 0
-  0x00000000 l22: local abs, size 0
-  0x00000000 l20: local abs, size 0
-  0x00000000 l36: local abs, size 0
-  0x00000000 l338: local abs, size 0
-  0x00000000 l95: local abs, size 0
-  0x00000000 l142: local abs, size 0
-  0x00000000 l137: local abs, size 0
-  0x00000000 l173: local abs, size 0
-  0x00000000 l14: local abs, size 0
-  0x00000000 l261: local abs, size 0
-  0x00000000 l120: local abs, size 0
-  0x00000000 l259: local abs, size 0
-  0x00000000 l140: local abs, size 0
-  0x00000000 l118: local abs, size 0
-  0x00000000 l11: local abs, size 0
-  0x00000000 l15: local abs, size 0
-  0x00000000 l13: local abs, size 0
-  0x00000000 l16: local abs, size 0
-  0x00000000 l115: local abs, size 0
-  0x00000000 l16: local abs, size 0
-  0x00000000 l38: local abs, size 0
-  0x00000000 l272: local abs, size 0
-  0x00000000 l5: local abs, size 0
-  0x00000000 l156: local abs, size 0
-  0x00000000 l171: local abs, size 0
-  0x00000000 l14: local abs, size 0
-  0x00000000 l270: local abs, size 0
-  0x00000000 l117: local abs, size 0
-  0x00000000 l113: local abs, size 0
-  0x00000000 l3: local abs, size 0
-  0x00000000 l115: local abs, size 0
-  0x00000000 l215: local abs, size 0
-  0x00000000 l13: local abs, size 0
   0x00000000 l11: local abs, size 0
   0x00000000 l51: local abs, size 0
-  0x00000000 l97: local abs, size 0
-  0x00000000 l108: local abs, size 0
-  0x00000000 l154: local abs, size 0
-  0x00000000 l10: local abs, size 0
-  0x00000000 l213: local abs, size 0
-  0x00000000 l7: local abs, size 0
   0x00000000 l8: local abs, size 0
-  0x00000000 l8: local abs, size 0
-  0x00000000 l6: local abs, size 0
-  0x00000000 l10: local abs, size 0
-  0x00000000 l13: local abs, size 0
-  0x00000000 l61: local abs, size 0
-  0x00000000 l15: local abs, size 0
-  0x00000000 l3: local abs, size 0
   0x00000000 l5: local abs, size 0
-  0x00000000 l8: local abs, size 0
-  0x00000000 l13: local abs, size 0
-  0x00000000 l10: local abs, size 0
+  0x00000000 l3: local abs, size 0
+  0x00000000 l6: local abs, size 0
+  0x00000000 l270: local abs, size 0
+  0x00000000 l171: local abs, size 0
+  0x00000000 l113: local abs, size 0
+  0x00000000 l117: local abs, size 0
   0x00000000 l85: local abs, size 0
-  0x00000000 l4: local abs, size 0
-  0x00000000 l44: local abs, size 0
-  0x00000000 l59: local abs, size 0
-  0x00000000 l34: local abs, size 0
-  0x00000000 l83: local abs, size 0
-  0x00000000 l123: local abs, size 0
-  0x00000000 l144: local abs, size 0
-  0x00000000 l10: local abs, size 0
-  0x00000000 l5: local abs, size 0
-  0x00000000 l19: local abs, size 0
-  0x00000000 l3: local abs, size 0
-  0x00000000 l15: local abs, size 0
-  0x00000000 l3: local abs, size 0
-  0x00000000 l17: local abs, size 0
-  0x00000000 l18: local abs, size 0
-  0x00000000 l32: local abs, size 0
-  0x00000000 l20: local abs, size 0
-  0x00000000 l8: local abs, size 0
-  0x00000000 l112: local abs, size 0
-  0x00000000 l9: local abs, size 0
-  0x00000000 l7: local abs, size 0
-  0x00000000 l24: local abs, size 0
-  0x00000000 l22: local abs, size 0
+  0x00000000 l115: local abs, size 0
   0x00000000 l14: local abs, size 0
-  0x00000000 l12: local abs, size 0
-  0x00000000 l46: local abs, size 0
-  0x00000000 l5: local abs, size 0
-  0x00000000 l3: local abs, size 0
-  0x00000000 l5: local abs, size 0
-  0x00000000 l6: local abs, size 0
-  0x00000000 l12: local abs, size 0
+  0x00000000 l4: local abs, size 0
+  0x00000000 l34: local abs, size 0
+  0x00000000 l115: local abs, size 0
+  0x00000000 l44: local abs, size 0
+  0x00000000 l16: local abs, size 0
+  0x00000000 l32: local abs, size 0
+  0x00000000 l112: local abs, size 0
+  0x00000000 l38: local abs, size 0
+  0x00000000 l272: local abs, size 0
+  0x00000000 l118: local abs, size 0
   0x00000000 l110: local abs, size 0
   0x00000000 l49: local abs, size 0
-  0x00000000 l10: local abs, size 0
-  0x00000000 l225: local abs, size 0
-  0x00000000 l23: local abs, size 0
-  0x00000000 l3: local abs, size 0
+  0x00000000 l83: local abs, size 0
   0x00000000 l47: local abs, size 0
+  0x00000000 l140: local abs, size 0
   0x00000000 l44: local abs, size 0
   0x00000000 l42: local abs, size 0
   0x00000000 l39: local abs, size 0
-  0x00000000 l25: local abs, size 0
+  0x00000000 l120: local abs, size 0
   0x00000000 l37: local abs, size 0
-  0x00000000 l5: local abs, size 0
-  0x00000000 l177: local abs, size 0
-  0x00000000 l292: local abs, size 0
-  0x00000000 l125: local abs, size 0
-  0x00000000 l146: local abs, size 0
-  0x00000000 l28: local abs, size 0
-  0x00000000 l14: local abs, size 0
-  0x00000000 l12: local abs, size 0
-  0x00000000 l249: local abs, size 0
-  0x00000000 l294: local abs, size 0
-  0x00000000 l5: local abs, size 0
-  0x00000000 l177: local abs, size 0
+  0x00000000 l13: local abs, size 0
+  0x00000000 l142: local abs, size 0
+  0x00000000 second: local abs, size 0
+  0x00000000 l200: local abs, size 0
   0x00000000 l179: local abs, size 0
-  0x00000000 l8: local abs, size 0
-  0x00000000 l14: local abs, size 0
+  0x00000000 l177: local abs, size 0
+  0x00000000 l22: local abs, size 0
+  0x00000000 l123: local abs, size 0
+  0x00000000 l268: local abs, size 0
+  0x00000000 l11: local abs, size 0
+  0x00000000 l24: local abs, size 0
   0x00000000 l227: local abs, size 0
+  0x00000000 l146: local abs, size 0
+  0x00000000 l173: local abs, size 0
+  0x00000000 l14: local abs, size 0
+  0x00000000 l266: local abs, size 0
+  0x00000000 l125: local abs, size 0
+  0x00000000 l4: local abs, size 0
+  0x00000000 l46: local abs, size 0
+  0x00000000 l225: local abs, size 0
+  0x00000000 l125: local abs, size 0
+  0x00000000 l144: local abs, size 0
   0x00000000 l16: local abs, size 0
+  0x00000000 l123: local abs, size 0
+  0x00000000 l294: local abs, size 0
+  0x00000000 l6: local abs, size 0
+  0x00000000 l36: local abs, size 0
+  0x00000000 l338: local abs, size 0
+  0x00000000 l20: local abs, size 0
+  0x00000000 l292: local abs, size 0
+  0x00000000 l49: local abs, size 0
+  0x00000000 l9: local abs, size 0
+  0x00000000 l198: local abs, size 0
+  0x00000000 l695: local abs, size 0
+  0x00000000 l10: local abs, size 0
+  0x00000000 l18: local abs, size 0
+  0x00000000 l340: local abs, size 0
+  0x00000000 l28: local abs, size 0
+  0x00000000 l12: local abs, size 0
+  0x00000000 l10: local abs, size 0
+  0x00000000 l13: local abs, size 0
+  0x00000000 l15: local abs, size 0
+  0x00000000 l18: local abs, size 0
+  0x00000000 l5: local abs, size 0
+  0x00000000 l20: local abs, size 0
+  0x00000000 l14: local abs, size 0
+  0x00000000 l16: local abs, size 0
+  0x00000000 l7: local abs, size 0
+  0x00000000 l12: local abs, size 0
+  0x00000000 l253: local abs, size 0
+  0x00000000 l108: local abs, size 0
+  0x00000000 l14: local abs, size 0
+  0x00000000 l23: local abs, size 0
+  0x00000000 l3: local abs, size 0
+  0x00000000 l251: local abs, size 0
+  0x00000000 l25: local abs, size 0
+  0x00000000 l15: local abs, size 0
   0x00000000 l3: local abs, size 0
   0x00000000 l5: local abs, size 0
+  0x00000000 l693: local abs, size 0
+  0x00000000 l97: local abs, size 0
+  0x00000000 l137: local abs, size 0
+  0x00000000 l12: local abs, size 0
+  0x00000000 l14: local abs, size 0
+  0x00000000 l95: local abs, size 0
+  0x00000000 l22: local abs, size 0
+  0x00000000 l135: local abs, size 0
+  0x00000000 l24: local abs, size 0
+  0x00000000 l7: local abs, size 0
+  0x00000000 l215: local abs, size 0
+  0x00000000 l9: local abs, size 0
+  0x00000000 l5: local abs, size 0
+  0x00000000 l13: local abs, size 0
+  0x00000000 l8: local abs, size 0
+  0x00000000 l10: local abs, size 0
+  0x00000000 l59: local abs, size 0
+  0x00000000 l61: local abs, size 0
+  0x00000000 l8: local abs, size 0
+  0x00000000 l6: local abs, size 0
+  0x00000000 l213: local abs, size 0
+  0x00000000 l8: local abs, size 0
+  0x00000000 l10: local abs, size 0
+  0x00000000 l5: local abs, size 0
+  0x00000000 l13: local abs, size 0
+  0x00000000 l15: local abs, size 0
+  0x00000000 l3: local abs, size 0
+  0x00000000 l5: local abs, size 0
+  0x00000000 l6: local abs, size 0
+  0x00000000 l8: local abs, size 0
+  0x00000000 l8: local abs, size 0
+  0x00000000 l3: local abs, size 0
+  0x00000000 l8: local abs, size 0
+  0x00000000 l154: local abs, size 0
+  0x00000000 l10: local abs, size 0
+  0x00000000 l92: local abs, size 0
+  0x00000000 l110: local abs, size 0
+  0x00000000 l90: local abs, size 0
+  0x00000000 l171: local abs, size 0
+  0x00000000 l156: local abs, size 0
+  0x00000000 l6: local abs, size 0
+  0x00000000 l173: local abs, size 0
+  0x00000000 l259: local abs, size 0
+  0x00000000 l17: local abs, size 0
+  0x00000000 l261: local abs, size 0
+  0x00000000 l19: local abs, size 0
+  0x00000000 l90: local abs, size 0
+  0x00000000 l177: local abs, size 0
+  0x00000000 l5: local abs, size 0
+  0x00000000 l88: local abs, size 0
+  0x00000000 l208: local abs, size 0
+  0x00000000 l206: local abs, size 0
+  0x00000000 l3: local abs, size 0
+  0x00000000 l185: local abs, size 0
+  0x00000000 l183: local abs, size 0
+  0x00000000 l3: local abs, size 0
+  0x00000000 l5: local abs, size 0
+  0x00000000 l30: local abs, size 0
+  0x00000000 l179: local abs, size 0
   0x00000002 normal: local abs, size 0
-  0x00000004 l45: local abs, size 0
-  0x00000004 l12: local abs, size 0
   0x00000004 l10: local abs, size 0
-  0x00000004 l312: local abs, size 0
-  0x00000004 l49: local abs, size 0
-  0x00000004 l303: local abs, size 0
-  0x00000004 l6: local abs, size 0
-  0x00000004 l205: local abs, size 0
-  0x00000004 l269: local abs, size 0
-  0x00000004 l205: local abs, size 0
-  0x00000004 l4: local abs, size 0
-  0x00000004 l15: local abs, size 0
-  0x00000004 l99: local abs, size 0
-  0x00000004 l67: local abs, size 0
-  0x00000004 l97: local abs, size 0
-  0x00000004 l17: local abs, size 0
-  0x00000004 l19: local abs, size 0
-  0x00000004 l11: local abs, size 0
-  0x00000004 l33: local abs, size 0
-  0x00000004 l65: local abs, size 0
-  0x00000004 l17: local abs, size 0
-  0x00000004 l35: local abs, size 0
-  0x00000004 l1306: local abs, size 0
-  0x00000004 l37: local abs, size 0
-  0x00000004 l105: local abs, size 0
   0x00000004 l210: local abs, size 0
-  0x00000004 l13: local abs, size 0
+  0x00000004 l81: local abs, size 0
   0x00000004 l170: local abs, size 0
+  0x00000004 l101: local abs, size 0
+  0x00000004 l19: local abs, size 0
+  0x00000004 l8: local abs, size 0
   0x00000004 l130: local abs, size 0
-  0x00000004 l7: local abs, size 0
-  0x00000004 l9: local abs, size 0
-  0x00000004 l30: local abs, size 0
+  0x00000004 l79: local abs, size 0
+  0x00000004 l37: local abs, size 0
+  0x00000004 l99: local abs, size 0
   0x00000004 l110: local abs, size 0
+  0x00000004 l35: local abs, size 0
   0x00000004 l90: local abs, size 0
   0x00000004 l70: local abs, size 0
-  0x00000004 l24: local abs, size 0
-  0x00000004 l1304: local abs, size 0
-  0x00000004 l22: local abs, size 0
-  0x00000004 l43: local abs, size 0
-  0x00000004 l28: local abs, size 0
-  0x00000004 l68: local abs, size 0
-  0x00000004 l111: local abs, size 0
-  0x00000004 l21: local abs, size 0
-  0x00000004 l103: local abs, size 0
-  0x00000004 l113: local abs, size 0
-  0x00000004 l73: local abs, size 0
-  0x00000004 l110: local abs, size 0
-  0x00000004 l133: local abs, size 0
-  0x00000004 l108: local abs, size 0
-  0x00000004 l73: local abs, size 0
-  0x00000004 l180: local abs, size 0
-  0x00000004 l75: local abs, size 0
   0x00000004 l33: local abs, size 0
-  0x00000004 l5: local abs, size 0
-  0x00000004 l135: local abs, size 0
-  0x00000004 l25: local abs, size 0
-  0x00000004 l18: local abs, size 0
+  0x00000004 l271: local abs, size 0
   0x00000004 l75: local abs, size 0
-  0x00000004 l35: local abs, size 0
-  0x00000004 l45: local abs, size 0
-  0x00000004 l105: local abs, size 0
-  0x00000004 l99: local abs, size 0
-  0x00000004 l79: local abs, size 0
-  0x00000004 l53: local abs, size 0
-  0x00000004 l125: local abs, size 0
-  0x00000004 l101: local abs, size 0
-  0x00000004 l81: local abs, size 0
-  0x00000004 l12: local abs, size 0
-  0x00000004 l110: local abs, size 0
-  0x00000004 l165: local abs, size 0
-  0x00000004 l8: local abs, size 0
-  0x00000004 l205: local abs, size 0
-  0x00000004 l16: local abs, size 0
-  0x00000004 quo: local abs, size 0
-  0x00000004 l225: local abs, size 0
-  0x00000004 l314: local abs, size 0
-  0x00000004 l238: local abs, size 0
-  0x00000004 l3: local abs, size 0
-  0x00000004 l15: local abs, size 0
-  0x00000004 l13: local abs, size 0
-  0x00000004 l23: local abs, size 0
-  0x00000004 l218: local abs, size 0
-  0x00000004 l8: local abs, size 0
-  0x00000004 l10: local abs, size 0
-  0x00000004 l108: local abs, size 0
-  0x00000004 l10: local abs, size 0
-  0x00000004 l5: local abs, size 0
-  0x00000004 l10: local abs, size 0
-  0x00000004 l43: local abs, size 0
-  0x00000004 l34: local abs, size 0
-  0x00000004 l345: local abs, size 0
-  0x00000004 l58: local abs, size 0
-  0x00000004 l3: local abs, size 0
-  0x00000004 l54: local abs, size 0
-  0x00000004 l32: local abs, size 0
+  0x00000004 l4: local abs, size 0
   0x00000004 l52: local abs, size 0
+  0x00000004 l12: local abs, size 0
+  0x00000004 l97: local abs, size 0
+  0x00000004 l3: local abs, size 0
+  0x00000004 l73: local abs, size 0
+  0x00000004 l113: local abs, size 0
+  0x00000004 l10: local abs, size 0
+  0x00000004 l51: local abs, size 0
+  0x00000004 l67: local abs, size 0
+  0x00000004 l5: local abs, size 0
+  0x00000004 l111: local abs, size 0
+  0x00000004 l32: local abs, size 0
+  0x00000004 l28: local abs, size 0
+  0x00000004 l345: local abs, size 0
+  0x00000004 l133: local abs, size 0
+  0x00000004 l99: local abs, size 0
+  0x00000004 l73: local abs, size 0
+  0x00000004 l12: local abs, size 0
+  0x00000004 l108: local abs, size 0
+  0x00000004 l65: local abs, size 0
+  0x00000004 l30: local abs, size 0
+  0x00000004 l9: local abs, size 0
+  0x00000004 l7: local abs, size 0
+  0x00000004 l10: local abs, size 0
+  0x00000004 l8: local abs, size 0
+  0x00000004 l33: local abs, size 0
+  0x00000004 l68: local abs, size 0
+  0x00000004 l108: local abs, size 0
+  0x00000004 l54: local abs, size 0
+  0x00000004 l34: local abs, size 0
+  0x00000004 l135: local abs, size 0
+  0x00000004 l19: local abs, size 0
+  0x00000004 l17: local abs, size 0
+  0x00000004 l53: local abs, size 0
+  0x00000004 l75: local abs, size 0
+  0x00000004 l10: local abs, size 0
+  0x00000004 l110: local abs, size 0
+  0x00000004 l35: local abs, size 0
+  0x00000004 l5: local abs, size 0
+  0x00000004 l103: local abs, size 0
+  0x00000004 l25: local abs, size 0
+  0x00000004 l45: local abs, size 0
+  0x00000004 l43: local abs, size 0
+  0x00000004 l105: local abs, size 0
+  0x00000004 l45: local abs, size 0
+  0x00000004 l269: local abs, size 0
+  0x00000004 l238: local abs, size 0
+  0x00000004 l105: local abs, size 0
+  0x00000004 l2074: local abs, size 0
+  0x00000004 l125: local abs, size 0
+  0x00000004 l13: local abs, size 0
+  0x00000004 l165: local abs, size 0
+  0x00000004 l15: local abs, size 0
+  0x00000004 l15: local abs, size 0
+  0x00000004 l49: local abs, size 0
+  0x00000004 l180: local abs, size 0
+  0x00000004 l312: local abs, size 0
+  0x00000004 l17: local abs, size 0
+  0x00000004 l218: local abs, size 0
+  0x00000004 l205: local abs, size 0
+  0x00000004 l225: local abs, size 0
+  0x00000004 l58: local abs, size 0
+  0x00000004 l108: local abs, size 0
+  0x00000004 l16: local abs, size 0
+  0x00000004 l314: local abs, size 0
   0x00000004 l38: local abs, size 0
   0x00000004 l18: local abs, size 0
+  0x00000004 l205: local abs, size 0
+  0x00000004 l3: local abs, size 0
+  0x00000004 l23: local abs, size 0
+  0x00000004 l43: local abs, size 0
+  0x00000004 quo: local abs, size 0
   0x00000004 l103: local abs, size 0
-  0x00000004 l271: local abs, size 0
-  0x00000004 l12: local abs, size 0
-  0x00000004 l123: local abs, size 0
-  0x00000004 l220: local abs, size 0
-  0x00000004 l2074: local abs, size 0
-  0x00000004 l180: local abs, size 0
-  0x00000004 l19: local abs, size 0
-  0x00000004 l51: local abs, size 0
-  0x00000004 l108: local abs, size 0
-  0x00000004 l60: local abs, size 0
-  0x00000004 l40: local abs, size 0
-  0x00000004 l20: local abs, size 0
   0x00000004 l17: local abs, size 0
+  0x00000004 l1306: local abs, size 0
+  0x00000004 l220: local abs, size 0
+  0x00000004 l12: local abs, size 0
   0x00000004 l14: local abs, size 0
-  0x00000008 l88: local abs, size 0
-  0x00000008 l89: local abs, size 0
-  0x00000008 l132: local abs, size 0
-  0x00000008 l117: local abs, size 0
-  0x00000008 l1473: local abs, size 0
-  0x00000008 l32: local abs, size 0
-  0x00000008 l120: local abs, size 0
-  0x00000008 l50: local abs, size 0
-  0x00000008 l140: local abs, size 0
-  0x00000008 l160: local abs, size 0
-  0x00000008 l43: local abs, size 0
-  0x00000008 l2093: local abs, size 0
-  0x00000008 l1534: local abs, size 0
-  0x00000008 l41: local abs, size 0
-  0x00000008 l132: local abs, size 0
-  0x00000008 l495: local abs, size 0
-  0x00000008 l232: local abs, size 0
-  0x00000008 l29: local abs, size 0
-  0x00000008 l72: local abs, size 0
-  0x00000008 l168: local abs, size 0
-  0x00000008 l31: local abs, size 0
-  0x00000008 l185: local abs, size 0
-  0x00000008 l43: local abs, size 0
-  0x00000008 l1299: local abs, size 0
-  0x00000008 l155: local abs, size 0
-  0x00000008 l34: local abs, size 0
-  0x00000008 l155: local abs, size 0
-  0x00000008 l141: local abs, size 0
-  0x00000008 l157: local abs, size 0
-  0x00000008 l175: local abs, size 0
-  0x00000008 l158: local abs, size 0
-  0x00000008 l69: local abs, size 0
-  0x00000008 l195: local abs, size 0
-  0x00000008 l87: local abs, size 0
-  0x00000008 l1640: local abs, size 0
-  0x00000008 l1330: local abs, size 0
-  0x00000008 l1480: local abs, size 0
-  0x00000008 l30: local abs, size 0
-  0x00000008 l30: local abs, size 0
-  0x00000008 l218: local abs, size 0
-  0x00000008 l256: local abs, size 0
-  0x00000008 l318: local abs, size 0
-  0x00000008 l2085: local abs, size 0
-  0x00000008 l150: local abs, size 0
-  0x00000008 l10: local abs, size 0
-  0x00000008 l120: local abs, size 0
+  0x00000004 l180: local abs, size 0
+  0x00000004 l11: local abs, size 0
+  0x00000004 l303: local abs, size 0
+  0x00000004 l18: local abs, size 0
+  0x00000004 l24: local abs, size 0
+  0x00000004 l13: local abs, size 0
+  0x00000004 l60: local abs, size 0
+  0x00000004 l21: local abs, size 0
+  0x00000004 l40: local abs, size 0
+  0x00000004 l205: local abs, size 0
+  0x00000004 l1304: local abs, size 0
+  0x00000004 l110: local abs, size 0
+  0x00000004 l20: local abs, size 0
+  0x00000004 l123: local abs, size 0
+  0x00000004 l6: local abs, size 0
+  0x00000004 l22: local abs, size 0
   0x00000008 l14: local abs, size 0
-  0x00000008 l156: local abs, size 0
-  0x00000008 l282: local abs, size 0
-  0x00000008 l141: local abs, size 0
-  0x00000008 l61: local abs, size 0
-  0x00000008 l234: local abs, size 0
-  0x00000008 l164: local abs, size 0
+  0x00000008 l318: local abs, size 0
+  0x00000008 l155: local abs, size 0
+  0x00000008 l175: local abs, size 0
+  0x00000008 l289: local abs, size 0
+  0x00000008 l195: local abs, size 0
+  0x00000008 l89: local abs, size 0
+  0x00000008 l29: local abs, size 0
+  0x00000008 l43: local abs, size 0
+  0x00000008 l10: local abs, size 0
+  0x00000008 l1480: local abs, size 0
   0x00000008 l310: local abs, size 0
-  0x00000008 l40: local abs, size 0
-  0x00000008 l63: local abs, size 0
   0x00000008 l5: local abs, size 0
+  0x00000008 l1640: local abs, size 0
+  0x00000008 l72: local abs, size 0
+  0x00000008 l282: local abs, size 0
+  0x00000008 l30: local abs, size 0
+  0x00000008 l132: local abs, size 0
+  0x00000008 l40: local abs, size 0
+  0x00000008 l232: local abs, size 0
+  0x00000008 l150: local abs, size 0
+  0x00000008 l1299: local abs, size 0
+  0x00000008 l2085: local abs, size 0
+  0x00000008 l63: local abs, size 0
+  0x00000008 l1330: local abs, size 0
+  0x00000008 l132: local abs, size 0
   0x00000008 l364: local abs, size 0
   0x00000008 l84: local abs, size 0
   0x00000008 l69: local abs, size 0
-  0x00000008 l56: local abs, size 0
-  0x00000008 l126: local abs, size 0
+  0x00000008 l157: local abs, size 0
+  0x00000008 l34: local abs, size 0
+  0x00000008 l120: local abs, size 0
+  0x00000008 l155: local abs, size 0
+  0x00000008 l117: local abs, size 0
+  0x00000008 l140: local abs, size 0
+  0x00000008 l30: local abs, size 0
+  0x00000008 l160: local abs, size 0
+  0x00000008 l87: local abs, size 0
+  0x00000008 l156: local abs, size 0
+  0x00000008 l42: local abs, size 0
+  0x00000008 l218: local abs, size 0
+  0x00000008 l132: local abs, size 0
   0x00000008 l145: local abs, size 0
+  0x00000008 l69: local abs, size 0
+  0x00000008 l158: local abs, size 0
+  0x00000008 l41: local abs, size 0
+  0x00000008 l256: local abs, size 0
+  0x00000008 l495: local abs, size 0
+  0x00000008 l50: local abs, size 0
+  0x00000008 l234: local abs, size 0
+  0x00000008 l185: local abs, size 0
   0x00000008 l5: local abs, size 0
+  0x00000008 l168: local abs, size 0
+  0x00000008 l88: local abs, size 0
+  0x00000008 l120: local abs, size 0
+  0x00000008 l141: local abs, size 0
+  0x00000008 l31: local abs, size 0
+  0x00000008 l126: local abs, size 0
+  0x00000008 l56: local abs, size 0
+  0x00000008 l2093: local abs, size 0
+  0x00000008 l1534: local abs, size 0
+  0x00000008 l1473: local abs, size 0
   0x00000008 l23: local abs, size 0
   0x00000008 l36: local abs, size 0
-  0x00000008 l289: local abs, size 0
-  0x00000008 l42: local abs, size 0
-  0x00000008 l132: local abs, size 0
+  0x00000008 l61: local abs, size 0
+  0x00000008 l164: local abs, size 0
+  0x00000008 l141: local abs, size 0
   0x00000008 l29: local abs, size 0
+  0x00000008 l43: local abs, size 0
   0x00000008 l17: local abs, size 0
+  0x00000008 l32: local abs, size 0
+  0x0000000c l162: local abs, size 0
   0x0000000c l27: local abs, size 0
-  0x0000000c l224: local abs, size 0
-  0x0000000c l282: local abs, size 0
-  0x0000000c l33: local abs, size 0
-  0x0000000c l50: local abs, size 0
-  0x0000000c l15: local abs, size 0
-  0x0000000c l200: local abs, size 0
-  0x0000000c l14: local abs, size 0
-  0x0000000c l55: local abs, size 0
-  0x0000000c l19: local abs, size 0
-  0x0000000c l40: local abs, size 0
+  0x0000000c l493: local abs, size 0
+  0x0000000c l181: local abs, size 0
+  0x0000000c l113: local abs, size 0
   0x0000000c l18: local abs, size 0
-  0x0000000c l213: local abs, size 0
-  0x0000000c l105: local abs, size 0
+  0x0000000c l43: local abs, size 0
+  0x0000000c l30: local abs, size 0
   0x0000000c l21: local abs, size 0
-  0x0000000c l3: local abs, size 0
+  0x0000000c l248: local abs, size 0
+  0x0000000c l18: local abs, size 0
+  0x0000000c l124: local abs, size 0
+  0x0000000c l1513: local abs, size 0
+  0x0000000c l34: local abs, size 0
+  0x0000000c l54: local abs, size 0
+  0x0000000c l124: local abs, size 0
+  0x0000000c l64: local abs, size 0
+  0x0000000c l21: local abs, size 0
+  0x0000000c l300: local abs, size 0
+  0x0000000c l148: local abs, size 0
+  0x0000000c l308: local abs, size 0
+  0x0000000c l248: local abs, size 0
+  0x0000000c l67: local abs, size 0
   0x0000000c l24: local abs, size 0
   0x0000000c l1088: local abs, size 0
-  0x0000000c l10: local abs, size 0
-  0x0000000c l67: local abs, size 0
-  0x0000000c l306: local abs, size 0
-  0x0000000c l54: local abs, size 0
-  0x0000000c l148: local abs, size 0
-  0x0000000c l385: local abs, size 0
-  0x0000000c l34: local abs, size 0
-  0x0000000c l189: local abs, size 0
-  0x0000000c l21: local abs, size 0
-  0x0000000c l1328: local abs, size 0
-  0x0000000c l124: local abs, size 0
-  0x0000000c l124: local abs, size 0
-  0x0000000c l82: local abs, size 0
-  0x0000000c l43: local abs, size 0
-  0x0000000c l90: local abs, size 0
-  0x0000000c l162: local abs, size 0
-  0x0000000c l290: local abs, size 0
-  0x0000000c l61: local abs, size 0
-  0x0000000c l154: local abs, size 0
-  0x0000000c l12: local abs, size 0
-  0x0000000c l8: local abs, size 0
-  0x0000000c l195: local abs, size 0
-  0x0000000c l63: local abs, size 0
-  0x0000000c l190: local abs, size 0
-  0x0000000c l260: local abs, size 0
-  0x0000000c l50: local abs, size 0
-  0x0000000c l143: local abs, size 0
-  0x0000000c l280: local abs, size 0
-  0x0000000c l384: local abs, size 0
-  0x0000000c l213: local abs, size 0
-  0x0000000c l1602: local abs, size 0
-  0x0000000c l121: local abs, size 0
-  0x0000000c l42: local abs, size 0
-  0x0000000c l100: local abs, size 0
-  0x0000000c l255: local abs, size 0
-  0x0000000c l316: local abs, size 0
-  0x0000000c l148: local abs, size 0
-  0x0000000c l300: local abs, size 0
-  0x0000000c l181: local abs, size 0
-  0x0000000c l34: local abs, size 0
-  0x0000000c l2080: local abs, size 0
-  0x0000000c l64: local abs, size 0
-  0x0000000c l308: local abs, size 0
-  0x0000000c l55: local abs, size 0
-  0x0000000c l30: local abs, size 0
-  0x0000000c l65: local abs, size 0
-  0x0000000c l1638: local abs, size 0
-  0x0000000c l153: local abs, size 0
-  0x0000000c l27: local abs, size 0
-  0x0000000c l145: local abs, size 0
-  0x0000000c l18: local abs, size 0
-  0x0000000c l248: local abs, size 0
-  0x0000000c l376: local abs, size 0
-  0x0000000c l12: local abs, size 0
-  0x0000000c l1496: local abs, size 0
   0x0000000c l149: local abs, size 0
   0x0000000c l28: local abs, size 0
-  0x0000000c l291: local abs, size 0
-  0x0000000c l70: local abs, size 0
-  0x0000000c l24: local abs, size 0
   0x0000000c l130: local abs, size 0
-  0x0000000c l130: local abs, size 0
-  0x0000000c l63: local abs, size 0
-  0x0000000c l113: local abs, size 0
-  0x0000000c l493: local abs, size 0
-  0x0000000c l48: local abs, size 0
-  0x0000000c l87: local abs, size 0
-  0x0000000c l15: local abs, size 0
-  0x0000000c l80: local abs, size 0
-  0x0000000c l138: local abs, size 0
+  0x0000000c l195: local abs, size 0
+  0x0000000c l3: local abs, size 0
   0x0000000c l30: local abs, size 0
-  0x0000000c l39: local abs, size 0
-  0x0000000c l1513: local abs, size 0
-  0x0000000c l64: local abs, size 0
+  0x0000000c l1496: local abs, size 0
+  0x0000000c l1328: local abs, size 0
+  0x0000000c l376: local abs, size 0
+  0x0000000c l213: local abs, size 0
+  0x0000000c l90: local abs, size 0
+  0x0000000c l145: local abs, size 0
+  0x0000000c l255: local abs, size 0
   0x0000000c l16: local abs, size 0
-  0x00000010 l42: local abs, size 0
-  0x00000010 l893: local abs, size 0
-  0x00000010 l79: local abs, size 0
-  0x00000010 l100: local abs, size 0
-  0x00000010 l100: local abs, size 0
-  0x00000010 l121: local abs, size 0
-  0x00000010 l73: local abs, size 0
-  0x00000010 l994: local abs, size 0
-  0x00000010 l281: local abs, size 0
-  0x00000010 l63: local abs, size 0
-  0x00000010 l10: local abs, size 0
-  0x00000010 l34: local abs, size 0
-  0x00000010 l50: local abs, size 0
-  0x00000010 l234: local abs, size 0
-  0x00000010 l636: local abs, size 0
-  0x00000010 l551: local abs, size 0
-  0x00000010 l30: local abs, size 0
-  0x00000010 l65: local abs, size 0
-  0x00000010 l62: local abs, size 0
-  0x00000010 l85: local abs, size 0
+  0x0000000c l105: local abs, size 0
+  0x0000000c l65: local abs, size 0
+  0x0000000c l39: local abs, size 0
+  0x0000000c l138: local abs, size 0
+  0x0000000c l154: local abs, size 0
+  0x0000000c l12: local abs, size 0
+  0x0000000c l40: local abs, size 0
+  0x0000000c l1638: local abs, size 0
+  0x0000000c l306: local abs, size 0
+  0x0000000c l42: local abs, size 0
+  0x0000000c l148: local abs, size 0
+  0x0000000c l64: local abs, size 0
+  0x0000000c l19: local abs, size 0
+  0x0000000c l8: local abs, size 0
+  0x0000000c l55: local abs, size 0
+  0x0000000c l213: local abs, size 0
+  0x0000000c l385: local abs, size 0
+  0x0000000c l200: local abs, size 0
+  0x0000000c l48: local abs, size 0
+  0x0000000c l14: local abs, size 0
+  0x0000000c l153: local abs, size 0
+  0x0000000c l34: local abs, size 0
+  0x0000000c l130: local abs, size 0
+  0x0000000c l282: local abs, size 0
+  0x0000000c l190: local abs, size 0
+  0x0000000c l70: local abs, size 0
+  0x0000000c l291: local abs, size 0
+  0x0000000c l384: local abs, size 0
+  0x0000000c l12: local abs, size 0
+  0x0000000c l63: local abs, size 0
+  0x0000000c l50: local abs, size 0
+  0x0000000c l33: local abs, size 0
+  0x0000000c l2080: local abs, size 0
+  0x0000000c l82: local abs, size 0
+  0x0000000c l224: local abs, size 0
+  0x0000000c l290: local abs, size 0
+  0x0000000c l10: local abs, size 0
+  0x0000000c l80: local abs, size 0
+  0x0000000c l61: local abs, size 0
+  0x0000000c l100: local abs, size 0
+  0x0000000c l260: local abs, size 0
+  0x0000000c l280: local abs, size 0
+  0x0000000c l87: local abs, size 0
+  0x0000000c l24: local abs, size 0
+  0x0000000c l27: local abs, size 0
+  0x0000000c l63: local abs, size 0
+  0x0000000c l189: local abs, size 0
+  0x0000000c l121: local abs, size 0
+  0x0000000c l143: local abs, size 0
+  0x0000000c l15: local abs, size 0
+  0x0000000c l1602: local abs, size 0
+  0x0000000c l50: local abs, size 0
+  0x0000000c l15: local abs, size 0
+  0x0000000c l55: local abs, size 0
+  0x0000000c l316: local abs, size 0
   0x00000010 l95: local abs, size 0
+  0x00000010 l62: local abs, size 0
   0x00000010 l115: local abs, size 0
-  0x00000010 l85: local abs, size 0
   0x00000010 l42: local abs, size 0
-  0x00000010 l22: local abs, size 0
-  0x00000010 l125: local abs, size 0
-  0x00000010 l21: local abs, size 0
-  0x00000010 l174: local abs, size 0
-  0x00000010 l141: local abs, size 0
-  0x00000010 l1101: local abs, size 0
-  0x00000010 l1290: local abs, size 0
-  0x00000010 l2064: local abs, size 0
   0x00000010 l53: local abs, size 0
-  0x00000010 l117: local abs, size 0
-  0x00000010 l1709: local abs, size 0
   0x00000010 l199: local abs, size 0
+  0x00000010 l22: local abs, size 0
+  0x00000010 l63: local abs, size 0
   0x00000010 l30: local abs, size 0
   0x00000010 l131: local abs, size 0
-  0x00000010 l75: local abs, size 0
+  0x00000010 l100: local abs, size 0
+  0x00000010 l79: local abs, size 0
   0x00000010 l29: local abs, size 0
-  0x00000010 l199: local abs, size 0
-  0x00000010 l95: local abs, size 0
-  0x00000010 l133: local abs, size 0
-  0x00000010 l47: local abs, size 0
-  0x00000010 l74: local abs, size 0
-  0x00000010 l47: local abs, size 0
-  0x00000010 l82: local abs, size 0
   0x00000010 l37: local abs, size 0
-  0x00000010 l104: local abs, size 0
-  0x00000010 l34: local abs, size 0
+  0x00000010 l47: local abs, size 0
+  0x00000010 l1290: local abs, size 0
+  0x00000010 l74: local abs, size 0
+  0x00000010 l174: local abs, size 0
+  0x00000010 l50: local abs, size 0
   0x00000010 l63: local abs, size 0
-  0x00000010 l48: local abs, size 0
   0x00000010 l24: local abs, size 0
-  0x00000010 l77: local abs, size 0
-  0x00000010 l139: local abs, size 0
-  0x00000010 l38: local abs, size 0
   0x00000010 l110: local abs, size 0
   0x00000010 l172: local abs, size 0
   0x00000010 l62: local abs, size 0
   0x00000010 l75: local abs, size 0
+  0x00000010 l85: local abs, size 0
+  0x00000010 l199: local abs, size 0
+  0x00000010 l21: local abs, size 0
+  0x00000010 l30: local abs, size 0
+  0x00000010 l48: local abs, size 0
+  0x00000010 l77: local abs, size 0
   0x00000010 l118: local abs, size 0
-  0x00000014 l192: local abs, size 0
-  0x00000014 l175: local abs, size 0
-  0x00000014 l109: local abs, size 0
-  0x00000014 l104: local abs, size 0
-  0x00000014 l54: local abs, size 0
-  0x00000014 l12: local abs, size 0
-  0x00000014 l86: local abs, size 0
-  0x00000014 l224: local abs, size 0
-  0x00000014 l180: local abs, size 0
-  0x00000014 l323: local abs, size 0
-  0x00000014 l70: local abs, size 0
-  0x00000014 l93: local abs, size 0
-  0x00000014 l202: local abs, size 0
-  0x00000014 l50: local abs, size 0
-  0x00000014 l967: local abs, size 0
-  0x00000014 l22: local abs, size 0
-  0x00000014 l347: local abs, size 0
-  0x00000014 l32: local abs, size 0
-  0x00000014 l197: local abs, size 0
-  0x00000014 l1520: local abs, size 0
-  0x00000014 l185: local abs, size 0
-  0x00000014 l52: local abs, size 0
-  0x00000014 l60: local abs, size 0
-  0x00000014 l310: local abs, size 0
-  0x00000014 l135: local abs, size 0
-  0x00000014 l23: local abs, size 0
-  0x00000014 l65: local abs, size 0
-  0x00000014 l165: local abs, size 0
+  0x00000010 l38: local abs, size 0
+  0x00000010 l139: local abs, size 0
+  0x00000010 l121: local abs, size 0
+  0x00000010 l82: local abs, size 0
+  0x00000010 l42: local abs, size 0
+  0x00000010 l104: local abs, size 0
+  0x00000010 l893: local abs, size 0
+  0x00000010 l281: local abs, size 0
+  0x00000010 l73: local abs, size 0
+  0x00000010 l1709: local abs, size 0
+  0x00000010 l34: local abs, size 0
+  0x00000010 l10: local abs, size 0
+  0x00000010 l994: local abs, size 0
+  0x00000010 l34: local abs, size 0
+  0x00000010 l636: local abs, size 0
+  0x00000010 l133: local abs, size 0
+  0x00000010 l95: local abs, size 0
+  0x00000010 l234: local abs, size 0
+  0x00000010 l75: local abs, size 0
+  0x00000010 l100: local abs, size 0
+  0x00000010 l117: local abs, size 0
+  0x00000010 l141: local abs, size 0
+  0x00000010 l551: local abs, size 0
+  0x00000010 l2064: local abs, size 0
+  0x00000010 l47: local abs, size 0
+  0x00000010 l125: local abs, size 0
+  0x00000010 l1101: local abs, size 0
+  0x00000010 l85: local abs, size 0
+  0x00000010 l65: local abs, size 0
   0x00000014 l238: local abs, size 0
-  0x00000014 l19: local abs, size 0
-  0x00000014 l72: local abs, size 0
-  0x00000014 l180: local abs, size 0
-  0x00000014 l222: local abs, size 0
-  0x00000014 l21: local abs, size 0
-  0x00000014 l271: local abs, size 0
-  0x00000014 l109: local abs, size 0
-  0x00000014 l368: local abs, size 0
-  0x00000014 l210: local abs, size 0
-  0x00000014 l78: local abs, size 0
-  0x00000014 l258: local abs, size 0
-  0x00000014 l220: local abs, size 0
-  0x00000014 l174: local abs, size 0
-  0x00000014 l101: local abs, size 0
-  0x00000014 l74: local abs, size 0
+  0x00000014 l104: local abs, size 0
+  0x00000014 l224: local abs, size 0
   0x00000014 l1672: local abs, size 0
+  0x00000014 l60: local abs, size 0
+  0x00000014 l32: local abs, size 0
+  0x00000014 l109: local abs, size 0
+  0x00000014 l135: local abs, size 0
+  0x00000014 l323: local abs, size 0
+  0x00000014 l101: local abs, size 0
+  0x00000014 l210: local abs, size 0
+  0x00000014 l65: local abs, size 0
+  0x00000014 l1520: local abs, size 0
+  0x00000014 l175: local abs, size 0
+  0x00000014 l12: local abs, size 0
+  0x00000014 l70: local abs, size 0
   0x00000014 l1789: local abs, size 0
-  0x00000014 l37: local abs, size 0
+  0x00000014 l93: local abs, size 0
+  0x00000014 l19: local abs, size 0
+  0x00000014 l50: local abs, size 0
+  0x00000014 l54: local abs, size 0
+  0x00000014 l23: local abs, size 0
   0x00000014 l180: local abs, size 0
-  0x00000018 l205: local abs, size 0
-  0x00000018 l57: local abs, size 0
-  0x00000018 l129: local abs, size 0
-  0x00000018 l2049: local abs, size 0
-  0x00000018 l12: local abs, size 0
-  0x00000018 l107: local abs, size 0
-  0x00000018 l735: local abs, size 0
+  0x00000014 l52: local abs, size 0
+  0x00000014 l37: local abs, size 0
+  0x00000014 l197: local abs, size 0
+  0x00000014 l368: local abs, size 0
+  0x00000014 l271: local abs, size 0
+  0x00000014 l222: local abs, size 0
+  0x00000014 l202: local abs, size 0
+  0x00000014 l72: local abs, size 0
+  0x00000014 l74: local abs, size 0
+  0x00000014 l180: local abs, size 0
+  0x00000014 l21: local abs, size 0
+  0x00000014 l109: local abs, size 0
+  0x00000014 l258: local abs, size 0
+  0x00000014 l22: local abs, size 0
+  0x00000014 l185: local abs, size 0
+  0x00000014 l174: local abs, size 0
+  0x00000014 l165: local abs, size 0
+  0x00000014 l192: local abs, size 0
+  0x00000014 l967: local abs, size 0
+  0x00000014 l78: local abs, size 0
+  0x00000014 l220: local abs, size 0
+  0x00000014 l310: local abs, size 0
+  0x00000014 l180: local abs, size 0
+  0x00000014 l347: local abs, size 0
+  0x00000014 l86: local abs, size 0
   0x00000018 l147: local abs, size 0
-  0x00000018 l31: local abs, size 0
   0x00000018 l80: local abs, size 0
   0x00000018 l62: local abs, size 0
-  0x00000018 l346: local abs, size 0
-  0x00000018 l84: local abs, size 0
-  0x00000018 l74: local abs, size 0
-  0x00000018 l26: local abs, size 0
+  0x00000018 l99: local abs, size 0
   0x00000018 l81: local abs, size 0
+  0x00000018 l38: local abs, size 0
+  0x00000018 l205: local abs, size 0
+  0x00000018 l57: local abs, size 0
+  0x00000018 l346: local abs, size 0
   0x00000018 l1740: local abs, size 0
+  0x00000018 l12: local abs, size 0
+  0x00000018 l2049: local abs, size 0
+  0x00000018 l84: local abs, size 0
   0x00000018 l63: local abs, size 0
+  0x00000018 l39: local abs, size 0
+  0x00000018 l31: local abs, size 0
+  0x00000018 l107: local abs, size 0
+  0x00000018 l26: local abs, size 0
+  0x00000018 l74: local abs, size 0
+  0x00000018 l735: local abs, size 0
   0x00000018 l267: local abs, size 0
   0x00000018 l23: local abs, size 0
-  0x00000018 l39: local abs, size 0
-  0x00000018 l99: local abs, size 0
-  0x00000018 l38: local abs, size 0
-  0x0000001c l432: local abs, size 0
-  0x0000001c l137: local abs, size 0
-  0x0000001c l16: local abs, size 0
-  0x0000001c l167: local abs, size 0
+  0x00000018 l129: local abs, size 0
   0x0000001c l28: local abs, size 0
-  0x0000001c l1451: local abs, size 0
-  0x0000001c l73: local abs, size 0
-  0x0000001c l571: local abs, size 0
-  0x0000001c args: local abs, size 0
-  0x0000001c l62: local abs, size 0
-  0x0000001c l201: local abs, size 0
   0x0000001c l1170: local abs, size 0
-  0x0000001c l176: local abs, size 0
-  0x0000001c args: local abs, size 0
-  0x0000001c l128: local abs, size 0
-  0x0000001c l281: local abs, size 0
-  0x0000001c l265: local abs, size 0
-  0x0000001c l17: local abs, size 0
-  0x0000001c l258: local abs, size 0
-  0x0000001c l88: local abs, size 0
-  0x0000001c l52: local abs, size 0
-  0x0000001c l14: local abs, size 0
-  0x0000001c l31: local abs, size 0
-  0x0000001c l28: local abs, size 0
-  0x0000001c l22: local abs, size 0
-  0x0000001c l383: local abs, size 0
-  0x0000001c l936: local abs, size 0
-  0x0000001c l408: local abs, size 0
   0x0000001c l179: local abs, size 0
-  0x0000001c l146: local abs, size 0
-  0x0000001c l304: local abs, size 0
   0x0000001c l86: local abs, size 0
-  0x0000001c l521: local abs, size 0
-  0x0000001c l41: local abs, size 0
-  0x0000001c l78: local abs, size 0
-  0x0000001c l104: local abs, size 0
-  0x0000001c l289: local abs, size 0
-  0x0000001c l146: local abs, size 0
-  0x0000001c l52: local abs, size 0
+  0x0000001c l936: local abs, size 0
+  0x0000001c l167: local abs, size 0
+  0x0000001c l176: local abs, size 0
   0x0000001c l48: local abs, size 0
-  0x0000001c l62: local abs, size 0
-  0x0000001c l41: local abs, size 0
-  0x0000001c l85: local abs, size 0
   0x0000001c l49: local abs, size 0
-  0x0000001c l32: local abs, size 0
-  0x0000001c l103: local abs, size 0
-  0x0000001c l80: local abs, size 0
+  0x0000001c l128: local abs, size 0
+  0x0000001c l408: local abs, size 0
+  0x0000001c l41: local abs, size 0
+  0x0000001c l62: local abs, size 0
+  0x0000001c l258: local abs, size 0
+  0x0000001c l201: local abs, size 0
+  0x0000001c l146: local abs, size 0
+  0x0000001c l22: local abs, size 0
+  0x0000001c args: local abs, size 0
+  0x0000001c l28: local abs, size 0
+  0x0000001c l104: local abs, size 0
+  0x0000001c l383: local abs, size 0
+  0x0000001c l17: local abs, size 0
   0x0000001c l40: local abs, size 0
-  0x0000001c l31: local abs, size 0
+  0x0000001c l521: local abs, size 0
+  0x0000001c l16: local abs, size 0
+  0x0000001c l78: local abs, size 0
+  0x0000001c l14: local abs, size 0
+  0x0000001c args: local abs, size 0
+  0x0000001c l1451: local abs, size 0
+  0x0000001c l304: local abs, size 0
   0x0000001c l138: local abs, size 0
-  0x00000020 l32: local abs, size 0
-  0x00000020 l1572: local abs, size 0
-  0x00000020 l38: local abs, size 0
-  0x00000020 l1393: local abs, size 0
-  0x00000020 l533: local abs, size 0
-  0x00000020 l613: local abs, size 0
+  0x0000001c l31: local abs, size 0
+  0x0000001c l137: local abs, size 0
+  0x0000001c l289: local abs, size 0
+  0x0000001c l31: local abs, size 0
+  0x0000001c l265: local abs, size 0
+  0x0000001c l52: local abs, size 0
+  0x0000001c l73: local abs, size 0
+  0x0000001c l52: local abs, size 0
+  0x0000001c l41: local abs, size 0
+  0x0000001c l62: local abs, size 0
+  0x0000001c l80: local abs, size 0
+  0x0000001c l88: local abs, size 0
+  0x0000001c l103: local abs, size 0
+  0x0000001c l281: local abs, size 0
+  0x0000001c l85: local abs, size 0
+  0x0000001c l32: local abs, size 0
+  0x0000001c l146: local abs, size 0
+  0x0000001c l571: local abs, size 0
+  0x0000001c l432: local abs, size 0
   0x00000020 l448: local abs, size 0
+  0x00000020 l32: local abs, size 0
+  0x00000020 l1393: local abs, size 0
+  0x00000020 l1572: local abs, size 0
   0x00000020 l92: local abs, size 0
-  0x00000024 l1072: local abs, size 0
+  0x00000020 l613: local abs, size 0
+  0x00000020 l533: local abs, size 0
+  0x00000020 l38: local abs, size 0
   0x00000024 l1822: local abs, size 0
-  0x00000024 l443: local abs, size 0
-  0x00000024 l486: local abs, size 0
-  0x00000024 l852: local abs, size 0
-  0x00000024 l684: local abs, size 0
-  0x00000024 l2193: local abs, size 0
   0x00000024 l2031: local abs, size 0
+  0x00000024 l684: local abs, size 0
+  0x00000024 l443: local abs, size 0
   0x00000024 l407: local abs, size 0
-  0x00000028 l499: local abs, size 0
+  0x00000024 l852: local abs, size 0
+  0x00000024 l1072: local abs, size 0
+  0x00000024 l2193: local abs, size 0
+  0x00000024 l486: local abs, size 0
   0x00000028 l1218: local abs, size 0
+  0x00000028 l499: local abs, size 0
+  0x0000002c l263: local abs, size 0
   0x0000002c l165: local abs, size 0
   0x0000002c l1275: local abs, size 0
-  0x0000002c l263: local abs, size 0
-  0x0000003c l32: local abs, size 0
-  0x0000003c l22: local abs, size 0
-  0x0000003c l36: local abs, size 0
-  0x0000003c l279: local abs, size 0
   0x0000003c l549: local abs, size 0
+  0x0000003c l279: local abs, size 0
   0x0000003c l170: local abs, size 0
-  0x0000003c l45: local abs, size 0
   0x0000003c l27: local abs, size 0
-  0x0000007c l84: local abs, size 0
-  0x0000007c l1670: local abs, size 0
-  0x0000007c l1787: local abs, size 0
-  0x0000007c l72: local abs, size 0
+  0x0000003c l36: local abs, size 0
+  0x0000003c l32: local abs, size 0
+  0x0000003c l45: local abs, size 0
+  0x0000003c l22: local abs, size 0
   0x0000007c l76: local abs, size 0
+  0x0000007c l1787: local abs, size 0
+  0x0000007c l1670: local abs, size 0
+  0x0000007c l72: local abs, size 0
+  0x0000007c l84: local abs, size 0
   0x000000fc l61: local abs, size 0
-  0x000000fc l97: local abs, size 0
   0x000000fc l29: local abs, size 0
+  0x000000fc l97: local abs, size 0
+  0x000000fc l344: local abs, size 0
   0x000000fc l60: local abs, size 0
   0x000000fc l36: local abs, size 0
-  0x000000fc l344: local abs, size 0
+  0x00000400 l301: local abs, size 0
+  0x00000400 l163: local abs, size 0
+  0x00000400 l168: local abs, size 0
   0x00000400 l47: local abs, size 0
-  0x00000400 l203: local abs, size 0
+  0x00000400 l223: local abs, size 0
+  0x00000400 l208: local abs, size 0
   0x00000400 l236: local abs, size 0
-  0x00000400 l88: local abs, size 0
+  0x00000400 l19: local abs, size 0
+  0x00000400 l178: local abs, size 0
   0x00000400 l203: local abs, size 0
   0x00000400 l128: local abs, size 0
+  0x00000400 l88: local abs, size 0
+  0x00000400 l35: local abs, size 0
+  0x00000400 l343: local abs, size 0
   0x00000400 l178: local abs, size 0
   0x00000400 l2072: local abs, size 0
-  0x00000400 l168: local abs, size 0
-  0x00000400 l208: local abs, size 0
-  0x00000400 l35: local abs, size 0
-  0x00000400 l301: local abs, size 0
-  0x00000400 l19: local abs, size 0
-  0x00000400 l163: local abs, size 0
-  0x00000400 l343: local abs, size 0
   0x00000400 l203: local abs, size 0
-  0x00000400 l178: local abs, size 0
-  0x00000400 l223: local abs, size 0
-  0x00000404 l85: local abs, size 0
-  0x00000404 l1297: local abs, size 0
-  0x00000404 l166: local abs, size 0
+  0x00000400 l203: local abs, size 0
   0x00000404 l1478: local abs, size 0
-  0x00000404 l155: local abs, size 0
-  0x00000404 l86: local abs, size 0
-  0x00000404 l1471: local abs, size 0
-  0x00000404 l216: local abs, size 0
-  0x00000404 l183: local abs, size 0
-  0x00000404 l115: local abs, size 0
-  0x00000404 l362: local abs, size 0
-  0x00000404 l130: local abs, size 0
   0x00000404 l59: local abs, size 0
   0x00000404 l139: local abs, size 0
-  0x00000404 l41: local abs, size 0
-  0x00000404 l38: local abs, size 0
-  0x00000404 l254: local abs, size 0
+  0x00000404 l1297: local abs, size 0
   0x00000404 l118: local abs, size 0
-  0x00000404 l139: local abs, size 0
-  0x00000404 l1532: local abs, size 0
-  0x00000404 l232: local abs, size 0
-  0x00000404 l2083: local abs, size 0
-  0x00000404 l118: local abs, size 0
-  0x00000404 l28: local abs, size 0
-  0x00000404 l148: local abs, size 0
-  0x00000404 l156: local abs, size 0
-  0x00000404 l67: local abs, size 0
-  0x00000404 l30: local abs, size 0
+  0x00000404 l362: local abs, size 0
   0x00000404 l158: local abs, size 0
-  0x00000404 l287: local abs, size 0
-  0x00000404 l28: local abs, size 0
-  0x00000404 l230: local abs, size 0
+  0x00000404 l86: local abs, size 0
+  0x00000404 l156: local abs, size 0
+  0x00000404 l115: local abs, size 0
   0x00000404 l138: local abs, size 0
-  0x0000040c l61: local abs, size 0
-  0x0000040c l111: local abs, size 0
-  0x0000040c l22: local abs, size 0
-  0x0000040c l53: local abs, size 0
-  0x0000040c l119: local abs, size 0
-  0x0000040c l61: local abs, size 0
-  0x0000040c l48: local abs, size 0
-  0x0000040c l28: local abs, size 0
-  0x0000040c l298: local abs, size 0
-  0x0000040c l1600: local abs, size 0
-  0x0000040c l193: local abs, size 0
+  0x00000404 l118: local abs, size 0
+  0x00000404 l38: local abs, size 0
+  0x00000404 l130: local abs, size 0
+  0x00000404 l30: local abs, size 0
+  0x00000404 l230: local abs, size 0
+  0x00000404 l148: local abs, size 0
+  0x00000404 l139: local abs, size 0
+  0x00000404 l28: local abs, size 0
+  0x00000404 l232: local abs, size 0
+  0x00000404 l254: local abs, size 0
+  0x00000404 l155: local abs, size 0
+  0x00000404 l216: local abs, size 0
+  0x00000404 l183: local abs, size 0
+  0x00000404 l1471: local abs, size 0
+  0x00000404 l1532: local abs, size 0
+  0x00000404 l85: local abs, size 0
+  0x00000404 l28: local abs, size 0
+  0x00000404 l67: local abs, size 0
+  0x00000404 l166: local abs, size 0
+  0x00000404 l41: local abs, size 0
+  0x00000404 l287: local abs, size 0
+  0x00000404 l2083: local abs, size 0
   0x0000040c l19: local abs, size 0
-  0x0000040c l12: local abs, size 0
-  0x0000040c l63: local abs, size 0
-  0x0000040c l13: local abs, size 0
+  0x0000040c l61: local abs, size 0
+  0x0000040c l193: local abs, size 0
   0x0000040c l98: local abs, size 0
+  0x0000040c l28: local abs, size 0
+  0x0000040c l48: local abs, size 0
+  0x0000040c l53: local abs, size 0
+  0x0000040c l63: local abs, size 0
+  0x0000040c l246: local abs, size 0
+  0x0000040c l12: local abs, size 0
+  0x0000040c l22: local abs, size 0
+  0x0000040c l61: local abs, size 0
+  0x0000040c l13: local abs, size 0
+  0x0000040c l298: local abs, size 0
   0x0000040c l136: local abs, size 0
-  0x0000041c l1707: local abs, size 0
+  0x0000040c l119: local abs, size 0
+  0x0000040c l1600: local abs, size 0
+  0x0000040c l111: local abs, size 0
   0x0000041c l98: local abs, size 0
-  0x0000041c l51: local abs, size 0
-  0x0000041c l137: local abs, size 0
-  0x0000041c l98: local abs, size 0
-  0x0000041c l75: local abs, size 0
   0x0000041c l19: local abs, size 0
-  0x0000041c l77: local abs, size 0
-  0x0000041c l197: local abs, size 0
-  0x0000041c l60: local abs, size 0
-  0x0000041c l46: local abs, size 0
-  0x0000041c l2062: local abs, size 0
-  0x0000041c l992: local abs, size 0
-  0x0000041c l116: local abs, size 0
-  0x0000041c l113: local abs, size 0
-  0x0000041c l61: local abs, size 0
-  0x0000041c l73: local abs, size 0
-  0x0000041c l1099: local abs, size 0
-  0x0000041c l72: local abs, size 0
   0x0000041c l108: local abs, size 0
-  0x0000041c l119: local abs, size 0
-  0x0000041c l80: local abs, size 0
-  0x0000041c l8: local abs, size 0
+  0x0000041c l197: local abs, size 0
+  0x0000041c l51: local abs, size 0
+  0x0000041c l116: local abs, size 0
   0x0000041c l102: local abs, size 0
-  0x0000041c l71: local abs, size 0
-  0x0000041c l45: local abs, size 0
-  0x0000041c l61: local abs, size 0
-  0x0000041c l35: local abs, size 0
-  0x0000041c l48: local abs, size 0
-  0x0000041c l28: local abs, size 0
-  0x0000041c l93: local abs, size 0
+  0x0000041c l137: local abs, size 0
+  0x0000041c l73: local abs, size 0
+  0x0000041c l992: local abs, size 0
+  0x0000041c l46: local abs, size 0
+  0x0000041c l1099: local abs, size 0
+  0x0000041c l2062: local abs, size 0
   0x0000041c l83: local abs, size 0
-  0x0000043c l19: local abs, size 0
-  0x0000043c l178: local abs, size 0
-  0x0000043c l195: local abs, size 0
-  0x0000043c l35: local abs, size 0
-  0x0000043c l965: local abs, size 0
-  0x0000043c l99: local abs, size 0
-  0x0000043c l163: local abs, size 0
+  0x0000041c l93: local abs, size 0
+  0x0000041c l113: local abs, size 0
+  0x0000041c l48: local abs, size 0
+  0x0000041c l61: local abs, size 0
+  0x0000041c l45: local abs, size 0
+  0x0000041c l28: local abs, size 0
+  0x0000041c l60: local abs, size 0
+  0x0000041c l71: local abs, size 0
+  0x0000041c l119: local abs, size 0
+  0x0000041c l1707: local abs, size 0
+  0x0000041c l72: local abs, size 0
+  0x0000041c l61: local abs, size 0
+  0x0000041c l98: local abs, size 0
+  0x0000041c l77: local abs, size 0
+  0x0000041c l35: local abs, size 0
+  0x0000041c l8: local abs, size 0
+  0x0000041c l75: local abs, size 0
+  0x0000041c l80: local abs, size 0
   0x0000043c l220: local abs, size 0
-  0x0000043c l208: local abs, size 0
-  0x0000043c l178: local abs, size 0
   0x0000043c l68: local abs, size 0
+  0x0000043c l195: local abs, size 0
   0x0000043c l183: local abs, size 0
+  0x0000043c l163: local abs, size 0
+  0x0000043c l178: local abs, size 0
+  0x0000043c l99: local abs, size 0
+  0x0000043c l35: local abs, size 0
+  0x0000043c l178: local abs, size 0
   0x0000043c l218: local abs, size 0
+  0x0000043c l208: local abs, size 0
+  0x0000043c l965: local abs, size 0
   0x0000043c l102: local abs, size 0
-  0x0000047c l72: local abs, size 0
-  0x0000047c l733: local abs, size 0
-  0x0000047c l10: local abs, size 0
-  0x0000047c l79: local abs, size 0
-  0x0000047c l37: local abs, size 0
+  0x0000043c l19: local abs, size 0
   0x0000047c l24: local abs, size 0
+  0x0000047c l79: local abs, size 0
+  0x0000047c l733: local abs, size 0
   0x0000047c l55: local abs, size 0
-  0x000004fc l50: local abs, size 0
-  0x000004fc l26: local abs, size 0
-  0x000004fc l102: local abs, size 0
-  0x000004fc l1449: local abs, size 0
-  0x000004fc l47: local abs, size 0
+  0x0000047c l10: local abs, size 0
+  0x0000047c l72: local abs, size 0
+  0x0000047c l37: local abs, size 0
   0x000004fc l144: local abs, size 0
   0x000004fc l126: local abs, size 0
+  0x000004fc l1168: local abs, size 0
+  0x000004fc l47: local abs, size 0
+  0x000004fc l84: local abs, size 0
   0x000004fc l78: local abs, size 0
   0x000004fc l135: local abs, size 0
+  0x000004fc l102: local abs, size 0
+  0x000004fc l50: local abs, size 0
+  0x000004fc l26: local abs, size 0
   0x000004fc l71: local abs, size 0
-  0x000004fc l84: local abs, size 0
-  0x000004fc l1168: local abs, size 0
+  0x000004fc l1449: local abs, size 0
+  0x00000c00 l29: local abs, size 0
+  0x00000c00 l173: local abs, size 0
+  0x00000c00 l2091: local abs, size 0
   0x00000c00 l153: local abs, size 0
   0x00000c00 l193: local abs, size 0
-  0x00000c00 l29: local abs, size 0
   0x00000c00 l41: local abs, size 0
-  0x00000c00 l2091: local abs, size 0
-  0x00000c00 l173: local abs, size 0
   0x00000c00 l3: local abs, size 0
   0x00000c00 l32: local abs, size 0
-  0x00000c04 l280: local abs, size 0
-  0x00000c04 l374: local abs, size 0
-  0x00000c04 l1086: local abs, size 0
-  0x00000c04 l122: local abs, size 0
-  0x00000c04 l382: local abs, size 0
-  0x00000c04 l198: local abs, size 0
+  0x00000c04 l187: local abs, size 0
+  0x00000c04 l10: local abs, size 0
+  0x00000c04 l16: local abs, size 0
+  0x00000c04 l53: local abs, size 0
+  0x00000c04 l188: local abs, size 0
+  0x00000c04 l1494: local abs, size 0
+  0x00000c04 l211: local abs, size 0
   0x00000c04 l8: local abs, size 0
   0x00000c04 l253: local abs, size 0
-  0x00000c04 l16: local abs, size 0
-  0x00000c04 l2078: local abs, size 0
-  0x00000c04 l1494: local abs, size 0
-  0x00000c04 l288: local abs, size 0
-  0x00000c04 l1511: local abs, size 0
-  0x00000c04 l147: local abs, size 0
-  0x00000c04 l211: local abs, size 0
-  0x00000c04 l211: local abs, size 0
-  0x00000c04 l222: local abs, size 0
   0x00000c04 l246: local abs, size 0
-  0x00000c04 l188: local abs, size 0
-  0x00000c04 l10: local abs, size 0
-  0x00000c04 l53: local abs, size 0
-  0x00000c04 l187: local abs, size 0
-  0x00000c0c l115: local abs, size 0
-  0x00000c0c l28: local abs, size 0
+  0x00000c04 l147: local abs, size 0
+  0x00000c04 l374: local abs, size 0
+  0x00000c04 l288: local abs, size 0
+  0x00000c04 l122: local abs, size 0
+  0x00000c04 l222: local abs, size 0
+  0x00000c04 l198: local abs, size 0
+  0x00000c04 l280: local abs, size 0
+  0x00000c04 l211: local abs, size 0
+  0x00000c04 l1511: local abs, size 0
+  0x00000c04 l2078: local abs, size 0
+  0x00000c04 l382: local abs, size 0
+  0x00000c04 l1086: local abs, size 0
+  0x00000c0c l60: local abs, size 0
   0x00000c0c l40: local abs, size 0
+  0x00000c0c l1288: local abs, size 0
+  0x00000c0c l131: local abs, size 0
+  0x00000c0c l139: local abs, size 0
   0x00000c0c l20: local abs, size 0
   0x00000c0c l891: local abs, size 0
-  0x00000c0c l73: local abs, size 0
-  0x00000c0c l60: local abs, size 0
-  0x00000c0c l232: local abs, size 0
-  0x00000c0c l172: local abs, size 0
   0x00000c0c l197: local abs, size 0
-  0x00000c0c l63: local abs, size 0
-  0x00000c0c l131: local abs, size 0
-  0x00000c0c l83: local abs, size 0
-  0x00000c0c l1288: local abs, size 0
-  0x00000c0c l139: local abs, size 0
-  0x00000c0c l32: local abs, size 0
   0x00000c0c l123: local abs, size 0
-  0x00000c0c l634: local abs, size 0
   0x00000c0c l93: local abs, size 0
+  0x00000c0c l73: local abs, size 0
+  0x00000c0c l83: local abs, size 0
+  0x00000c0c l63: local abs, size 0
+  0x00000c0c l232: local abs, size 0
+  0x00000c0c l32: local abs, size 0
+  0x00000c0c l28: local abs, size 0
+  0x00000c0c l172: local abs, size 0
+  0x00000c0c l115: local abs, size 0
+  0x00000c0c l634: local abs, size 0
   0x00000c1c l178: local abs, size 0
-  0x00000c1c l308: local abs, size 0
   0x00000c1c l58: local abs, size 0
   0x00000c1c l173: local abs, size 0
-  0x00000c1c l20: local abs, size 0
-  0x00000c1c l10: local abs, size 0
-  0x00000c1c l30: local abs, size 0
-  0x00000c1c l50: local abs, size 0
-  0x00000c1c l321: local abs, size 0
-  0x00000c1c l63: local abs, size 0
-  0x00000c1c l345: local abs, size 0
   0x00000c1c l366: local abs, size 0
-  0x00000c1c l236: local abs, size 0
-  0x00000c1c l91: local abs, size 0
-  0x00000c1c l70: local abs, size 0
-  0x00000c1c l52: local abs, size 0
-  0x00000c1c l269: local abs, size 0
-  0x00000c1c l256: local abs, size 0
-  0x00000c1c l17: local abs, size 0
   0x00000c1c l107: local abs, size 0
+  0x00000c1c l321: local abs, size 0
+  0x00000c1c l91: local abs, size 0
+  0x00000c1c l20: local abs, size 0
+  0x00000c1c l308: local abs, size 0
+  0x00000c1c l70: local abs, size 0
+  0x00000c1c l269: local abs, size 0
+  0x00000c1c l63: local abs, size 0
+  0x00000c1c l256: local abs, size 0
+  0x00000c1c l50: local abs, size 0
+  0x00000c1c l236: local abs, size 0
+  0x00000c1c l345: local abs, size 0
+  0x00000c1c l30: local abs, size 0
+  0x00000c1c l10: local abs, size 0
+  0x00000c1c l17: local abs, size 0
+  0x00000c1c l52: local abs, size 0
   0x00000c1c l172: local abs, size 0
   0x00000c1c l107: local abs, size 0
   0x00000c3c l1738: local abs, size 0
-  0x00000c3c l265: local abs, size 0
-  0x00000c3c l21: local abs, size 0
-  0x00000c3c l145: local abs, size 0
-  0x00000c3c l105: local abs, size 0
   0x00000c3c l203: local abs, size 0
-  0x00000c7c l50: local abs, size 0
-  0x00000c7c l39: local abs, size 0
-  0x00000c7c l165: local abs, size 0
+  0x00000c3c l21: local abs, size 0
+  0x00000c3c l105: local abs, size 0
+  0x00000c3c l145: local abs, size 0
+  0x00000c3c l265: local abs, size 0
   0x00000c7c l279: local abs, size 0
+  0x00000c7c l430: local abs, size 0
+  0x00000c7c l165: local abs, size 0
   0x00000c7c l569: local abs, size 0
+  0x00000c7c l174: local abs, size 0
+  0x00000c7c l519: local abs, size 0
+  0x00000c7c l406: local abs, size 0
+  0x00000c7c l39: local abs, size 0
+  0x00000c7c l263: local abs, size 0
   0x00000c7c l136: local abs, size 0
   0x00000c7c l83: local abs, size 0
-  0x00000c7c l174: local abs, size 0
-  0x00000c7c l406: local abs, size 0
-  0x00000c7c l519: local abs, size 0
-  0x00000c7c l263: local abs, size 0
-  0x00000c7c l430: local abs, size 0
-  0x00000cfc l1391: local abs, size 0
+  0x00000c7c l50: local abs, size 0
   0x00000cfc l30: local abs, size 0
+  0x00000cfc l1391: local abs, size 0
   0x00000cfc l611: local abs, size 0
-  0x00000cfc l1570: local abs, size 0
   0x00000cfc l531: local abs, size 0
+  0x00000cfc l1570: local abs, size 0
   0x00000cfc l446: local abs, size 0
-  0x00001c00 l143: local abs, size 0
   0x00001c00 l26: local abs, size 0
   0x00001c00 l146: local abs, size 0
+  0x00001c00 l143: local abs, size 0
   0x00001c04 l129: local abs, size 0
   0x00001c04 l40: local abs, size 0
   0x00001c0c l48: local abs, size 0
-  0x00001c0c l222: local abs, size 0
   0x00001c0c l190: local abs, size 0
+  0x00001c0c l222: local abs, size 0
   0x00001c1c l78: local abs, size 0
   0x00001c1c l2047: local abs, size 0
   0x00001c3c l934: local abs, size 0
   0x00001c3c l29: local abs, size 0
   0x00001c7c l36: local abs, size 0
   0x00001c7c l90: local abs, size 0
-  0x00001cfc l682: local abs, size 0
-  0x00001cfc l1070: local abs, size 0
-  0x00001cfc l441: local abs, size 0
-  0x00001cfc l2029: local abs, size 0
-  0x00001cfc l1820: local abs, size 0
-  0x00001cfc l2191: local abs, size 0
   0x00001cfc l850: local abs, size 0
-  0x00001cfc l405: local abs, size 0
   0x00001cfc l484: local abs, size 0
+  0x00001cfc l441: local abs, size 0
+  0x00001cfc l405: local abs, size 0
+  0x00001cfc l1820: local abs, size 0
+  0x00001cfc l2029: local abs, size 0
+  0x00001cfc l1070: local abs, size 0
+  0x00001cfc l682: local abs, size 0
+  0x00001cfc l2191: local abs, size 0
+  0x00003c04 l133: local abs, size 0
   0x00003c04 l1518: local abs, size 0
   0x00003c04 l200: local abs, size 0
-  0x00003c04 l133: local abs, size 0
   0x00003c0c l127: local abs, size 0
   0x00003cfc l1216: local abs, size 0
   0x00003cfc l497: local abs, size 0
@@ -1101,8 +1105,8 @@ Symbols of text:
   0x00007c04 l82: local abs, size 0
   0x00007c0c l199: local abs, size 0
   0x00007cfc l1273: local abs, size 0
-  0x00007cfc l163: local abs, size 0
   0x00007cfc l261: local abs, size 0
+  0x00007cfc l163: local abs, size 0
   0x00010000 coldboot: local reloc, size 0
   0x00010018 clrloop: local reloc, size 0
   0x00010028 callmain: local reloc, size 0
@@ -1155,9 +1159,9 @@ Symbols of text:
   0x0001039a l14: local reloc, size 0
   0x000103a0 l17: local reloc, size 0
   0x000103a2 l15: local reloc, size 0
-  0x000103aa l16: local reloc, size 0
-  0x000103aa l13: local reloc, size 0
   0x000103aa l11: local reloc, size 0
+  0x000103aa l13: local reloc, size 0
+  0x000103aa l16: local reloc, size 0
   0x000103ae l12: local reloc, size 0
   0x000103e8 l18: local reloc, size 0
   0x000103e8 l19: local reloc, size 0
@@ -1179,8 +1183,8 @@ Symbols of text:
   0x000105da l56: local reloc, size 0
   0x000105ea l58: local reloc, size 0
   0x0001060e l61: local reloc, size 0
-  0x0001061e l63: local reloc, size 0
   0x0001061e l31: local reloc, size 0
+  0x0001061e l63: local reloc, size 0
   0x00010624 l37: local reloc, size 0
   0x00010644 l39: local reloc, size 0
   0x00010658 l42: local reloc, size 0
@@ -1379,24 +1383,24 @@ Symbols of text:
   0x00011d18 l9: local reloc, size 0
   0x00011d1c l10: local reloc, size 0
   0x00011d20 l11: local reloc, size 0
-  0x00011d24 _ind_init: global reloc, size 0
   0x00011d24 l1: local reloc, size 0
+  0x00011d24 _ind_init: global reloc, size 0
   0x00011d28 _ind_set_power: global reloc, size 0
   0x00011d28 l6: local reloc, size 0
   0x00011d2c _ind_set_fdc: global reloc, size 0
   0x00011d2c l11: local reloc, size 0
-  0x00011d30 l16: local reloc, size 0
   0x00011d30 _ind_set_sdc: global reloc, size 0
-  0x00011d34 l21: local reloc, size 0
+  0x00011d30 l16: local reloc, size 0
   0x00011d34 _ind_set_hdc: global reloc, size 0
+  0x00011d34 l21: local reloc, size 0
   0x00011d38 _ind_set: global reloc, size 0
   0x00011d5a l29: local reloc, size 0
   0x00011d66 l30: local reloc, size 0
   0x00011d72 l31: local reloc, size 0
   0x00011d7e l32: local reloc, size 0
-  0x00011d88 l26: local reloc, size 0
   0x00011d88 l33: local reloc, size 0
   0x00011d88 l28: local reloc, size 0
+  0x00011d88 l26: local reloc, size 0
   0x00011d90 _int_group: global reloc, size 0
   0x00011da4 l1: local reloc, size 0
   0x00011da8 _int_mask: global reloc, size 0
@@ -1433,13 +1437,13 @@ Symbols of text:
   0x00011fd0 _int_vicky_channel_b: global reloc, size 0
   0x00011ff6 l65: local reloc, size 0
   0x00011ffa l67: local reloc, size 0
-  0x0001201c l72: local reloc, size 0
   0x0001201c l74: local reloc, size 0
+  0x0001201c l72: local reloc, size 0
   0x00012024 l70: local reloc, size 0
   0x00012026 l68: local reloc, size 0
-  0x0001202c l69: local reloc, size 0
   0x0001202c l66: local reloc, size 0
   0x0001202c l63: local reloc, size 0
+  0x0001202c l69: local reloc, size 0
   0x00012034 _log_init: global reloc, size 0
   0x00012042 l3: local reloc, size 0
   0x00012044 _err_message: global reloc, size 0
@@ -1469,8 +1473,8 @@ Symbols of text:
   0x00012408 l91: local reloc, size 0
   0x00012448 l95: local reloc, size 0
   0x000124b4 l100: local reloc, size 0
-  0x000124b6 l102: local reloc, size 0
   0x000124b6 l64: local reloc, size 0
+  0x000124b6 l102: local reloc, size 0
   0x000124c0 l72: local reloc, size 0
   0x000124f0 l74: local reloc, size 0
   0x00012520 l76: local reloc, size 0
@@ -1500,12 +1504,12 @@ Symbols of text:
   0x00012856 l111: local reloc, size 0
   0x0001285c _log2: global reloc, size 0
   0x00012874 l120: local reloc, size 0
-  0x000128b0 l118: local reloc, size 0
   0x000128b0 l121: local reloc, size 0
+  0x000128b0 l118: local reloc, size 0
   0x000128b8 _log3: global reloc, size 0
   0x000128d4 l127: local reloc, size 0
-  0x00012922 l128: local reloc, size 0
   0x00012922 l125: local reloc, size 0
+  0x00012922 l128: local reloc, size 0
   0x00012928 _log_num: global reloc, size 0
   0x00012940 l134: local reloc, size 0
   0x0001297c l132: local reloc, size 0
@@ -1572,14 +1576,14 @@ Symbols of text:
   0x00012d7e l33: local reloc, size 0
   0x00012d84 l35: local reloc, size 0
   0x00012d88 l36: local reloc, size 0
-  0x00012d8c l32: local reloc, size 0
   0x00012d8c l25: local reloc, size 0
   0x00012d8c l34: local reloc, size 0
+  0x00012d8c l32: local reloc, size 0
   0x00012d8e l23: local reloc, size 0
   0x00012d94 l24: local reloc, size 0
   0x00012d9a l37: local reloc, size 0
-  0x00012d9e l20: local reloc, size 0
   0x00012d9e l38: local reloc, size 0
+  0x00012d9e l20: local reloc, size 0
   0x00012da4 _mem_alloc: global reloc, size 0
   0x00012dbe l44: local reloc, size 0
   0x00012dd2 l48: local reloc, size 0
@@ -1593,17 +1597,17 @@ Symbols of text:
   0x00012e1c l60: local reloc, size 0
   0x00012e1e l58: local reloc, size 0
   0x00012e32 l59: local reloc, size 0
+  0x00012e40 l47: local reloc, size 0
   0x00012e40 l52: local reloc, size 0
   0x00012e40 l56: local reloc, size 0
-  0x00012e40 l47: local reloc, size 0
   0x00012e44 l45: local reloc, size 0
   0x00012e4e l46: local reloc, size 0
   0x00012e50 l42: local reloc, size 0
   0x00012e58 _mem_reserve: global reloc, size 0
   0x00012e7a l66: local reloc, size 0
   0x00012e8c l70: local reloc, size 0
-  0x00012e90 l71: local reloc, size 0
   0x00012e90 l69: local reloc, size 0
+  0x00012e90 l71: local reloc, size 0
   0x00012e92 l67: local reloc, size 0
   0x00012e96 l68: local reloc, size 0
   0x00012e9a l72: local reloc, size 0
@@ -1634,8 +1638,8 @@ Symbols of text:
   0x00012fd2 l105: local reloc, size 0
   0x00012fd2 l107: local reloc, size 0
   0x00012fd4 l103: local reloc, size 0
-  0x00012fda l104: local reloc, size 0
   0x00012fda l100: local reloc, size 0
+  0x00012fda l104: local reloc, size 0
   0x00012fe0 _proc_exec: global reloc, size 0
   0x0001303a l3: local reloc, size 0
   0x00013040 l5: local reloc, size 0
@@ -1672,9 +1676,9 @@ Symbols of text:
   0x000131b8 _rb_word_put: global reloc, size 0
   0x000131ce l24: local reloc, size 0
   0x000131ea l26: local reloc, size 0
+  0x000131ee l25: local reloc, size 0
   0x000131ee l22: local reloc, size 0
   0x000131ee l27: local reloc, size 0
-  0x000131ee l25: local reloc, size 0
   0x000131f4 _rb_word_get: global reloc, size 0
   0x00013206 l33: local reloc, size 0
   0x00013222 l35: local reloc, size 0
@@ -1688,8 +1692,8 @@ Symbols of text:
   0x0001326c l8: local reloc, size 0
   0x00013282 l11: local reloc, size 0
   0x00013284 l9: local reloc, size 0
-  0x00013294 l6: local reloc, size 0
   0x00013294 l10: local reloc, size 0
+  0x00013294 l6: local reloc, size 0
   0x0001329c _print_hex_8: global reloc, size 0
   0x000132f2 l15: local reloc, size 0
   0x000132fc _print_hex_16: global reloc, size 0
@@ -1709,8 +1713,8 @@ Symbols of text:
   0x00013448 _i_to_bcd: global reloc, size 0
   0x00013456 l45: local reloc, size 0
   0x0001345a l46: local reloc, size 0
-  0x00013482 l43: local reloc, size 0
   0x00013482 l47: local reloc, size 0
+  0x00013482 l43: local reloc, size 0
   0x00013488 _dump_buffer: global reloc, size 0
   0x000134a0 l53: local reloc, size 0
   0x000134a8 l56: local reloc, size 0
@@ -1725,9 +1729,9 @@ Symbols of text:
   0x0001351e l69: local reloc, size 0
   0x00013542 l70: local reloc, size 0
   0x00013548 l73: local reloc, size 0
+  0x0001356e l72: local reloc, size 0
   0x0001356e l74: local reloc, size 0
   0x0001356e l62: local reloc, size 0
-  0x0001356e l72: local reloc, size 0
   0x0001358e l77: local reloc, size 0
   0x0001359c l78: local reloc, size 0
   0x000135b2 l79: local reloc, size 0
@@ -1755,17 +1759,17 @@ Symbols of text:
   0x00013740 l20: local reloc, size 0
   0x00013750 l22: local reloc, size 0
   0x00013756 l19: local reloc, size 0
-  0x00013790 l26: local reloc, size 0
   0x00013790 l25: local reloc, size 0
   0x00013790 l24: local reloc, size 0
+  0x00013790 l26: local reloc, size 0
   0x0001379e l27: local reloc, size 0
   0x000137a8 l23: local reloc, size 0
   0x000137ba l29: local reloc, size 0
   0x000137c4 l31: local reloc, size 0
   0x000137c4 l30: local reloc, size 0
   0x000137ce l32: local reloc, size 0
-  0x000137d6 l28: local reloc, size 0
   0x000137d6 l1: local reloc, size 0
+  0x000137d6 l28: local reloc, size 0
   0x000137dc l5: local reloc, size 0
   0x000137e8 l6: local reloc, size 0
   0x000137f4 l8: local reloc, size 0
@@ -1885,8 +1889,8 @@ Symbols of text:
   0x00013f78 l12: local reloc, size 0
   0x00013f84 l13: local reloc, size 0
   0x00013f9a l14: local reloc, size 0
-  0x00013fb2 l5: local reloc, size 0
   0x00013fb2 l15: local reloc, size 0
+  0x00013fb2 l5: local reloc, size 0
   0x00013fb6 l16: local reloc, size 0
   0x00013fd4 l76: local reloc, size 0
   0x00013ffc l18: local reloc, size 0
@@ -1927,10 +1931,10 @@ Symbols of text:
   0x00014346 l52: local reloc, size 0
   0x00014358 l53: local reloc, size 0
   0x0001436a l54: local reloc, size 0
-  0x00014380 l39: local reloc, size 0
   0x00014380 l55: local reloc, size 0
-  0x00014384 l56: local reloc, size 0
+  0x00014380 l39: local reloc, size 0
   0x00014384 l57: local reloc, size 0
+  0x00014384 l56: local reloc, size 0
   0x0001439e l58: local reloc, size 0
   0x000143be l60: local reloc, size 0
   0x000143c6 l61: local reloc, size 0
@@ -1938,12 +1942,12 @@ Symbols of text:
   0x000143e6 l63: local reloc, size 0
   0x000143f4 l64: local reloc, size 0
   0x00014404 l65: local reloc, size 0
-  0x00014414 l3: local reloc, size 0
   0x00014414 l59: local reloc, size 0
-  0x00014414 l66: local reloc, size 0
   0x00014414 l67: local reloc, size 0
-  0x00014424 l69: local reloc, size 0
+  0x00014414 l3: local reloc, size 0
+  0x00014414 l66: local reloc, size 0
   0x00014424 l71: local reloc, size 0
+  0x00014424 l69: local reloc, size 0
   0x00014426 l70: local reloc, size 0
   0x00014428 l1: local reloc, size 0
   0x00014430 l68: local reloc, size 0
@@ -1957,16 +1961,16 @@ Symbols of text:
   0x000144cc _bdev_register: global reloc, size 0
   0x000144ec l14: local reloc, size 0
   0x00014542 l15: local reloc, size 0
-  0x00014544 l16: local reloc, size 0
   0x00014544 l11: local reloc, size 0
+  0x00014544 l16: local reloc, size 0
   0x0001454c l13: local reloc, size 0
   0x0001455c _bdev_init: global reloc, size 0
   0x0001457c l23: local reloc, size 0
   0x000145a6 l25: local reloc, size 0
   0x000145b2 l26: local reloc, size 0
+  0x000145b4 l27: local reloc, size 0
   0x000145b4 l24: local reloc, size 0
   0x000145b4 l20: local reloc, size 0
-  0x000145b4 l27: local reloc, size 0
   0x000145bc l22: local reloc, size 0
   0x000145c8 _bdev_read: global reloc, size 0
   0x000145f4 l34: local reloc, size 0
@@ -1980,17 +1984,17 @@ Symbols of text:
   0x0001467c l45: local reloc, size 0
   0x000146a6 l47: local reloc, size 0
   0x000146c0 l48: local reloc, size 0
+  0x000146c2 l49: local reloc, size 0
   0x000146c2 l42: local reloc, size 0
   0x000146c2 l46: local reloc, size 0
-  0x000146c2 l49: local reloc, size 0
   0x000146cc l44: local reloc, size 0
   0x000146d8 _bdev_status: global reloc, size 0
   0x000146f8 l56: local reloc, size 0
   0x00014722 l58: local reloc, size 0
   0x0001472e l59: local reloc, size 0
+  0x00014730 l57: local reloc, size 0
   0x00014730 l60: local reloc, size 0
   0x00014730 l53: local reloc, size 0
-  0x00014730 l57: local reloc, size 0
   0x00014738 l55: local reloc, size 0
   0x00014744 _bdev_flush: global reloc, size 0
   0x00014764 l67: local reloc, size 0
@@ -2004,9 +2008,9 @@ Symbols of text:
   0x000147dc l78: local reloc, size 0
   0x00014806 l80: local reloc, size 0
   0x00014824 l81: local reloc, size 0
+  0x00014826 l82: local reloc, size 0
   0x00014826 l79: local reloc, size 0
   0x00014826 l75: local reloc, size 0
-  0x00014826 l82: local reloc, size 0
   0x00014830 l77: local reloc, size 0
   0x0001483c _cdev_init_system: global reloc, size 0
   0x00014854 l4: local reloc, size 0
@@ -2016,8 +2020,8 @@ Symbols of text:
   0x000148a4 l8: local reloc, size 0
   0x000148ec l11: local reloc, size 0
   0x000148ee l9: local reloc, size 0
-  0x000148f4 l1: local reloc, size 0
   0x000148f4 l10: local reloc, size 0
+  0x000148f4 l1: local reloc, size 0
   0x000148fc l3: local reloc, size 0
   0x00014910 _cdev_register: global reloc, size 0
   0x00014920 l17: local reloc, size 0
@@ -2033,8 +2037,8 @@ Symbols of text:
   0x00014ad2 l35: local reloc, size 0
   0x00014ad2 l33: local reloc, size 0
   0x00014ad4 l31: local reloc, size 0
-  0x00014adc l29: local reloc, size 0
   0x00014adc l32: local reloc, size 0
+  0x00014adc l29: local reloc, size 0
   0x00014ade l23: local reloc, size 0
   0x00014ae4 l25: local reloc, size 0
   0x00014af0 _chan_get_record: global reloc, size 0
@@ -2059,8 +2063,8 @@ Symbols of text:
   0x00014c60 l68: local reloc, size 0
   0x00014c8a l70: local reloc, size 0
   0x00014c96 l71: local reloc, size 0
-  0x00014c98 l69: local reloc, size 0
   0x00014c98 l66: local reloc, size 0
+  0x00014c98 l69: local reloc, size 0
   0x00014c98 l72: local reloc, size 0
   0x00014ca0 _chan_open: global reloc, size 0
   0x00014ce0 l80: local reloc, size 0
@@ -2072,8 +2076,8 @@ Symbols of text:
   0x00014d44 l87: local reloc, size 0
   0x00014d48 l88: local reloc, size 0
   0x00014d4a l81: local reloc, size 0
-  0x00014d4c l76: local reloc, size 0
   0x00014d4c l89: local reloc, size 0
+  0x00014d4c l76: local reloc, size 0
   0x00014d58 l78: local reloc, size 0
   0x00014d64 l79: local reloc, size 0
   0x00014d6c _chan_close: global reloc, size 0
@@ -2091,8 +2095,8 @@ Symbols of text:
   0x00014e88 _chan_readline: global reloc, size 0
   0x00014eba l113: local reloc, size 0
   0x00014eda l114: local reloc, size 0
-  0x00014edc l115: local reloc, size 0
   0x00014edc l111: local reloc, size 0
+  0x00014edc l115: local reloc, size 0
   0x00014ee8 _chan_read_b: global reloc, size 0
   0x00014f12 l121: local reloc, size 0
   0x00014f28 l122: local reloc, size 0
@@ -2103,8 +2107,8 @@ Symbols of text:
   0x00014f9a l131: local reloc, size 0
   0x00014fb2 l134: local reloc, size 0
   0x00014fb4 l136: local reloc, size 0
-  0x00014fb6 l127: local reloc, size 0
   0x00014fb6 l132: local reloc, size 0
+  0x00014fb6 l127: local reloc, size 0
   0x00014fc0 l133: local reloc, size 0
   0x00014fd4 l129: local reloc, size 0
   0x00014fe4 _chan_write_b: global reloc, size 0
@@ -2126,8 +2130,8 @@ Symbols of text:
   0x000150f0 _chan_seek: global reloc, size 0
   0x00015122 l167: local reloc, size 0
   0x00015142 l168: local reloc, size 0
-  0x00015144 l169: local reloc, size 0
   0x00015144 l165: local reloc, size 0
+  0x00015144 l169: local reloc, size 0
   0x00015150 _chan_ioctrl: global reloc, size 0
   0x00015186 l175: local reloc, size 0
   0x000151ac l176: local reloc, size 0
@@ -2149,16 +2153,16 @@ Symbols of text:
   0x00015232 l19: local reloc, size 0
   0x0001528a l24: local reloc, size 0
   0x00015290 l26: local reloc, size 0
+  0x00015292 l27: local reloc, size 0
   0x00015292 l22: local reloc, size 0
   0x00015292 l25: local reloc, size 0
-  0x00015292 l27: local reloc, size 0
   0x00015294 l20: local reloc, size 0
   0x000152a4 l21: local reloc, size 0
   0x000152b6 l28: local reloc, size 0
   0x000152dc l32: local reloc, size 0
   0x00015304 l34: local reloc, size 0
-  0x0001531a l33: local reloc, size 0
   0x0001531a l31: local reloc, size 0
+  0x0001531a l33: local reloc, size 0
   0x0001531a l35: local reloc, size 0
   0x0001531c l29: local reloc, size 0
   0x00015344 l30: local reloc, size 0
@@ -2256,13 +2260,13 @@ Symbols of text:
   0x00015890 l165: local reloc, size 0
   0x000158b2 l166: local reloc, size 0
   0x000158b8 l170: local reloc, size 0
-  0x000158be l156: local reloc, size 0
-  0x000158be l171: local reloc, size 0
-  0x000158be l148: local reloc, size 0
-  0x000158be l152: local reloc, size 0
   0x000158be l160: local reloc, size 0
-  0x000158be l169: local reloc, size 0
+  0x000158be l152: local reloc, size 0
+  0x000158be l171: local reloc, size 0
+  0x000158be l156: local reloc, size 0
   0x000158be l164: local reloc, size 0
+  0x000158be l169: local reloc, size 0
+  0x000158be l148: local reloc, size 0
   0x000158c0 l146: local reloc, size 0
   0x000158c6 l147: local reloc, size 0
   0x000158e8 l142: local reloc, size 0
@@ -2280,8 +2284,8 @@ Symbols of text:
   0x00015972 l194: local reloc, size 0
   0x00015990 l197: local reloc, size 0
   0x00015992 l195: local reloc, size 0
-  0x0001599c l193: local reloc, size 0
   0x0001599c l196: local reloc, size 0
+  0x0001599c l193: local reloc, size 0
   0x000159a2 l190: local reloc, size 0
   0x000159a8 _con_close: global reloc, size 0
   0x000159b6 l201: local reloc, size 0
@@ -2303,8 +2307,8 @@ Symbols of text:
   0x00015a82 l232: local reloc, size 0
   0x00015a86 l234: local reloc, size 0
   0x00015a94 l235: local reloc, size 0
-  0x00015a94 l230: local reloc, size 0
   0x00015a94 l233: local reloc, size 0
+  0x00015a94 l230: local reloc, size 0
   0x00015a96 l228: local reloc, size 0
   0x00015a9e l229: local reloc, size 0
   0x00015aa0 l225: local reloc, size 0
@@ -2319,9 +2323,9 @@ Symbols of text:
   0x00015b00 l253: local reloc, size 0
   0x00015b06 l254: local reloc, size 0
   0x00015b08 l255: local reloc, size 0
+  0x00015b16 l248: local reloc, size 0
   0x00015b16 l249: local reloc, size 0
   0x00015b16 l246: local reloc, size 0
-  0x00015b16 l248: local reloc, size 0
   0x00015b16 l242: local reloc, size 0
   0x00015b20 l243: local reloc, size 0
   0x00015b22 l239: local reloc, size 0
@@ -2329,8 +2333,8 @@ Symbols of text:
   0x00015b4c l262: local reloc, size 0
   0x00015b52 l266: local reloc, size 0
   0x00015b54 l267: local reloc, size 0
-  0x00015b64 l265: local reloc, size 0
   0x00015b64 l268: local reloc, size 0
+  0x00015b64 l265: local reloc, size 0
   0x00015b66 l263: local reloc, size 0
   0x00015b6e l264: local reloc, size 0
   0x00015b70 l259: local reloc, size 0
@@ -2340,9 +2344,9 @@ Symbols of text:
   0x00015b9a l275: local reloc, size 0
   0x00015ba4 l277: local reloc, size 0
   0x00015ba8 l278: local reloc, size 0
+  0x00015bae l272: local reloc, size 0
   0x00015bae l279: local reloc, size 0
   0x00015bae l276: local reloc, size 0
-  0x00015bae l272: local reloc, size 0
   0x00015bb4 _con_status: global reloc, size 0
   0x00015bcc l286: local reloc, size 0
   0x00015bce l283: local reloc, size 0
@@ -2364,8 +2368,8 @@ Symbols of text:
   0x00015d84 _fatfs_to_foenix: global reloc, size 0
   0x00015d8a l3: local reloc, size 0
   0x00015d8e l4: local reloc, size 0
-  0x00015d98 l1: local reloc, size 0
   0x00015d98 l5: local reloc, size 0
+  0x00015d98 l1: local reloc, size 0
   0x00015d9c _fsys_open: global reloc, size 0
   0x00015dc0 l12: local reloc, size 0
   0x00015dcc l16: local reloc, size 0
@@ -2402,9 +2406,9 @@ Symbols of text:
   0x0001605a l51: local reloc, size 0
   0x0001605e l52: local reloc, size 0
   0x00016068 l53: local reloc, size 0
-  0x00016076 l54: local reloc, size 0
   0x00016076 l48: local reloc, size 0
   0x00016076 l38: local reloc, size 0
+  0x00016076 l54: local reloc, size 0
   0x00016080 _fsys_closedir: global reloc, size 0
   0x000160cc l61: local reloc, size 0
   0x000160ce l58: local reloc, size 0
@@ -2419,13 +2423,13 @@ Symbols of text:
   0x00016168 l74: local reloc, size 0
   0x0001616c l71: local reloc, size 0
   0x0001616e l68: local reloc, size 0
-  0x00016170 l78: local reloc, size 0
   0x00016170 l65: local reloc, size 0
+  0x00016170 l78: local reloc, size 0
   0x0001617c _fsys_findfirst: global reloc, size 0
   0x0001618c l84: local reloc, size 0
   0x00016198 l88: local reloc, size 0
-  0x0001619c l89: local reloc, size 0
   0x0001619c l87: local reloc, size 0
+  0x0001619c l89: local reloc, size 0
   0x0001619e l85: local reloc, size 0
   0x000161a4 l86: local reloc, size 0
   0x000161a8 l90: local reloc, size 0
@@ -2434,8 +2438,8 @@ Symbols of text:
   0x000161ba l94: local reloc, size 0
   0x000161d4 l96: local reloc, size 0
   0x000161e4 l100: local reloc, size 0
-  0x000161e6 l99: local reloc, size 0
   0x000161e6 l101: local reloc, size 0
+  0x000161e6 l99: local reloc, size 0
   0x000161e8 l97: local reloc, size 0
   0x000161f0 l98: local reloc, size 0
   0x000161f2 l92: local reloc, size 0
@@ -2446,27 +2450,27 @@ Symbols of text:
   0x0001623e l110: local reloc, size 0
   0x00016258 l112: local reloc, size 0
   0x00016268 l116: local reloc, size 0
-  0x0001626a l115: local reloc, size 0
   0x0001626a l117: local reloc, size 0
+  0x0001626a l115: local reloc, size 0
   0x0001626c l113: local reloc, size 0
   0x00016274 l114: local reloc, size 0
   0x00016278 l111: local reloc, size 0
   0x0001627a l108: local reloc, size 0
-  0x0001627c l118: local reloc, size 0
   0x0001627c l105: local reloc, size 0
+  0x0001627c l118: local reloc, size 0
   0x00016288 _fsys_mkdir: global reloc, size 0
   0x000162ae l125: local reloc, size 0
   0x000162c6 l126: local reloc, size 0
-  0x000162e0 l122: local reloc, size 0
   0x000162e0 l128: local reloc, size 0
+  0x000162e0 l122: local reloc, size 0
   0x000162e8 l127: local reloc, size 0
   0x000162fc l129: local reloc, size 0
   0x00016310 l124: local reloc, size 0
   0x0001631c _fsys_delete: global reloc, size 0
   0x00016332 l135: local reloc, size 0
   0x00016336 l136: local reloc, size 0
-  0x00016350 l133: local reloc, size 0
   0x00016350 l137: local reloc, size 0
+  0x00016350 l133: local reloc, size 0
   0x00016358 l138: local reloc, size 0
   0x0001636c _fsys_rename: global reloc, size 0
   0x00016388 l144: local reloc, size 0
@@ -2491,8 +2495,8 @@ Symbols of text:
   0x00016454 _fchan_to_file: global reloc, size 0
   0x0001646a l176: local reloc, size 0
   0x00016496 l177: local reloc, size 0
-  0x00016498 l178: local reloc, size 0
   0x00016498 l174: local reloc, size 0
+  0x00016498 l178: local reloc, size 0
   0x000164a0 _fchan_read: global reloc, size 0
   0x000164ee l187: local reloc, size 0
   0x000164f4 l188: local reloc, size 0
@@ -2502,8 +2506,8 @@ Symbols of text:
   0x0001650c l184: local reloc, size 0
   0x00016518 _fchan_readline: global reloc, size 0
   0x0001655e l198: local reloc, size 0
-  0x0001656e l196: local reloc, size 0
   0x0001656e l199: local reloc, size 0
+  0x0001656e l196: local reloc, size 0
   0x00016570 l193: local reloc, size 0
   0x00016578 _fchan_read_b: global reloc, size 0
   0x000165c2 l208: local reloc, size 0
@@ -2515,15 +2519,15 @@ Symbols of text:
   0x000165f4 _fchan_write: global reloc, size 0
   0x00016634 l218: local reloc, size 0
   0x0001663a l219: local reloc, size 0
-  0x00016656 l220: local reloc, size 0
   0x00016656 l217: local reloc, size 0
+  0x00016656 l220: local reloc, size 0
   0x00016658 l214: local reloc, size 0
   0x00016664 l221: local reloc, size 0
   0x00016678 _fchan_write_b: global reloc, size 0
   0x000166ba l229: local reloc, size 0
   0x000166c0 l230: local reloc, size 0
-  0x000166ca l228: local reloc, size 0
   0x000166ca l231: local reloc, size 0
+  0x000166ca l228: local reloc, size 0
   0x000166cc l225: local reloc, size 0
   0x000166d8 _fchan_status: global reloc, size 0
   0x000166fa l243: local reloc, size 0
@@ -2541,36 +2545,36 @@ Symbols of text:
   0x00016776 l260: local reloc, size 0
   0x0001678e l261: local reloc, size 0
   0x00016794 l263: local reloc, size 0
-  0x000167b4 l259: local reloc, size 0
   0x000167b4 l262: local reloc, size 0
   0x000167b4 l264: local reloc, size 0
+  0x000167b4 l259: local reloc, size 0
   0x000167b6 l256: local reloc, size 0
   0x000167bc _fchan_ioctrl: global reloc, size 0
   0x000167be l268: local reloc, size 0
   0x000167c0 _fsys_mount: global reloc, size 0
   0x0001681e l275: local reloc, size 0
   0x00016848 l276: local reloc, size 0
-  0x0001684a l273: local reloc, size 0
   0x0001684a l278: local reloc, size 0
+  0x0001684a l273: local reloc, size 0
   0x00016854 l277: local reloc, size 0
   0x0001686c _fsys_getlabel: global reloc, size 0
   0x0001689a l285: local reloc, size 0
   0x000168a4 l286: local reloc, size 0
-  0x000168a6 l287: local reloc, size 0
   0x000168a6 l282: local reloc, size 0
+  0x000168a6 l287: local reloc, size 0
   0x000168ac l284: local reloc, size 0
   0x000168bc _fsys_setlabel: global reloc, size 0
   0x000168f8 l294: local reloc, size 0
   0x00016914 l295: local reloc, size 0
-  0x00016916 l297: local reloc, size 0
   0x00016916 l291: local reloc, size 0
+  0x00016916 l297: local reloc, size 0
   0x00016920 l296: local reloc, size 0
   0x00016930 l293: local reloc, size 0
   0x00016938 _fsys_mkfs: global reloc, size 0
   0x0001697a l304: local reloc, size 0
   0x00016996 l305: local reloc, size 0
-  0x00016998 l307: local reloc, size 0
   0x00016998 l301: local reloc, size 0
+  0x00016998 l307: local reloc, size 0
   0x000169a4 l306: local reloc, size 0
   0x000169b0 l303: local reloc, size 0
   0x000169b4 _fsys_default_loader: global reloc, size 0
@@ -2592,10 +2596,10 @@ Symbols of text:
   0x00016a80 l336: local reloc, size 0
   0x00016a86 l334: local reloc, size 0
   0x00016a9a l335: local reloc, size 0
+  0x00016a9c l324: local reloc, size 0
   0x00016a9c l329: local reloc, size 0
   0x00016a9c l337: local reloc, size 0
   0x00016a9c l333: local reloc, size 0
-  0x00016a9c l324: local reloc, size 0
   0x00016aa0 _atoi_hex: global reloc, size 0
   0x00016ad6 l341: local reloc, size 0
   0x00016adc _fsys_pgz_loader: global reloc, size 0
@@ -2609,8 +2613,8 @@ Symbols of text:
   0x00016b70 l364: local reloc, size 0
   0x00016b78 l366: local reloc, size 0
   0x00016b84 l367: local reloc, size 0
-  0x00016b8a l365: local reloc, size 0
   0x00016b8a l368: local reloc, size 0
+  0x00016b8a l365: local reloc, size 0
   0x00016b8e l362: local reloc, size 0
   0x00016b94 l372: local reloc, size 0
   0x00016b9c l370: local reloc, size 0
@@ -2635,20 +2639,20 @@ Symbols of text:
   0x00016cc6 l384: local reloc, size 0
   0x00016cc8 l382: local reloc, size 0
   0x00016cd4 l398: local reloc, size 0
-  0x00016cde l397: local reloc, size 0
-  0x00016cde l380: local reloc, size 0
   0x00016cde l399: local reloc, size 0
+  0x00016cde l380: local reloc, size 0
+  0x00016cde l397: local reloc, size 0
   0x00016ce4 l400: local reloc, size 0
   0x00016cee l402: local reloc, size 0
-  0x00016cf4 l360: local reloc, size 0
-  0x00016cf4 l403: local reloc, size 0
   0x00016cf4 l369: local reloc, size 0
   0x00016cf4 l401: local reloc, size 0
+  0x00016cf4 l403: local reloc, size 0
+  0x00016cf4 l360: local reloc, size 0
   0x00016d00 l358: local reloc, size 0
   0x00016d0c l359: local reloc, size 0
   0x00016d0e l356: local reloc, size 0
-  0x00016d10 l353: local reloc, size 0
   0x00016d10 l404: local reloc, size 0
+  0x00016d10 l353: local reloc, size 0
   0x00016d18 l351: local reloc, size 0
   0x00016d18 l354: local reloc, size 0
   0x00016d1c l346: local reloc, size 0
@@ -2680,12 +2684,12 @@ Symbols of text:
   0x00016e72 l434: local reloc, size 0
   0x00016e76 l435: local reloc, size 0
   0x00016e7a l437: local reloc, size 0
-  0x00016e7c l438: local reloc, size 0
   0x00016e7c l436: local reloc, size 0
   0x00016e7c l415: local reloc, size 0
+  0x00016e7c l438: local reloc, size 0
   0x00016e7c l433: local reloc, size 0
-  0x00016e82 l416: local reloc, size 0
   0x00016e82 l413: local reloc, size 0
+  0x00016e82 l416: local reloc, size 0
   0x00016e88 l439: local reloc, size 0
   0x00016e92 l440: local reloc, size 0
   0x00016e94 l408: local reloc, size 0
@@ -2699,22 +2703,22 @@ Symbols of text:
   0x00016f06 l453: local reloc, size 0
   0x00016f0c l455: local reloc, size 0
   0x00016f38 l460: local reloc, size 0
-  0x00016f3a l461: local reloc, size 0
   0x00016f3a l458: local reloc, size 0
+  0x00016f3a l461: local reloc, size 0
   0x00016f3c l456: local reloc, size 0
-  0x00016f42 l454: local reloc, size 0
   0x00016f42 l457: local reloc, size 0
   0x00016f42 l452: local reloc, size 0
+  0x00016f42 l454: local reloc, size 0
   0x00016f60 l463: local reloc, size 0
   0x00016f64 l465: local reloc, size 0
   0x00016f6a l466: local reloc, size 0
-  0x00016f70 l467: local reloc, size 0
   0x00016f70 l464: local reloc, size 0
+  0x00016f70 l467: local reloc, size 0
   0x00016f76 l468: local reloc, size 0
   0x00016fda l474: local reloc, size 0
-  0x00017030 l471: local reloc, size 0
-  0x00017030 l473: local reloc, size 0
   0x00017030 l475: local reloc, size 0
+  0x00017030 l473: local reloc, size 0
+  0x00017030 l471: local reloc, size 0
   0x00017032 l469: local reloc, size 0
   0x0001703a l470: local reloc, size 0
   0x0001704e l478: local reloc, size 0
@@ -2729,8 +2733,8 @@ Symbols of text:
   0x000170d8 l492: local reloc, size 0
   0x000170f0 l493: local reloc, size 0
   0x000170f4 l491: local reloc, size 0
-  0x0001710e l444: local reloc, size 0
   0x0001710e l495: local reloc, size 0
+  0x0001710e l444: local reloc, size 0
   0x00017118 l476: local reloc, size 0
   0x00017128 l482: local reloc, size 0
   0x00017140 l484: local reloc, size 0
@@ -2750,8 +2754,8 @@ Symbols of text:
   0x00017292 l510: local reloc, size 0
   0x00017296 l512: local reloc, size 0
   0x000172dc l517: local reloc, size 0
-  0x000172de l515: local reloc, size 0
   0x000172de l518: local reloc, size 0
+  0x000172de l515: local reloc, size 0
   0x000172e0 l513: local reloc, size 0
   0x000172e6 l514: local reloc, size 0
   0x000172ea l507: local reloc, size 0
@@ -2778,8 +2782,8 @@ Symbols of text:
   0x0001739e l542: local reloc, size 0
   0x000173c2 l545: local reloc, size 0
   0x000173c4 l543: local reloc, size 0
-  0x000173ca l544: local reloc, size 0
   0x000173ca l541: local reloc, size 0
+  0x000173ca l544: local reloc, size 0
   0x000173cc l539: local reloc, size 0
   0x000173d2 l540: local reloc, size 0
   0x00017472 l522: local reloc, size 0
@@ -2816,8 +2820,8 @@ Symbols of text:
   0x0001759a l5: local reloc, size 0
   0x0001759e l8: local reloc, size 0
   0x000175d4 l9: local reloc, size 0
-  0x000175d6 l1: local reloc, size 0
   0x000175d6 l13: local reloc, size 0
+  0x000175d6 l1: local reloc, size 0
   0x000175dc l10: local reloc, size 0
   0x000175f8 l11: local reloc, size 0
   0x00017608 l12: local reloc, size 0
@@ -2857,16 +2861,16 @@ Symbols of text:
   0x00017804 l55: local reloc, size 0
   0x00017808 l58: local reloc, size 0
   0x0001781c l59: local reloc, size 0
-  0x0001781e l51: local reloc, size 0
   0x0001781e l61: local reloc, size 0
+  0x0001781e l51: local reloc, size 0
   0x00017824 l60: local reloc, size 0
   0x00017844 l53: local reloc, size 0
   0x0001785c _pata_identity: global reloc, size 0
   0x000178ac l69: local reloc, size 0
   0x000178ba l71: local reloc, size 0
   0x000178d4 l73: local reloc, size 0
-  0x0001790c l74: local reloc, size 0
   0x0001790c l76: local reloc, size 0
+  0x0001790c l74: local reloc, size 0
   0x00017912 l75: local reloc, size 0
   0x00017a8c l65: local reloc, size 0
   0x00017a94 l67: local reloc, size 0
@@ -2893,8 +2897,8 @@ Symbols of text:
   0x00017c42 l114: local reloc, size 0
   0x00017c58 l116: local reloc, size 0
   0x00017c78 l118: local reloc, size 0
-  0x00017c8a l120: local reloc, size 0
   0x00017c8a l119: local reloc, size 0
+  0x00017c8a l120: local reloc, size 0
   0x00017c94 l121: local reloc, size 0
   0x00017ca0 l123: local reloc, size 0
   0x00017cbc l124: local reloc, size 0
@@ -2908,8 +2912,8 @@ Symbols of text:
   0x00017d48 _pata_write: global reloc, size 0
   0x00017d76 l137: local reloc, size 0
   0x00017d9c l139: local reloc, size 0
-  0x00017de6 l140: local reloc, size 0
   0x00017de6 l141: local reloc, size 0
+  0x00017de6 l140: local reloc, size 0
   0x00017df0 l142: local reloc, size 0
   0x00017dfe l144: local reloc, size 0
   0x00017e04 l145: local reloc, size 0
@@ -2962,16 +2966,16 @@ Symbols of text:
   0x00018060 _ps2_wait_out: global reloc, size 0
   0x0001807e l27: local reloc, size 0
   0x00018088 l30: local reloc, size 0
-  0x0001808c l28: local reloc, size 0
   0x0001808c l31: local reloc, size 0
+  0x0001808c l28: local reloc, size 0
   0x000180a6 l29: local reloc, size 0
   0x000180a8 l24: local reloc, size 0
   0x000180ac l26: local reloc, size 0
   0x000180bc _ps2_wait_in: global reloc, size 0
   0x000180da l38: local reloc, size 0
   0x000180e4 l41: local reloc, size 0
-  0x000180e8 l42: local reloc, size 0
   0x000180e8 l39: local reloc, size 0
+  0x000180e8 l42: local reloc, size 0
   0x00018102 l40: local reloc, size 0
   0x00018104 l35: local reloc, size 0
   0x00018108 l37: local reloc, size 0
@@ -3003,17 +3007,17 @@ Symbols of text:
   0x00018224 l93: local reloc, size 0
   0x00018228 _kbd_makebreak_modifier: global reloc, size 0
   0x00018244 l101: local reloc, size 0
-  0x0001824c l102: local reloc, size 0
   0x0001824c l98: local reloc, size 0
+  0x0001824c l102: local reloc, size 0
   0x00018250 _kbd_enqueue_scan: global reloc, size 0
   0x0001825c l110: local reloc, size 0
   0x00018264 l108: local reloc, size 0
-  0x000182c8 l113: local reloc, size 0
   0x000182c8 l112: local reloc, size 0
+  0x000182c8 l113: local reloc, size 0
   0x000182da l115: local reloc, size 0
   0x000182da l114: local reloc, size 0
-  0x000182ec l117: local reloc, size 0
   0x000182ec l116: local reloc, size 0
+  0x000182ec l117: local reloc, size 0
   0x000182fe l118: local reloc, size 0
   0x00018310 l119: local reloc, size 0
   0x00018322 l120: local reloc, size 0
@@ -3024,9 +3028,9 @@ Symbols of text:
   0x00018340 l125: local reloc, size 0
   0x00018342 l126: local reloc, size 0
   0x00018346 l127: local reloc, size 0
-  0x00018350 l128: local reloc, size 0
   0x00018350 l129: local reloc, size 0
   0x00018350 l111: local reloc, size 0
+  0x00018350 l128: local reloc, size 0
   0x00018370 l106: local reloc, size 0
   0x00018370 l109: local reloc, size 0
   0x00018378 _kbd_get_scancode: global reloc, size 0
@@ -3040,8 +3044,8 @@ Symbols of text:
   0x00018418 l149: local reloc, size 0
   0x00018422 l150: local reloc, size 0
   0x00018448 l151: local reloc, size 0
-  0x0001845a l152: local reloc, size 0
   0x0001845a l147: local reloc, size 0
+  0x0001845a l152: local reloc, size 0
   0x0001845e l153: local reloc, size 0
   0x0001846e l155: local reloc, size 0
   0x00018478 l156: local reloc, size 0
@@ -3084,11 +3088,11 @@ Symbols of text:
   0x000185bc l192: local reloc, size 0
   0x000185c6 l194: local reloc, size 0
   0x000185d8 l195: local reloc, size 0
-  0x000185de l193: local reloc, size 0
-  0x000185de l143: local reloc, size 0
-  0x000185de l145: local reloc, size 0
-  0x000185de l141: local reloc, size 0
   0x000185de l196: local reloc, size 0
+  0x000185de l145: local reloc, size 0
+  0x000185de l143: local reloc, size 0
+  0x000185de l193: local reloc, size 0
+  0x000185de l141: local reloc, size 0
   0x000185de l138: local reloc, size 0
   0x000185e4 _kbd_to_ansi: global reloc, size 0
   0x000185f8 l205: local reloc, size 0
@@ -3102,9 +3106,9 @@ Symbols of text:
   0x00018700 l204: local reloc, size 0
   0x00018706 l215: local reloc, size 0
   0x0001871c l216: local reloc, size 0
-  0x0001871e l214: local reloc, size 0
-  0x0001871e l201: local reloc, size 0
   0x0001871e l217: local reloc, size 0
+  0x0001871e l201: local reloc, size 0
+  0x0001871e l214: local reloc, size 0
   0x00018724 _kbd_getc: global reloc, size 0
   0x0001873a l223: local reloc, size 0
   0x0001874c l224: local reloc, size 0
@@ -3126,13 +3130,13 @@ Symbols of text:
   0x00018926 l254: local reloc, size 0
   0x00018948 l255: local reloc, size 0
   0x0001894a l252: local reloc, size 0
-  0x0001896c l256: local reloc, size 0
   0x0001896c l244: local reloc, size 0
   0x0001896c l250: local reloc, size 0
+  0x0001896c l256: local reloc, size 0
   0x0001896c l235: local reloc, size 0
   0x0001896e l232: local reloc, size 0
-  0x00018990 l257: local reloc, size 0
   0x00018990 l230: local reloc, size 0
+  0x00018990 l257: local reloc, size 0
   0x00018996 l227: local reloc, size 0
   0x0001899c l228: local reloc, size 0
   0x0001899e l225: local reloc, size 0
@@ -3143,8 +3147,8 @@ Symbols of text:
   0x000189da l264: local reloc, size 0
   0x00018a02 l267: local reloc, size 0
   0x00018a08 l266: local reloc, size 0
-  0x00018a08 l268: local reloc, size 0
   0x00018a08 l261: local reloc, size 0
+  0x00018a08 l268: local reloc, size 0
   0x00018a0c _ps2_mouse_command: global reloc, size 0
   0x00018a20 l275: local reloc, size 0
   0x00018a34 l277: local reloc, size 0
@@ -3208,8 +3212,8 @@ Symbols of text:
   0x00018e3e l350: local reloc, size 0
   0x00018e46 l354: local reloc, size 0
   0x00018e5a l356: local reloc, size 0
-  0x00018e60 l355: local reloc, size 0
   0x00018e60 l357: local reloc, size 0
+  0x00018e60 l355: local reloc, size 0
   0x00018e64 l358: local reloc, size 0
   0x00018e72 l361: local reloc, size 0
   0x00018e74 l359: local reloc, size 0
@@ -3219,8 +3223,8 @@ Symbols of text:
   0x00018efc _ps2_init: global reloc, size 0
   0x00018fa8 l367: local reloc, size 0
   0x00018fa8 l368: local reloc, size 0
-  0x00018fb2 l369: local reloc, size 0
   0x00018fb2 l370: local reloc, size 0
+  0x00018fb2 l369: local reloc, size 0
   0x00018fc0 l371: local reloc, size 0
   0x00018fc4 l372: local reloc, size 0
   0x00018fc6 l373: local reloc, size 0
@@ -3337,8 +3341,8 @@ Symbols of text:
   0x0001a1de l12: local reloc, size 0
   0x0001a1e0 _sdc_set_led: global reloc, size 0
   0x0001a1f0 l20: local reloc, size 0
-  0x0001a1f8 l17: local reloc, size 0
   0x0001a1f8 l21: local reloc, size 0
+  0x0001a1f8 l17: local reloc, size 0
   0x0001a1fc _sdc_wait_busy: global reloc, size 0
   0x0001a210 l27: local reloc, size 0
   0x0001a21a l30: local reloc, size 0
@@ -3377,8 +3381,8 @@ Symbols of text:
   0x0001a46e l61: local reloc, size 0
   0x0001a46e l70: local reloc, size 0
   0x0001a470 l58: local reloc, size 0
-  0x0001a480 l71: local reloc, size 0
   0x0001a480 l52: local reloc, size 0
+  0x0001a480 l71: local reloc, size 0
   0x0001a488 l54: local reloc, size 0
   0x0001a494 _sdc_write: global reloc, size 0
   0x0001a4bc l78: local reloc, size 0
@@ -3392,8 +3396,8 @@ Symbols of text:
   0x0001a4fc l88: local reloc, size 0
   0x0001a502 l91: local reloc, size 0
   0x0001a504 l89: local reloc, size 0
-  0x0001a518 l87: local reloc, size 0
   0x0001a518 l90: local reloc, size 0
+  0x0001a518 l87: local reloc, size 0
   0x0001a51a l81: local reloc, size 0
   0x0001a52e l92: local reloc, size 0
   0x0001a58e l93: local reloc, size 0
@@ -3401,8 +3405,8 @@ Symbols of text:
   0x0001a5ac l96: local reloc, size 0
   0x0001a5be l97: local reloc, size 0
   0x0001a5c0 l94: local reloc, size 0
-  0x0001a5d0 l98: local reloc, size 0
   0x0001a5d0 l75: local reloc, size 0
+  0x0001a5d0 l98: local reloc, size 0
   0x0001a5d8 l77: local reloc, size 0
   0x0001a5e4 _sdc_status: global reloc, size 0
   0x0001a5fa l105: local reloc, size 0
@@ -3444,21 +3448,21 @@ Symbols of text:
   0x0001aa20 _text_set_border: global reloc, size 0
   0x0001aa40 l24: local reloc, size 0
   0x0001aad2 l27: local reloc, size 0
-  0x0001aae0 l28: local reloc, size 0
   0x0001aae0 l22: local reloc, size 0
+  0x0001aae0 l28: local reloc, size 0
   0x0001aae0 l25: local reloc, size 0
   0x0001aae8 _text_set_cursor: global reloc, size 0
   0x0001ab06 l34: local reloc, size 0
-  0x0001ab7a l32: local reloc, size 0
   0x0001ab7a l35: local reloc, size 0
+  0x0001ab7a l32: local reloc, size 0
   0x0001ab80 _text_set_xy: global reloc, size 0
   0x0001ab98 l41: local reloc, size 0
   0x0001abcc l43: local reloc, size 0
   0x0001abd0 l44: local reloc, size 0
   0x0001abde l45: local reloc, size 0
   0x0001abf2 l46: local reloc, size 0
-  0x0001ac2c l42: local reloc, size 0
   0x0001ac2c l39: local reloc, size 0
+  0x0001ac2c l42: local reloc, size 0
   0x0001ac34 _text_get_xy: global reloc, size 0
   0x0001ac72 l50: local reloc, size 0
   0x0001ac78 _text_setsizes: global reloc, size 0
@@ -3477,13 +3481,13 @@ Symbols of text:
   0x0001adc6 l78: local reloc, size 0
   0x0001add4 l79: local reloc, size 0
   0x0001add8 l70: local reloc, size 0
-  0x0001ade4 l68: local reloc, size 0
-  0x0001ade4 l58: local reloc, size 0
   0x0001ade4 l55: local reloc, size 0
+  0x0001ade4 l58: local reloc, size 0
+  0x0001ade4 l68: local reloc, size 0
   0x0001adf0 _text_set_color: global reloc, size 0
   0x0001ae06 l82: local reloc, size 0
-  0x0001ae4c l83: local reloc, size 0
   0x0001ae4c l80: local reloc, size 0
+  0x0001ae4c l83: local reloc, size 0
   0x0001ae54 _text_get_color: global reloc, size 0
   0x0001ae6a l89: local reloc, size 0
   0x0001aeae l87: local reloc, size 0
@@ -3493,9 +3497,9 @@ Symbols of text:
   0x0001af4c l98: local reloc, size 0
   0x0001af5e l101: local reloc, size 0
   0x0001af60 l99: local reloc, size 0
-  0x0001af68 l100: local reloc, size 0
-  0x0001af68 l97: local reloc, size 0
   0x0001af68 l94: local reloc, size 0
+  0x0001af68 l97: local reloc, size 0
+  0x0001af68 l100: local reloc, size 0
   0x0001af70 _text_clear_line: global reloc, size 0
   0x0001af84 l107: local reloc, size 0
   0x0001b052 l110: local reloc, size 0
@@ -3512,11 +3516,11 @@ Symbols of text:
   0x0001b092 l121: local reloc, size 0
   0x0001b0a4 l124: local reloc, size 0
   0x0001b0a6 l122: local reloc, size 0
+  0x0001b0aa l125: local reloc, size 0
+  0x0001b0aa l108: local reloc, size 0
   0x0001b0aa l123: local reloc, size 0
   0x0001b0aa l105: local reloc, size 0
   0x0001b0aa l109: local reloc, size 0
-  0x0001b0aa l108: local reloc, size 0
-  0x0001b0aa l125: local reloc, size 0
   0x0001b0b0 _text_insert: global reloc, size 0
   0x0001b136 l131: local reloc, size 0
   0x0001b15a l134: local reloc, size 0
@@ -3535,16 +3539,16 @@ Symbols of text:
   0x0001b2b4 l155: local reloc, size 0
   0x0001b2c8 l158: local reloc, size 0
   0x0001b2ca l156: local reloc, size 0
-  0x0001b2d0 l157: local reloc, size 0
   0x0001b2d0 l154: local reloc, size 0
+  0x0001b2d0 l157: local reloc, size 0
   0x0001b2d2 l152: local reloc, size 0
   0x0001b2e2 l153: local reloc, size 0
   0x0001b308 l159: local reloc, size 0
   0x0001b32a l162: local reloc, size 0
   0x0001b32c l160: local reloc, size 0
-  0x0001b332 l161: local reloc, size 0
-  0x0001b332 l150: local reloc, size 0
   0x0001b332 l147: local reloc, size 0
+  0x0001b332 l150: local reloc, size 0
+  0x0001b332 l161: local reloc, size 0
   0x0001b33c _text_put_raw: global reloc, size 0
   0x0001b352 l168: local reloc, size 0
   0x0001b38e l171: local reloc, size 0
@@ -3554,9 +3558,9 @@ Symbols of text:
   0x0001b3e4 l175: local reloc, size 0
   0x0001b3e6 l176: local reloc, size 0
   0x0001b420 l177: local reloc, size 0
+  0x0001b454 l170: local reloc, size 0
   0x0001b454 l169: local reloc, size 0
   0x0001b454 l166: local reloc, size 0
-  0x0001b454 l170: local reloc, size 0
   0x0001b45c _fg_color_lut: global reloc, size 0
   0x0001b49c _bg_color_lut: global reloc, size 0
   0x0001b4dc _uart_get_base: global reloc, size 0
@@ -3574,8 +3578,8 @@ Symbols of text:
   0x0001b590 l21: local reloc, size 0
   0x0001b5a0 l18: local reloc, size 0
   0x0001b5ac _uart_init: global reloc, size 0
-  0x0001b5fc l29: local reloc, size 0
   0x0001b5fc l25: local reloc, size 0
+  0x0001b5fc l29: local reloc, size 0
   0x0001b604 l27: local reloc, size 0
   0x0001b610 _uart_has_bytes: global reloc, size 0
   0x0001b646 l38: local reloc, size 0
@@ -3605,8 +3609,8 @@ Symbols of text:
   0x0001b76c l16: local reloc, size 0
   0x0001b78a l20: local reloc, size 0
   0x0001b7a2 l21: local reloc, size 0
-  0x0001b7a4 l19: local reloc, size 0
   0x0001b7a4 l23: local reloc, size 0
+  0x0001b7a4 l19: local reloc, size 0
   0x0001b7a6 l17: local reloc, size 0
   0x0001b7aa l18: local reloc, size 0
   0x0001b7ac l13: local reloc, size 0
@@ -3669,16 +3673,16 @@ Symbols of text:
   0x0001bab4 l84: local reloc, size 0
   0x0001bab4 l82: local reloc, size 0
   0x0001bab6 l80: local reloc, size 0
-  0x0001bab8 l85: local reloc, size 0
   0x0001bab8 l78: local reloc, size 0
+  0x0001bab8 l85: local reloc, size 0
   0x0001baba l75: local reloc, size 0
   0x0001bac0 l89: local reloc, size 0
   0x0001bad4 l92: local reloc, size 0
   0x0001bae0 l94: local reloc, size 0
   0x0001bb00 l96: local reloc, size 0
   0x0001bb04 l97: local reloc, size 0
-  0x0001bb08 l93: local reloc, size 0
   0x0001bb08 l95: local reloc, size 0
+  0x0001bb08 l93: local reloc, size 0
   0x0001bb0a l90: local reloc, size 0
   0x0001bb10 l101: local reloc, size 0
   0x0001bb26 l104: local reloc, size 0
@@ -3686,8 +3690,8 @@ Symbols of text:
   0x0001bb38 l106: local reloc, size 0
   0x0001bc00 l107: local reloc, size 0
   0x0001bc1a l109: local reloc, size 0
-  0x0001bc1c l110: local reloc, size 0
   0x0001bc1c l105: local reloc, size 0
+  0x0001bc1c l110: local reloc, size 0
   0x0001bc1e l102: local reloc, size 0
   0x0001bc24 l114: local reloc, size 0
   0x0001bc3c l117: local reloc, size 0
@@ -3712,8 +3716,8 @@ Symbols of text:
   0x0001bd7a l142: local reloc, size 0
   0x0001bd7c l143: local reloc, size 0
   0x0001bd9a l144: local reloc, size 0
-  0x0001bd9c l129: local reloc, size 0
   0x0001bd9c l128: local reloc, size 0
+  0x0001bd9c l129: local reloc, size 0
   0x0001bd9e l123: local reloc, size 0
   0x0001bda4 l148: local reloc, size 0
   0x0001bdc2 l153: local reloc, size 0
@@ -3742,12 +3746,12 @@ Symbols of text:
   0x0001bfa2 l182: local reloc, size 0
   0x0001bfa8 l180: local reloc, size 0
   0x0001bfac l181: local reloc, size 0
-  0x0001bfb0 l183: local reloc, size 0
   0x0001bfb0 l185: local reloc, size 0
+  0x0001bfb0 l183: local reloc, size 0
   0x0001bfc4 l186: local reloc, size 0
   0x0001bfc8 l187: local reloc, size 0
-  0x0001bfc8 l184: local reloc, size 0
   0x0001bfc8 l188: local reloc, size 0
+  0x0001bfc8 l184: local reloc, size 0
   0x0001bfd6 l191: local reloc, size 0
   0x0001bfd8 l192: local reloc, size 0
   0x0001bfde l193: local reloc, size 0
@@ -3786,14 +3790,14 @@ Symbols of text:
   0x0001c0d2 l234: local reloc, size 0
   0x0001c0d8 l232: local reloc, size 0
   0x0001c0da l233: local reloc, size 0
-  0x0001c0dc l231: local reloc, size 0
   0x0001c0dc l224: local reloc, size 0
+  0x0001c0dc l231: local reloc, size 0
   0x0001c0e0 l235: local reloc, size 0
   0x0001c0e2 l237: local reloc, size 0
   0x0001c0ea l241: local reloc, size 0
   0x0001c0f0 l243: local reloc, size 0
-  0x0001c0f6 l244: local reloc, size 0
   0x0001c0f6 l242: local reloc, size 0
+  0x0001c0f6 l244: local reloc, size 0
   0x0001c104 l245: local reloc, size 0
   0x0001c106 l246: local reloc, size 0
   0x0001c10c l249: local reloc, size 0
@@ -3819,23 +3823,23 @@ Symbols of text:
   0x0001c184 l266: local reloc, size 0
   0x0001c19c l269: local reloc, size 0
   0x0001c1a2 l270: local reloc, size 0
-  0x0001c206 l271: local reloc, size 0
   0x0001c206 l274: local reloc, size 0
+  0x0001c206 l271: local reloc, size 0
   0x0001c208 l272: local reloc, size 0
   0x0001c212 l275: local reloc, size 0
   0x0001c232 l273: local reloc, size 0
   0x0001c23c l276: local reloc, size 0
   0x0001c240 l277: local reloc, size 0
-  0x0001c242 l278: local reloc, size 0
   0x0001c242 l267: local reloc, size 0
+  0x0001c242 l278: local reloc, size 0
   0x0001c248 l282: local reloc, size 0
   0x0001c25e l287: local reloc, size 0
   0x0001c264 l285: local reloc, size 0
   0x0001c26a l286: local reloc, size 0
   0x0001c274 l290: local reloc, size 0
   0x0001c27a l288: local reloc, size 0
-  0x0001c27e l292: local reloc, size 0
   0x0001c27e l289: local reloc, size 0
+  0x0001c27e l292: local reloc, size 0
   0x0001c282 l293: local reloc, size 0
   0x0001c290 l295: local reloc, size 0
   0x0001c296 l296: local reloc, size 0
@@ -3877,11 +3881,11 @@ Symbols of text:
   0x0001c3f0 l339: local reloc, size 0
   0x0001c3f4 l340: local reloc, size 0
   0x0001c402 l341: local reloc, size 0
-  0x0001c406 l342: local reloc, size 0
   0x0001c406 l344: local reloc, size 0
   0x0001c406 l332: local reloc, size 0
-  0x0001c418 l319: local reloc, size 0
+  0x0001c406 l342: local reloc, size 0
   0x0001c418 l324: local reloc, size 0
+  0x0001c418 l319: local reloc, size 0
   0x0001c418 l326: local reloc, size 0
   0x0001c430 l312: local reloc, size 0
   0x0001c438 l348: local reloc, size 0
@@ -3907,8 +3911,8 @@ Symbols of text:
   0x0001c4e0 l370: local reloc, size 0
   0x0001c4e8 l377: local reloc, size 0
   0x0001c512 l380: local reloc, size 0
-  0x0001c52a l381: local reloc, size 0
   0x0001c52a l378: local reloc, size 0
+  0x0001c52a l381: local reloc, size 0
   0x0001c530 l385: local reloc, size 0
   0x0001c54e l388: local reloc, size 0
   0x0001c554 l389: local reloc, size 0
@@ -3919,9 +3923,9 @@ Symbols of text:
   0x0001c5de l397: local reloc, size 0
   0x0001c5e2 l395: local reloc, size 0
   0x0001c5e8 l400: local reloc, size 0
+  0x0001c5ec l399: local reloc, size 0
   0x0001c5ec l401: local reloc, size 0
   0x0001c5ec l393: local reloc, size 0
-  0x0001c5ec l399: local reloc, size 0
   0x0001c5ee l391: local reloc, size 0
   0x0001c5f4 l392: local reloc, size 0
   0x0001c60a l405: local reloc, size 0
@@ -3938,9 +3942,9 @@ Symbols of text:
   0x0001c698 l421: local reloc, size 0
   0x0001c6a6 l419: local reloc, size 0
   0x0001c6ac l423: local reloc, size 0
+  0x0001c6b0 l424: local reloc, size 0
   0x0001c6b0 l417: local reloc, size 0
   0x0001c6b0 l422: local reloc, size 0
-  0x0001c6b0 l424: local reloc, size 0
   0x0001c6b2 l415: local reloc, size 0
   0x0001c6b8 l416: local reloc, size 0
   0x0001c6ce l427: local reloc, size 0
@@ -3968,8 +3972,8 @@ Symbols of text:
   0x0001c83e l462: local reloc, size 0
   0x0001c83e l460: local reloc, size 0
   0x0001c840 l458: local reloc, size 0
-  0x0001c846 l455: local reloc, size 0
   0x0001c846 l459: local reloc, size 0
+  0x0001c846 l455: local reloc, size 0
   0x0001c84a l456: local reloc, size 0
   0x0001c84e l453: local reloc, size 0
   0x0001c850 l463: local reloc, size 0
@@ -3981,8 +3985,8 @@ Symbols of text:
   0x0001c894 l469: local reloc, size 0
   0x0001c8b0 l475: local reloc, size 0
   0x0001c8b2 l476: local reloc, size 0
-  0x0001c8b4 l472: local reloc, size 0
   0x0001c8b4 l474: local reloc, size 0
+  0x0001c8b4 l472: local reloc, size 0
   0x0001c8b6 l470: local reloc, size 0
   0x0001c8ba l477: local reloc, size 0
   0x0001c8c2 l471: local reloc, size 0
@@ -4022,11 +4026,11 @@ Symbols of text:
   0x0001c9fe l526: local reloc, size 0
   0x0001ca0c l524: local reloc, size 0
   0x0001ca14 l525: local reloc, size 0
-  0x0001ca16 l523: local reloc, size 0
   0x0001ca16 l513: local reloc, size 0
+  0x0001ca16 l523: local reloc, size 0
   0x0001ca24 l527: local reloc, size 0
-  0x0001ca26 l528: local reloc, size 0
   0x0001ca26 l500: local reloc, size 0
+  0x0001ca26 l528: local reloc, size 0
   0x0001ca2e l501: local reloc, size 0
   0x0001ca32 l529: local reloc, size 0
   0x0001ca36 l530: local reloc, size 0
@@ -4059,8 +4063,8 @@ Symbols of text:
   0x0001cb7a l568: local reloc, size 0
   0x0001cb94 l566: local reloc, size 0
   0x0001cb96 l567: local reloc, size 0
-  0x0001cba0 l550: local reloc, size 0
   0x0001cba0 l562: local reloc, size 0
+  0x0001cba0 l550: local reloc, size 0
   0x0001cbac l541: local reloc, size 0
   0x0001cbb2 l540: local reloc, size 0
   0x0001cbb4 l535: local reloc, size 0
@@ -4092,9 +4096,9 @@ Symbols of text:
   0x0001cd3e l605: local reloc, size 0
   0x0001cd6e l603: local reloc, size 0
   0x0001cd72 l606: local reloc, size 0
+  0x0001cd76 l602: local reloc, size 0
   0x0001cd76 l597: local reloc, size 0
   0x0001cd76 l600: local reloc, size 0
-  0x0001cd76 l602: local reloc, size 0
   0x0001cd7c l607: local reloc, size 0
   0x0001cd8e l609: local reloc, size 0
   0x0001ce3c l608: local reloc, size 0
@@ -4104,11 +4108,11 @@ Symbols of text:
   0x0001ce64 l617: local reloc, size 0
   0x0001ce68 l618: local reloc, size 0
   0x0001ce80 l619: local reloc, size 0
-  0x0001ce84 l620: local reloc, size 0
   0x0001ce84 l622: local reloc, size 0
+  0x0001ce84 l620: local reloc, size 0
   0x0001ce94 l625: local reloc, size 0
-  0x0001ce96 l628: local reloc, size 0
   0x0001ce96 l626: local reloc, size 0
+  0x0001ce96 l628: local reloc, size 0
   0x0001ceaa l630: local reloc, size 0
   0x0001ceac l631: local reloc, size 0
   0x0001ceb8 l624: local reloc, size 0
@@ -4155,8 +4159,8 @@ Symbols of text:
   0x0001d00c l677: local reloc, size 0
   0x0001d012 l673: local reloc, size 0
   0x0001d01a l671: local reloc, size 0
-  0x0001d020 l672: local reloc, size 0
   0x0001d020 l669: local reloc, size 0
+  0x0001d020 l672: local reloc, size 0
   0x0001d02e l680: local reloc, size 0
   0x0001d032 l681: local reloc, size 0
   0x0001d032 l666: local reloc, size 0
@@ -4176,8 +4180,8 @@ Symbols of text:
   0x0001d0f8 l701: local reloc, size 0
   0x0001d0fc l706: local reloc, size 0
   0x0001d100 l704: local reloc, size 0
-  0x0001d106 l707: local reloc, size 0
   0x0001d106 l705: local reloc, size 0
+  0x0001d106 l707: local reloc, size 0
   0x0001d110 l710: local reloc, size 0
   0x0001d11a l716: local reloc, size 0
   0x0001d124 l714: local reloc, size 0
@@ -4186,8 +4190,8 @@ Symbols of text:
   0x0001d130 l719: local reloc, size 0
   0x0001d13e l722: local reloc, size 0
   0x0001d142 l723: local reloc, size 0
-  0x0001d148 l724: local reloc, size 0
   0x0001d148 l721: local reloc, size 0
+  0x0001d148 l724: local reloc, size 0
   0x0001d152 l725: local reloc, size 0
   0x0001d15c l720: local reloc, size 0
   0x0001d17c l727: local reloc, size 0
@@ -4291,9 +4295,9 @@ Symbols of text:
   0x0001d510 l832: local reloc, size 0
   0x0001d516 l836: local reloc, size 0
   0x0001d51c l834: local reloc, size 0
-  0x0001d526 l825: local reloc, size 0
-  0x0001d526 l830: local reloc, size 0
   0x0001d526 l835: local reloc, size 0
+  0x0001d526 l830: local reloc, size 0
+  0x0001d526 l825: local reloc, size 0
   0x0001d530 l801: local reloc, size 0
   0x0001d534 l800: local reloc, size 0
   0x0001d53c l837: local reloc, size 0
@@ -4312,8 +4316,8 @@ Symbols of text:
   0x0001d600 l829: local reloc, size 0
   0x0001d608 l853: local reloc, size 0
   0x0001d61c l859: local reloc, size 0
-  0x0001d626 l860: local reloc, size 0
   0x0001d626 l858: local reloc, size 0
+  0x0001d626 l860: local reloc, size 0
   0x0001d636 l856: local reloc, size 0
   0x0001d63e l857: local reloc, size 0
   0x0001d640 l862: local reloc, size 0
@@ -4335,8 +4339,8 @@ Symbols of text:
   0x0001d6f4 l880: local reloc, size 0
   0x0001d70a l885: local reloc, size 0
   0x0001d70c l878: local reloc, size 0
-  0x0001d70c l886: local reloc, size 0
   0x0001d70c l884: local reloc, size 0
+  0x0001d70c l886: local reloc, size 0
   0x0001d70e l876: local reloc, size 0
   0x0001d724 l888: local reloc, size 0
   0x0001d73c l889: local reloc, size 0
@@ -4371,8 +4375,8 @@ Symbols of text:
   0x0001d810 l923: local reloc, size 0
   0x0001d816 l927: local reloc, size 0
   0x0001d81c l925: local reloc, size 0
-  0x0001d820 l926: local reloc, size 0
   0x0001d820 l921: local reloc, size 0
+  0x0001d820 l926: local reloc, size 0
   0x0001d824 l928: local reloc, size 0
   0x0001d828 l920: local reloc, size 0
   0x0001d828 l918: local reloc, size 0
@@ -4415,8 +4419,8 @@ Symbols of text:
   0x0001d9e6 l973: local reloc, size 0
   0x0001d9ec l974: local reloc, size 0
   0x0001d9f0 l971: local reloc, size 0
-  0x0001d9f4 l976: local reloc, size 0
   0x0001d9f4 l972: local reloc, size 0
+  0x0001d9f4 l976: local reloc, size 0
   0x0001d9f8 l977: local reloc, size 0
   0x0001da1a l980: local reloc, size 0
   0x0001da1c l978: local reloc, size 0
@@ -4439,13 +4443,13 @@ Symbols of text:
   0x0001dab2 l1000: local reloc, size 0
   0x0001dab8 l1001: local reloc, size 0
   0x0001dac4 l1002: local reloc, size 0
-  0x0001daec l1009: local reloc, size 0
   0x0001daec l1004: local reloc, size 0
+  0x0001daec l1009: local reloc, size 0
   0x0001daf2 l1008: local reloc, size 0
   0x0001db08 l1006: local reloc, size 0
   0x0001db0e l1007: local reloc, size 0
-  0x0001db14 l1003: local reloc, size 0
   0x0001db14 l1005: local reloc, size 0
+  0x0001db14 l1003: local reloc, size 0
   0x0001db4c l1011: local reloc, size 0
   0x0001db4c l1015: local reloc, size 0
   0x0001db52 l1014: local reloc, size 0
@@ -4502,8 +4506,8 @@ Symbols of text:
   0x0001de66 l1069: local reloc, size 0
   0x0001de78 l1068: local reloc, size 0
   0x0001de8e l1066: local reloc, size 0
-  0x0001deb0 l1063: local reloc, size 0
   0x0001deb0 l1067: local reloc, size 0
+  0x0001deb0 l1063: local reloc, size 0
   0x0001dece l996: local reloc, size 0
   0x0001ded8 l1073: local reloc, size 0
   0x0001deea l1080: local reloc, size 0
@@ -4511,8 +4515,8 @@ Symbols of text:
   0x0001def4 l1078: local reloc, size 0
   0x0001df00 l1076: local reloc, size 0
   0x0001df28 l1081: local reloc, size 0
-  0x0001df2a l1082: local reloc, size 0
   0x0001df2a l1077: local reloc, size 0
+  0x0001df2a l1082: local reloc, size 0
   0x0001df2e l1083: local reloc, size 0
   0x0001df32 l1084: local reloc, size 0
   0x0001df34 l1085: local reloc, size 0
@@ -4544,18 +4548,18 @@ Symbols of text:
   0x0001e0ba l1124: local reloc, size 0
   0x0001e12c l1127: local reloc, size 0
   0x0001e14e l1129: local reloc, size 0
-  0x0001e16c l1128: local reloc, size 0
-  0x0001e16c l1125: local reloc, size 0
   0x0001e16c l1130: local reloc, size 0
+  0x0001e16c l1125: local reloc, size 0
+  0x0001e16c l1128: local reloc, size 0
   0x0001e16e l1113: local reloc, size 0
   0x0001e172 l1132: local reloc, size 0
   0x0001e18e l1135: local reloc, size 0
   0x0001e1a4 l1139: local reloc, size 0
   0x0001e1bc l1137: local reloc, size 0
-  0x0001e1be l1131: local reloc, size 0
-  0x0001e1be l1136: local reloc, size 0
   0x0001e1be l1138: local reloc, size 0
   0x0001e1be l1133: local reloc, size 0
+  0x0001e1be l1136: local reloc, size 0
+  0x0001e1be l1131: local reloc, size 0
   0x0001e1c2 l1140: local reloc, size 0
   0x0001e1dc l1143: local reloc, size 0
   0x0001e1ec l1141: local reloc, size 0
@@ -4566,8 +4570,8 @@ Symbols of text:
   0x0001e2d0 l1153: local reloc, size 0
   0x0001e2d2 l1154: local reloc, size 0
   0x0001e2da l1155: local reloc, size 0
-  0x0001e2dc l1156: local reloc, size 0
   0x0001e2dc l1152: local reloc, size 0
+  0x0001e2dc l1156: local reloc, size 0
   0x0001e2de l1150: local reloc, size 0
   0x0001e2e2 l1157: local reloc, size 0
   0x0001e2e6 l1151: local reloc, size 0
@@ -4576,12 +4580,12 @@ Symbols of text:
   0x0001e30a l1161: local reloc, size 0
   0x0001e30e l1162: local reloc, size 0
   0x0001e342 l1164: local reloc, size 0
-  0x0001e344 l1159: local reloc, size 0
-  0x0001e344 l1165: local reloc, size 0
-  0x0001e344 l1163: local reloc, size 0
   0x0001e344 l1145: local reloc, size 0
+  0x0001e344 l1159: local reloc, size 0
   0x0001e344 l1107: local reloc, size 0
+  0x0001e344 l1163: local reloc, size 0
   0x0001e344 l1147: local reloc, size 0
+  0x0001e344 l1165: local reloc, size 0
   0x0001e348 l1166: local reloc, size 0
   0x0001e34a l1167: local reloc, size 0
   0x0001e34c l1102: local reloc, size 0
@@ -4634,8 +4638,8 @@ Symbols of text:
   0x0001e6a4 l1221: local reloc, size 0
   0x0001e6ac l1222: local reloc, size 0
   0x0001e6c4 l1224: local reloc, size 0
-  0x0001e6ca l1225: local reloc, size 0
   0x0001e6ca l1228: local reloc, size 0
+  0x0001e6ca l1225: local reloc, size 0
   0x0001e6d6 l1226: local reloc, size 0
   0x0001e6de l1227: local reloc, size 0
   0x0001e6e2 l1229: local reloc, size 0
@@ -4689,8 +4693,8 @@ Symbols of text:
   0x0001ea38 l1283: local reloc, size 0
   0x0001ea50 l1286: local reloc, size 0
   0x0001eaa8 l1287: local reloc, size 0
-  0x0001eaa8 l1279: local reloc, size 0
   0x0001eaa8 l1281: local reloc, size 0
+  0x0001eaa8 l1279: local reloc, size 0
   0x0001eaaa l1276: local reloc, size 0
   0x0001eab4 _f_close: global reloc, size 0
   0x0001eaca l1293: local reloc, size 0
@@ -4713,13 +4717,13 @@ Symbols of text:
   0x0001eba6 l1319: local reloc, size 0
   0x0001eba8 l1320: local reloc, size 0
   0x0001ebac l1321: local reloc, size 0
-  0x0001ebb0 l1326: local reloc, size 0
   0x0001ebb0 l1323: local reloc, size 0
+  0x0001ebb0 l1326: local reloc, size 0
   0x0001ebb2 l1324: local reloc, size 0
   0x0001ebb6 l1327: local reloc, size 0
   0x0001ebca l1325: local reloc, size 0
-  0x0001ebd0 l1322: local reloc, size 0
   0x0001ebd0 l1310: local reloc, size 0
+  0x0001ebd0 l1322: local reloc, size 0
   0x0001ebd2 l1307: local reloc, size 0
   0x0001ebdc _f_getcwd: global reloc, size 0
   0x0001ec0e l1333: local reloc, size 0
@@ -4763,26 +4767,26 @@ Symbols of text:
   0x0001ed68 l1378: local reloc, size 0
   0x0001ed68 l1381: local reloc, size 0
   0x0001ed76 l1379: local reloc, size 0
-  0x0001ed7a l1383: local reloc, size 0
   0x0001ed7a l1380: local reloc, size 0
+  0x0001ed7a l1383: local reloc, size 0
   0x0001ed7c l1375: local reloc, size 0
   0x0001ed80 l1384: local reloc, size 0
   0x0001ed82 l1385: local reloc, size 0
-  0x0001ed86 l1386: local reloc, size 0
   0x0001ed86 l1388: local reloc, size 0
+  0x0001ed86 l1386: local reloc, size 0
   0x0001ed96 l1390: local reloc, size 0
+  0x0001ed9a l1367: local reloc, size 0
   0x0001ed9a l1389: local reloc, size 0
   0x0001ed9a l1387: local reloc, size 0
   0x0001ed9a l1334: local reloc, size 0
-  0x0001ed9a l1367: local reloc, size 0
   0x0001ed9e l1331: local reloc, size 0
   0x0001eda8 _f_lseek: global reloc, size 0
   0x0001edca l1396: local reloc, size 0
   0x0001edd2 l1397: local reloc, size 0
   0x0001edd6 l1398: local reloc, size 0
   0x0001eddc l1399: local reloc, size 0
-  0x0001ede2 l1403: local reloc, size 0
   0x0001ede2 l1402: local reloc, size 0
+  0x0001ede2 l1403: local reloc, size 0
   0x0001edfa l1400: local reloc, size 0
   0x0001edfe l1401: local reloc, size 0
   0x0001ee0e l1404: local reloc, size 0
@@ -4812,9 +4816,9 @@ Symbols of text:
   0x0001ef2c l1420: local reloc, size 0
   0x0001ef4c l1435: local reloc, size 0
   0x0001ef58 l1436: local reloc, size 0
-  0x0001ef60 l1405: local reloc, size 0
   0x0001ef60 l1439: local reloc, size 0
   0x0001ef60 l1434: local reloc, size 0
+  0x0001ef60 l1405: local reloc, size 0
   0x0001ef60 l1417: local reloc, size 0
   0x0001ef6a l1437: local reloc, size 0
   0x0001ef78 l1438: local reloc, size 0
@@ -4840,8 +4844,8 @@ Symbols of text:
   0x0001f0c4 l1459: local reloc, size 0
   0x0001f0c4 l1466: local reloc, size 0
   0x0001f0ca l1467: local reloc, size 0
-  0x0001f0cc l1457: local reloc, size 0
   0x0001f0cc l1468: local reloc, size 0
+  0x0001f0cc l1457: local reloc, size 0
   0x0001f0d0 l1469: local reloc, size 0
   0x0001f0d2 l1470: local reloc, size 0
   0x0001f0d4 l1452: local reloc, size 0
@@ -4858,9 +4862,9 @@ Symbols of text:
   0x0001f14e l1490: local reloc, size 0
   0x0001f16a l1492: local reloc, size 0
   0x0001f16c l1493: local reloc, size 0
+  0x0001f16c l1484: local reloc, size 0
   0x0001f16c l1487: local reloc, size 0
   0x0001f16c l1491: local reloc, size 0
-  0x0001f16c l1484: local reloc, size 0
   0x0001f16e l1481: local reloc, size 0
   0x0001f178 _f_findnext: global reloc, size 0
   0x0001f184 l1499: local reloc, size 0
@@ -4869,8 +4873,8 @@ Symbols of text:
   0x0001f19c l1503: local reloc, size 0
   0x0001f19e l1504: local reloc, size 0
   0x0001f1b8 l1508: local reloc, size 0
-  0x0001f1d2 l1502: local reloc, size 0
   0x0001f1d2 l1510: local reloc, size 0
+  0x0001f1d2 l1502: local reloc, size 0
   0x0001f1d4 l1501: local reloc, size 0
   0x0001f1d6 l1497: local reloc, size 0
   0x0001f1dc _f_findfirst: global reloc, size 0
@@ -4881,10 +4885,10 @@ Symbols of text:
   0x0001f23e l1523: local reloc, size 0
   0x0001f252 l1525: local reloc, size 0
   0x0001f26e l1528: local reloc, size 0
-  0x0001f280 l1524: local reloc, size 0
-  0x0001f280 l1526: local reloc, size 0
   0x0001f280 l1529: local reloc, size 0
   0x0001f280 l1531: local reloc, size 0
+  0x0001f280 l1526: local reloc, size 0
+  0x0001f280 l1524: local reloc, size 0
   0x0001f282 l1521: local reloc, size 0
   0x0001f28c _f_getfree: global reloc, size 0
   0x0001f2b8 l1537: local reloc, size 0
@@ -4897,8 +4901,8 @@ Symbols of text:
   0x0001f312 l1549: local reloc, size 0
   0x0001f316 l1550: local reloc, size 0
   0x0001f31a l1551: local reloc, size 0
-  0x0001f31c l1552: local reloc, size 0
   0x0001f31c l1546: local reloc, size 0
+  0x0001f31c l1552: local reloc, size 0
   0x0001f328 l1545: local reloc, size 0
   0x0001f32a l1543: local reloc, size 0
   0x0001f33c l1554: local reloc, size 0
@@ -4917,9 +4921,9 @@ Symbols of text:
   0x0001f39c l1555: local reloc, size 0
   0x0001f39c l1553: local reloc, size 0
   0x0001f3a0 l1568: local reloc, size 0
+  0x0001f3b4 l1538: local reloc, size 0
   0x0001f3b4 l1541: local reloc, size 0
   0x0001f3b4 l1569: local reloc, size 0
-  0x0001f3b4 l1538: local reloc, size 0
   0x0001f3b6 l1535: local reloc, size 0
   0x0001f3c0 _f_truncate: global reloc, size 0
   0x0001f3de l1577: local reloc, size 0
@@ -4936,14 +4940,14 @@ Symbols of text:
   0x0001f458 l1588: local reloc, size 0
   0x0001f45c l1591: local reloc, size 0
   0x0001f466 l1589: local reloc, size 0
-  0x0001f478 l1590: local reloc, size 0
   0x0001f478 l1584: local reloc, size 0
+  0x0001f478 l1590: local reloc, size 0
   0x0001f48a l1594: local reloc, size 0
   0x0001f4a2 l1592: local reloc, size 0
   0x0001f4c8 l1595: local reloc, size 0
   0x0001f4cc l1596: local reloc, size 0
-  0x0001f4d4 l1593: local reloc, size 0
   0x0001f4d4 l1597: local reloc, size 0
+  0x0001f4d4 l1593: local reloc, size 0
   0x0001f4d8 l1598: local reloc, size 0
   0x0001f4e2 l1599: local reloc, size 0
   0x0001f4e2 l1581: local reloc, size 0
@@ -4965,26 +4969,26 @@ Symbols of text:
   0x0001f5f2 l1627: local reloc, size 0
   0x0001f5f4 l1628: local reloc, size 0
   0x0001f5fa l1629: local reloc, size 0
-  0x0001f5fc l1626: local reloc, size 0
+  0x0001f5fc l1624: local reloc, size 0
   0x0001f5fc l1621: local reloc, size 0
+  0x0001f5fc l1626: local reloc, size 0
   0x0001f5fc l1619: local reloc, size 0
   0x0001f5fc l1630: local reloc, size 0
-  0x0001f5fc l1624: local reloc, size 0
   0x0001f600 l1631: local reloc, size 0
   0x0001f610 l1635: local reloc, size 0
   0x0001f614 l1633: local reloc, size 0
   0x0001f628 l1634: local reloc, size 0
   0x0001f62c l1636: local reloc, size 0
-  0x0001f638 l1637: local reloc, size 0
-  0x0001f638 l1632: local reloc, size 0
-  0x0001f638 l1606: local reloc, size 0
   0x0001f638 l1612: local reloc, size 0
+  0x0001f638 l1637: local reloc, size 0
+  0x0001f638 l1606: local reloc, size 0
+  0x0001f638 l1632: local reloc, size 0
   0x0001f63a l1603: local reloc, size 0
   0x0001f644 _f_mkdir: global reloc, size 0
   0x0001f66a l1643: local reloc, size 0
   0x0001f684 l1645: local reloc, size 0
-  0x0001f686 l1646: local reloc, size 0
   0x0001f686 l1650: local reloc, size 0
+  0x0001f686 l1646: local reloc, size 0
   0x0001f68c l1649: local reloc, size 0
   0x0001f6a4 l1647: local reloc, size 0
   0x0001f6a6 l1648: local reloc, size 0
@@ -4997,15 +5001,15 @@ Symbols of text:
   0x0001f6de l1658: local reloc, size 0
   0x0001f6ea l1659: local reloc, size 0
   0x0001f6fc l1661: local reloc, size 0
-  0x0001f820 l1660: local reloc, size 0
   0x0001f820 l1662: local reloc, size 0
+  0x0001f820 l1660: local reloc, size 0
   0x0001f824 l1665: local reloc, size 0
   0x0001f85c l1667: local reloc, size 0
   0x0001f868 l1668: local reloc, size 0
   0x0001f86a l1666: local reloc, size 0
-  0x0001f87c l1644: local reloc, size 0
   0x0001f87c l1669: local reloc, size 0
   0x0001f87c l1652: local reloc, size 0
+  0x0001f87c l1644: local reloc, size 0
   0x0001f87e l1641: local reloc, size 0
   0x0001f888 _f_rename: global reloc, size 0
   0x0001f8b8 l1675: local reloc, size 0
@@ -5029,17 +5033,17 @@ Symbols of text:
   0x0001faa0 l1698: local reloc, size 0
   0x0001fabe l1702: local reloc, size 0
   0x0001fac6 l1700: local reloc, size 0
-  0x0001fae2 l1701: local reloc, size 0
   0x0001fae2 l1695: local reloc, size 0
   0x0001fae2 l1689: local reloc, size 0
-  0x0001fae2 l1691: local reloc, size 0
+  0x0001fae2 l1701: local reloc, size 0
   0x0001fae2 l1699: local reloc, size 0
+  0x0001fae2 l1691: local reloc, size 0
   0x0001fae6 l1703: local reloc, size 0
   0x0001faf6 l1705: local reloc, size 0
   0x0001fb02 l1704: local reloc, size 0
   0x0001fb02 l1681: local reloc, size 0
-  0x0001fb02 l1706: local reloc, size 0
   0x0001fb02 l1676: local reloc, size 0
+  0x0001fb02 l1706: local reloc, size 0
   0x0001fb04 l1673: local reloc, size 0
   0x0001fb10 _f_getlabel: global reloc, size 0
   0x0001fb3a l1714: local reloc, size 0
@@ -5053,9 +5057,9 @@ Symbols of text:
   0x0001fb9c l1725: local reloc, size 0
   0x0001fb9e l1724: local reloc, size 0
   0x0001fb9e l1726: local reloc, size 0
+  0x0001fba8 l1723: local reloc, size 0
   0x0001fba8 l1718: local reloc, size 0
   0x0001fba8 l1716: local reloc, size 0
-  0x0001fba8 l1723: local reloc, size 0
   0x0001fbae l1727: local reloc, size 0
   0x0001fbb2 l1713: local reloc, size 0
   0x0001fbb2 l1728: local reloc, size 0
@@ -5066,8 +5070,8 @@ Symbols of text:
   0x0001fbe4 l1736: local reloc, size 0
   0x0001fbe8 l1737: local reloc, size 0
   0x0001fbea l1734: local reloc, size 0
-  0x0001fbfa l1733: local reloc, size 0
   0x0001fbfa l1730: local reloc, size 0
+  0x0001fbfa l1733: local reloc, size 0
   0x0001fbfc l1710: local reloc, size 0
   0x0001fc08 _f_setlabel: global reloc, size 0
   0x0001fc2c l1744: local reloc, size 0
@@ -5094,8 +5098,8 @@ Symbols of text:
   0x0001fd34 l1766: local reloc, size 0
   0x0001fd44 l1765: local reloc, size 0
   0x0001fd62 l1767: local reloc, size 0
-  0x0001fd76 l1769: local reloc, size 0
   0x0001fd76 l1772: local reloc, size 0
+  0x0001fd76 l1769: local reloc, size 0
   0x0001fd7a l1774: local reloc, size 0
   0x0001fdcc l1775: local reloc, size 0
   0x0001fdd4 l1776: local reloc, size 0
@@ -5104,11 +5108,11 @@ Symbols of text:
   0x0001fdfe l1780: local reloc, size 0
   0x0001fe14 l1782: local reloc, size 0
   0x0001fe5a l1785: local reloc, size 0
-  0x0001feca l1768: local reloc, size 0
-  0x0001feca l1777: local reloc, size 0
   0x0001feca l1783: local reloc, size 0
-  0x0001feca l1781: local reloc, size 0
   0x0001feca l1779: local reloc, size 0
+  0x0001feca l1777: local reloc, size 0
+  0x0001feca l1781: local reloc, size 0
+  0x0001feca l1768: local reloc, size 0
   0x0001fecc l1741: local reloc, size 0
   0x0001fed8 l1743: local reloc, size 0
   0x0001feec l1790: local reloc, size 0
@@ -5182,8 +5186,8 @@ Symbols of text:
   0x00020430 l1877: local reloc, size 0
   0x0002043a l1878: local reloc, size 0
   0x00020440 l1880: local reloc, size 0
-  0x00020440 l1884: local reloc, size 0
   0x00020440 l1879: local reloc, size 0
+  0x00020440 l1884: local reloc, size 0
   0x0002044a l1889: local reloc, size 0
   0x00020452 l1890: local reloc, size 0
   0x00020482 l1893: local reloc, size 0
@@ -5191,8 +5195,8 @@ Symbols of text:
   0x0002048a l1894: local reloc, size 0
   0x000204a2 l1895: local reloc, size 0
   0x000204a8 l1896: local reloc, size 0
-  0x000204ae l1882: local reloc, size 0
   0x000204ae l1881: local reloc, size 0
+  0x000204ae l1882: local reloc, size 0
   0x000204bc l1897: local reloc, size 0
   0x000204ca l1900: local reloc, size 0
   0x000204ce l1902: local reloc, size 0
@@ -5207,12 +5211,12 @@ Symbols of text:
   0x00020566 l1910: local reloc, size 0
   0x0002056a l1901: local reloc, size 0
   0x0002056e l1913: local reloc, size 0
-  0x0002057c l1915: local reloc, size 0
   0x0002057c l1918: local reloc, size 0
+  0x0002057c l1915: local reloc, size 0
   0x00020582 l1916: local reloc, size 0
   0x00020590 l1919: local reloc, size 0
-  0x000205a2 l1914: local reloc, size 0
   0x000205a2 l1917: local reloc, size 0
+  0x000205a2 l1914: local reloc, size 0
   0x000205be l1920: local reloc, size 0
   0x000205ca l1921: local reloc, size 0
   0x000205f8 l1922: local reloc, size 0
@@ -5228,8 +5232,8 @@ Symbols of text:
   0x00020754 l1936: local reloc, size 0
   0x0002075e l1934: local reloc, size 0
   0x00020762 l1935: local reloc, size 0
-  0x00020768 l1933: local reloc, size 0
   0x00020768 l1931: local reloc, size 0
+  0x00020768 l1933: local reloc, size 0
   0x00020772 l1937: local reloc, size 0
   0x0002077c l1939: local reloc, size 0
   0x00020782 l1943: local reloc, size 0
@@ -5278,8 +5282,8 @@ Symbols of text:
   0x00020ca4 l1989: local reloc, size 0
   0x00020caa l1990: local reloc, size 0
   0x00020cf8 l1985: local reloc, size 0
-  0x00020cfe l1976: local reloc, size 0
   0x00020cfe l1984: local reloc, size 0
+  0x00020cfe l1976: local reloc, size 0
   0x00020d00 l1974: local reloc, size 0
   0x00020d08 l1975: local reloc, size 0
   0x00020d10 l1991: local reloc, size 0
@@ -5301,13 +5305,13 @@ Symbols of text:
   0x00020d7e l2011: local reloc, size 0
   0x00020d82 l2012: local reloc, size 0
   0x00020d84 l2013: local reloc, size 0
-  0x00020d88 l2015: local reloc, size 0
-  0x00020d88 l2007: local reloc, size 0
   0x00020d88 l2010: local reloc, size 0
+  0x00020d88 l2007: local reloc, size 0
+  0x00020d88 l2015: local reloc, size 0
   0x00020da0 l2023: local reloc, size 0
   0x00020dd0 l2025: local reloc, size 0
-  0x00020dd6 l2024: local reloc, size 0
   0x00020dd6 l2026: local reloc, size 0
+  0x00020dd6 l2024: local reloc, size 0
   0x00020df0 l2027: local reloc, size 0
   0x00020df4 l2028: local reloc, size 0
   0x00020df6 l1823: local reloc, size 0
@@ -5323,8 +5327,8 @@ Symbols of text:
   0x00020ea4 l2039: local reloc, size 0
   0x00020eaa l2041: local reloc, size 0
   0x00020eba l2042: local reloc, size 0
-  0x00020ebc l2043: local reloc, size 0
   0x00020ebc l2036: local reloc, size 0
+  0x00020ebc l2043: local reloc, size 0
   0x00020ec0 l2037: local reloc, size 0
   0x00020ec6 l2044: local reloc, size 0
   0x00020eca l2045: local reloc, size 0
@@ -5371,17 +5375,17 @@ Symbols of text:
   0x0002112c l2112: local reloc, size 0
   0x00021162 l2113: local reloc, size 0
   0x00021168 l2115: local reloc, size 0
-  0x0002116e l2114: local reloc, size 0
   0x0002116e l2111: local reloc, size 0
+  0x0002116e l2114: local reloc, size 0
   0x00021174 l2116: local reloc, size 0
   0x00021184 l2118: local reloc, size 0
   0x000211a2 l2119: local reloc, size 0
   0x000211a6 l2121: local reloc, size 0
   0x000211dc l2122: local reloc, size 0
   0x000211e2 l2124: local reloc, size 0
-  0x000211e8 l2120: local reloc, size 0
   0x000211e8 l2117: local reloc, size 0
   0x000211e8 l2123: local reloc, size 0
+  0x000211e8 l2120: local reloc, size 0
   0x000211ee l2125: local reloc, size 0
   0x000211fe l2126: local reloc, size 0
   0x00021202 l2127: local reloc, size 0
@@ -5396,8 +5400,8 @@ Symbols of text:
   0x0002128c l2137: local reloc, size 0
   0x000212a2 l2138: local reloc, size 0
   0x000212a6 l2139: local reloc, size 0
-  0x000212aa l2140: local reloc, size 0
   0x000212aa l2143: local reloc, size 0
+  0x000212aa l2140: local reloc, size 0
   0x000212ac l2141: local reloc, size 0
   0x000212b2 l2142: local reloc, size 0
   0x000212b6 l2146: local reloc, size 0
@@ -5468,13 +5472,13 @@ Symbols of text:
   0x000215da l5: local reloc, size 0
   0x000215e2 l9: local reloc, size 0
   0x000215e8 l7: local reloc, size 0
-  0x000215ec l10: local reloc, size 0
   0x000215ec l13: local reloc, size 0
+  0x000215ec l10: local reloc, size 0
   0x000215ee l11: local reloc, size 0
   0x000215f4 l14: local reloc, size 0
   0x00021606 l12: local reloc, size 0
-  0x00021616 l6: local reloc, size 0
   0x00021616 l8: local reloc, size 0
+  0x00021616 l6: local reloc, size 0
   0x00021618 l2: local reloc, size 0
   0x00021620 _ff_oem2uni: global reloc, size 0
   0x00021638 l20: local reloc, size 0
@@ -5482,8 +5486,8 @@ Symbols of text:
   0x00021642 l23: local reloc, size 0
   0x00021648 l25: local reloc, size 0
   0x00021658 l22: local reloc, size 0
-  0x00021658 l24: local reloc, size 0
   0x00021658 l26: local reloc, size 0
+  0x00021658 l24: local reloc, size 0
   0x0002165a l18: local reloc, size 0
   0x00021660 _ff_wtoupper: global reloc, size 0
   0x00021672 l34: local reloc, size 0
@@ -5508,17 +5512,17 @@ Symbols of text:
   0x00021742 l48: local reloc, size 0
   0x00021744 l47: local reloc, size 0
   0x00021748 l58: local reloc, size 0
-  0x00021754 l42: local reloc, size 0
   0x00021754 l59: local reloc, size 0
+  0x00021754 l42: local reloc, size 0
   0x00021758 l41: local reloc, size 0
   0x0002175c l35: local reloc, size 0
   0x0002175e l30: local reloc, size 0
   0x00021764 l32: local reloc, size 0
   0x00021958 l33: local reloc, size 0
   0x00021a14 l1: local reloc, size 0
-  0x00021b14 _codec_wait: global reloc, size 0
-  0x00021b14 l5: local reloc, size 0
   0x00021b14 l4: local reloc, size 0
+  0x00021b14 l5: local reloc, size 0
+  0x00021b14 _codec_wait: global reloc, size 0
   0x00021b20 l6: local reloc, size 0
   0x00021b20 l2: local reloc, size 0
   0x00021b24 _init_codec: global reloc, size 0
@@ -5531,8 +5535,8 @@ Symbols of text:
   0x00021bd2 l3: local reloc, size 0
   0x00021be2 l6: local reloc, size 0
   0x00021be4 l4: local reloc, size 0
-  0x00021bea l1: local reloc, size 0
   0x00021bea l5: local reloc, size 0
+  0x00021bea l1: local reloc, size 0
   0x00021bf0 _psg_tone: global reloc, size 0
   0x00021c02 l12: local reloc, size 0
   0x00021c08 l14: local reloc, size 0
@@ -5546,15 +5550,15 @@ Symbols of text:
   0x00021cbe l5: local reloc, size 0
   0x00021cc6 l6: local reloc, size 0
   0x00021cce l7: local reloc, size 0
-  0x00021cd0 l1: local reloc, size 0
   0x00021cd0 l3: local reloc, size 0
+  0x00021cd0 l1: local reloc, size 0
   0x00021cd4 _sid_init: global reloc, size 0
   0x00021cf0 l15: local reloc, size 0
   0x00021cf4 l18: local reloc, size 0
   0x00021cf6 l16: local reloc, size 0
-  0x00021cfc l17: local reloc, size 0
-  0x00021cfc l14: local reloc, size 0
   0x00021cfc l11: local reloc, size 0
+  0x00021cfc l14: local reloc, size 0
+  0x00021cfc l17: local reloc, size 0
   0x00021d04 _sid_init_all: global reloc, size 0
   0x00021d0a l24: local reloc, size 0
   0x00021d10 l27: local reloc, size 0
@@ -5565,8 +5569,8 @@ Symbols of text:
   0x00021dca l34: local reloc, size 0
   0x00021dca l33: local reloc, size 0
   0x00021dd4 l35: local reloc, size 0
-  0x00021e0e l36: local reloc, size 0
   0x00021e0e l37: local reloc, size 0
+  0x00021e0e l36: local reloc, size 0
   0x00021e18 l38: local reloc, size 0
   0x00021e52 l40: local reloc, size 0
   0x00021e52 l39: local reloc, size 0
@@ -5575,17 +5579,17 @@ Symbols of text:
   0x00021e70 l42: local reloc, size 0
   0x00021e72 l43: local reloc, size 0
   0x00021e7a l44: local reloc, size 0
-  0x00021e8e l49: local reloc, size 0
   0x00021e8e l46: local reloc, size 0
+  0x00021e8e l49: local reloc, size 0
   0x00021e90 l47: local reloc, size 0
   0x00021e98 l48: local reloc, size 0
-  0x00021eac l50: local reloc, size 0
   0x00021eac l53: local reloc, size 0
+  0x00021eac l50: local reloc, size 0
   0x00021eae l51: local reloc, size 0
   0x00021eb6 l52: local reloc, size 0
   0x00021ec2 l31: local reloc, size 0
-  0x00021ec8 l57: local reloc, size 0
   0x00021ec8 _sid_text_external: global reloc, size 0
+  0x00021ec8 l57: local reloc, size 0
   0x00021ecc _cmd_help: global reloc, size 0
   0x00021eda l61: local reloc, size 0
   0x00021f12 l64: local reloc, size 0
@@ -5627,8 +5631,8 @@ Symbols of text:
   0x00022446 l120: local reloc, size 0
   0x00022460 l123: local reloc, size 0
   0x0002247a l124: local reloc, size 0
-  0x0002247e l121: local reloc, size 0
   0x0002247e l125: local reloc, size 0
+  0x0002247e l121: local reloc, size 0
   0x00022482 l126: local reloc, size 0
   0x00022486 l122: local reloc, size 0
   0x0002249a l114: local reloc, size 0
@@ -5637,8 +5641,8 @@ Symbols of text:
   0x000224bc l118: local reloc, size 0
   0x000224c8 l119: local reloc, size 0
   0x000224d0 _strtok_r: global reloc, size 0
-  0x000224e2 l135: local reloc, size 0
   0x000224e2 l132: local reloc, size 0
+  0x000224e2 l135: local reloc, size 0
   0x000224e4 l133: local reloc, size 0
   0x000224e8 l136: local reloc, size 0
   0x000224ee l134: local reloc, size 0
@@ -5661,8 +5665,8 @@ Symbols of text:
   0x0002259a l165: local reloc, size 0
   0x000225b6 l169: local reloc, size 0
   0x000225c4 l170: local reloc, size 0
-  0x000225c6 l171: local reloc, size 0
   0x000225c6 l168: local reloc, size 0
+  0x000225c6 l171: local reloc, size 0
   0x000225c8 l166: local reloc, size 0
   0x000225ce l167: local reloc, size 0
   0x000225d2 l172: local reloc, size 0
@@ -5681,8 +5685,8 @@ Symbols of text:
   0x0002266a l187: local reloc, size 0
   0x0002266e l188: local reloc, size 0
   0x000226bc l191: local reloc, size 0
-  0x000226be l189: local reloc, size 0
   0x000226be l192: local reloc, size 0
+  0x000226be l189: local reloc, size 0
   0x000226c0 l185: local reloc, size 0
   0x000226c4 l186: local reloc, size 0
   0x000226c6 l181: local reloc, size 0
@@ -5698,10 +5702,10 @@ Symbols of text:
   0x00022768 l214: local reloc, size 0
   0x0002276e l212: local reloc, size 0
   0x00022786 l213: local reloc, size 0
-  0x00022788 l211: local reloc, size 0
   0x00022788 l215: local reloc, size 0
-  0x00022788 l207: local reloc, size 0
   0x00022788 l204: local reloc, size 0
+  0x00022788 l207: local reloc, size 0
+  0x00022788 l211: local reloc, size 0
   0x0002278a l200: local reloc, size 0
   0x00022790 l201: local reloc, size 0
   0x00022792 l196: local reloc, size 0
@@ -5725,9 +5729,9 @@ Symbols of text:
   0x00022846 l242: local reloc, size 0
   0x00022852 l243: local reloc, size 0
   0x0002285a l245: local reloc, size 0
-  0x00022866 l246: local reloc, size 0
   0x00022866 l239: local reloc, size 0
   0x00022866 l241: local reloc, size 0
+  0x00022866 l246: local reloc, size 0
   0x00022866 l244: local reloc, size 0
   0x0002286c l247: local reloc, size 0
   0x00022872 l249: local reloc, size 0
@@ -5832,8 +5836,8 @@ Symbols of text:
   0x000233c6 l43: local reloc, size 0
   0x000233e4 l44: local reloc, size 0
   0x000233e6 l42: local reloc, size 0
-  0x000233fa l46: local reloc, size 0
   0x000233fa l38: local reloc, size 0
+  0x000233fa l46: local reloc, size 0
   0x00023400 l45: local reloc, size 0
   0x0002341c l47: local reloc, size 0
   0x00023434 l40: local reloc, size 0
@@ -5863,15 +5867,15 @@ Symbols of text:
   0x000235d8 _cmd_pwd: global reloc, size 0
   0x0002360a l83: local reloc, size 0
   0x00023628 l84: local reloc, size 0
-  0x0002363e l86: local reloc, size 0
   0x0002363e l80: local reloc, size 0
+  0x0002363e l86: local reloc, size 0
   0x00023648 l85: local reloc, size 0
   0x00023668 l82: local reloc, size 0
   0x00023670 _cmd_rename: global reloc, size 0
   0x00023696 l93: local reloc, size 0
   0x000236aa l95: local reloc, size 0
-  0x000236c8 l96: local reloc, size 0
   0x000236c8 l94: local reloc, size 0
+  0x000236c8 l96: local reloc, size 0
   0x000236ca l90: local reloc, size 0
   0x000236d0 l97: local reloc, size 0
   0x000236e8 l92: local reloc, size 0
@@ -5881,8 +5885,8 @@ Symbols of text:
   0x00023726 l106: local reloc, size 0
   0x0002373a l110: local reloc, size 0
   0x0002374c l108: local reloc, size 0
-  0x00023788 l109: local reloc, size 0
   0x00023788 l112: local reloc, size 0
+  0x00023788 l109: local reloc, size 0
   0x000237a2 l117: local reloc, size 0
   0x000237aa l115: local reloc, size 0
   0x000237c4 l118: local reloc, size 0
@@ -5895,8 +5899,8 @@ Symbols of text:
   0x0002388c l140: local reloc, size 0
   0x000238aa l131: local reloc, size 0
   0x000238aa l127: local reloc, size 0
-  0x000238d0 l123: local reloc, size 0
   0x000238d0 l119: local reloc, size 0
+  0x000238d0 l123: local reloc, size 0
   0x000238d2 l116: local reloc, size 0
   0x000238d4 l133: local reloc, size 0
   0x000238d8 l114: local reloc, size 0
@@ -5979,15 +5983,15 @@ Symbols of text:
   0x00023e64 _mem_cmd_poke8: global reloc, size 0
   0x00023e86 l16: local reloc, size 0
   0x00023ea6 l17: local reloc, size 0
-  0x00023eb8 l18: local reloc, size 0
   0x00023eb8 l13: local reloc, size 0
+  0x00023eb8 l18: local reloc, size 0
   0x00023ec0 l19: local reloc, size 0
   0x00023ee0 l15: local reloc, size 0
   0x00023ef0 _mem_cmd_peek8: global reloc, size 0
   0x00023f16 l26: local reloc, size 0
   0x00023f40 l27: local reloc, size 0
-  0x00023f52 l23: local reloc, size 0
   0x00023f52 l28: local reloc, size 0
+  0x00023f52 l23: local reloc, size 0
   0x00023f58 l29: local reloc, size 0
   0x00023f70 l25: local reloc, size 0
   0x00023f80 _mem_cmd_poke16: global reloc, size 0
@@ -6000,8 +6004,8 @@ Symbols of text:
   0x0002400c _mem_cmd_peek16: global reloc, size 0
   0x00024032 l46: local reloc, size 0
   0x0002405a l47: local reloc, size 0
-  0x0002406c l43: local reloc, size 0
   0x0002406c l48: local reloc, size 0
+  0x0002406c l43: local reloc, size 0
   0x00024074 l49: local reloc, size 0
   0x0002408c l45: local reloc, size 0
   0x0002409c _mem_cmd_poke32: global reloc, size 0
@@ -6031,13 +6035,13 @@ Symbols of text:
   0x0002425a l18: local reloc, size 0
   0x00024268 l19: local reloc, size 0
   0x00024278 l20: local reloc, size 0
-  0x0002427a l13: local reloc, size 0
   0x0002427a l17: local reloc, size 0
+  0x0002427a l13: local reloc, size 0
   0x00024280 _cli_find_setting: global reloc, size 0
   0x000242a2 l26: local reloc, size 0
   0x000242c0 l30: local reloc, size 0
-  0x000242c4 l31: local reloc, size 0
   0x000242c4 l29: local reloc, size 0
+  0x000242c4 l31: local reloc, size 0
   0x000242ca l27: local reloc, size 0
   0x000242ce l28: local reloc, size 0
   0x000242d0 l24: local reloc, size 0
@@ -6055,409 +6059,420 @@ Symbols of text:
   0x000243b2 l54: local reloc, size 0
   0x000243ea l57: local reloc, size 0
   0x000243f0 l55: local reloc, size 0
-  0x000243f4 l56: local reloc, size 0
   0x000243f4 l51: local reloc, size 0
+  0x000243f4 l56: local reloc, size 0
   0x00024400 l58: local reloc, size 0
   0x00024404 l53: local reloc, size 0
   0x0002442c _cli_cmd_set: global reloc, size 0
-  0x00024442 l64: local reloc, size 0
-  0x0002445c l66: local reloc, size 0
-  0x00024474 l67: local reloc, size 0
-  0x0002447a l65: local reloc, size 0
-  0x00024480 l72: local reloc, size 0
-  0x0002449e l74: local reloc, size 0
-  0x000244bc l73: local reloc, size 0
-  0x000244da l70: local reloc, size 0
-  0x000244e8 l71: local reloc, size 0
-  0x000244fc l62: local reloc, size 0
-  0x000244fc l69: local reloc, size 0
-  0x000244fc l78: local reloc, size 0
-  0x00024504 l68: local reloc, size 0
-  0x0002451c l79: local reloc, size 0
-  0x00024538 l75: local reloc, size 0
-  0x00024540 l76: local reloc, size 0
-  0x00024548 l77: local reloc, size 0
-  0x0002454c _cli_cmd_get: global reloc, size 0
-  0x00024568 l85: local reloc, size 0
-  0x00024586 l90: local reloc, size 0
-  0x000245a4 l89: local reloc, size 0
-  0x000245c2 l87: local reloc, size 0
-  0x000245d0 l88: local reloc, size 0
-  0x000245f0 l95: local reloc, size 0
-  0x0002461a l96: local reloc, size 0
-  0x00024630 l98: local reloc, size 0
-  0x00024630 l94: local reloc, size 0
-  0x00024632 l86: local reloc, size 0
-  0x00024646 l83: local reloc, size 0
-  0x00024646 l100: local reloc, size 0
-  0x00024650 l97: local reloc, size 0
-  0x00024654 l99: local reloc, size 0
-  0x0002466c l91: local reloc, size 0
-  0x00024674 l92: local reloc, size 0
-  0x0002467c l93: local reloc, size 0
-  0x00024680 l101: local reloc, size 0
-  0x00024694 _cli_sof_set: global reloc, size 0
-  0x000246c0 l107: local reloc, size 0
-  0x000246de l108: local reloc, size 0
-  0x000246fa l112: local reloc, size 0
-  0x00024718 l113: local reloc, size 0
-  0x0002472a l111: local reloc, size 0
-  0x0002472a l116: local reloc, size 0
-  0x00024752 l105: local reloc, size 0
-  0x0002475c l110: local reloc, size 0
-  0x00024780 l115: local reloc, size 0
-  0x000247a4 l117: local reloc, size 0
-  0x000247b8 l109: local reloc, size 0
-  0x000247bc l114: local reloc, size 0
-  0x000247c0 _cli_sof_get: global reloc, size 0
-  0x000247c2 l121: local reloc, size 0
-  0x000247c4 _cli_rtc_set: global reloc, size 0
-  0x000247f0 l128: local reloc, size 0
-  0x0002480a l129: local reloc, size 0
-  0x00024826 l133: local reloc, size 0
-  0x00024846 l134: local reloc, size 0
-  0x00024858 l132: local reloc, size 0
-  0x00024858 l137: local reloc, size 0
-  0x00024880 l126: local reloc, size 0
-  0x0002488c l131: local reloc, size 0
-  0x000248a4 l136: local reloc, size 0
-  0x000248c0 l138: local reloc, size 0
-  0x000248d4 l130: local reloc, size 0
-  0x000248d8 l135: local reloc, size 0
-  0x000248dc _cli_rtc_get: global reloc, size 0
-  0x000248de l142: local reloc, size 0
-  0x000248e0 _atoi_n: global reloc, size 0
-  0x000248f2 l149: local reloc, size 0
-  0x00024908 l152: local reloc, size 0
-  0x0002490a l150: local reloc, size 0
-  0x0002490e l151: local reloc, size 0
-  0x00024910 l147: local reloc, size 0
-  0x00024918 _cli_date_set: global reloc, size 0
-  0x00024948 l159: local reloc, size 0
-  0x0002494e l165: local reloc, size 0
-  0x00024954 l163: local reloc, size 0
-  0x0002495c l166: local reloc, size 0
-  0x00024980 l167: local reloc, size 0
-  0x00024982 l164: local reloc, size 0
-  0x0002498a l171: local reloc, size 0
-  0x00024992 l169: local reloc, size 0
-  0x000249b6 l162: local reloc, size 0
-  0x000249b6 l170: local reloc, size 0
-  0x000249b6 l168: local reloc, size 0
-  0x000249b8 l160: local reloc, size 0
-  0x000249be l161: local reloc, size 0
-  0x000249fe l156: local reloc, size 0
-  0x00024a08 l158: local reloc, size 0
-  0x00024a24 _cli_date_get: global reloc, size 0
-  0x00024a64 l175: local reloc, size 0
-  0x00024a6c l177: local reloc, size 0
-  0x00024a7c _cli_time_set: global reloc, size 0
-  0x00024aac l184: local reloc, size 0
-  0x00024ab2 l190: local reloc, size 0
-  0x00024ab8 l188: local reloc, size 0
-  0x00024ac0 l191: local reloc, size 0
-  0x00024ae4 l192: local reloc, size 0
-  0x00024ae6 l189: local reloc, size 0
-  0x00024aee l196: local reloc, size 0
-  0x00024af6 l194: local reloc, size 0
-  0x00024b1a l187: local reloc, size 0
-  0x00024b1a l193: local reloc, size 0
-  0x00024b1a l195: local reloc, size 0
-  0x00024b1c l185: local reloc, size 0
-  0x00024b22 l186: local reloc, size 0
-  0x00024b62 l181: local reloc, size 0
-  0x00024b6c l183: local reloc, size 0
-  0x00024b88 _cli_time_get: global reloc, size 0
-  0x00024bc8 l200: local reloc, size 0
-  0x00024bd0 l202: local reloc, size 0
-  0x00024be0 _cli_font_set: global reloc, size 0
-  0x00024c04 l208: local reloc, size 0
-  0x00024c08 l210: local reloc, size 0
-  0x00024c1a l214: local reloc, size 0
-  0x00024c28 l215: local reloc, size 0
-  0x00024c7a l213: local reloc, size 0
-  0x00024c7a l216: local reloc, size 0
-  0x00024c7c l211: local reloc, size 0
-  0x00024c84 l212: local reloc, size 0
-  0x00024c94 l209: local reloc, size 0
-  0x00024ca8 l206: local reloc, size 0
-  0x00024ca8 l218: local reloc, size 0
-  0x00024cb4 l217: local reloc, size 0
-  0x00024cd4 l219: local reloc, size 0
-  0x00024cf0 _cli_font_get: global reloc, size 0
-  0x00024cf8 l223: local reloc, size 0
-  0x00024cfc _cli_volume_set: global reloc, size 0
-  0x00024d1e l228: local reloc, size 0
-  0x00024d24 _cli_volume_get: global reloc, size 0
-  0x00024d4a l233: local reloc, size 0
-  0x00024d50 l235: local reloc, size 0
-  0x00024d54 _cli_set_init: global reloc, size 0
-  0x00024db4 l239: local reloc, size 0
-  0x00024db8 l241: local reloc, size 0
-  0x00024df0 l242: local reloc, size 0
-  0x00024df8 l243: local reloc, size 0
-  0x00024e2c l244: local reloc, size 0
-  0x00024e34 l245: local reloc, size 0
-  0x00024e60 l246: local reloc, size 0
-  0x00024e68 l247: local reloc, size 0
-  0x00024e94 l248: local reloc, size 0
-  0x00024e9c _psg_test: global reloc, size 0
-  0x00024ec4 l3: local reloc, size 0
-  0x00024ec4 l4: local reloc, size 0
-  0x00024ece l5: local reloc, size 0
-  0x00024ef8 l7: local reloc, size 0
-  0x00024ef8 l6: local reloc, size 0
-  0x00024f02 l8: local reloc, size 0
-  0x00024f2c l10: local reloc, size 0
-  0x00024f2c l9: local reloc, size 0
-  0x00024f36 l11: local reloc, size 0
-  0x00024f86 l1: local reloc, size 0
-  0x00024f8c _opl3_test: global reloc, size 0
-  0x00024f92 l17: local reloc, size 0
-  0x00024fa4 l20: local reloc, size 0
-  0x00024fa6 l21: local reloc, size 0
-  0x00024fc0 l22: local reloc, size 0
-  0x00024fc2 l19: local reloc, size 0
-  0x00024fcc l23: local reloc, size 0
-  0x00024fcc l24: local reloc, size 0
-  0x00024fd6 l25: local reloc, size 0
-  0x00024fd8 l26: local reloc, size 0
-  0x00024fea l29: local reloc, size 0
-  0x00024fec l30: local reloc, size 0
-  0x00025006 l31: local reloc, size 0
-  0x00025008 l28: local reloc, size 0
-  0x0002500a l15: local reloc, size 0
-  0x00025010 _midi_tx_test: global reloc, size 0
-  0x00025012 l35: local reloc, size 0
-  0x00025014 _midi_rx_test: global reloc, size 0
-  0x00025016 l40: local reloc, size 0
-  0x00025018 _midi_loop_test: global reloc, size 0
-  0x0002501a l45: local reloc, size 0
-  0x0002501c _opl2_test: global reloc, size 0
-  0x00025030 l52: local reloc, size 0
-  0x00025036 l55: local reloc, size 0
-  0x00025038 l53: local reloc, size 0
-  0x0002503e l54: local reloc, size 0
-  0x000255b4 l56: local reloc, size 0
-  0x000255ba l59: local reloc, size 0
-  0x000255bc l57: local reloc, size 0
-  0x000255c2 l58: local reloc, size 0
-  0x000255ca l60: local reloc, size 0
-  0x000255ca l61: local reloc, size 0
-  0x000255da l62: local reloc, size 0
-  0x000255de l63: local reloc, size 0
-  0x000255e4 l66: local reloc, size 0
-  0x000255e6 l64: local reloc, size 0
-  0x000255ec l65: local reloc, size 0
-  0x000255ee l50: local reloc, size 0
-  0x000255f4 _opl3_tone_on: global reloc, size 0
-  0x00025610 _opl3_tone_off: global reloc, size 0
-  0x00025614 _cli_test_bitmap: global reloc, size 0
-  0x00025632 l3: local reloc, size 0
-  0x00025670 l6: local reloc, size 0
-  0x00025672 l4: local reloc, size 0
-  0x0002567a l5: local reloc, size 0
-  0x0002567e l7: local reloc, size 0
-  0x00025690 l10: local reloc, size 0
-  0x00025692 l8: local reloc, size 0
-  0x0002569a l1: local reloc, size 0
-  0x0002569a l9: local reloc, size 0
-  0x000256a0 _cli_test_uart: global reloc, size 0
-  0x00025702 l17: local reloc, size 0
-  0x0002570c l20: local reloc, size 0
-  0x00025712 l22: local reloc, size 0
-  0x00025716 l23: local reloc, size 0
-  0x0002572a l21: local reloc, size 0
-  0x0002575a l26: local reloc, size 0
-  0x0002575a l24: local reloc, size 0
-  0x0002575c l19: local reloc, size 0
-  0x0002575c l14: local reloc, size 0
-  0x00025768 l16: local reloc, size 0
-  0x000257b4 _cli_test_panic: global reloc, size 0
-  0x000257d0 l30: local reloc, size 0
-  0x000257d4 _cli_test_rtc: global reloc, size 0
-  0x00025840 l39: local reloc, size 0
-  0x0002584a l42: local reloc, size 0
-  0x0002588a l43: local reloc, size 0
-  0x0002588c l35: local reloc, size 0
-  0x0002588c l41: local reloc, size 0
-  0x00025898 l44: local reloc, size 0
-  0x000258a4 l37: local reloc, size 0
-  0x000258ac l38: local reloc, size 0
-  0x000258d8 _cli_mem_test: global reloc, size 0
-  0x00025936 l51: local reloc, size 0
-  0x00025944 l55: local reloc, size 0
-  0x0002598c l56: local reloc, size 0
-  0x0002599a l58: local reloc, size 0
-  0x000259e2 l59: local reloc, size 0
-  0x000259ec l61: local reloc, size 0
-  0x00025a34 l62: local reloc, size 0
-  0x00025a46 l64: local reloc, size 0
-  0x00025a7e l54: local reloc, size 0
-  0x00025a7e l65: local reloc, size 0
-  0x00025a80 l52: local reloc, size 0
-  0x00025a86 l53: local reloc, size 0
-  0x00025abe l48: local reloc, size 0
-  0x00025ac8 l57: local reloc, size 0
-  0x00025b00 l60: local reloc, size 0
-  0x00025b38 l63: local reloc, size 0
-  0x00025b70 l66: local reloc, size 0
-  0x00025b8c l50: local reloc, size 0
-  0x00025ba8 l67: local reloc, size 0
-  0x00025bcc _cli_test_ide: global reloc, size 0
-  0x00025bda l73: local reloc, size 0
-  0x00025bf8 l76: local reloc, size 0
-  0x00025c16 l77: local reloc, size 0
-  0x00025c1a l79: local reloc, size 0
-  0x00025c30 l83: local reloc, size 0
-  0x00025c42 l84: local reloc, size 0
-  0x00025c6e l82: local reloc, size 0
-  0x00025c70 l80: local reloc, size 0
-  0x00025c74 l81: local reloc, size 0
-  0x00025c8a l75: local reloc, size 0
-  0x00025c8a l71: local reloc, size 0
-  0x00025c94 l78: local reloc, size 0
-  0x00025ca8 l85: local reloc, size 0
-  0x00025cac l86: local reloc, size 0
-  0x00025cb0 l87: local reloc, size 0
-  0x00025cb4 _cli_test_create: global reloc, size 0
-  0x00025ccc l93: local reloc, size 0
-  0x00025ce0 l95: local reloc, size 0
-  0x00025d08 l98: local reloc, size 0
-  0x00025d22 l99: local reloc, size 0
-  0x00025d34 l96: local reloc, size 0
-  0x00025d52 l101: local reloc, size 0
-  0x00025d54 l94: local reloc, size 0
-  0x00025d68 l103: local reloc, size 0
-  0x00025d68 l91: local reloc, size 0
-  0x00025d70 l100: local reloc, size 0
-  0x00025d88 l97: local reloc, size 0
-  0x00025d98 l102: local reloc, size 0
-  0x00025db0 l104: local reloc, size 0
-  0x00025dcc _cli_test_lpt: global reloc, size 0
-  0x00025dce l108: local reloc, size 0
-  0x00025dd0 _cmd_test_print: global reloc, size 0
-  0x00025dd2 l113: local reloc, size 0
-  0x00025dd4 _test_help: global reloc, size 0
-  0x00025df6 l150: local reloc, size 0
-  0x00025e1a l153: local reloc, size 0
-  0x00025e1e l151: local reloc, size 0
-  0x00025e22 l147: local reloc, size 0
-  0x00025e22 l152: local reloc, size 0
-  0x00025e28 l154: local reloc, size 0
-  0x00025e2c l149: local reloc, size 0
-  0x00025e5c _cmd_test: global reloc, size 0
-  0x00025e78 l160: local reloc, size 0
-  0x00025e94 l162: local reloc, size 0
-  0x00025ebc l165: local reloc, size 0
-  0x00025ebe l163: local reloc, size 0
-  0x00025ede l164: local reloc, size 0
-  0x00025ee6 l166: local reloc, size 0
-  0x00025f04 l170: local reloc, size 0
-  0x00025f26 l171: local reloc, size 0
-  0x00025f26 l169: local reloc, size 0
-  0x00025f2a l167: local reloc, size 0
-  0x00025f2e l168: local reloc, size 0
-  0x00025f3e l161: local reloc, size 0
-  0x00025f4c l158: local reloc, size 0
-  0x00025f4c l172: local reloc, size 0
-  0x00025f58 l119: local reloc, size 0
-  0x00025f60 l120: local reloc, size 0
-  0x00025f80 l121: local reloc, size 0
-  0x00025f88 l122: local reloc, size 0
-  0x00025fac l123: local reloc, size 0
-  0x00025fb0 l124: local reloc, size 0
-  0x00025fdc l125: local reloc, size 0
-  0x00025fe4 l126: local reloc, size 0
-  0x0002600c l127: local reloc, size 0
-  0x00026010 l128: local reloc, size 0
-  0x0002602c l129: local reloc, size 0
-  0x00026030 l130: local reloc, size 0
-  0x00026058 l131: local reloc, size 0
-  0x00026064 l132: local reloc, size 0
-  0x00026098 l133: local reloc, size 0
-  0x000260a0 l134: local reloc, size 0
-  0x000260d4 l135: local reloc, size 0
-  0x000260dc l136: local reloc, size 0
-  0x00026104 l137: local reloc, size 0
-  0x0002610c l138: local reloc, size 0
-  0x0002612c l139: local reloc, size 0
-  0x00026134 l140: local reloc, size 0
-  0x00026154 l141: local reloc, size 0
-  0x00026158 l142: local reloc, size 0
-  0x00026178 l143: local reloc, size 0
-  0x00026180 l144: local reloc, size 0
-  0x000261a0 l145: local reloc, size 0
-  0x000261a8 l146: local reloc, size 0
+  0x00024446 l64: local reloc, size 0
+  0x00024460 l66: local reloc, size 0
+  0x000244aa l67: local reloc, size 0
+  0x000244b0 l65: local reloc, size 0
+  0x000244b6 l72: local reloc, size 0
+  0x000244d4 l74: local reloc, size 0
+  0x000244f2 l73: local reloc, size 0
+  0x00024510 l70: local reloc, size 0
+  0x0002451e l71: local reloc, size 0
+  0x00024532 l69: local reloc, size 0
+  0x00024532 l78: local reloc, size 0
+  0x00024532 l62: local reloc, size 0
+  0x0002453c l68: local reloc, size 0
+  0x0002455c l79: local reloc, size 0
+  0x00024578 l75: local reloc, size 0
+  0x00024580 l76: local reloc, size 0
+  0x00024588 l77: local reloc, size 0
+  0x0002458c _cli_cmd_get: global reloc, size 0
+  0x000245a8 l85: local reloc, size 0
+  0x000245c6 l90: local reloc, size 0
+  0x000245e4 l89: local reloc, size 0
+  0x00024602 l87: local reloc, size 0
+  0x00024612 l88: local reloc, size 0
+  0x00024632 l95: local reloc, size 0
+  0x0002465c l96: local reloc, size 0
+  0x000246a4 l94: local reloc, size 0
+  0x000246a4 l98: local reloc, size 0
+  0x000246a6 l86: local reloc, size 0
+  0x000246ba l100: local reloc, size 0
+  0x000246ba l83: local reloc, size 0
+  0x000246c4 l97: local reloc, size 0
+  0x000246c8 l99: local reloc, size 0
+  0x000246e4 l91: local reloc, size 0
+  0x000246ec l92: local reloc, size 0
+  0x000246f4 l93: local reloc, size 0
+  0x000246f8 l101: local reloc, size 0
+  0x0002470c _cli_sof_set: global reloc, size 0
+  0x00024738 l107: local reloc, size 0
+  0x00024756 l108: local reloc, size 0
+  0x00024772 l112: local reloc, size 0
+  0x00024790 l113: local reloc, size 0
+  0x000247a2 l116: local reloc, size 0
+  0x000247a2 l111: local reloc, size 0
+  0x000247ca l105: local reloc, size 0
+  0x000247d4 l110: local reloc, size 0
+  0x000247f8 l115: local reloc, size 0
+  0x0002481c l117: local reloc, size 0
+  0x00024830 l109: local reloc, size 0
+  0x00024834 l114: local reloc, size 0
+  0x00024838 _cli_sof_get: global reloc, size 0
+  0x0002483a l121: local reloc, size 0
+  0x0002483c _cli_rtc_set: global reloc, size 0
+  0x00024868 l128: local reloc, size 0
+  0x00024882 l129: local reloc, size 0
+  0x0002489e l133: local reloc, size 0
+  0x000248be l134: local reloc, size 0
+  0x000248d0 l132: local reloc, size 0
+  0x000248d0 l137: local reloc, size 0
+  0x000248f8 l126: local reloc, size 0
+  0x00024904 l131: local reloc, size 0
+  0x0002491c l136: local reloc, size 0
+  0x00024938 l138: local reloc, size 0
+  0x0002494c l130: local reloc, size 0
+  0x00024950 l135: local reloc, size 0
+  0x00024954 _cli_rtc_get: global reloc, size 0
+  0x00024956 l142: local reloc, size 0
+  0x00024958 _atoi_n: global reloc, size 0
+  0x0002496a l149: local reloc, size 0
+  0x00024980 l152: local reloc, size 0
+  0x00024982 l150: local reloc, size 0
+  0x00024986 l151: local reloc, size 0
+  0x00024988 l147: local reloc, size 0
+  0x00024990 _cli_date_set: global reloc, size 0
+  0x000249c0 l159: local reloc, size 0
+  0x000249c6 l165: local reloc, size 0
+  0x000249cc l163: local reloc, size 0
+  0x000249d4 l166: local reloc, size 0
+  0x000249f8 l167: local reloc, size 0
+  0x000249fa l164: local reloc, size 0
+  0x00024a02 l171: local reloc, size 0
+  0x00024a0a l169: local reloc, size 0
+  0x00024a2e l162: local reloc, size 0
+  0x00024a2e l168: local reloc, size 0
+  0x00024a2e l170: local reloc, size 0
+  0x00024a30 l160: local reloc, size 0
+  0x00024a36 l161: local reloc, size 0
+  0x00024a76 l156: local reloc, size 0
+  0x00024a80 l158: local reloc, size 0
+  0x00024a9c _cli_date_get: global reloc, size 0
+  0x00024adc l175: local reloc, size 0
+  0x00024ae4 l177: local reloc, size 0
+  0x00024af4 _cli_time_set: global reloc, size 0
+  0x00024b24 l184: local reloc, size 0
+  0x00024b2a l190: local reloc, size 0
+  0x00024b30 l188: local reloc, size 0
+  0x00024b38 l191: local reloc, size 0
+  0x00024b5c l192: local reloc, size 0
+  0x00024b5e l189: local reloc, size 0
+  0x00024b66 l196: local reloc, size 0
+  0x00024b6e l194: local reloc, size 0
+  0x00024b92 l193: local reloc, size 0
+  0x00024b92 l195: local reloc, size 0
+  0x00024b92 l187: local reloc, size 0
+  0x00024b94 l185: local reloc, size 0
+  0x00024b9a l186: local reloc, size 0
+  0x00024bda l181: local reloc, size 0
+  0x00024be4 l183: local reloc, size 0
+  0x00024c00 _cli_time_get: global reloc, size 0
+  0x00024c40 l200: local reloc, size 0
+  0x00024c48 l202: local reloc, size 0
+  0x00024c58 _cli_font_set: global reloc, size 0
+  0x00024c7c l208: local reloc, size 0
+  0x00024c80 l210: local reloc, size 0
+  0x00024c92 l214: local reloc, size 0
+  0x00024ca0 l215: local reloc, size 0
+  0x00024cf2 l213: local reloc, size 0
+  0x00024cf2 l216: local reloc, size 0
+  0x00024cf4 l211: local reloc, size 0
+  0x00024cfc l212: local reloc, size 0
+  0x00024d0c l209: local reloc, size 0
+  0x00024d20 l206: local reloc, size 0
+  0x00024d20 l218: local reloc, size 0
+  0x00024d2c l217: local reloc, size 0
+  0x00024d4c l219: local reloc, size 0
+  0x00024d68 _cli_font_get: global reloc, size 0
+  0x00024d70 l223: local reloc, size 0
+  0x00024d74 _cli_volume_set: global reloc, size 0
+  0x00024d96 l228: local reloc, size 0
+  0x00024d9c _cli_volume_get: global reloc, size 0
+  0x00024dc2 l233: local reloc, size 0
+  0x00024dc8 l235: local reloc, size 0
+  0x00024dcc _cli_layout_set: global reloc, size 0
+  0x00024dea l241: local reloc, size 0
+  0x00024e08 l243: local reloc, size 0
+  0x00024e18 l244: local reloc, size 0
+  0x00024e2a l242: local reloc, size 0
+  0x00024e2c l245: local reloc, size 0
+  0x00024e2c l239: local reloc, size 0
+  0x00024e38 _cli_layout_get: global reloc, size 0
+  0x00024e3a l249: local reloc, size 0
+  0x00024e3c _cli_set_init: global reloc, size 0
+  0x00024eb0 l254: local reloc, size 0
+  0x00024eb4 l256: local reloc, size 0
+  0x00024eec l257: local reloc, size 0
+  0x00024ef4 l258: local reloc, size 0
+  0x00024f20 l259: local reloc, size 0
+  0x00024f28 l260: local reloc, size 0
+  0x00024f54 l261: local reloc, size 0
+  0x00024f5c l262: local reloc, size 0
+  0x00024f90 l263: local reloc, size 0
+  0x00024f98 l264: local reloc, size 0
+  0x00024fc4 l265: local reloc, size 0
+  0x00024fcc _psg_test: global reloc, size 0
+  0x00024ff4 l3: local reloc, size 0
+  0x00024ff4 l4: local reloc, size 0
+  0x00024ffe l5: local reloc, size 0
+  0x00025028 l6: local reloc, size 0
+  0x00025028 l7: local reloc, size 0
+  0x00025032 l8: local reloc, size 0
+  0x0002505c l9: local reloc, size 0
+  0x0002505c l10: local reloc, size 0
+  0x00025066 l11: local reloc, size 0
+  0x000250b6 l1: local reloc, size 0
+  0x000250bc _opl3_test: global reloc, size 0
+  0x000250c2 l17: local reloc, size 0
+  0x000250d4 l20: local reloc, size 0
+  0x000250d6 l21: local reloc, size 0
+  0x000250f0 l22: local reloc, size 0
+  0x000250f2 l19: local reloc, size 0
+  0x000250fc l24: local reloc, size 0
+  0x000250fc l23: local reloc, size 0
+  0x00025106 l25: local reloc, size 0
+  0x00025108 l26: local reloc, size 0
+  0x0002511a l29: local reloc, size 0
+  0x0002511c l30: local reloc, size 0
+  0x00025136 l31: local reloc, size 0
+  0x00025138 l28: local reloc, size 0
+  0x0002513a l15: local reloc, size 0
+  0x00025140 _midi_tx_test: global reloc, size 0
+  0x00025142 l35: local reloc, size 0
+  0x00025144 _midi_rx_test: global reloc, size 0
+  0x00025146 l40: local reloc, size 0
+  0x00025148 _midi_loop_test: global reloc, size 0
+  0x0002514a l45: local reloc, size 0
+  0x0002514c _opl2_test: global reloc, size 0
+  0x00025160 l52: local reloc, size 0
+  0x00025166 l55: local reloc, size 0
+  0x00025168 l53: local reloc, size 0
+  0x0002516e l54: local reloc, size 0
+  0x000256e4 l56: local reloc, size 0
+  0x000256ea l59: local reloc, size 0
+  0x000256ec l57: local reloc, size 0
+  0x000256f2 l58: local reloc, size 0
+  0x000256fa l61: local reloc, size 0
+  0x000256fa l60: local reloc, size 0
+  0x0002570a l62: local reloc, size 0
+  0x0002570e l63: local reloc, size 0
+  0x00025714 l66: local reloc, size 0
+  0x00025716 l64: local reloc, size 0
+  0x0002571c l65: local reloc, size 0
+  0x0002571e l50: local reloc, size 0
+  0x00025724 _opl3_tone_on: global reloc, size 0
+  0x00025740 _opl3_tone_off: global reloc, size 0
+  0x00025744 _cli_test_bitmap: global reloc, size 0
+  0x00025762 l3: local reloc, size 0
+  0x000257a0 l6: local reloc, size 0
+  0x000257a2 l4: local reloc, size 0
+  0x000257aa l5: local reloc, size 0
+  0x000257ae l7: local reloc, size 0
+  0x000257c0 l10: local reloc, size 0
+  0x000257c2 l8: local reloc, size 0
+  0x000257ca l9: local reloc, size 0
+  0x000257ca l1: local reloc, size 0
+  0x000257d0 _cli_test_uart: global reloc, size 0
+  0x00025832 l17: local reloc, size 0
+  0x0002583c l20: local reloc, size 0
+  0x00025842 l22: local reloc, size 0
+  0x00025846 l23: local reloc, size 0
+  0x0002585a l21: local reloc, size 0
+  0x0002588a l26: local reloc, size 0
+  0x0002588a l24: local reloc, size 0
+  0x0002588c l14: local reloc, size 0
+  0x0002588c l19: local reloc, size 0
+  0x00025898 l16: local reloc, size 0
+  0x000258e4 _cli_test_panic: global reloc, size 0
+  0x00025900 l30: local reloc, size 0
+  0x00025904 _cli_test_rtc: global reloc, size 0
+  0x00025970 l39: local reloc, size 0
+  0x0002597a l42: local reloc, size 0
+  0x000259ba l43: local reloc, size 0
+  0x000259bc l35: local reloc, size 0
+  0x000259bc l41: local reloc, size 0
+  0x000259c8 l44: local reloc, size 0
+  0x000259d4 l37: local reloc, size 0
+  0x000259dc l38: local reloc, size 0
+  0x00025a08 _cli_mem_test: global reloc, size 0
+  0x00025a66 l51: local reloc, size 0
+  0x00025a74 l55: local reloc, size 0
+  0x00025abc l56: local reloc, size 0
+  0x00025aca l58: local reloc, size 0
+  0x00025b12 l59: local reloc, size 0
+  0x00025b1c l61: local reloc, size 0
+  0x00025b64 l62: local reloc, size 0
+  0x00025b76 l64: local reloc, size 0
+  0x00025bae l65: local reloc, size 0
+  0x00025bae l54: local reloc, size 0
+  0x00025bb0 l52: local reloc, size 0
+  0x00025bb6 l53: local reloc, size 0
+  0x00025bee l48: local reloc, size 0
+  0x00025bf8 l57: local reloc, size 0
+  0x00025c30 l60: local reloc, size 0
+  0x00025c68 l63: local reloc, size 0
+  0x00025ca0 l66: local reloc, size 0
+  0x00025cbc l50: local reloc, size 0
+  0x00025cd8 l67: local reloc, size 0
+  0x00025cfc _cli_test_ide: global reloc, size 0
+  0x00025d0a l73: local reloc, size 0
+  0x00025d28 l76: local reloc, size 0
+  0x00025d46 l77: local reloc, size 0
+  0x00025d4a l79: local reloc, size 0
+  0x00025d60 l83: local reloc, size 0
+  0x00025d72 l84: local reloc, size 0
+  0x00025d9e l82: local reloc, size 0
+  0x00025da0 l80: local reloc, size 0
+  0x00025da4 l81: local reloc, size 0
+  0x00025dba l75: local reloc, size 0
+  0x00025dba l71: local reloc, size 0
+  0x00025dc4 l78: local reloc, size 0
+  0x00025dd8 l85: local reloc, size 0
+  0x00025ddc l86: local reloc, size 0
+  0x00025de0 l87: local reloc, size 0
+  0x00025de4 _cli_test_create: global reloc, size 0
+  0x00025dfc l93: local reloc, size 0
+  0x00025e10 l95: local reloc, size 0
+  0x00025e38 l98: local reloc, size 0
+  0x00025e52 l99: local reloc, size 0
+  0x00025e64 l96: local reloc, size 0
+  0x00025e82 l101: local reloc, size 0
+  0x00025e84 l94: local reloc, size 0
+  0x00025e98 l103: local reloc, size 0
+  0x00025e98 l91: local reloc, size 0
+  0x00025ea0 l100: local reloc, size 0
+  0x00025eb8 l97: local reloc, size 0
+  0x00025ec8 l102: local reloc, size 0
+  0x00025ee0 l104: local reloc, size 0
+  0x00025efc _cli_test_lpt: global reloc, size 0
+  0x00025efe l108: local reloc, size 0
+  0x00025f00 _cmd_test_print: global reloc, size 0
+  0x00025f02 l113: local reloc, size 0
+  0x00025f04 _test_help: global reloc, size 0
+  0x00025f26 l150: local reloc, size 0
+  0x00025f4a l153: local reloc, size 0
+  0x00025f4e l151: local reloc, size 0
+  0x00025f52 l147: local reloc, size 0
+  0x00025f52 l152: local reloc, size 0
+  0x00025f58 l154: local reloc, size 0
+  0x00025f5c l149: local reloc, size 0
+  0x00025f8c _cmd_test: global reloc, size 0
+  0x00025fa8 l160: local reloc, size 0
+  0x00025fc4 l162: local reloc, size 0
+  0x00025fec l165: local reloc, size 0
+  0x00025fee l163: local reloc, size 0
+  0x0002600e l164: local reloc, size 0
+  0x00026016 l166: local reloc, size 0
+  0x00026034 l170: local reloc, size 0
+  0x00026056 l171: local reloc, size 0
+  0x00026056 l169: local reloc, size 0
+  0x0002605a l167: local reloc, size 0
+  0x0002605e l168: local reloc, size 0
+  0x0002606e l161: local reloc, size 0
+  0x0002607c l172: local reloc, size 0
+  0x0002607c l158: local reloc, size 0
+  0x00026088 l119: local reloc, size 0
+  0x00026090 l120: local reloc, size 0
+  0x000260b0 l121: local reloc, size 0
+  0x000260b8 l122: local reloc, size 0
+  0x000260dc l123: local reloc, size 0
+  0x000260e0 l124: local reloc, size 0
+  0x0002610c l125: local reloc, size 0
+  0x00026114 l126: local reloc, size 0
+  0x0002613c l127: local reloc, size 0
+  0x00026140 l128: local reloc, size 0
+  0x0002615c l129: local reloc, size 0
+  0x00026160 l130: local reloc, size 0
+  0x00026188 l131: local reloc, size 0
+  0x00026194 l132: local reloc, size 0
+  0x000261c8 l133: local reloc, size 0
+  0x000261d0 l134: local reloc, size 0
+  0x00026204 l135: local reloc, size 0
+  0x0002620c l136: local reloc, size 0
+  0x00026234 l137: local reloc, size 0
+  0x0002623c l138: local reloc, size 0
+  0x0002625c l139: local reloc, size 0
+  0x00026264 l140: local reloc, size 0
+  0x00026284 l141: local reloc, size 0
+  0x00026288 l142: local reloc, size 0
+  0x000262a8 l143: local reloc, size 0
+  0x000262b0 l144: local reloc, size 0
+  0x000262d0 l145: local reloc, size 0
+  0x000262d8 l146: local reloc, size 0
 
 Symbols of .dtors:
-  0x000261c4 ___DTOR_LIST__: global reloc object, size 8
+  0x000262f4 ___DTOR_LIST__: global reloc object, size 8
 
 Symbols of .ctors:
-  0x000261cc ___CTOR_LIST__: global reloc object, size 8
+  0x000262fc ___CTOR_LIST__: global reloc object, size 8
 
 Symbols of data:
-  0x000261d4 l21: local reloc, size 0
-  0x000261d8 _VolumeStr: global reloc, size 0
-  0x000261e4 _splashscreen_lut: global reloc, size 0
-  0x000265e4 _splashscreen_pix: global reloc, size 0
-  0x00028938 ___first_block: global reloc, size 0
-  0x0002893c ___last_block: global reloc, size 0
-  0x00028940 ___current: global reloc, size 0
-  0x00028944 __clz_tab: global reloc, size 0
-  0x00028a44 _err_messages: global reloc, size 0
-  0x00028ad8 l1: local reloc, size 0
-  0x00028adc l2: local reloc, size 0
-  0x00028ae0 _g_pata_error: global reloc, size 0
-  0x00028ae4 _g_pata_status: global reloc, size 0
-  0x00028ae8 _g_mouse_state: global reloc, size 0
-  0x00028aec _ansi_keys: global reloc, size 0
-  0x00028b44 _g_sdc_status: global reloc, size 0
-  0x00028b48 _g_sdc_error: global reloc, size 0
-  0x00028b4c _MSX_CP437_8x8_bin: global reloc, size 0
-  0x0002934c _volume: global reloc, size 0
-  0x00029350 _g_current_channel: global reloc, size 0
-  0x00029354 l118: local reloc, size 0
+  0x00026304 l21: local reloc, size 0
+  0x00026308 _VolumeStr: global reloc, size 0
+  0x00026314 _splashscreen_lut: global reloc, size 0
+  0x00026714 _splashscreen_pix: global reloc, size 0
+  0x00028a68 ___first_block: global reloc, size 0
+  0x00028a6c ___last_block: global reloc, size 0
+  0x00028a70 ___current: global reloc, size 0
+  0x00028a74 __clz_tab: global reloc, size 0
+  0x00028b74 _err_messages: global reloc, size 0
+  0x00028c08 l1: local reloc, size 0
+  0x00028c0c l2: local reloc, size 0
+  0x00028c10 _g_pata_error: global reloc, size 0
+  0x00028c14 _g_pata_status: global reloc, size 0
+  0x00028c18 _g_mouse_state: global reloc, size 0
+  0x00028c1c _ansi_keys: global reloc, size 0
+  0x00028c74 _g_sdc_status: global reloc, size 0
+  0x00028c78 _g_sdc_error: global reloc, size 0
+  0x00028c7c _MSX_CP437_8x8_bin: global reloc, size 0
+  0x0002947c _volume: global reloc, size 0
+  0x00029480 _g_current_channel: global reloc, size 0
+  0x00029484 l118: local reloc, size 0
 
 Symbols of bss:
-  0x00029408 ___firstexit: global reloc, size 0
-  0x0002940c l1: local reloc, size 0
-  0x00029410 _g_int_handler: global reloc, size 0
-  0x000294d0 _panic_number: global reloc, size 0
-  0x000294d4 _panic_pc: global reloc, size 0
-  0x000294d8 _panic_address: global reloc, size 0
-  0x000294dc _mem_pages: global reloc, size 0
-  0x000295dc l2: local reloc, size 0
-  0x000295e0 _jiffy_count: global reloc, size 0
-  0x000295e4 _g_block_devs: global reloc, size 0
-  0x000296d4 _g_channel_devs: global reloc, size 0
-  0x00029884 _g_channels: global reloc, size 0
-  0x00029ac4 _g_drive: global reloc, size 0
-  0x0002ac84 _g_dir_state: global reloc, size 0
-  0x0002ac8c _g_directory: global reloc, size 0
-  0x0002ae2c _g_fil_state: global reloc, size 0
-  0x0002ae34 _g_file: global reloc, size 0
-  0x0002bf64 _g_file_dev: global reloc, size 0
-  0x0002bf9c _g_file_loader: global reloc, size 0
-  0x0002c000 _workspace: global reloc, size 0
-  0x0002c800 _g_buffer: global reloc, size 0
-  0x0002ca00 _g_kbd_control: global reloc, size 0
-  0x0002cc34 l1: local reloc, size 0
-  0x0002cc38 l1: local reloc, size 0
-  0x0002cc94 l1: local reloc, size 0
-  0x0002cca0 l2: local reloc, size 0
-  0x0002cca4 l3: local reloc, size 0
-  0x0002cca8 l5: local reloc, size 0
-  0x0002cea8 l1: local reloc, size 0
-  0x0002ceac l1: local reloc, size 0
-  0x0002ceb0 l2: local reloc, size 0
+  0x00029538 ___firstexit: global reloc, size 0
+  0x0002953c l1: local reloc, size 0
+  0x00029540 _g_int_handler: global reloc, size 0
+  0x00029600 _panic_number: global reloc, size 0
+  0x00029604 _panic_pc: global reloc, size 0
+  0x00029608 _panic_address: global reloc, size 0
+  0x0002960c _mem_pages: global reloc, size 0
+  0x0002970c l2: local reloc, size 0
+  0x00029710 _jiffy_count: global reloc, size 0
+  0x00029714 _g_block_devs: global reloc, size 0
+  0x00029804 _g_channel_devs: global reloc, size 0
+  0x000299b4 _g_channels: global reloc, size 0
+  0x00029bf4 _g_drive: global reloc, size 0
+  0x0002adb4 _g_dir_state: global reloc, size 0
+  0x0002adbc _g_directory: global reloc, size 0
+  0x0002af5c _g_fil_state: global reloc, size 0
+  0x0002af64 _g_file: global reloc, size 0
+  0x0002c094 _g_file_dev: global reloc, size 0
+  0x0002c0cc _g_file_loader: global reloc, size 0
+  0x0002c130 _workspace: global reloc, size 0
+  0x0002c930 _g_buffer: global reloc, size 0
+  0x0002cb30 _g_kbd_control: global reloc, size 0
+  0x0002cd64 l1: local reloc, size 0
+  0x0002cd68 l1: local reloc, size 0
+  0x0002cdc4 l1: local reloc, size 0
+  0x0002cdd0 l2: local reloc, size 0
+  0x0002cdd4 l3: local reloc, size 0
+  0x0002cdd8 l5: local reloc, size 0
+  0x0002cfd8 l1: local reloc, size 0
+  0x0002cfdc l1: local reloc, size 0
+  0x0002cfe0 l2: local reloc, size 0
 
 Linker symbols:
   0x00010000 RAMSTART: global abs, size 0
   0x00030000 RAMSIZE: global abs, size 0
   0x00000400 STACKLEN: global abs, size 0
-  0x0002ceb4 ___heap: global abs, size 0
+  0x0002cfe4 ___heap: global abs, size 0
   0x0003fc00 ___heapend: global abs, size 0
-  0x00029408 ___BSSSTART: global abs, size 0
+  0x00029538 ___BSSSTART: global abs, size 0
   0x00003aac ___BSSSIZE: global abs, size 0
   0x00040000 ___STACK: global abs, size 0

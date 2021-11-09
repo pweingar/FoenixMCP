@@ -189,12 +189,14 @@ void cli_set_help(short channel) {
  * Command to set the value of a setting
  */
 short cli_cmd_set(short channel, int argc, char * argv[]) {
+    char message[80];
     short result;
 
     if (argc == 3) {
         result = cli_set_value(channel, argv[1], argv[2]);
         if (result != 0) {
-            print(channel, "Unknown setting name.\n");
+            sprintf(message, "Unable to change setting: %s", sys_err_message(result));
+            sys_chan_write(channel, message, strlen(message));
             return 0;
         }
         return result;
@@ -228,7 +230,8 @@ short cli_cmd_get(short channel, int argc, char * argv[]) {
                 return 0;
 
             } else {
-                print(channel, "Unable to get value.\n");
+                sprintf(buffer, "Unable to get setting: %s", sys_err_message(result));
+                sys_chan_write(channel, buffer, strlen(buffer));
                 return result;
             }
         }
@@ -464,6 +467,38 @@ short cli_volume_get(short channel, char * value) {
 }
 
 /*
+ * Set the keyboard layout given a keyboard layout file -- SET LAYOUT <path>
+ */
+short cli_layout_set(short channel, const char * value) {
+    short result, fd;
+    char buffer[1024];      /* Temporary storage for the translation tables */
+
+    /* Try to open the file */
+    fd = sys_fsys_open(value, 1);
+    if (fd >= 0) {
+        /* Try to read the data */
+        result = sys_chan_read(fd, buffer, 1024);
+
+        if (result > 0) {
+            /* If we got something, set the layout */
+            result = sys_kbd_layout(buffer);
+        }
+
+        sys_fsys_close(fd);
+        return result;
+    } else {
+        return fd;
+    }
+}
+
+/*
+ * Get the keyboard layout given a keyboard layout file -- GET LAYOUT
+ */
+short cli_layout_get(short channel, char * value) {
+    return 0;
+}
+
+/*
  * Initialize the settings tables
  */
 void cli_set_init() {
@@ -473,7 +508,8 @@ void cli_set_init() {
     cli_set_register("DATE", "DATE yyyy-mm-dd -- set the date in the realtime clock", cli_date_set, cli_date_get);
     // cli_set_register("RTC", "RTC 1|0 -- Enable or disable the realtime clock interrupt", cli_rtc_set, cli_rtc_get);
     // cli_set_register("SOF", "SOF 1|0 -- Enable or disable the Start of Frame interrupt", cli_sof_set, cli_sof_get);
-    cli_set_register("TIME", "TIME HH:MM:SS -- set the time in the realtime clock", cli_time_set, cli_time_get);
     cli_set_register("FONT", "FONT <path> -- set a font for the display", cli_font_set, cli_font_get);
+    cli_set_register("KEYBOARD", "KEYBOARD <path> -- set the keyboard layout", cli_layout_set, cli_layout_get);
+    cli_set_register("TIME", "TIME HH:MM:SS -- set the time in the realtime clock", cli_time_set, cli_time_get);
     cli_set_register("VOLUME", "VOLUME <0 - 255> -- set the master volume", cli_volume_set, cli_volume_get);
 }
