@@ -19,7 +19,7 @@ export CPU=32
 export MODEL=9
 export VER_MAJOR = 0
 export VER_MINOR = 1
-export VER_BUILD = 10
+export VER_BUILD = 11
 
 export AS = vasmm68k_mot
 export ASFLAGS = -quiet -Fvobj -nowarn=62

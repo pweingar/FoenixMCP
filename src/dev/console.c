@@ -523,7 +523,7 @@ short con_read_b(p_channel chan) {
     // Echo the character to the screen
     con_write_b(chan, c);
 
-    return c;
+    return (short)(c & 0x00ff);
 }
 
 

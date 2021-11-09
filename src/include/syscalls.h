@@ -84,7 +84,7 @@
 #define KFN_TIME_SETRTC         0x51    /* Set the real time clock date-time */
 #define KFN_TIME_GETRTC         0x52    /* Get the real time clock date-time */
 #define KFN_KBD_SCANCODE        0x53    /* Get the next scan code from the keyboard */
-#define KFN_KBD_SETLAYOUT       0x54    /* Set the translation tables for the keyboard */
+#define KFN_KBD_LAYOUT          0x54    /* Set the translation tables for the keyboard */
 #define KFN_ERR_MESSAGE         0x55    /* Return an error description, given an error number */
 
 /*
@@ -610,6 +610,32 @@ extern void sys_rtc_get_time(p_time time);
  */
 extern unsigned short sys_kbd_scancode();
 
+/*
+ * Return an error message given an error number
+ */
 extern const char * sys_err_message(short err_number);
+
+/*
+ * Set the keyboard translation tables
+ *
+ * The translation tables provided to the keyboard consist of eight
+ * consecutive tables of 128 characters each. Each table maps from
+ * the MAKE scan code of a key to its appropriate 8-bit character code.
+ *
+ * The tables included must include, in order:
+ * - UNMODIFIED: Used when no modifier keys are pressed or active
+ * - SHIFT: Used when the SHIFT modifier is pressed
+ * - CTRL: Used when the CTRL modifier is pressed
+ * - CTRL-SHIFT: Used when both CTRL and SHIFT are pressed
+ * - CAPSLOCK: Used when CAPSLOCK is down but SHIFT is not pressed
+ * - CAPSLOCK-SHIFT: Used when CAPSLOCK is down and SHIFT is pressed
+ * - ALT: Used when only ALT is presse
+ * - ALT-SHIFT: Used when ALT is pressed and either CAPSLOCK is down
+ *   or SHIFT is pressed (but not both)
+ *
+ * Inputs:
+ * tables = pointer to the keyboard translation tables
+ */
+extern short sys_kbd_layout(const char * tables);
 
 #endif

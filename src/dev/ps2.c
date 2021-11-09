@@ -4,6 +4,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include "errors.h"
 #include "log.h"
 #include "types.h"
 #include "ring_buffer.h"
@@ -14,8 +15,9 @@
 #include "dev/text_screen_iii.h"
 #include "rsrc/bitmaps/mouse_pointer.h"
 
-#define PS2_TIMEOUT_JF  10          /* Timeout in jiffies: 1/60 second units */
-#define PS2_RESEND_MAX  50          /* Number of times we'll repeat a command on receiving a 0xFE reply */
+#define PS2_TIMEOUT_JF          10          /* Timeout in jiffies: 1/60 second units */
+#define PS2_RESEND_MAX          50          /* Number of times we'll repeat a command on receiving a 0xFE reply */
+#define KBD_XLATE_TABLE_SIZE    128*8       /* Number of characters in the keyboard layout tables */
 
 /*
  * Modifier bit flags
@@ -76,6 +78,10 @@ struct s_ps2_kbd {
     char * keys_control_shift;
     char * keys_caps;
     char * keys_caps_shift;
+    char * keys_r_alt;
+    char * keys_r_alt_shift;
+
+    char * translation_table;
 };
 
 /*
@@ -116,7 +122,7 @@ const char * ansi_keys[] = {
 };
 
 // Translation table from base set1 make scan codes to Foenix scan codes
-unsigned char g_kbd_set1_base[128] = {
+const unsigned char g_kbd_set1_base[128] = {
     0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, /* 0x00 - 0x07 */
     0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, /* 0x08 - 0x0F */
     0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, /* 0x10 - 0x17 */
@@ -136,7 +142,7 @@ unsigned char g_kbd_set1_base[128] = {
 };
 
 // Translation table from E0 prefixed set1 make scan codes to Foenix scan codes
-unsigned char g_kbd_set1_e0[128] = {
+const unsigned char g_kbd_set1_e0[128] = {
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, /* 0x00 - 0x07 */
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, /* 0x08 - 0x0F */
     0x70, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, /* 0x10 - 0x17 */
@@ -159,7 +165,7 @@ unsigned char g_kbd_set1_e0[128] = {
  * US keyboard layout scancode translation tables
  */
 
-char g_us_sc_unmodified[] = {
+const char g_us_sc_unmodified[] = {
     0x00, 0x1B, '1', '2', '3', '4', '5', '6',           /* 0x00 - 0x07 */
     '7', '8', '9', '0', '-', '=', 0x08, 0x09,           /* 0x08 - 0x0F */
     'q', 'w', 'e', 'r', 't', 'y', 'u', 'i',             /* 0x10 - 0x17 */
@@ -178,7 +184,7 @@ char g_us_sc_unmodified[] = {
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00      /* 0x78 - 0x7F */
 };
 
-char g_us_sc_shift[] = {
+const char g_us_sc_shift[] = {
     0x00, 0x1B, '!', '@', '#', '$', '%', '^',           /* 0x00 - 0x07 */
     '&', '*', '(', ')', '_', '+', 0x08, 0x09,           /* 0x08 - 0x0F */
     'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I',             /* 0x10 - 0x17 */
@@ -197,7 +203,7 @@ char g_us_sc_shift[] = {
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00      /* 0x78 - 0x7F */
 };
 
-char g_us_sc_ctrl[] = {
+const char g_us_sc_ctrl[] = {
     0x00, 0x1B, '1', '2', '3', '4', '5', 0x1E,          /* 0x00 - 0x07 */
     '7', '8', '9', '0', 0x1F, '=', 0x08, 0x09,          /* 0x08 - 0x0F */
     0x11, 0x17, 0x05, 0x12, 0x14, 0x19, 0x15, 0x09,     /* 0x10 - 0x17 */
@@ -216,7 +222,7 @@ char g_us_sc_ctrl[] = {
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00      /* 0x78 - 0x7F */
 };
 
-char g_us_sc_lock[] = {
+const char g_us_sc_lock[] = {
     0x00, 0x1B, '1', '2', '3', '4', '5', '6',           /* 0x00 - 0x07 */
     '7', '8', '9', '0', '-', '=', 0x08, 0x09,           /* 0x08 - 0x0F */
     'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I',             /* 0x10 - 0x17 */
@@ -235,7 +241,7 @@ char g_us_sc_lock[] = {
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00      /* 0x78 - 0x7F */
 };
 
-char g_us_sc_lock_shift[] = {
+const char g_us_sc_lock_shift[] = {
     0x00, 0x1B, '!', '@', '#', '$', '%', '^',           /* 0x00 - 0x07 */
     '&', '*', '(', ')', '_', '+', 0x08, 0x09,           /* 0x08 - 0x0F */
     'q', 'w', 'e', 'r', 't', 'y', 'u', 'i',             /* 0x10 - 0x17 */
@@ -254,7 +260,7 @@ char g_us_sc_lock_shift[] = {
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00      /* 0x78 - 0x7F */
 };
 
-char g_us_sc_ctrl_shift[] = {
+const char g_us_sc_ctrl_shift[] = {
     0x00, 0x1B, '!', '@', '#', '$', '%', '^',           /* 0x00 - 0x07 */
     '&', '*', '(', ')', '_', '+', 0x08, 0x09,           /* 0x08 - 0x0F */
     0x11, 0x17, 0x05, 0x12, 0x14, 0x19, 0x15, 0x09,     /* 0x10 - 0x17 */
@@ -262,6 +268,46 @@ char g_us_sc_ctrl_shift[] = {
     0x04, 0x06, 0x07, 0x08, 0x0A, 0x0B, 0x0C, ';',      /* 0x20 - 0x27 */
     0x22, '`', 0x00, '\\', 0x1A, 0x18, 0x03, 0x16,      /* 0x28 - 0x2F */
     0x02, 0x0E, 0x0D, ',', '.', 0x1C, 0x00, 0x00,       /* 0x30 - 0x37 */
+    0x00, ' ', 0x00, 0x8A, 0x8B, 0x8C, 0x8D, 0x8E,      /* 0x38 - 0x3F */
+    0x8F, 0x90, 0x91, 0x92, 0x93, 0x00, 0x00, 0x80,     /* 0x40 - 0x47 */
+    0x86, 0x84, '-', 0x89, '5', 0x88, '+', 0x83,        /* 0x48 - 0x4F */
+    0x87, 0x85, 0x81, 0x82, 0x00, 0x00, 0x00, 0x94,     /* 0x50 - 0x57 */
+    0x95, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,     /* 0x58 - 0x5F */
+    0x00, 0x00, 0x81, 0x80, 0x84, 0x82, 0x83, 0x85,     /* 0x60 - 0x67 */
+    0x86, 0x89, 0x87, 0x88, '/', 0x0D, 0x00, 0x00,      /* 0x68 - 0x6F */
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,     /* 0x70 - 0x77 */
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00      /* 0x78 - 0x7F */
+};
+
+/* Right Alt */
+const char g_us_sc_alt[] = {
+    0x00, 0x1B, '1', '2', 0x9C, 0x9E, '5', '6',         /* 0x00 - 0x07 ... British Pound, and Euro */
+    '7', '8', '9', '0', '-', '=', 0x08, 0x09,           /* 0x08 - 0x0F */
+    'q', 'w', 'e', 'r', 't', 'y', 'u', 'i',             /* 0x10 - 0x17 */
+    'o', 'p', '[', ']', 0x0D, 0x00, 'a', 's',           /* 0x18 - 0x1F */
+    'd', 'f', 'g', 'h', 'j', 'k', 'l', ';',             /* 0x20 - 0x27 */
+    0x27, '`', 0x00, '\\', 'z', 'x', 'c', 'v',          /* 0x28 - 0x2F */
+    'b', 'n', 'm', ',', '.', '/', 0x00, '*',            /* 0x30 - 0x37 */
+    0x00, ' ', 0x00, 0x8A, 0x8B, 0x8C, 0x8D, 0x8E,      /* 0x38 - 0x3F */
+    0x8F, 0x90, 0x91, 0x92, 0x93, 0x00, 0x00, 0x80,     /* 0x40 - 0x47 */
+    0x86, 0x84, '-', 0x89, '5', 0x88, '+', 0x83,        /* 0x48 - 0x4F */
+    0x87, 0x85, 0x81, 0x82, 0x00, 0x00, 0x00, 0x94,     /* 0x50 - 0x57 */
+    0x95, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,     /* 0x58 - 0x5F */
+    0x00, 0x00, 0x81, 0x80, 0x84, 0x82, 0x83, 0x85,     /* 0x60 - 0x67 */
+    0x86, 0x89, 0x87, 0x88, '/', 0x0D, 0x00, 0x00,      /* 0x68 - 0x6F */
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,     /* 0x70 - 0x77 */
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00      /* 0x78 - 0x7F */
+};
+
+/* Right Alt and Shift/CAPS */
+const char g_us_sc_alt_shift[] = {
+    0x00, 0x1B, '1', '2', 0x9C, 0x9E, '5', '6',         /* 0x00 - 0x07 */
+    '7', '8', '9', '0', '-', '=', 0x08, 0x09,           /* 0x08 - 0x0F */
+    'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I',             /* 0x10 - 0x17 */
+    'O', 'P', '[', ']', 0x0D, 0x00, 'A', 'S',           /* 0x18 - 0x1F */
+    'D', 'F', 'G', 'H', 'J', 'K', 'L', ';',             /* 0x20 - 0x27 */
+    0x27, '`', 0x00, '\\', 'Z', 'X', 'C', 'V',          /* 0x28 - 0x2F */
+    'B', 'N', 'M', ',', '.', '/', 0x00, '*',            /* 0x30 - 0x37 */
     0x00, ' ', 0x00, 0x8A, 0x8B, 0x8C, 0x8D, 0x8E,      /* 0x38 - 0x3F */
     0x8F, 0x90, 0x91, 0x92, 0x93, 0x00, 0x00, 0x80,     /* 0x40 - 0x47 */
     0x86, 0x84, '-', 0x89, '5', 0x88, '+', 0x83,        /* 0x48 - 0x4F */
@@ -749,9 +795,20 @@ char kbd_getc() {
 
                     // Check the modifiers to see what we should lookup...
 
-                    if ((modifiers & (KBD_MOD_SHIFT | KBD_MOD_CTRL | KBD_LOCK_CAPS)) == 0) {
+                    if ((modifiers & (KBD_MOD_SHIFT | KBD_MOD_CTRL | KBD_LOCK_CAPS | KBD_MOD_ALT)) == 0) {
                         // No modifiers... just return the base character
                         return kbd_to_ansi(modifiers, g_kbd_control.keys_unmodified[scan_code]);
+
+                    } else if (modifiers & KBD_MOD_ALT) {
+                        if ((( (modifiers & KBD_MOD_SHIFT) == 0) && ((modifiers & KBD_LOCK_CAPS) != 0)) ||
+                            (( (modifiers & KBD_MOD_SHIFT) != 0) && ((modifiers & KBD_LOCK_CAPS) == 0))) {
+                                /* Either SHIFT or CAPSLOCK is active, but not both */
+                                return g_kbd_control.keys_r_alt_shift[scan_code];
+
+                            } else {
+                                /* No shift, or both SHIFT and CAPS are active */
+                                return g_kbd_control.keys_r_alt[scan_code];
+                            }
 
                     } else if (modifiers & KBD_MOD_CTRL) {
                         // If CTRL is pressed...
@@ -1004,6 +1061,81 @@ short mouse_init() {
 }
 
 /*
+ * Set the keyboard translation tables
+ *
+ * The translation tables provided to the keyboard consist of eight
+ * consecutive tables of 128 characters each. Each table maps from
+ * the MAKE scan code of a key to its appropriate 8-bit character code.
+ *
+ * The tables included must include, in order:
+ * - UNMODIFIED: Used when no modifier keys are pressed or active
+ * - SHIFT: Used when the SHIFT modifier is pressed
+ * - CTRL: Used when the CTRL modifier is pressed
+ * - CTRL-SHIFT: Used when both CTRL and SHIFT are pressed
+ * - CAPSLOCK: Used when CAPSLOCK is down but SHIFT is not pressed
+ * - CAPSLOCK-SHIFT: Used when CAPSLOCK is down and SHIFT is pressed
+ * - ALT: Used when only ALT is presse
+ * - ALT-SHIFT: Used when ALT is pressed and either CAPSLOCK is down
+ *   or SHIFT is pressed (but not both)
+ *
+ * Inputs:
+ * tables = pointer to the keyboard translation tables (0 to reset to default)
+ *
+ * Returns:
+ * 0 on success, a negative number if there was an error
+ */
+short kbd_layout(const char * tables) {
+    short i;
+
+    /* Are we resetting the tables? */
+    if (tables == 0) {
+        /* Yes... free the old table if needed */
+        if (g_kbd_control.translation_table != 0) {
+            free(g_kbd_control.translation_table);
+        }
+
+        /* Reset the translation tables to their default values */
+        g_kbd_control.keys_unmodified = g_us_sc_unmodified;
+        g_kbd_control.keys_shift = g_us_sc_shift;
+        g_kbd_control.keys_control = g_us_sc_ctrl;
+        g_kbd_control.keys_control_shift = g_us_sc_ctrl_shift;
+        g_kbd_control.keys_caps = g_us_sc_lock;
+        g_kbd_control.keys_caps_shift = g_us_sc_lock_shift;
+        g_kbd_control.keys_r_alt = g_us_sc_alt;
+        g_kbd_control.keys_r_alt_shift = g_us_sc_alt_shift;
+
+    } else {
+        /* No: we're setting new tables */
+
+        /* Allocate a space for all the tables in the kernel's memory, if we don't have one already */
+        if (g_kbd_control.translation_table == 0) {
+            g_kbd_control.translation_table = (char *)malloc(KBD_XLATE_TABLE_SIZE);
+            if (g_kbd_control.translation_table == 0) {
+                /* We couldn't allocate... return out of memory */
+                return ERR_OUT_OF_MEMORY;
+            }
+        }
+
+        /* Copy the tables into kernel memory */
+        for (i = 0; i < KBD_XLATE_TABLE_SIZE; i++) {
+            g_kbd_control.translation_table[i] = tables[i];
+        }
+
+        /* Set the lookup tables to the individual tables in the collection */
+        g_kbd_control.keys_unmodified = g_kbd_control.translation_table;
+        g_kbd_control.keys_shift = g_kbd_control.keys_unmodified + 128;
+        g_kbd_control.keys_control = g_kbd_control.keys_shift + 128;
+        g_kbd_control.keys_control_shift = g_kbd_control.keys_control + 128;
+        g_kbd_control.keys_caps = g_kbd_control.keys_control_shift + 128;
+        g_kbd_control.keys_caps_shift = g_kbd_control.keys_caps + 128;
+        g_kbd_control.keys_r_alt = g_kbd_control.keys_caps_shift + 128;
+        g_kbd_control.keys_r_alt_shift = g_kbd_control.keys_r_alt + 128;
+    }
+
+    return 0;
+}
+
+/*
  * Initialize the PS2 controller and any attached devices
  * Enable keyboard and mouse interrupts as appropriate.
  *
@@ -1030,6 +1162,9 @@ short ps2_init() {
     g_kbd_control.keys_control_shift = g_us_sc_ctrl_shift;
     g_kbd_control.keys_caps = g_us_sc_lock;
     g_kbd_control.keys_caps_shift = g_us_sc_lock_shift;
+    g_kbd_control.keys_r_alt = g_us_sc_alt;
+    g_kbd_control.keys_r_alt_shift = g_us_sc_alt_shift;
+    g_kbd_control.translation_table = 0;
 
     // Disable the PS/2 interrupts...
 
@@ -1111,13 +1246,4 @@ short ps2_init() {
     }
 
     return(0);
-}
-
-char kbd_getc_poll() {
-    if (ps2_wait_out() == 0) {
-        kbd_handle_irq();
-        return kbd_getc();
-    } else {
-        return 0;
-    }
 }
