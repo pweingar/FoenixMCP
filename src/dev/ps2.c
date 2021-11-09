@@ -2,6 +2,8 @@
  * Definitions for the PS/2 interface devices... mouse and keyboard
  */
 
+#include <stdio.h>
+#include <string.h>
 #include "log.h"
 #include "types.h"
 #include "ring_buffer.h"
@@ -83,6 +85,35 @@ struct s_ps2_kbd {
 struct s_ps2_kbd g_kbd_control;
 
 short g_mouse_state = 0;                /* Mouse packet state machine's state */
+
+/*
+ * Mapping of "codepoints" 0x80 - 0x95 (function keys, etc)
+ * to ANSI escape codes
+ */
+const char * ansi_keys[] = {
+    "1~",      /* HOME */
+    "2~",      /* INS */
+    "3~",      /* DELETE */
+    "4~",      /* END */
+    "5~",      /* PgUp */
+    "6~",      /* PgDn */
+    "A",       /* Up */
+    "B",       /* Left */
+    "C",       /* Right */
+    "D",       /* Down */
+    "11~",     /* F1 */
+    "12~",     /* F2 */
+    "13~",     /* F3 */
+    "14~",     /* F4 */
+    "15~",     /* F5 */
+    "17~",     /* F6 */
+    "18~",     /* F7 */
+    "19~",     /* F8 */
+    "20~",     /* F9 */
+    "21~",     /* F10 */
+    "23~",     /* F11 */
+    "24~",     /* F12 */
+};
 
 // Translation table from base set1 make scan codes to Foenix scan codes
 unsigned char g_kbd_set1_base[128] = {
@@ -641,6 +672,58 @@ void kbd_handle_irq() {
 }
 
 /*
+ * Catch special keys and convert them to their ANSI terminal codes
+ *
+ * Characters 0x80 - 0x95 are reserved for function keys, arrow keys, etc.
+ * This function maps them to the ANSI escape codes
+ *
+ * Inputs:
+ * modifiers = the current modifier bit flags (ALT, CTRL, META, etc)
+ * c = the character found from the scan code.
+ */
+char kbd_to_ansi(unsigned char modifiers, unsigned char c) {
+    if ((c >= 0x80) && (c <= 0x95)) {
+        /* The key is a function key or a special control key */
+        const char * sequence;
+
+        /* After ESC, all sequences have [ */
+        rb_word_put(&g_kbd_control.char_buf, '[');
+
+        /* Check to see if we need to send a modifier sequence */
+        if (modifiers & (KBD_MOD_SHIFT | KBD_MOD_CTRL | KBD_MOD_ALT | KBD_MOD_OS)) {
+            unsigned char code_bcd;
+            short modifier_code = 0;
+            short i;
+
+            modifier_code = (modifiers >> 2) & 0x0E;
+            code_bcd = i_to_bcd(modifier_code);
+
+            if (code_bcd & 0xF0) {
+                rb_word_put(&g_kbd_control.char_buf, ((code_bcd & 0xF0) >> 4) + '0');
+            }
+            rb_word_put(&g_kbd_control.char_buf, (code_bcd & 0x0F) + '0');
+            rb_word_put(&g_kbd_control.char_buf, ';');
+        }
+
+        /* Get the expanded sequence and put it in the queue */
+        for (sequence = ansi_keys[c - 0x80]; *sequence != 0; sequence++) {
+            rb_word_put(&g_kbd_control.char_buf, *sequence);
+        }
+
+        return 0x1B;    /* Start the sequence with an escape */
+
+    } else if (c == 0x1B) {
+        /* ESC should be doubled, to distinguish from the start of an escape sequence */
+        rb_word_put(&g_kbd_control.char_buf, 0x1B);
+        return c;
+
+    } else {
+        /* Not a special key: return the character unmodified */
+        return c;
+    }
+}
+
+/*
  * Try to get a character from the keyboard...
  *
  * Returns:
@@ -668,40 +751,40 @@ char kbd_getc() {
 
                     if ((modifiers & (KBD_MOD_SHIFT | KBD_MOD_CTRL | KBD_LOCK_CAPS)) == 0) {
                         // No modifiers... just return the base character
-                        return g_kbd_control.keys_unmodified[scan_code];
+                        return kbd_to_ansi(modifiers, g_kbd_control.keys_unmodified[scan_code]);
 
                     } else if (modifiers & KBD_MOD_CTRL) {
                         // If CTRL is pressed...
                         if (modifiers & KBD_MOD_SHIFT) {
                             // If SHIFT is also pressed, return CTRL-SHIFT form
-                            return g_kbd_control.keys_control_shift[scan_code];
+                            return kbd_to_ansi(modifiers, g_kbd_control.keys_control_shift[scan_code]);
 
                         } else {
                             // Otherwise, return just CTRL form
-                            return g_kbd_control.keys_control[scan_code];
+                            return kbd_to_ansi(modifiers, g_kbd_control.keys_control[scan_code]);
                         }
 
                     } else if (modifiers & KBD_LOCK_CAPS) {
                         // If CAPS is locked...
                         if (modifiers & KBD_MOD_SHIFT) {
                             // If SHIFT is also pressed, return CAPS-SHIFT form
-                            return g_kbd_control.keys_caps_shift[scan_code];
+                            return kbd_to_ansi(modifiers, g_kbd_control.keys_caps_shift[scan_code]);
 
                         } else {
                             // Otherwise, return just CAPS form
-                            return g_kbd_control.keys_caps[scan_code];
+                            return kbd_to_ansi(modifiers, g_kbd_control.keys_caps[scan_code]);
                         }
 
                     } else {
                         // SHIFT is pressed, return SHIFT form
-                        return g_kbd_control.keys_shift[scan_code];
+                        return kbd_to_ansi(modifiers, g_kbd_control.keys_shift[scan_code]);
                     }
 
                 } else {
                     // It's on the right side of the keyboard, NUMLOCK determines lock value
 
                     // TODO: flesh this out...
-                    return g_kbd_control.keys_unmodified[scan_code];
+                    return kbd_to_ansi(modifiers, g_kbd_control.keys_unmodified[scan_code]);
                 }
             }
 

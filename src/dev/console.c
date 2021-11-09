@@ -69,9 +69,9 @@ extern void ansi_sgr(p_channel chan, short arg_count, short args[]);
 const t_ansi_seq ansi_sequence[] = {
     { '@', ansi_ich },
     { 'A', ansi_cuu },
-    { 'B', ansi_cuf },
-    { 'C', ansi_cub },
-    { 'D', ansi_cud },
+    { 'B', ansi_cud },
+    { 'C', ansi_cuf },
+    { 'D', ansi_cub },
     { 'J', ansi_ed },
     { 'K', ansi_el },
     { 'P', ansi_dch },
