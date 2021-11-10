@@ -226,6 +226,34 @@ short sys_chan_ioctrl(short channel, short command, uint8_t * buffer, short size
     return syscall(KFN_CHAN_IOCTRL, channel, command, buffer, size);
 }
 
+/*
+ * Open a channel
+ *
+ * Inputs:
+ * dev = the device number to have a channel opened
+ * path = a "path" describing how the device is to be open
+ * mode = is the device to be read, written, both? (0x01 = READ flag, 0x02 = WRITE flag, 0x03 = READ and WRITE)
+ *
+ * Returns:
+ * the number of the channel opened, negative number on error
+ */
+short sys_chan_open(short dev, uint8_t * path, short mode) {
+    return syscall(KFN_CHAN_OPEN, path, mode);
+}
+
+/*
+ * Close a channel
+ *
+ * Inputs:
+ * chan = the number of the channel to close
+ *
+ * Returns:
+ * nothing useful
+ */
+short sys_chan_close(short chan) {
+    return syscall(KFN_CHAN_CLOSE, chan);
+}
+
 /***
  *** Block device system calls
  ***/

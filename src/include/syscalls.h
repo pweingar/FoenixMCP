@@ -44,7 +44,10 @@
 #define KFN_CHAN_STATUS         0x17    /* Get the status of a channel */
 #define KFN_CHAN_IOCTRL         0x18    /* Send a command to a channel (channel dependent functionality) */
 #define KFN_CHAN_REGISTER       0x19    /* Register a channel device driver */
-#define KFN_TEXT_SETSIZES       0x1A    /* Adjusts the screen size based on the current graphics mode */
+#define KFN_CHAN_OPEN           0x1A    /* Open a channel device */
+#define KFN_CHAN_CLOSE          0x1B    /* Close an open channel (not for files) */
+#define KFN_TEXT_SETSIZES       0x1C    /* Adjusts the screen size based on the current graphics mode */
+
 
 /* Block device system calls */
 
@@ -282,6 +285,30 @@ extern short sys_chan_seek(short channel, long position, short base);
  *  0 on success, any negative number is an error code
  */
 extern short sys_chan_ioctrl(short channel, short command, uint8_t * buffer, short size);
+
+/*
+ * Open a channel
+ *
+ * Inputs:
+ * dev = the device number to have a channel opened
+ * path = a "path" describing how the device is to be open
+ * mode = is the device to be read, written, both? (0x01 = READ flag, 0x02 = WRITE flag, 0x03 = READ and WRITE)
+ *
+ * Returns:
+ * the number of the channel opened, negative number on error
+ */
+extern short sys_chan_open(short dev, uint8_t * path, short mode);
+
+/*
+ * Close a channel
+ *
+ * Inputs:
+ * chan = the number of the channel to close
+ *
+ * Returns:
+ * nothing useful
+ */
+extern short sys_chan_close(short chan);
 
 /***
  *** Block device system calls
