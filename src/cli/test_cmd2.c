@@ -205,18 +205,14 @@ short cli_test_ide(short screen, int argc, char * argv[]) {
             return n;
         }
 
-        for (i = 0; i < n; i++) {
-            if ((i % 16) == 0) {
-                print(screen, "\n");
-            }
-
-            print_hex_8(screen, buffer[i]);
-            print(screen, " ");
-        }
+        dump_buffer(screen, buffer, 512, 1);
 
         print(screen, "\n\n");
 
-        // if (kbdmo_getc_poll()) break;
+        scancode = sys_kbd_scancode();
+        if (scancode == 0x01) {
+            break;
+        }
     }
 }
 
