@@ -1,5 +1,5 @@
--cc=vbccm68k -quiet %s -o= %s %s -O=%ld -ID:\projects\FoenixMCP\vbcc\targets\m68k-foenix\include
--ccv=vbccm68k %s -o= %s %s -O=%ld -ID:\projects\FoenixMCP\vbcc\targets\m68k-foenix\include
+-cc=vbccm68k -quiet %s -o= %s %s -O=%ld -IC:\A2560U\FoenixMCP\vbcc\targets\m68k-foenix\include
+-ccv=vbccm68k %s -o= %s %s -O=%ld -IC:\A2560U\FoenixMCP\vbcc\targets\m68k-foenix\include
 -as=vasmm68k_mot -quiet -Fvobj -nowarn=62 %s -o %s
 -asv=vasmm68k_mot -Fvobj -nowarn=62 %s -o %s
 -rm=del %s
