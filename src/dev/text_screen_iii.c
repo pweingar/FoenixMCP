@@ -118,7 +118,7 @@ int text_init() {
 
     /* Initialize everything... only do a screen if it's present */
 
-    // need_hires = ((*VKY3_DIP_REG & VKY3_DIP_HIRES) == VKY3_DIP_HIRES) ? 1 : 0;
+    need_hires = ((*VKY3_DIP_REG & VKY3_DIP_HIRES) == 0) ? 1 : 0;
 
     chan_a->master_control = MasterControlReg_A;
     chan_a->text_cells = ScreenText_A;
@@ -258,7 +258,8 @@ void text_set_xy(short screen, unsigned short x, unsigned short y) {
 
         chan->x = x;
         chan->y = y;
-        *(chan->cursor_position) = y << 16 | x;
+
+        *(chan->cursor_position) = ((unsigned long)y << 16) | (unsigned long)x;
         short offset = y * chan->columns_max + x;
         chan->text_cursor_ptr = &chan->text_cells[offset];
         chan->color_cursor_ptr = &chan->color_cells[offset];

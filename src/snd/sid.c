@@ -119,27 +119,31 @@ void sid_test_internal() {
 	*SID_INT_L_V3_CTRL = 0x11;
 	*SID_INT_R_V3_CTRL = 0x11;
 
-    jiffies = rtc_get_jiffies() + 60;
+    jiffies = rtc_get_jiffies() + 25;
     while (jiffies > rtc_get_jiffies());
 
 	*SID_INT_L_V1_CTRL = 0x10;
 	*SID_INT_R_V1_CTRL = 0x10;
-	for (j=0 ; j<8192 ; j++);
-	*SID_INT_L_V2_CTRL = 0x10;
-	*SID_INT_R_V2_CTRL = 0x10;
-	for (j=0 ; j<8192 ; j++);
-	*SID_INT_L_V2_CTRL = 0x10;
-	*SID_INT_R_V2_CTRL = 0x10;
-	for (j=0 ; j<32768 ; j++);
 
-	// for (i = 0; i < 16; i++) {
-    //
-    //     jiffies = rtc_get_jiffies() + 1;
-    //     while (jiffies > rtc_get_jiffies());
-    //
-	// 	*SID_INT_L_MODE_VOL = 15 - i;
-	// 	*SID_INT_R_MODE_VOL = 15 - i;
-	// }
+    jiffies = rtc_get_jiffies() + 3;
+    while (jiffies > rtc_get_jiffies());
+
+	*SID_INT_L_V2_CTRL = 0x10;
+	*SID_INT_R_V2_CTRL = 0x10;
+
+    jiffies = rtc_get_jiffies() + 3;
+    while (jiffies > rtc_get_jiffies());
+
+	*SID_INT_L_V2_CTRL = 0x10;
+	*SID_INT_R_V2_CTRL = 0x10;
+
+    jiffies = rtc_get_jiffies() + 10;
+    while (jiffies > rtc_get_jiffies());
+
+	for (i = 0; i < 16; i++) {
+		*SID_INT_L_MODE_VOL = 15 - i;
+		*SID_INT_R_MODE_VOL = 15 - i;
+	}
 
 	*SID_INT_L_MODE_VOL = 0;
 	*SID_INT_R_MODE_VOL = 0;

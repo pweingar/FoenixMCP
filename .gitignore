@@ -58,3 +58,5 @@ src/foenixmcp_20211027_1.bin
 src/foenixmcp_setsof.bin
 src/foenixmcp_u_20201020.bin
 src/foenixmcp.bin
+src/foenixmcp_ram.bin
+src/foenixmcp_flash.bin
