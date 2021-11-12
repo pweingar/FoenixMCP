@@ -544,23 +544,29 @@ short fchan_flush(t_channel * chan) {
 }
 
 /**
- * attempt to move the "cursor" position in the channel
+ * Attempt to move the "cursor" position in the channel
  */
 short fchan_seek(t_channel * chan, long position, short base) {
     FIL * file;
-    FRESULT result;
-    int total_written;
+    FSIZE_t new_position;
 
     file = fchan_to_file(chan);
     if (file) {
-        if (base == CDEV_SEEK_ABSOLUTE) {
-            result = f_lseek(file, position);
-            return fatfs_to_foenix(result);
-        } else if (base == CDEV_SEEK_RELATIVE) {
-            long current = f_tell(file);
-            result = f_lseek(file, current + position);
-            return fatfs_to_foenix(result);
+        switch (base) {
+        case CDEV_SEEK_ABSOLUTE:
+            new_position = position;    
+            break;
+        case CDEV_SEEK_RELATIVE:
+            new_position = f_tell(file) + position;
+            break;
+        case CDEV_SEEK_END:
+            new_position = f_size(file) - position;
+            break;
+        default:
+            return ERR_GENERAL; 
         }
+
+        return fatfs_to_foenix(f_lseek(file, position));
     }
 
     return ERR_BADCHANNEL;
