@@ -134,29 +134,30 @@ short cmd_sysinfo(short channel, int argc, char * argv[]) {
     char buffer[80];
 
     sys_get_info(&info);
-    print(channel, "System information:\nModel: ");
-    print(channel, info.model_name);
 
-    print(channel, "\nCPU: ");
-    print(channel, info.cpu_name);
+    sprintf(buffer, "System information:\nModel: %s", info.model_name);
+    sys_chan_write(channel, buffer, strlen(buffer));
 
-    print(channel, "\nMemory: ");
-    print_hex_32(channel, info.system_ram_size);
+    sprintf(buffer, "\nCPU: %s", info.cpu_name);
+    sys_chan_write(channel, buffer, strlen(buffer));
 
-    print(channel, "\nGABE version: ");
-    print_hex_16(channel, info.gabe_number);
-    print(channel, ".");
-    print_hex_16(channel, info.gabe_version);
-    print(channel, ".");
-    print_hex_16(channel, info.gabe_subrev);
+    sprintf(buffer, "\nSystem Memory: 0x%X", info.system_ram_size);
+    sys_chan_write(channel, buffer, strlen(buffer));
 
-    print(channel, "\nVICKY version: ");
-    print_hex_16(channel, info.vicky_rev);
+    sprintf(buffer, "\nPCB version: %s", &info.pcb_version);
+    sys_chan_write(channel, buffer, strlen(buffer));
 
-    sprintf(buffer, "\nMCP version: v%02d.%02d.%04d", info.mcp_version, info.mcp_rev, info.mcp_build);
-    print(channel, buffer);
+    sprintf(buffer, "\nFPGA Date: %08X", info.fpga_date);
+    sys_chan_write(channel, buffer, strlen(buffer));
 
-    print(channel, "\n");
+    sprintf(buffer, "\nFPGA Model: %08X", info.fpga_model);
+    sys_chan_write(channel, buffer, strlen(buffer));
+
+    sprintf(buffer, "\nFPGA Version: %04X.%04X", info.fpga_version, info.fpga_subver);
+    sys_chan_write(channel, buffer, strlen(buffer));
+
+    sprintf(buffer, "\nMCP version: v%02d.%02d.%04d\n", info.mcp_version, info.mcp_rev, info.mcp_build);
+    sys_chan_write(channel, buffer, strlen(buffer));
 
     return 0;
 }

@@ -60,6 +60,10 @@ unsigned long syscall_dispatch(int32_t function, int32_t param0, int32_t param1,
                 case KFN_INT_PENDING:
                     return int_pending((unsigned short)param0);
 
+                case KFN_SYS_GET_INFO:
+                    sys_get_information((p_sys_info)param0);
+                    return;
+
                 default:
                     break;
             }

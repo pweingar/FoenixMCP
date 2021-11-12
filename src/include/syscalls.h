@@ -31,6 +31,7 @@
 #define KFN_INT_DISABLE_ALL     0x06    /* Disable all interrupts */
 #define KFN_INT_CLEAR           0x07    /* Clear (acknowledge) an interrupt */
 #define KFN_INT_PENDING         0x08    /* Return true if the interrupt is pending */
+#define KFN_SYS_GET_INFO        0x09    /* Get information about the computer */
 
 /* Channel system calls */
 
@@ -163,6 +164,14 @@ extern p_int_handler sys_int_register(unsigned short n, p_int_handler handler);
  * non-zero if interrupt n is pending, 0 if not
  */
 extern short sys_int_pending(unsigned short n);
+
+/*
+ * Fill out a s_sys_info structure with the information about the current system
+ *
+ * Inputs:
+ * info = pointer to a s_sys_info structure to fill out
+ */
+extern void sys_get_info(p_sys_info info);
 
 /*
  * Acknowledge an interrupt (clear out its pending flag)

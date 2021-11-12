@@ -20,8 +20,8 @@ SECTIONS
 {
   vectors : { *(VECTORS) } >vectors AT>binpage0
   text : {*(CODE)} >flash AT>binpages
-  .dtors : { *(.dtors) } >flash AT>binpages
-  .ctors : { *(.ctors) } >flash AT>binpages
+  .dtors : { *(.dtors) } >ram AT>binpage0
+  .ctors : { *(.ctors) } >ram AT>binpage0
   rodata : {*(RODATA)} >flash AT>binpages
   data: {*(DATA)} >ram
   bss (NOLOAD): {*(BSS)} >ram

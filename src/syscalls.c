@@ -57,6 +57,16 @@ void sys_int_enable(unsigned short n) {
 }
 
 /*
+ * Fill out a s_sys_info structure with the information about the current system
+ *
+ * Inputs:
+ * info = pointer to a s_sys_info structure to fill out
+ */
+void sys_get_info(p_sys_info info) {
+    syscall(KFN_SYS_GET_INFO, info);
+}
+
+/*
  * Register a handler for a given interrupt.
  *
  * Inputs:
