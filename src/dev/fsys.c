@@ -566,7 +566,7 @@ short fchan_seek(t_channel * chan, long position, short base) {
             return ERR_GENERAL; 
         }
 
-        return fatfs_to_foenix(f_lseek(file, position));
+        return fatfs_to_foenix(f_lseek(file, new_position));
     }
 
     return ERR_BADCHANNEL;
