@@ -38,6 +38,7 @@
 
 #define CDEV_SEEK_ABSOLUTE  0
 #define CDEV_SEEK_RELATIVE  1
+#define CDEV_SEEK_END       2
 
 /*
  * Structure defining a channel
