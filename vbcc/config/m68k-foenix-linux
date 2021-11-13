@@ -1,0 +1,13 @@
+-cc=vbccm68k -quiet %s -o= %s %s -O=%ld -I$VBCC/targets/m68k-foenix/include
+-ccv=vbccm68k %s -o= %s %s -O=%ld -I$VBCC/targets/m68k-foenix/include
+-as=vasmm68k_mot -quiet -Fvobj -nowarn=62 %s -o %s
+-asv=vasmm68k_mot -Fvobj -nowarn=62 %s -o %s
+-rm=rm %s
+-rmv=rm %s
+-ld=vlink -bsrec28 -x  -Cvbcc m68k/startup_m68k.o %s %s -L$VBCC/targets/m68k-foenix/lib -T$VBCC/targets/m68k-foenix/vlink.cmd -lvc -o %s -Mmapfile
+-l2=vlink -bsrec28 -x  -Cvbcc %s %s -L$VBCC/targets/m68k-foenix/lib -T$VBCC/targets/m68k-foenix/vlink.cmd -o %s -Mmapfile
+-ldv=vlink -bsrec28 -t -x -Cvbcc m68k/startup.o %s %s -L$VBCC/targets/m68k-foenix/lib -T$VBCC/targets/m68k-foenix/vlink.cmd -lvc -o %s -Mmapfile
+-l2v=vlink -bsrec28 -t -x -Cvbcc %s %s -L$VBCC/targets/m68k-foenix/lib -T$VBCC/targets/m68k-foenix/vlink.cmd -o %s -Mmapfile
+-ul=-l%s
+-cf=-F%s
+-ml=1000

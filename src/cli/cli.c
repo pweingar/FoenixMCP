@@ -10,10 +10,19 @@
 #include "simpleio.h"
 #include "syscalls.h"
 #include "sys_general.h"
+#include "timers.h"
 #include "cli/cli.h"
 #include "cli/dos_cmds.h"
 #include "cli/mem_cmds.h"
+#include "cli/settings.h"
+#include "cli/sound_cmds.h"
+#include "cli/test_cmds.h"
+#include "dev/ps2.h"
 #include "dev/rtc.h"
+#include "dev/uart.h"
+#include "uart_reg.h"
+#include "rtc_reg.h"
+#include "vicky_general.h"
 
 #define MAX_COMMAND_SIZE    128
 #define MAX_ARGC            32
@@ -30,11 +39,11 @@ typedef struct s_cli_command {
     cli_cmd_handler handler;
 } t_cli_command, *p_cli_command;
 
-extern short cmd_gettime(short channel, int argc, char * argv[]);
-extern short cmd_settime(short channel, int argc, char * argv[]);
 extern short cmd_sysinfo(short channel, int argc, char * argv[]);
 extern short cmd_cls(short channel, int argc, char * argv[]);
 extern short cmd_showint(short channel, int argc, char * argv[]);
+extern short cmd_getjiffies(short channel, int argc, char * argv[]);
+extern short cmd_get_ticks(short channel, int argc, char * argv[]);
 
 /*
  * Variables
@@ -52,6 +61,8 @@ const t_cli_command g_cli_commands[] = {
     { "DISKFILL", "DISKFILL <drive #> <sector #> <byte value>", cmd_diskfill },
     { "DISKREAD", "DISKREAD <drive #> <sector #>", cmd_diskread },
     { "DUMP", "DUMP <addr> [<count>] : print a memory dump", mem_cmd_dump},
+    { "GETJIFFIES", "GETJIFFIES : print the number of jiffies since bootup", cmd_getjiffies },
+    { "GETTICKS", "GETTICKS : print number of ticks since reset", cmd_get_ticks },
     { "LABEL", "LABEL <drive#> <label> : set the label of a drive", cmd_label },
     { "LOAD", "LOAD <path> : load a file into memory", cmd_load },
     { "MKDIR", "MKDIR <path> : create a directory", cmd_mkdir },
@@ -62,14 +73,13 @@ const t_cli_command g_cli_commands[] = {
     { "POKE16", "POKE16 <addr> <value> : write the 16-bit value to the address in memory", mem_cmd_poke16 },
     { "POKE32", "POKE32 <addr> <value> : write the 32-bit value to the address in memory", mem_cmd_poke32 },
     { "PWD", "PWD : prints the current directory", cmd_pwd },
-    // { "REN", "REN <old path> <new path> : rename a file or directory", cmd_rename },
+    { "REN", "REN <old path> <new path> : rename a file or directory", cmd_rename },
     { "RUN", "RUN <path> : execute a binary file",  cmd_run },
-    { "GETTIME", "GETTIME : prints the current time", cmd_gettime },
-    { "SETTIME", "SETTIME yyyy-mm-dd HH:MM:SS : sets the current time", cmd_settime },
+    { "SET", "SET <name> <value> : set the value of a setting", cli_cmd_set },
+    { "GET", "GET <name> : get the value of a setting", cli_cmd_get },
     { "SHOWINT", "SHOWINT : Show information about the interrupt registers", cmd_showint },
     { "SYSINFO", "SYSINFO : prints information about the system", cmd_sysinfo },
-    { "TESTIDE", "TESTIDE : fetches and prints the IDE MBR repeatedly", cmd_testide },
-    { "TESTCREATE", "TESTCREATE <path> : tries to create a file", cmd_testcreate },
+    { "TEST", "TEST <feature> : run a test about a feature", cmd_test },
     { "TYPE", "TYPE <path> : print the contents of a text file", cmd_type },
     { 0, 0 }
 };
@@ -84,6 +94,25 @@ int cmd_help(short channel, int argc, char * argv[]) {
         sys_chan_write(channel, command->help, strlen(command->help));
         sys_chan_write(channel, "\n", 2);
     }
+    return 0;
+}
+
+short cmd_getjiffies(short channel, int argc, char * argv[]) {
+    char buffer[80];
+
+    sprintf(buffer, "%d\n", timers_jiffies());
+    sys_chan_write(channel, buffer, strlen(buffer));;
+    return 0;
+}
+
+/*
+ * Print the number of ticks since last restart
+ */
+short cmd_get_ticks(short channel, int argc, char * argv[]) {
+    char buffer[80];
+
+    sprintf(buffer, "%d\n", rtc_get_jiffies());
+    sys_chan_write(channel, buffer, strlen(buffer));
     return 0;
 }
 
@@ -102,124 +131,33 @@ short cmd_cls(short channel, int argc, char * argv[]) {
  */
 short cmd_sysinfo(short channel, int argc, char * argv[]) {
     t_sys_info info;
+    char buffer[80];
 
     sys_get_info(&info);
-    print(channel, "System information:\nModel: ");
-    print(channel, info.model_name);
 
-    print(channel, "\nCPU: ");
-    print(channel, info.cpu_name);
+    sprintf(buffer, "System information:\nModel: %s", info.model_name);
+    sys_chan_write(channel, buffer, strlen(buffer));
 
-    print(channel, "\nGABE version: ");
-    print_hex_16(channel, info.gabe_number);
-    print(channel, ".");
-    print_hex_16(channel, info.gabe_version);
-    print(channel, ".");
-    print_hex_16(channel, info.gabe_subrev);
+    sprintf(buffer, "\nCPU: %s", info.cpu_name);
+    sys_chan_write(channel, buffer, strlen(buffer));
 
-    print(channel, "\nVICKY version: ");
-    print_hex_16(channel, info.vicky_rev);
+    sprintf(buffer, "\nSystem Memory: 0x%X", info.system_ram_size);
+    sys_chan_write(channel, buffer, strlen(buffer));
 
-    print(channel, "\n");
+    sprintf(buffer, "\nPCB version: %s", &info.pcb_version);
+    sys_chan_write(channel, buffer, strlen(buffer));
 
-    return 0;
-}
+    sprintf(buffer, "\nFPGA Date: %08X", info.fpga_date);
+    sys_chan_write(channel, buffer, strlen(buffer));
 
-short cmd_gettime(short channel, int argc, char * argv[]) {
-    char time_string[128];
-    t_time time;
+    sprintf(buffer, "\nFPGA Model: %08X", info.fpga_model);
+    sys_chan_write(channel, buffer, strlen(buffer));
 
-    rtc_get_time(&time);
-    sprintf(time_string, "%04d-%02d-%02d %02d:%02d:%02d\n", time.year, time.month, time.day, time.hour, time.minute, time.second);
-    print(channel, time_string);
+    sprintf(buffer, "\nFPGA Version: %04X.%04X", info.fpga_version, info.fpga_subver);
+    sys_chan_write(channel, buffer, strlen(buffer));
 
-    return 0;
-}
-
-short atoi_n(char * text, short n) {
-    short result = 0;
-    short i;
-
-    for (i = 0; i < n; i++) {
-        result = result * 10;
-        result = result + (text[i] - '0');
-    }
-
-    return result;
-}
-
-/*
- * Set the date and time in the RTC
- *
- * SETTIME yyyy-mm-dd HH:MM:SS
- */
-short cmd_settime(short screen, int argc, char * argv[]) {
-    char * date;
-    char * time
-    t_time date_time;
-    short i;
-
-    date_time.year = 2021;
-    date_time.month = 10;
-    date_time.day = 4;
-    date_time.hour = 9;
-    date_time.minute = 15;
-    date_time.second = 0;
-    date_time.is_24hours = 1;
-    date_time.is_pm = 0;
-
-    if (argc != 3) {
-        print(screen, "USAGE: SETTIME yyyy-mm-dd HH:MM:SS\n");
-        return -1;
-    }
-
-    date = argv[1];
-    time = argv[2];
-
-    /* Validate date is correct format */
-
-    for (i = 0; i < 10; i++) {
-        if ((i == 4) || (i == 7)) {
-            if (date[i] != '-') {
-                print(screen, "USAGE: SETTIME yyyy-mm-dd HH:MM:SS\n");
-                print(screen, "                   ^");
-                return -1;
-            }
-        } else {
-            if ((date[i] < '0') || (date[i] > '9')) {
-                print(screen, "USAGE: SETTIME yyyy-mm-dd HH:MM:SS\n");
-                print(screen, "               ^");
-                return -1;
-            }
-        }
-    }
-
-    /* Validate time is correct format */
-
-    for (i = 0; i < 8; i++) {
-        if ((i == 2) || (i == 5)) {
-            if (time[i] != ':') {
-                print(screen, "USAGE: SETTIME yyyy-mm-dd HH:MM:SS\n");
-                print(screen, "                            ^");
-                return -1;
-            }
-        } else {
-            if ((time[i] < '0') || (date[i] > '9')) {
-                print(screen, "USAGE: SETTIME yyyy-mm-dd HH:MM:SS\n");
-                print(screen, "                          ^");
-                return -1;
-            }
-        }
-    }
-
-    date_time.year = atoi_n(&date[0], 4);
-    date_time.month = atoi_n(&date[5], 2);
-    date_time.day = atoi_n(&date[8], 2);
-    date_time.hour = atoi_n(&time[0], 2);
-    date_time.minute = atoi_n(&time[3], 2);
-    date_time.second = atoi_n(&time[6], 2);
-
-    rtc_set_time(&date_time);
+    sprintf(buffer, "\nMCP version: v%02d.%02d.%04d\n", info.mcp_version, info.mcp_rev, info.mcp_build);
+    sys_chan_write(channel, buffer, strlen(buffer));
 
     return 0;
 }
@@ -275,10 +213,8 @@ short cli_exec(short channel, char * command, int argc, char * argv[]) {
         }
     }
 
-    // Built in command not found..
-    // TODO: search the current drive for an executable file
-    sys_chan_write(channel, cmd_not_found, strlen(cmd_not_found));
-    return -1;
+    /* No built-in command that matched... try to run a binary file */
+    return cmd_run(channel, argc, argv);
 }
 
 char * strtok_r(char * source, const char * delimiter, char ** saveptr) {
@@ -466,5 +402,6 @@ long cli_eval_number(const char * arg) {
 //  0 on success, negative number on error
 //
 short cli_init() {
+    cli_set_init();
     return 0;
 }

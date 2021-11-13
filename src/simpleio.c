@@ -33,8 +33,7 @@ void print(short channel, char * message) {
     // sys_chan_write(channel, message, strlen(message));
 }
 
-unsigned char number[5];
-unsigned char hex_digits[] = "0123456789ABCDEF";
+const unsigned char hex_digits[] = "0123456789ABCDEF";
 
 /*
  * Print an 8-bit number as hex to a channel
@@ -45,6 +44,7 @@ unsigned char hex_digits[] = "0123456789ABCDEF";
  */
 void print_hex_8(short channel, unsigned short x) {
     short digit;
+    char number[3];
 
     digit = (x & 0xf0) >> 4;
     number[0] = hex_digits[digit];
@@ -66,6 +66,7 @@ void print_hex_8(short channel, unsigned short x) {
  */
 void print_hex_16(short channel, unsigned short x) {
     short digit;
+    char number[5];
 
     digit = (x >> 12) & 0x000f;
     number[0] = hex_digits[digit];
@@ -155,8 +156,9 @@ unsigned char i_to_bcd(unsigned short n) {
  * channel = the number of the channel
  * buffer = the byte buffer to print
  * size = the number of bytes to print
+ * labels = 0: none, 1: offset, 2: address
  */
-void dump_buffer(short channel, unsigned char * buffer, short size) {
+void dump_buffer(short channel, unsigned char * buffer, short size, short labels) {
     short i, j, ascii_idx;
     char ascii_buffer[17];
     unsigned char c;
@@ -178,6 +180,14 @@ void dump_buffer(short channel, unsigned char * buffer, short size) {
             }
 
             ascii_idx = 0;
+
+            if (labels == 1) {
+                print_hex_16(channel, i);
+                print(channel, ":");
+            } else if (labels == 2) {
+                print_hex_32(channel, (unsigned long)buffer + i);
+                print(channel, ":");
+            }
         }
 
         if (isgraph(c)) {
@@ -186,8 +196,11 @@ void dump_buffer(short channel, unsigned char * buffer, short size) {
             ascii_buffer[ascii_idx++] = '.';
         }
 
+        if ((i % 8) == 0) {
+            print(channel, " ");
+        }
+
         print_hex_8(channel, c);
-        print(channel, " ");
     }
 
     print(channel, " ");

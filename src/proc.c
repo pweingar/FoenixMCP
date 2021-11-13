@@ -10,7 +10,7 @@
 #include "log.h"
 #include "dev/fsys.h"
 
-static const long k_default_stack = 0x0000ffff;     /* For now... we're just going to put the user stack under 0x00010000 */
+static const long k_default_stack = 0x00010000;     /* For now... we're just going to put the user stack under 0x00010000 */
 static int g_proc_result;
 
 /*
@@ -18,7 +18,7 @@ static int g_proc_result;
  */
 extern void restart_cli();
 
-extern void call_user(long start, long stack);
+extern void call_user(long start, long stack, int argc, char * argv[]);
 
 /*
  * Start a user mode process
@@ -26,15 +26,17 @@ extern void call_user(long start, long stack);
  * Inputs:
  * start = the address to start execution
  * stack = the location to start the user mode stack
+ * argc = the number of parameters
+ * argv = the array of parameters
  */
-void proc_exec(long start, long stack) {
+void proc_exec(long start, long stack, int argc, char * argv[]) {
     TRACE("proc_exec");
 
     log_num(LOG_INFO, "proc_exec start: ", start);
     log_num(LOG_INFO, "proc_exec stack: ", stack);
 
     g_proc_result = 0;
-    call_user(start, stack);
+    call_user(start, stack, argc, argv);
 }
 
 /*
@@ -63,11 +65,13 @@ int proc_get_result() {
  *
  * Inputs:
  * path = the path to try to load
+ * argc = the number of parameters
+ * argv = the array of parameters
  *
  * Returns:
  * returns an error code on failure, will not return on success
  */
-short proc_run(const char * path) {
+short proc_run(const char * path, int argc, char * argv[]) {
 
     TRACE("proc_run");
 
@@ -79,7 +83,7 @@ short proc_run(const char * path) {
     short result = fsys_load(path, 0, &start);
     if (result == 0) {
         if (start != 0) {
-            proc_exec(start, k_default_stack);
+            proc_exec(start, k_default_stack, argc, argv);
         } else {
             log_num(LOG_ERROR, "Couldn't execute file: ", result);
             return ERR_NOT_EXECUTABLE;

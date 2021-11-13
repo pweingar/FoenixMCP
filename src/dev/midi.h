@@ -24,6 +24,6 @@ extern short midi_put(unsigned char b);
  * Returns:
  * b = the byte to send
  */
-extern short midi_get_poll();
+extern unsigned char midi_get_poll();
 
 #endif

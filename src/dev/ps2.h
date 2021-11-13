@@ -44,7 +44,28 @@ extern unsigned short kbd_get_scancode();
  */
 extern char kbd_getc();
 
-extern char kbd_getc_poll();
+/*
+ * Set the keyboard translation tables
+ *
+ * The translation tables provided to the keyboard consist of eight
+ * consecutive tables of 128 characters each. Each table maps from
+ * the MAKE scan code of a key to its appropriate 8-bit character code.
+ *
+ * The tables included must include, in order:
+ * - UNMODIFIED: Used when no modifier keys are pressed or active
+ * - SHIFT: Used when the SHIFT modifier is pressed
+ * - CTRL: Used when the CTRL modifier is pressed
+ * - CTRL-SHIFT: Used when both CTRL and SHIFT are pressed
+ * - CAPSLOCK: Used when CAPSLOCK is down but SHIFT is not pressed
+ * - CAPSLOCK-SHIFT: Used when CAPSLOCK is down and SHIFT is pressed
+ * - ALT: Used when only ALT is presse
+ * - ALT-SHIFT: Used when ALT is pressed and either CAPSLOCK is down
+ *   or SHIFT is pressed (but not both)
+ *
+ * Inputs:
+ * tables = pointer to the keyboard translation tables
+ */
+extern short kbd_layout(const char * tables);
 
 /*
  * Query the mouse for an update packet (use if we aren't using interrupts)

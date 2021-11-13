@@ -23,6 +23,18 @@ extern int text_init();
 extern void text_set_cursor(short screen, short color, char character, short rate, short enable);
 
 /*
+ * Set the border
+ *
+ * Inputs:
+ * screen = the screen number 0 for channel A, 1 for channel B
+ * visible = 0 to hide, any other number to show
+ * width = the horizontal thickness of the border in pixels
+ * height = the vertical thickness of the border in pixels
+ * color = the RGB color (xxRRGGBB)
+ */
+extern void text_set_border(short screen, short visible, short width, short height, unsigned long color);
+
+/*
  * Set the position of the cursor on the screen. Adjusts internal pointers used for printing the characters
  *
  * If the x and y coordinates are out of bounds of the display, the routine will attempt to handle wrapping and

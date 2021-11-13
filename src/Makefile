@@ -16,18 +16,24 @@ export CPU=32
 # MODEL_FOENIX_A2560X         8
 # MODEL_FOENIX_A2560U         9
 # MODEL_FOENIX_A2560K         13
-export MODEL=13
-
+export MODEL=9
 export VER_MAJOR = 0
-export VER_MINOR = 0
-export VER_BUILD = 1
+export VER_MINOR = 1
+export VER_BUILD = 11
 
 export AS = vasmm68k_mot
 export ASFLAGS = -quiet -Fvobj -nowarn=62
 export CC = vc
 export DEFINES = -DCPU=$(CPU) -DMODEL=$(MODEL) -DVER_MAJOR=$(VER_MAJOR) -DVER_MINOR=$(VER_MINOR) -DVER_BUILD=$(VER_BUILD) # -DKBD_POLLED
-export CFLAGS = +../vbcc/config/m68k-foenix -I. -Iinclude
-export RM = cmd /C del /Q /F
+
+ifeq ($(OS),Windows_NT)
+	# export CFLAGS = +$(VBCC)\config\m68k-foenix -I. -I$(CURDIR)\include -I$(CURDIR)
+	export CFLAGS = +$(VBCC)\config\a2560u_flash -I. -I$(CURDIR)\include -I$(CURDIR)
+	export RM = cmd /C del /Q /F
+else
+	export CFLAGS = +$(VBCC)/config/m68k-foenix-linux -I. -I$(CURDIR)/include -I$(CURDIR)
+	export RM = rm -f
+endif
 
 cpu = m68k
 cpu_assembly_src := $(wildcard $(cpu)/*.s)

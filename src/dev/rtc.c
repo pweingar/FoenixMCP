@@ -4,9 +4,10 @@
 
 #include "log.h"
 #include "interrupt.h"
+#include "gabe_reg.h"
 #include "rtc.h"
 #include "rtc_reg.h"
-#include "simpleio.h"
+#include "timers.h"
 
 static long rtc_ticks;
 
@@ -16,39 +17,55 @@ static long rtc_ticks;
 void rtc_handle_int() {
     unsigned char flags;
 
-    flags = *RTC_FLAGS;
-    if (flags | RTC_PF) {
-        /* Peridic interrupt: increment the ticks counter */
-        rtc_ticks++;
-    }
+    /* Periodic interrupt: increment the ticks counter */
+    rtc_ticks++;
 }
 
 /*
  * Initialize the RTC
  */
 void rtc_init() {
+    unsigned char flags;
     unsigned char rates;
     unsigned char enables;
 
-    // int_disable(INT_RTC);
-    //
-    // /* Reset the ticks counter */
-    // rtc_ticks = 0;
-    //
-    // /* Set the periodic interrupt to 976.5625 microseconds */
-    // *RTC_RATES = (*RTC_RATES & RTC_RATES_WD) | RTC_RATE_976us;
-    //
-    // /* Enable the periodic interrupt */
-    *RTC_RATES = 0;
-    *RTC_ENABLES = 0; // RTC_PIE;
+    log(LOG_TRACE, "rtc_init");
+
+    int_disable(INT_RTC);
 
     /* Make sure the RTC is on */
     *RTC_CTRL = RTC_STOP;
 
-    /* Register our interrupt handler and clear out any pending interrupts */
+    /*
+     * For the moment: Every so often, the RTC interrupt gets acknowledged
+     * without clearing the flags. Until I can sort out why, I will use
+     * the SOF A interrupt as a surrogate for the RTC jiffie timer
+     */
+
+    // /* Set the periodic interrupt to 15 millisecs */
+    // *RTC_RATES = RTC_RATE_15ms;
+
     // int_register(INT_RTC, rtc_handle_int);
-    // int_clear(INT_RTC);
+
+    /* Enable the periodic interrupt */
+    // flags = *RTC_FLAGS;
+    // *RTC_ENABLES = RTC_PIE;
+
     // int_enable(INT_RTC);
+}
+
+/*
+ * Make sure the RTC tick counter is enabled
+ */
+void rtc_enable_ticks() {
+    /* Set the periodic interrupt to 15 millisecs */
+    *RTC_RATES = RTC_RATE_15ms;
+
+    unsigned char flags = *RTC_FLAGS;
+
+    *RTC_ENABLES = RTC_PIE;
+
+    int_enable(INT_RTC);
 }
 
 /*
@@ -205,22 +222,15 @@ void rtc_get_time(p_time time) {
 }
 
 /*
- * Get the number of ticks since the system last booted.
+ * Get the number of jiffies since the system last booted.
  *
- * NOTE: a tick is almost, but not quite, 1ms. The RTC periodic interrupt
- *       period does not line up with a 1ms timer, but it comes close.
- *       Therefore, a tick will be 976.5625 microseconds... a little faster
- *       than 1ms.
+ * NOTE: a jiffie is 1/60 of a second. This timer will not be
+ *       100% precise, so it should be used for timeout purposes
+ *       where precision is not critical.
  *
  * Returns:
- * the number of ticks since the last reset
+ * the number of jiffies since the last reset
  */
-long rtc_get_ticks() {
-    long result = 0;
-
-    int_disable(INT_RTC);   /* Make sure we aren't changing the tick counter during the query */
-    result = rtc_ticks;
-    int_enable(INT_RTC);
-
-    return rtc_ticks;
+long rtc_get_jiffies() {
+    return timers_jiffies();
 }

@@ -1,5 +1,3 @@
-override CFLAGS = +../../vbcc/config/m68k-foenix -I. -I.. -I../include
-
 asources = startup_m68k.s
 aobjects = $(subst .s,.o,$(asources))
 csources = bios_m68k.c

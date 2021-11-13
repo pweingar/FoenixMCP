@@ -13,6 +13,29 @@
 #define LOG_VERBOSE 5   /* Log a truly verbose message... the sort you almost never want to bother with */
 
 /*
+ * Return human readable message for an error number
+ */
+extern const char * err_message(short err_number);
+
+/*
+ * Print an error message
+ *
+ * Inputs:
+ * channel = the number of the channel to print to
+ * message = a message string to print before the error
+ * err_number = the number of the error
+ */
+extern void err_print(short channel, const char * message, short err_number);
+
+/*
+ * Display a panic screen
+ *
+ * Inputs:
+ * vector = the number of the vector that was called
+ */
+extern void panic(unsigned short exception_number);
+
+/*
  * Set the maximum level of verbosity in logging.
  * To be printed, a message must have a level lower or equal to this level.
  *

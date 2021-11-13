@@ -5,6 +5,9 @@
 #include "log.h"
 #include "dev/lpt.h"
 #include "dev/text_screen_iii.h"
+#include "sys_general.h"
+
+#if MODEL == MODEL_FOENIX_A2560K
 
 #define LPT_DATA_PORT   ((volatile unsigned char *)0x00C02378)
 
@@ -32,11 +35,9 @@
 short lpt_delay() {
     int i;
     short x;
-    for (i = 0, x = 0; i < 65535; i++) {
+    for (i = 0, x = 0; i < 10; i++) {
         x++;
     }
-
-    DEBUG(".");
     return x;
 }
 
@@ -138,3 +139,5 @@ short lpt_write(p_channel chan, unsigned char * buffer, short size) {
 
     return 0;
 }
+
+#endif

@@ -3,6 +3,8 @@
  */
 
 #include "snd/sid.h"
+#include "sound_reg.h"
+#include "dev/rtc.h"
 
 /*
  * Return the base address of the given SID chip
@@ -21,10 +23,12 @@ volatile unsigned char * sid_get_base(short sid) {
             return SID_INT_L_V1_FREQ_LO;
         case 2:
             return SID_INT_R_V1_FREQ_LO;
+#if MODEL == MODEL_FOENIX_A2560K
         case 3:
             return SID_EXT_L_V1_FREQ_LO;
         case 4:
             return SID_EXT_R_V1_FREQ_LO;
+#endif
         default:
             return 0;
     }
@@ -62,6 +66,7 @@ void sid_init_all() {
 void sid_test_internal() {
     unsigned char i;
 	unsigned int j;
+    long jiffies;
 
 	// Attack = 2, Decay = 9
 	*SID_INT_L_V1_ATCK_DECY = 0x29;
@@ -92,8 +97,8 @@ void sid_test_internal() {
 	*SID_INT_L_V1_CTRL = 0x11;
 	*SID_INT_R_V1_CTRL = 0x11;
 
-	for (j=0 ; j<65536; j++);
-
+	jiffies = rtc_get_jiffies() + 3;
+    while (jiffies > rtc_get_jiffies());
 
 	*SID_INT_L_V2_FREQ_LO = 49;
 	*SID_INT_L_V2_FREQ_HI = 8;
@@ -103,7 +108,8 @@ void sid_test_internal() {
 	*SID_INT_L_V2_CTRL = 0x11;
 	*SID_INT_R_V2_CTRL = 0x11;
 
-	for (j=0 ; j<65536; j++);
+    jiffies = rtc_get_jiffies() + 3;
+    while (jiffies > rtc_get_jiffies());
 
 	*SID_INT_L_V3_FREQ_LO = 135;
 	*SID_INT_L_V3_FREQ_HI = 33;
@@ -113,30 +119,41 @@ void sid_test_internal() {
 	*SID_INT_L_V3_CTRL = 0x11;
 	*SID_INT_R_V3_CTRL = 0x11;
 
-	for (j=0 ; j<262144; j++);
+    jiffies = rtc_get_jiffies() + 25;
+    while (jiffies > rtc_get_jiffies());
 
 	*SID_INT_L_V1_CTRL = 0x10;
 	*SID_INT_R_V1_CTRL = 0x10;
-	for (j=0 ; j<8192 ; j++);
+
+    jiffies = rtc_get_jiffies() + 3;
+    while (jiffies > rtc_get_jiffies());
+
 	*SID_INT_L_V2_CTRL = 0x10;
 	*SID_INT_R_V2_CTRL = 0x10;
-	for (j=0 ; j<8192 ; j++);
+
+    jiffies = rtc_get_jiffies() + 3;
+    while (jiffies > rtc_get_jiffies());
+
 	*SID_INT_L_V2_CTRL = 0x10;
 	*SID_INT_R_V2_CTRL = 0x10;
-	for (j=0 ; j<32768 ; j++);
+
+    jiffies = rtc_get_jiffies() + 10;
+    while (jiffies > rtc_get_jiffies());
 
 	for (i = 0; i < 16; i++) {
-
-		for (j=0 ; j<1024 ; j++);
-
 		*SID_INT_L_MODE_VOL = 15 - i;
 		*SID_INT_R_MODE_VOL = 15 - i;
 	}
+
+	*SID_INT_L_MODE_VOL = 0;
+	*SID_INT_R_MODE_VOL = 0;
 }
 
 void sid_text_external() {
     unsigned char i;
     unsigned int j;
+
+#if MODEL == MODEL_FOENIX_A2560K
 
     // Clear all Channels
     //	for (i = 0; i<24 ; i++) {
@@ -213,4 +230,6 @@ void sid_text_external() {
         *SID_EXT_L_MODE_VOL = 15 - i;
         *SID_EXT_R_MODE_VOL = 15 - i;
     }
+
+#endif
 }

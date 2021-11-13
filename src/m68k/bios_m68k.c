@@ -8,14 +8,23 @@
 #include "types.h"
 #include "syscalls.h"
 #include "interrupt.h"
+#include "proc.h"
 #include "dev/channel.h"
 #include "dev/block.h"
 #include "dev/fsys.h"
+#include "dev/rtc.h"
+#include "sys_general.h"
+
+#if MODEL == MODEL_FOENIX_A2560K
+#include "dev/kbd_mo.h"
+#else
+#include "dev/ps2.h"
+#endif
 
 /*
  * Determine the correct system function implementation and call it.
  */
-int32_t syscall_dispatch(int32_t function, int32_t param0, int32_t param1, int32_t param2, int32_t param3, int32_t param4, int32_t param5) {
+unsigned long syscall_dispatch(int32_t function, int32_t param0, int32_t param1, int32_t param2, int32_t param3, int32_t param4, int32_t param5) {
     switch (function & 0x00f0) {
         case 0x00:
             /* Core System Calls */
@@ -39,12 +48,10 @@ int32_t syscall_dispatch(int32_t function, int32_t param0, int32_t param1, int32
                     return;
 
                 case KFN_INT_ENABLE_ALL:
-                    int_enable_all();
-                    return;
+                    return int_enable_all();
 
                 case KFN_INT_DISABLE_ALL:
-                    int_disable_all();
-                    return;
+                    return int_disable_all();
 
                 case KFN_INT_CLEAR:
                     int_clear((unsigned short)param0);
@@ -52,6 +59,10 @@ int32_t syscall_dispatch(int32_t function, int32_t param0, int32_t param1, int32
 
                 case KFN_INT_PENDING:
                     return int_pending((unsigned short)param0);
+
+                case KFN_SYS_GET_INFO:
+                    sys_get_information((p_sys_info)param0);
+                    return;
 
                 default:
                     break;
@@ -87,6 +98,12 @@ int32_t syscall_dispatch(int32_t function, int32_t param0, int32_t param1, int32
 
                 case KFN_CHAN_IOCTRL:
                     return chan_ioctrl((short)param0, (short)param1, (unsigned char *)param2, (short)param3);
+
+                case KFN_CHAN_OPEN:
+                    return chan_open((short)param0, (const char *)param1, (short)param2);
+
+                case KFN_CHAN_CLOSE:
+                    return chan_close((short)param0);
 
                 case KFN_CHAN_REGISTER:
                     return cdev_register((p_dev_chan)param0);
@@ -152,11 +169,71 @@ int32_t syscall_dispatch(int32_t function, int32_t param0, int32_t param1, int32
                 case KFN_RENAME:
                     return fsys_rename((const char *)param0, (const char *)param1);
 
+                case KFN_LOAD:
+                    return fsys_load((char *)param0, (long)param1, (long *)param2);
+
+                case KFN_GET_LABEL:
+                    return fsys_getlabel((char *)param0, (char *)param1);
+
+                case KFN_SET_LABEL:
+                    return fsys_setlabel((short)param0, (char *)param1);
+
+                case KFN_GET_CWD:
+                    return fsys_get_cwd((char *)param0);
+
+                case KFN_SET_CWD:
+                    return fsys_set_cwd((char *)param0);
+
+                case KFN_LOAD_REGISTER:
+                    return fsys_register_loader((char *)param0, (p_file_loader)param1);
+
                 default:
                     break;
             }
 
             break;
+
+        case 0x40:
+            /* Process and Memory functions */
+            case KFN_RUN:
+                return proc_run((char *)param0, (int)param1, (char *)param2);
+
+            break;
+
+        case 0x50:
+            /* Misc functions */
+            switch (function) {
+                case KFN_TIME_JIFFIES:
+                    return rtc_get_jiffies();
+
+                case KFN_TIME_SETRTC:
+                    rtc_set_time((p_time)param0);
+                    return 0;
+
+                case KFN_TIME_GETRTC:
+                    rtc_get_time((p_time)param0);
+                    return 0;
+
+                case KFN_KBD_SCANCODE:
+#if MODEL == MODEL_FOENIX_A2560K
+                    return kbdmo_get_scancode();
+#else
+                    return kbd_get_scancode();
+#endif
+
+                case KFN_ERR_MESSAGE:
+                    return (unsigned long)err_message((short)param0);
+
+                case KFN_KBD_LAYOUT:
+#if MODEL == MODEL_FOENIX_A2560K
+                    return kbdmo_layout((const char *)param0);
+#else
+                    return kbd_layout((const char *)param0);
+#endif
+
+                default:
+                    break;
+            }
 
         default:
             break;

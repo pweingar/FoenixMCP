@@ -5,10 +5,22 @@
 #ifndef __UART_REG_H
 #define __UART_REG_H
 
+#include "sys_general.h"
+
+#if MODEL == MODEL_FOENIX_A2560K
 #define UART1_BASE              0x00C023F8  /* Base address for UART 1 (COM1) */
 #define UART2_BASE              0x00C022F8  /* Base address for UART 2 (COM2) */
 
-// Register Offsets
+#elif MODEL == MODEL_FOENIX_A2560U || MODEL == MODEL_FOENIX_A2560U_PLUS
+#define UART1_BASE              0x00B028F8  /* Base address for UART 1 (COM1) */
+#define UART2_BASE              0x00B028F9  /* Base address for UART 2 (COM2) */
+
+#endif
+
+/*
+ * Register Offsets
+ */
+
 #define UART_TRHB               0x00        /* Transmit/Receive Hold Buffer */
 #define UART_DLL                UART_TRHB   /* Divisor Latch Low Byte */
 #define UART_DLH                0x01        /* Divisor Latch High Byte */
@@ -67,6 +79,20 @@
 #define LSR_ERR_OVERRUN         0x02        /* Overrun error */
 #define LSR_DATA_AVAIL          0x01        /* Data is ready in the receive buffer */
 
+#if MODEL == MODEL_FOENIX_A2560U || MODEL == MODEL_FOENIX_A2560U_PLUS
+
+#define UART_300                4167        /* Code for 300 bps */
+#define UART_1200               1042        /* Code for 1200 bps */
+#define UART_2400               521         /* Code for 2400 bps */
+#define UART_4800               260         /* Code for 4800 bps */
+#define UART_9600               130         /* Code for 9600 bps */
+#define UART_19200              65          /* Code for 19200 bps */
+#define UART_38400              33          /* Code for 28400 bps */
+#define UART_57600              22          /* Code for 57600 bps */
+#define UART_115200             11          /* Code for 115200 bps */
+
+#else
+
 #define UART_300                384         /* Code for 300 bps */
 #define UART_1200               96          /* Code for 1200 bps */
 #define UART_2400               48          /* Code for 2400 bps */
@@ -76,5 +102,9 @@
 #define UART_38400              3           /* Code for 28400 bps */
 #define UART_57600              2           /* Code for 57600 bps */
 #define UART_115200             1           /* Code for 115200 bps */
+
+#endif
+
+
 
 #endif

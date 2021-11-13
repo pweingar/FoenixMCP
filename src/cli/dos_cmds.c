@@ -1,4 +1,5 @@
 #include <ctype.h>
+#include <stdio.h>
 #include <string.h>
 
 #include "syscalls.h"
@@ -37,13 +38,11 @@ short cmd_diskread(short screen, int argc, char * argv[]) {
 
     result = bdev_read(bdev_number, lba, buffer, 512);
     if (result < 512) {
-        print(screen, "Unable to read sector: ");
-        print_hex_32(screen, result);
-        print(screen, "\n");
+        err_print(screen, "Unable to read sector", result);
         return -2;
     }
 
-    dump_buffer(screen, buffer, 512);
+    dump_buffer(screen, buffer, 512, 1);
 
     return 0;
 }
@@ -79,9 +78,7 @@ short cmd_diskfill(short screen, int argc, char * argv[]) {
 
     result = bdev_write(bdev_number, lba, buffer, 512);
     if (result < 512) {
-        print(screen, "Unable to write sector: ");
-        print_hex_32(screen, result);
-        print(screen, "\n");
+        err_print(screen, "Unable to write sector", result);
         return -2;
     }
 
@@ -89,80 +86,22 @@ short cmd_diskfill(short screen, int argc, char * argv[]) {
     return cmd_diskread(screen, argc, argv);
 }
 
-/*
- * Test the IDE interface by reading the MBR
- */
-short cmd_testide(short screen, int argc, char * argv[]) {
-    unsigned char buffer[512];
-    short i;
-    short scancode;
-    short n = 0;
-
-    while (1) {
-        n = bdev_read(BDEV_HDC, 0, buffer, 512);
-        if (n <= 0) {
-            log_num(LOG_ERROR, "Unable to read MBR: ", n);
-            return n;
-        }
-
-        for (i = 0; i < n; i++) {
-            if ((i % 16) == 0) {
-                print(screen, "\n");
-            }
-
-            print_hex_8(screen, buffer[i]);
-            print(screen, " ");
-        }
-
-        print(screen, "\n\n");
-
-        if (kbdmo_getc_poll()) break;
-    }
-}
 
 /*
- * Test file creation
+ * Try to run a command from storage.
+ *
+ * Command name is in argv[0].
  */
-short cmd_testcreate(short screen, int argc, char * argv[]) {
-    short n;
-
-    if (argc > 1) {
-        short channel = fsys_open(argv[1], FA_CREATE_NEW | FA_WRITE);
-        if (channel >= 0) {
-            char * message = "Hello, world!\n";
-            n = chan_write(channel, message, strlen(message));
-            if (n <= 0) {
-                print(screen, "Unable to write to file: ");
-                print_hex_16(screen, n);
-                print(screen, "\n");
-            }
-
-            fsys_close(channel);
-            return 0;
-
-        } else {
-            print(screen, "Unable to open file: ");
-            print_hex_16(screen, channel);
-            print(screen, "\n");
-            return -1;
-        }
-
-    } else {
-        print(screen, "USAGE: TESTCREATE <path>\n");
-        return -1;
-    }
-}
-
 short cmd_run(short screen, int argc, char * argv[]) {
     TRACE("cmd_run");
 
-    if (argc > 1) {
-        short result = proc_run(argv[1]);
-        if (result < 0) {
-            log_num(LOG_ERROR, "Unable to run: ", result);
-            return result;
-        }
+    short result = proc_run(argv[0], argc, argv);
+    if (result < 0) {
+        err_print(screen, "Unable to execute file", result);
+        return -1;
     }
+
+    return result;
 }
 
 /*
@@ -175,7 +114,7 @@ short cmd_mkdir(short screen, int argc, char * argv[]) {
     if (argc > 1) {
         short result = fsys_mkdir(argv[1]);
         if (result < 0) {
-            log_num(LOG_ERROR, "Unable to create directory: ", result);
+            err_print(screen, "Unable to create directory", result);
             return result;
         }
     } else {
@@ -194,7 +133,7 @@ short cmd_del(short screen, int argc, char * argv[]) {
     if (argc > 1) {
         short result = fsys_delete(argv[1]);
         if (result < 0) {
-            log_num(LOG_ERROR, "Unable to delete: ", result);
+            err_print(screen, "Unable to delete file", result);
             return result;
         }
     } else {
@@ -211,9 +150,9 @@ short cmd_cd(short screen, int argc, char * argv[]) {
     TRACE("cmd_cd");
 
     if (argc > 1) {
-        short result = fsys_setcwd(argv[1]);
+        short result = fsys_set_cwd(argv[1]);
         if (result < 0) {
-            log_num(LOG_ERROR, "Unable to change directory: ", result);
+            err_print(screen, "Unable to change directory", result);
             return result;
         } else {
             print(screen, "Changed to: ");
@@ -236,9 +175,9 @@ short cmd_pwd(short screen, int argc, char * argv[]) {
 
     TRACE("cmd_pwd");
 
-    short result = fsys_getcwd(buffer, 128);
+    short result = fsys_get_cwd(buffer, 128);
     if (result < 0) {
-        log_num(LOG_ERROR, "Unable to get directory: ", result);
+        err_print(screen, "Unable to get current directory", result);
         return result;
     } else {
         print(screen, buffer);
@@ -249,14 +188,14 @@ short cmd_pwd(short screen, int argc, char * argv[]) {
 /*
  * Rename a file or directory
  */
-extern short cmd_rename(short screen, int argc, char * argv[]) {
+short cmd_rename(short screen, int argc, char * argv[]) {
 
     TRACE("cmd_rename");
 
     if (argc > 2) {
         short result = fsys_rename(argv[1], argv[2]);
         if (result < 0) {
-            log_num(LOG_ERROR, "Unable to rename: ", result);
+            err_print(screen, "Unable to rename file", result);
             return result;
         }
     }
@@ -271,13 +210,10 @@ short cmd_dir(short screen, int argc, char * argv[]) {
     char * path = "";
     char label[40];
 
-    log_num(LOG_INFO, "cmd_dir: ", argc);
-
     if (argc > 1) {
         path = argv[1];
     }
 
-    log3(LOG_INFO, "Attempting to read directory for [", path, "]\n");
     short dir = fsys_opendir(path);
     if (dir >= 0) {
         result = fsys_getlabel(path, label);
@@ -313,7 +249,7 @@ short cmd_dir(short screen, int argc, char * argv[]) {
 
         fsys_closedir(dir);
     } else {
-        log_num(LOG_ERROR, "Could not open directory: ", dir);
+        err_print(screen, "Unable to open directory", dir);
         return dir;
     }
 
@@ -347,7 +283,7 @@ short cmd_type(short screen, int argc, char * argv[]) {
             return 0;
 
         } else {
-            log_num(LOG_ERROR, "Could not open file for reading: ", fd);
+            err_print(screen, "Unable to open file", fd);
             return fd;
         }
     } else {
@@ -377,7 +313,7 @@ short cmd_load(short screen, int argc, char * argv[]) {
                 log(LOG_INFO, "File loaded.");
             }
         } else {
-            log_num(LOG_ERROR, "Unable to open file: ", result);
+            err_print(screen, "Unable to open file", result);
             return -1;
         }
 
@@ -399,8 +335,7 @@ short cmd_label(short screen, int argc, char * argv[]) {
         short drive = cli_eval_number(argv[1]);
         short result = fsys_setlabel(drive, argv[2]);
         if (result != 0) {
-            print(screen, "Unable to set the label: ");
-            print_hex_16(screen, result);
+            err_print(screen, "Unable to set volume label", result);
             return -1;
         }
 
@@ -420,8 +355,7 @@ short cmd_format(short screen, int argc, char * argv[]) {
         short drive = cli_eval_number(argv[1]);
         short result = fsys_mkfs(drive, "");
         if (result != 0) {
-            print(screen, "Unable to format the drive: ");
-            print_hex_16(screen, result);
+            err_print(screen, "Unable to format volume", result);
             return -1;
         }
 

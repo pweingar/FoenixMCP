@@ -2,10 +2,15 @@
  * Declarations for Mo, the built-in keyboard of the A2560K
  */
 
+#include "sys_general.h"
+
+#if MODEL == MODEL_FOENIX_A2560K
+
 #include "log.h"
 #include "interrupt.h"
 #include "kbd_mo.h"
 #include "ring_buffer.h"
+#include "gabe_reg.h"
 
 #define KBD_MO_DATA     ((volatile unsigned short *)0x00C00040)     /* Data register for the keyboard (scan codes will be here) */
 #define KBD_MO_STAT     ((volatile unsigned short *)0x00C00042)     /* Status register for the keyboard */
@@ -50,6 +55,7 @@ struct s_kdbmo_kbd {
  */
 
 struct s_kdbmo_kbd g_kbdmo_control;
+static short kbdmo_leds = 0;
 
 /*
  * US keyboard layout scancode translation tables
@@ -214,6 +220,10 @@ short kbdmo_init() {
     /* Make sure everything is read */
     kbdmo_flush_out();
 
+    /* Turn off the LEDs */
+    kbdmo_leds = 0;
+    *GABE_MO_LEDS = kbdmo_leds;
+
     /* Clear out any pending interrupt */
     int_clear(INT_KBD_A2560K);
 
@@ -233,6 +243,17 @@ short kbdmo_init() {
  */
 void kbdmo_toggle_modifier(short flag) {
     g_kbdmo_control.modifiers ^= flag;
+
+    if (flag == KBD_LOCK_CAPS) {
+        if (g_kbdmo_control.modifiers & flag) {
+            /* CAPS is on... set it to purple */
+            kbdmo_set_caps_led(5);
+
+        } else {
+            /* CAPS is off... turn off the LED */
+            kbdmo_set_caps_led(0);
+        }
+    }
 }
 
 /*
@@ -428,3 +449,49 @@ unsigned short kbdmo_get_scancode_poll() {
     kbdmo_handle_irq();
     return kbdmo_get_scancode();
 }
+
+/*
+ * Set the color of the LED for the capslock
+ *
+ * Inputs:
+ * colors = color specification, three bits: 0x_____RGB
+ */
+void kbdmo_set_caps_led(short colors) {
+    kbdmo_leds = (kbdmo_leds & 0xF1FF) | ((colors & 0x07) << 9);
+    *GABE_MO_LEDS = kbdmo_leds;
+}
+
+/*
+ * Set the color of the LED for the floppy drive
+ *
+ * Inputs:
+ * colors = color specification, three bits: 0x_____RGB
+ */
+void kbdmo_set_fdc_led(short colors) {
+    kbdmo_leds = (kbdmo_leds & 0xFFF8) | (colors & 0x07);
+    *GABE_MO_LEDS = kbdmo_leds;
+}
+
+/*
+ * Set the color of the LED for the SD card slot
+ *
+ * Inputs:
+ * colors = color specification, three bits: 0x_____RGB
+ */
+void kbdmo_set_sdc_led(short colors) {
+    kbdmo_leds = (kbdmo_leds & 0xFFC7) | ((colors & 0x07) << 3);
+    *GABE_MO_LEDS = kbdmo_leds;
+}
+
+/*
+ * Set the color of the LED for the IDE hard drive
+ *
+ * Inputs:
+ * colors = color specification, three bits: 0x_____RGB
+ */
+void kbdmo_set_hdc_led(short colors)  {
+    kbdmo_leds = (kbdmo_leds & 0xFE3F) | ((colors & 0x07) << 6);
+    *GABE_MO_LEDS = kbdmo_leds;
+}
+
+#endif

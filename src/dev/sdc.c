@@ -3,13 +3,21 @@
  */
 
 #include "log.h"
-// #include "fatfs/ff.h"
 #include "constants.h"
 #include "errors.h"
+#include "gabe_reg.h"
+#include "indicators.h"
 #include "dev/block.h"
 #include "sdc_reg.h"
+#include "dev/rtc.h"
 #include "dev/sdc.h"
 #include "dev/text_screen_iii.h"
+
+//
+// Constants
+//
+
+#define SDC_TIMEOUT_JF 20           /* Timeout in jiffies (1/60 second) */
 
 unsigned char g_sdc_status = SDC_STAT_NOINIT;
 unsigned char g_sdc_error = 0;
@@ -51,13 +59,11 @@ short sdc_protected() {
 //  is_on = if 0, turn the LED off, otherwise turn the LED on
 //
 void sdc_set_led(short is_on) {
-    // volatile unsigned char *gabe_control = (unsigned char *)GABE_MSTR_CTRL;
-    //
-    // if (is_on) {
-    //     *gabe_control = *gabe_control | GABE_CTRL_SDC_LED;
-    // } else {
-    //     *gabe_control = *gabe_control & ~GABE_CTRL_SDC_LED;
-    // }
+    if (is_on) {
+        *GABE_CTRL_REG = *GABE_CTRL_REG | SDCARD_LED;
+    } else {
+        *GABE_CTRL_REG = *GABE_CTRL_REG & ~SDCARD_LED;
+    }
 }
 
 //
@@ -67,11 +73,13 @@ void sdc_set_led(short is_on) {
 //  0 on success, DEV_TIMEOUT on timeout
 //
 short sdc_wait_busy() {
+    long timer_ticks;
     int retry_count = MAX_TRIES_BUSY;
     unsigned char status;
 
+    timer_ticks = rtc_get_jiffies() + SDC_TIMEOUT_JF;
     do {
-        if (retry_count-- == 0) {
+        if (rtc_get_jiffies() > timer_ticks) {
             // If we have run out of tries, return a TIMEOUT error
             return DEV_TIMEOUT;
         }
@@ -145,7 +153,8 @@ short sdc_read(long lba, unsigned char * buffer, short size) {
         return DEV_NOMEDIA;
     }
 
-    sdc_set_led(1);                         // Turn on the SDC LED
+    /* Turn on the SDC LED */
+    ind_set(IND_SDC, IND_ON);
 
     // Send the LBA to the SDC
 
@@ -164,7 +173,9 @@ short sdc_read(long lba, unsigned char * buffer, short size) {
         g_sdc_error = *SDC_TRANS_ERROR_REG;     // Check for errors
 
         if (g_sdc_error != 0) {
-            sdc_set_led(0);                     // Turn off the SDC LED
+            /* Turn off the SDC LED */
+            ind_set(IND_SDC, IND_OFF);
+
             return DEV_CANNOT_READ;
 
         } else {
@@ -174,6 +185,9 @@ short sdc_read(long lba, unsigned char * buffer, short size) {
             // Get the number of bytes to be read and make sure there is room
             count = *SDC_RX_FIFO_DATA_CNT_HI << 8 | *SDC_RX_FIFO_DATA_CNT_LO;
             if (count > size) {
+                /* Turn off the SDC LED */
+                ind_set(IND_SDC, IND_OFF);
+
                 return DEV_BOUNDS_ERR;
             }
 
@@ -185,14 +199,22 @@ short sdc_read(long lba, unsigned char * buffer, short size) {
 
             g_sdc_error = *SDC_TRANS_ERROR_REG; // Check for errors
             if (g_sdc_error != 0) {
+                /* Turn off the SDC LED */
+                ind_set(IND_SDC, IND_OFF);
+
                 return DEV_CANNOT_READ;
             } else {
+                /* Turn off the SDC LED */
+                ind_set(IND_SDC, IND_OFF);
+
                 // Success: return the byte count
                 return count;
             }
         }
     } else {
-        sdc_set_led(0);                         // Turn off the SDC LED
+        /* Turn off the SDC LED */
+        ind_set(IND_SDC, IND_OFF);
+
         return DEV_TIMEOUT;
     }
 }
@@ -222,7 +244,8 @@ short sdc_write(long lba, const unsigned char * buffer, short size) {
         return DEV_NOMEDIA;
     }
 
-    sdc_set_led(1);                         // Turn on the SDC LED
+    /* Turn on the SDC LED */
+    ind_set(IND_SDC, IND_ON);
 
     if (size <= SDC_SECTOR_SIZE) {
         // Copy the data to the SDC, if there isn't too much...
@@ -238,6 +261,9 @@ short sdc_write(long lba, const unsigned char * buffer, short size) {
         }
 
     } else {
+        /* Turn off the SDC LED */
+        ind_set(IND_SDC, IND_OFF);
+
         // If size is too big, return a BOUNDS error
         return DEV_BOUNDS_ERR;
     }
@@ -259,15 +285,22 @@ short sdc_write(long lba, const unsigned char * buffer, short size) {
         g_sdc_error = *SDC_TRANS_ERROR_REG;     // Check for errors
 
         if (g_sdc_error != 0) {
-            sdc_set_led(0);                     // Turn off the SDC LED
+            /* Turn off the SDC LED */
+            ind_set(IND_SDC, IND_OFF);
+
             return DEV_CANNOT_WRITE;
 
         } else {
+            /* Turn off the SDC LED */
+            ind_set(IND_SDC, IND_OFF);
+
             // Success: return the byte count
             return size;
         }
     } else {
-        sdc_set_led(0);                         // Turn off the SDC LED
+        /* Turn off the SDC LED */
+        ind_set(IND_SDC, IND_OFF);
+
         return DEV_TIMEOUT;
     }
 }

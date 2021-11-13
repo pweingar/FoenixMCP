@@ -21,6 +21,8 @@
 #define MAX_ANSI_ARGS       10
 
 #define CON_CTRL_ANSI       0x80            /* Set to enable ANSI escape processing */
+#define CON_IOCTRL_ANSI_ON  0x01            /* IOCTRL Command: turn on ANSI terminal codes */
+#define CON_IOCTRL_ANSI_OFF 0x02            /* IOCTRL Command: turn off ANSI terminal codes */
 
 typedef void (*ansi_handler)(p_channel, short, short[]);
 
@@ -39,6 +41,7 @@ typedef struct s_console_data {
     unsigned char control;              /* Control flags for the console: e.g. process ANSI codes */
     unsigned char ansi_buffer_count;    /* Number of characters in the ANSI BUFFER */
     char ansi_buffer[ANSI_BUFFER_SIZE]; /* Used to keep track of characters in the ANSI escape sequences */
+    char key_buffer;                    /* Used to peek at keyboard input */
 } t_console_data, *p_console_data;
 
 /*
@@ -66,9 +69,9 @@ extern void ansi_sgr(p_channel chan, short arg_count, short args[]);
 const t_ansi_seq ansi_sequence[] = {
     { '@', ansi_ich },
     { 'A', ansi_cuu },
-    { 'B', ansi_cuf },
-    { 'C', ansi_cub },
-    { 'D', ansi_cud },
+    { 'B', ansi_cud },
+    { 'C', ansi_cuf },
+    { 'D', ansi_cub },
     { 'J', ansi_ed },
     { 'K', ansi_el },
     { 'P', ansi_dch },
@@ -425,6 +428,7 @@ short con_open(p_channel chan, uint8_t * path, short mode) {
     for (i = 0; i < ANSI_BUFFER_SIZE; i++) {
         con_data->ansi_buffer[i] = 0;
     }
+    con_data->key_buffer = 0;
 
     return 0;
 }
@@ -485,20 +489,41 @@ short con_write_b(p_channel chan, uint8_t b) {
  * Attempt to read from the keyboard.
  */
 short con_read_b(p_channel chan) {
+    p_console_data con_data;
+
+    /* Check to see if we need to process ANSI codes */
+    con_data = &(chan->data);
+
     char c;
     do {
+        if (con_data->key_buffer != 0) {
+            c = con_data->key_buffer;
+            con_data->key_buffer = 0;
+
+        } else {
+
+#if MODEL == MODEL_FOENIX_A2560K
 #ifdef KBD_POLLED
-        ps2_mouse_get_packet();
-        c = kbdmo_getc_poll();
+            ps2_mouse_get_packet();
+            c = kbdmo_getc_poll();
 #else
-        c = kbdmo_getc();
+            c = kbdmo_getc();
 #endif
+#else
+#ifdef KBD_POLLED
+            c = kbd_getc_poll();
+#else
+            c = kbd_getc();
+#endif
+#endif
+        }
+
     } while (c == 0);
 
     // Echo the character to the screen
     con_write_b(chan, c);
 
-    return c;
+    return (short)(c & 0x00ff);
 }
 
 
@@ -595,13 +620,58 @@ short con_write(p_channel chan, const uint8_t * buffer, short size) {
     return i;
 }
 
+short con_has_input(p_channel chan) {
+    p_console_data con_data;
+    char c;
+
+    /* Check to see if we need to process ANSI codes */
+    con_data = &(chan->data);
+
+    if (con_data->key_buffer != 0) {
+        /* If we already peeked and have a character... return true */
+        return 1;
+
+    } else {
+        /* Otherwise, peek at the keyboard to see if there is a valid key */
+
+    #if MODEL == MODEL_FOENIX_A2560K
+    #ifdef KBD_POLLED
+                ps2_mouse_get_packet();
+                c = kbdmo_getc_poll();
+    #else
+                c = kbdmo_getc();
+    #endif
+    #else
+    #ifdef KBD_POLLED
+                c = kbd_getc_poll();
+    #else
+                c = kbd_getc();
+    #endif
+    #endif
+
+        if (c == 0) {
+            /* No: return false */
+            return 0;
+
+        } else {
+            /* Yes: save the key we got and return true */
+            con_data->key_buffer = c;
+            return 1;
+        }
+    }
+}
+
 //
 // Return the status of the console
 //
 short con_status(p_channel chan) {
-    // TODO: make CDEV_STAT_READABLE conditional
+    short status = CDEV_STAT_WRITABLE;  /* The console is always writable */
+    if (con_has_input(chan)) {
+        /* If there is data available, flag that it's readable */
+        status |= CDEV_STAT_READABLE;
+    }
 
-    return CDEV_STAT_READABLE | CDEV_STAT_WRITABLE;
+    return status;
 }
 
 //
@@ -612,6 +682,25 @@ short con_seek(p_channel chan, long position, short base) {
 }
 
 short con_ioctrl(p_channel chan, short command, uint8_t * buffer, short size) {
+    p_console_data con_data;
+
+    /* Check to see if we need to process ANSI codes */
+    con_data = &(chan->data);
+
+    switch (command) {
+        case CON_IOCTRL_ANSI_ON:
+            /* Turn on ANSI interpreting */
+            con_data->control |= CON_CTRL_ANSI;
+            return 0;
+
+        case CON_IOCTRL_ANSI_OFF:
+            /* Turn on ANSI interpreting */
+            con_data->control &= ~CON_CTRL_ANSI;
+            return 0;
+
+        default:
+            break;
+    }
     return 0;
 }
 

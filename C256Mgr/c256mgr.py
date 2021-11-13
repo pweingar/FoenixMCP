@@ -63,31 +63,31 @@ def program_flash(port, filename, hex_address):
     address = base_address
     print("About to upload image to address 0x{:X}".format(address), flush=True)
 
-    if os.path.getsize(filename) == FLASH_SIZE:
-        if confirm("Are you sure you want to reprogram the flash memory? (y/n): "):
-            with open(filename, "rb") as f:
-                c256 = foenix.FoenixDebugPort()
+    #if os.path.getsize(filename) == FLASH_SIZE:
+    if confirm("Are you sure you want to reprogram the flash memory? (y/n): "):
+        with open(filename, "rb") as f:
+            c256 = foenix.FoenixDebugPort()
+            try:
+                c256.open(port)
+                c256.enter_debug()
                 try:
-                    c256.open(port)
-                    c256.enter_debug()
-                    try:
+                    block = f.read(CHUNK_SIZE)
+                    while block:
+                        c256.write_block(address, block)
+                        address += len(block)
                         block = f.read(CHUNK_SIZE)
-                        while block:
-                            c256.write_block(address, block)
-                            address += len(block)
-                            block = f.read(CHUNK_SIZE)
 
-                        print("Binary file uploaded...", flush=True)
-                        c256.erase_flash()
-                        print("Flash memory erased...", flush=True)
-                        c256.program_flash(base_address)
-                        print("Flash memory programmed...")
-                    finally:
-                        c256.exit_debug()
+                    print("Binary file uploaded...", flush=True)
+                    c256.erase_flash()
+                    print("Flash memory erased...", flush=True)
+                    c256.program_flash(base_address)
+                    print("Flash memory programmed...")
                 finally:
-                    c256.close()
-    else:
-        print("The provided flash file is not the right size.")
+                    c256.exit_debug()
+            finally:
+                c256.close()
+    # else:
+    #     print("The provided flash file is not the right size.")
 
 def dereference(port, file, label):
     """Get the address contained in the pointer with the label in the label file."""
@@ -140,7 +140,7 @@ def display(base_address, data):
                 text_buff = text_buff + "."
         else:
             text_buff = text_buff + "."
-        
+
     sys.stdout.write(' {}\n'.format(text_buff))
 
 def send_wdc(port, filename):
@@ -161,7 +161,7 @@ def send_wdc(port, filename):
         finally:
             infile.close()
     finally:
-        c256.close() 
+        c256.close()
 
 def send_srec(port, filename):
     """Send the data in the SREC hex file 'filename' to the C256 on the given serial port."""
@@ -257,7 +257,7 @@ parser.add_argument("--lookup", metavar="LABEL", dest="lookup_name",
                     help="Display the memory starting at the address indicated by the label.")
 
 parser.add_argument("--revision", action="store_true", dest="revision",
-                    help="Display the revision code of the debug interface.")  
+                    help="Display the revision code of the debug interface.")
 
 parser.add_argument("--flash", metavar="BINARY FILE", dest="flash_file",
                     help="Attempt to reprogram the flash using the binary file provided.")
@@ -321,4 +321,3 @@ try:
         parser.print_help()
 finally:
     print
-

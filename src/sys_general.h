@@ -32,20 +32,25 @@
  * Structure to describe the hardware
  */
 typedef struct s_sys_info {
-    unsigned short model;       /* Code to say what model of machine this is */
-    const char * model_name;    /* Human readable name of the model of the computer */
-    unsigned short cpu;         /* Code to say which CPU is running */
-    const char * cpu_name;      /* Human readable name for the CPU */
-    unsigned short gabe_number; /* GABE revision information */
-    unsigned short gabe_version;
-    unsigned short gabe_subrev;
-    unsigned short vicky_rev;   /* Code for the VICKY revision number */
-    int system_ram_size;        /* The number of bytes of system RAM on the board */
-    bool has_floppy;            /* TRUE if the board has a floppy drive installed */
-    bool has_hard_drive;        /* TRUE if the board has a PATA device installed */
-    bool has_expansion_card;    /* TRUE if an expansion card is installed on the device */
-    bool has_ethernet;          /* TRUE if an ethernet port is present */
-    unsigned short screens;     /* How many screens are on this computer */
+    unsigned short mcp_version;     /* Current version of the MCP kernel */
+    unsigned short mcp_rev;         /* Current revision, or sub-version of the MCP kernel */
+    unsigned short mcp_build;       /* Current vuild # of the MCP kernel */
+    unsigned short model;           /* Code to say what model of machine this is */
+    const char * model_name;        /* Human readable name of the model of the computer */
+    unsigned short cpu;             /* Code to say which CPU is running */
+    const char * cpu_name;          /* Human readable name for the CPU */
+    unsigned long fpga_date;        /* BCD date describing the date of the FPGA built: YYYYMMDD */
+    char pcb_version[4];            /* PCB version (string) */
+    unsigned long fpga_model;       /* FPGA model number */
+    unsigned short fpga_version;    /* FPGA version */
+    unsigned short fpga_subver;     /* FPGA sub-version */
+    unsigned short vicky_rev;       /* Code for the VICKY revision number */
+    long system_ram_size;           /* The number of bytes of system RAM on the board */
+    bool has_floppy;                /* TRUE if the board has a floppy drive installed */
+    bool has_hard_drive;            /* TRUE if the board has a PATA device installed */
+    bool has_expansion_card;        /* TRUE if an expansion card is installed on the device */
+    bool has_ethernet;              /* TRUE if an ethernet port is present */
+    unsigned short screens;         /* How many screens are on this computer */
 } t_sys_info, *p_sys_info;
 
 /*
@@ -54,6 +59,6 @@ typedef struct s_sys_info {
  * Inputs:
  * info = pointer to a s_sys_info structure to fill out
  */
-extern void sys_get_info(p_sys_info info);
+extern void sys_get_information(p_sys_info info);
 
 #endif

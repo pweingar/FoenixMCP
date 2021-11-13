@@ -20,7 +20,7 @@
  * Syscall function numbers
  */
 
-/* Miscellaneous control calls */
+/* Core calls */
 
 #define KFN_EXIT                0x00    /* Quick the current program and return to the command line */
 #define KFN_WARMBOOT            0x01    /* Do a soft re-initialization */
@@ -29,8 +29,9 @@
 #define KFN_INT_DISABLE         0x04    /* Disable an interrupt */
 #define KFN_INT_ENABLE_ALL      0x05    /* Enable all interrupts */
 #define KFN_INT_DISABLE_ALL     0x06    /* Disable all interrupts */
-#define KFN_INT_CLEAR           0x05    /* Clear (acknowledge) an interrupt */
-#define KFN_INT_PENDING         0x06    /* Return true if the interrupt is pending */
+#define KFN_INT_CLEAR           0x07    /* Clear (acknowledge) an interrupt */
+#define KFN_INT_PENDING         0x08    /* Return true if the interrupt is pending */
+#define KFN_SYS_GET_INFO        0x09    /* Get information about the computer */
 
 /* Channel system calls */
 
@@ -44,7 +45,10 @@
 #define KFN_CHAN_STATUS         0x17    /* Get the status of a channel */
 #define KFN_CHAN_IOCTRL         0x18    /* Send a command to a channel (channel dependent functionality) */
 #define KFN_CHAN_REGISTER       0x19    /* Register a channel device driver */
-#define KFN_TEXT_SETSIZES       0x1A    /* Adjusts the screen size based on the current graphics mode */
+#define KFN_CHAN_OPEN           0x1A    /* Open a channel device */
+#define KFN_CHAN_CLOSE          0x1B    /* Close an open channel (not for files) */
+#define KFN_TEXT_SETSIZES       0x1C    /* Adjusts the screen size based on the current graphics mode */
+
 
 /* Block device system calls */
 
@@ -68,17 +72,24 @@
 #define KFN_RENAME              0x38    /* Rename a file */
 #define KFN_MKDIR               0x39    /* Create a directory */
 #define KFN_LOAD                0x3A    /* Load a file into memory */
-#define KFN_SAVE                0x3B    /* Save a block of memory to a file */
-#define KFN_RUN                 0x3C    /* Load an execute a binary file */
-#define KFN_LOAD_REGISTER       0x3D    /* Register a file type handler for executable binaries */
+#define KFN_GET_LABEL           0x3B    /* Read the label of a volume */
+#define KFN_SET_LABEL           0x3C    /* Set the label of a volume */
+#define KFN_SET_CWD             0x3D    /* Set the current working directory */
+#define KFN_GET_CWD             0x3E    /* Get the current working directory */
+#define KFN_LOAD_REGISTER       0x3F    /* Register a file type handler for executable binaries */
 
-/* Timer calls */
+/* Process and memory calls */
 
-#define KFN_DELAY               0x40    /* Block for a certain amount of time */
-#define KFN_SET_ALARM           0x41    /* Set an alarm for a certain amount of time */
-#define KFN_GET_TIMECODE        0x42    /* Gets the current time code (increments since boot) */
-#define KFN_SET_DATETIME        0x43    /* Set the real time clock date-time */
-#define KFN_GET_DATETIME        0x44    /* Get the real time clock date-time */
+#define KFN_RUN                 0x40    /* Load an execute a binary file */
+
+/* Misc calls */
+
+#define KFN_TIME_JIFFIES        0x50    /* Gets the current time code (increments since boot) */
+#define KFN_TIME_SETRTC         0x51    /* Set the real time clock date-time */
+#define KFN_TIME_GETRTC         0x52    /* Get the real time clock date-time */
+#define KFN_KBD_SCANCODE        0x53    /* Get the next scan code from the keyboard */
+#define KFN_KBD_LAYOUT          0x54    /* Set the translation tables for the keyboard */
+#define KFN_ERR_MESSAGE         0x55    /* Return an error description, given an error number */
 
 /*
  * Call into the kernel (provided by assembly)
@@ -153,6 +164,14 @@ extern p_int_handler sys_int_register(unsigned short n, p_int_handler handler);
  * non-zero if interrupt n is pending, 0 if not
  */
 extern short sys_int_pending(unsigned short n);
+
+/*
+ * Fill out a s_sys_info structure with the information about the current system
+ *
+ * Inputs:
+ * info = pointer to a s_sys_info structure to fill out
+ */
+extern void sys_get_info(p_sys_info info);
 
 /*
  * Acknowledge an interrupt (clear out its pending flag)
@@ -276,6 +295,30 @@ extern short sys_chan_seek(short channel, long position, short base);
  */
 extern short sys_chan_ioctrl(short channel, short command, uint8_t * buffer, short size);
 
+/*
+ * Open a channel
+ *
+ * Inputs:
+ * dev = the device number to have a channel opened
+ * path = a "path" describing how the device is to be open
+ * mode = is the device to be read, written, both? (0x01 = READ flag, 0x02 = WRITE flag, 0x03 = READ and WRITE)
+ *
+ * Returns:
+ * the number of the channel opened, negative number on error
+ */
+extern short sys_chan_open(short dev, uint8_t * path, short mode);
+
+/*
+ * Close a channel
+ *
+ * Inputs:
+ * chan = the number of the channel to close
+ *
+ * Returns:
+ * nothing useful
+ */
+extern short sys_chan_close(short chan);
+
 /***
  *** Block device system calls
  ***/
@@ -348,5 +391,287 @@ extern short sys_bdev_flush(short dev);
 //  0 on success, any negative number is an error code
 //
 extern short sys_bdev_ioctrl(short dev, short command, unsigned char * buffer, short size);
+
+
+/*
+ * File System Calls
+ */
+
+/**
+ * Attempt to open a file given the path to the file and the mode.
+ *
+ * Inputs:
+ * path = the ASCIIZ string containing the path to the file.
+ * mode = the mode (e.g. r/w/create)
+ *
+ * Returns:
+ * the channel ID for the open file (negative if error)
+ */
+extern short sys_fsys_open(const char * path, short mode);
+
+/**
+ * Close access to a previously open file.
+ *
+ * Inputs:
+ * fd = the channel ID for the file
+ *
+ * Returns:
+ * 0 on success, negative number on failure
+ */
+extern short sys_fsys_close(short fd);
+
+/**
+ * Attempt to open a directory for scanning
+ *
+ * Inputs:
+ * path = the path to the directory to open
+ *
+ * Returns:
+ * the handle to the directory if >= 0. An error if < 0
+ */
+extern short sys_fsys_opendir(const char * path);
+
+/**
+ * Close access to a previously open file.
+ *
+ * Inputs:
+ * fd = the channel ID for the file
+ *
+ * Returns:
+ * 0 on success, negative number on failure
+ */
+extern short sys_fsys_close(short fd);
+
+/**
+ * Attempt to open a directory for scanning
+ *
+ * Inputs:
+ * path = the path to the directory to open
+ *
+ * Returns:
+ * the handle to the directory if >= 0. An error if < 0
+ */
+extern short sys_fsys_opendir(const char * path);
+
+/**
+ * Close a previously open directory
+ *
+ * Inputs:
+ * dir = the directory handle to close
+ *
+ * Returns:
+ * 0 on success, negative number on error
+ */
+extern short sys_fsys_closedir(short dir);
+
+/**
+ * Attempt to read an entry from an open directory
+ *
+ * Inputs:
+ * dir = the handle of the open directory
+ * file = pointer to the t_file_info structure to fill out.
+ *
+ * Returns:
+ * 0 on success, negative number on failure
+ */
+extern short sys_fsys_readdir(short dir, p_file_info file);
+
+/**
+ * Open a directory given the path and search for the first file matching the pattern.
+ *
+ * Inputs:
+ * path = the path to the directory to search
+ * pattern = the file name pattern to search for
+ * file = pointer to the t_file_info structure to fill out
+ *
+ * Returns:
+ * the directory handle to use for subsequent calls if >= 0, error if negative
+ */
+extern short sys_fsys_findfirst(const char * path, const char * pattern, p_file_info file);
+
+/**
+ * Open a directory given the path and search for the first file matching the pattern.
+ *
+ * Inputs:
+ * dir = the handle to the directory (returned by fsys_findfirst) to search
+ * file = pointer to the t_file_info structure to fill out
+ *
+ * Returns:
+ * 0 on success, error if negative
+ */
+extern short sys_fsys_findnext(short dir, p_file_info file);
+
+/*
+ * Get the label for the drive holding the path
+ *
+ * Inputs:
+ * path = path to the drive
+ * label = buffer that will hold the label... should be at least 35 bytes
+ */
+extern short sys_fsys_get_label(const char * path, char * label);
+
+/*
+ * Set the label for the drive holding the path
+ *
+ * Inputs:
+ * drive = drive number
+ * label = buffer that holds the label
+ */
+extern short sys_fsys_set_label(short drive, const char * label);
+
+/**
+ * Create a directory
+ *
+ * Inputs:
+ * path = the path of the directory to create.
+ *
+ * Returns:
+ * 0 on success, negative number on failure.
+ */
+extern short sys_fsys_mkdir(const char * path);
+
+/**
+ * Delete a file or directory
+ *
+ * Inputs:
+ * path = the path of the file or directory to delete.
+ *
+ * Returns:
+ * 0 on success, negative number on failure.
+ */
+extern short sys_fsys_delete(const char * path);
+
+/**
+ * Rename a file or directory
+ *
+ * Inputs:
+ * old_path = the current path to the file
+ * new_path = the new path for the file
+ *
+ * Returns:
+ * 0 on success, negative number on failure.
+ */
+extern short sys_fsys_rename(const char * old_path, const char * new_path);
+
+/**
+ * Change the current working directory (and drive)
+ *
+ * Inputs:
+ * path = the path that should be the new current
+ *
+ * Returns:
+ * 0 on success, negative number on failure.
+ */
+extern short sys_fsys_setcwd(const char * path);
+
+/**
+ * Get the current working drive and directory
+ *
+ * Inputs:
+ * path = the buffer in which to store the directory
+ * size = the size of the buffer in bytes
+ *
+ * Returns:
+ * 0 on success, negative number on failure.
+ */
+extern short sys_fsys_getcwd(char * path, short size);
+
+/*
+ * Load a file into memory at the designated destination address.
+ *
+ * If destination = 0, the file must be in a recognized binary format
+ * that specifies its own loading address.
+ *
+ * Inputs:
+ * path = the path to the file to load
+ * destination = the destination address (0 for use file's address)
+ * start = pointer to the long variable to fill with the starting address
+ *         (0 if not an executable, any other number if file is executable
+ *         with a known starting address)
+ *
+ * Returns:
+ * 0 on success, negative number on error
+ */
+extern short sys_fsys_load(const char * path, long destination, long * start);
+
+/*
+ * Register a file loading routine
+ *
+ * A file loader, takes a channel number to load from and returns a
+ * short that is the status of the load.
+ *
+ * Inputs:
+ * extension = the file extension to map to
+ * loader = pointer to the file load routine to add
+ *
+ * Returns:
+ * 0 on success, negative number on error
+ */
+extern short sys_fsys_register_loader(const char * extension, p_file_loader loader);
+
+/*
+ * Miscellaneous
+ */
+
+/*
+ * Get the number of jiffies since the system last booted.
+ *
+ * NOTE: a jiffie is 1/60 of a second. This timer will not be
+ *       100% precise, so it should be used for timeout purposes
+ *       where precision is not critical.
+ *
+ * Returns:
+ * the number of jiffies since the last reset
+ */
+extern long sys_time_jiffies();
+
+/*
+ * Set the time on the RTC
+ *
+ * Inputs:
+ * time = pointer to a t_time record containing the correct time
+ */
+extern void sys_rtc_set_time(p_time time);
+
+/*
+ * Get the time on the RTC
+ *
+ * Inputs:
+ * time = pointer to a t_time record in which to put the current time
+ */
+extern void sys_rtc_get_time(p_time time);
+
+/*
+ * Return the next scan code from the keyboard... 0 if nothing pending
+ */
+extern unsigned short sys_kbd_scancode();
+
+/*
+ * Return an error message given an error number
+ */
+extern const char * sys_err_message(short err_number);
+
+/*
+ * Set the keyboard translation tables
+ *
+ * The translation tables provided to the keyboard consist of eight
+ * consecutive tables of 128 characters each. Each table maps from
+ * the MAKE scan code of a key to its appropriate 8-bit character code.
+ *
+ * The tables included must include, in order:
+ * - UNMODIFIED: Used when no modifier keys are pressed or active
+ * - SHIFT: Used when the SHIFT modifier is pressed
+ * - CTRL: Used when the CTRL modifier is pressed
+ * - CTRL-SHIFT: Used when both CTRL and SHIFT are pressed
+ * - CAPSLOCK: Used when CAPSLOCK is down but SHIFT is not pressed
+ * - CAPSLOCK-SHIFT: Used when CAPSLOCK is down and SHIFT is pressed
+ * - ALT: Used when only ALT is presse
+ * - ALT-SHIFT: Used when ALT is pressed and either CAPSLOCK is down
+ *   or SHIFT is pressed (but not both)
+ *
+ * Inputs:
+ * tables = pointer to the keyboard translation tables
+ */
+extern short sys_kbd_layout(const char * tables);
 
 #endif

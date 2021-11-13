@@ -15,8 +15,10 @@
  * Inputs:
  * start = the address to start execution
  * stack = the location to start the user mode stack
+ * argc = the number of parameters
+ * argv = the array of parameters
  */
-extern void proc_exec(long start, long stack);
+extern void proc_exec(long start, long stack, int argc, char * argv[]);
 
 /*
  * Quit the current user process
@@ -39,10 +41,12 @@ extern int proc_get_result();
  *
  * Inputs:
  * path = the path to try to load
+ * argc = the number of parameters
+ * argv = the array of parameters
  *
  * Returns:
  * returns an error code on failure, will not return on success
  */
-extern short proc_run(const char * path);
+extern short proc_run(const char * path, int argc, char * argv[]);
 
 #endif
