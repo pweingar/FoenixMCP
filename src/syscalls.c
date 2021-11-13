@@ -264,6 +264,17 @@ short sys_chan_close(short chan) {
     return syscall(KFN_CHAN_CLOSE, chan);
 }
 
+/*
+ * Compute the size information for the text screen based on the current settings in VICKY
+ * These settings are needed to correctly position text on the screen.
+ *
+ * Inputs:
+ * screen = the screen number 0 for channel A, 1 for channel B
+ */
+void sys_text_setsizes(short chan) {
+    return syscall(KFN_TEXT_SETSIZES, chan);
+}
+
 /***
  *** Block device system calls
  ***/

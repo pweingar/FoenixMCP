@@ -65,7 +65,7 @@ unsigned long syscall_dispatch(int32_t function, int32_t param0, int32_t param1,
                     return;
 
                 default:
-                    break;
+                    return ERR_GENERAL;
             }
             break;
 
@@ -108,8 +108,12 @@ unsigned long syscall_dispatch(int32_t function, int32_t param0, int32_t param1,
                 case KFN_CHAN_REGISTER:
                     return cdev_register((p_dev_chan)param0);
 
+                case KFN_TEXT_SETSIZES:
+                    text_setsizes((short)param0);
+                    return 0;
+
                 default:
-                    break;
+                    return ERR_GENERAL;
             }
             break;
 
@@ -135,7 +139,7 @@ unsigned long syscall_dispatch(int32_t function, int32_t param0, int32_t param1,
                     return bdev_register((p_dev_block)param0);
 
                 default:
-                    break;
+                    return ERR_GENERAL;
             }
             break;
 
@@ -188,16 +192,21 @@ unsigned long syscall_dispatch(int32_t function, int32_t param0, int32_t param1,
                     return fsys_register_loader((char *)param0, (p_file_loader)param1);
 
                 default:
-                    break;
+                    return ERR_GENERAL;
             }
 
             break;
 
         case 0x40:
             /* Process and Memory functions */
-            case KFN_RUN:
-                return proc_run((char *)param0, (int)param1, (char *)param2);
+            switch (function) {
+                case KFN_RUN:
+                    return proc_run((char *)param0, (int)param1, (char *)param2);
+                    break;
 
+                default:
+                    return ERR_GENERAL;
+            }
             break;
 
         case 0x50:
@@ -232,14 +241,12 @@ unsigned long syscall_dispatch(int32_t function, int32_t param0, int32_t param1,
 #endif
 
                 default:
-                    break;
+                    return ERR_GENERAL;
             }
 
         default:
             break;
     }
 
-    DEBUG("syscall unknown function\n");
-    do {} while (1);
-    return -1;
+    return ERR_GENERAL;
 }
