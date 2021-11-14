@@ -16,12 +16,21 @@
 #include "dev/channel.h"
 #include "simpleio.h"
 #include "errors.h"
+#include "elf.h"
 
 #define MAX_DRIVES      8       /* Maximum number of drives */
 #define MAX_DIRECTORIES 8       /* Maximum number of open directories */
 #define MAX_FILES       8       /* Maximum number of open files */
 #define MAX_LOADERS     10      /* Maximum number of file loaders */
 #define MAX_EXT         4
+
+static const char *const elf_cpu_desc[] = {
+	"NONE","M32","SPARC","386","68K","88K","IAMCU","860","MIPS","S370",
+    "MIPS_RS3_LE","UNKNOWN","UNKNOWN","UNKNOWN","UNKNOWN","PARISC","UNKNOWN",
+    "VPP500","SPARC32PLUS","960","PPC","PPC64","S390","SPU","UNKNOWN",
+    "UNKNOWN","UNKNOWN","UNKNOWN","UNKNOWN","UNKNOWN","UNKNOWN","UNKNOWN",
+    "UNKNOWN","UNKNOWN","UNKNOWN","UNKNOWN","V800","FR20","RH32","RCE","ARM"
+};
 
 /*
  * Types
@@ -340,7 +349,7 @@ short fsys_findnext(short dir, p_file_info file) {
                 }
             }
 
-            return 0
+            return 0;
         }
     } else {
         return ERR_BAD_HANDLE;
@@ -970,6 +979,76 @@ short fsys_pgz_loader(short chan, long destination, long * start) {
     return result;
 }
 
+short fsys_elf_loader(short chan, long destination, long * start) {
+    char log_buffer[100];
+	size_t numBytes, highMem = 0, progIndex = 0, lowMem = ~0;
+	elf32_header header;
+	elf32_program_header progHeader;
+
+    chan_seek(chan, 0, 0);
+    numBytes = chan_read(chan, &header, sizeof(header));
+
+	if (header.ident.magic[0] != 0x7F ||
+		header.ident.magic[1] != 'E' ||
+		header.ident.magic[2] != 'L' ||
+		header.ident.magic[3] != 'F') {
+			DEBUG("[!] Not an ELF file");
+			return ERR_BAD_BINARY;
+	}
+
+	if (header.machine != CPU_ARCH) {
+		sprintf(&log_buffer, "[!] Incompatible CPU arch: expected %s, but found %s\n", elf_cpu_desc[CPU_ARCH], elf_cpu_desc[header.machine]);
+		DEBUG(log_buffer);
+        return ERR_BAD_BINARY;
+	}
+
+	switch (header.type) {
+		case ET_REL:
+			// ELF type: relocatable"
+			break;
+		case ET_EXEC:
+			// ELF type: executable"
+			break;
+		case ET_DYN:
+			DEBUG("[!] Cannot load ELF: loading shared objects is not supported");
+			return ERR_NOT_EXECUTABLE;
+		default:
+			DEBUG("[!] Cannot load ELF: invalid type flag (file probably corrupted)");
+			return ERR_NOT_EXECUTABLE;
+	}
+
+	while (progIndex < header.progNum) {
+		chan_seek(chan, progIndex * header.progSize + header.progOffset, 0);
+		numBytes = chan_read(chan, &progHeader, sizeof(progHeader));
+		switch (progHeader.type) {
+			case PT_NULL:
+			case PT_PHDR:
+			case PT_NOTE:
+				break;
+			case PT_DYNAMIC:
+			case PT_SHLIB:
+				DEBUG("[!] Dynamically linked ELFs not supported");
+				return ERR_NOT_EXECUTABLE;
+			case PT_LOAD:
+                chan_seek(chan, progHeader.offset, 0);
+				numBytes = chan_read(chan, (uint8_t *) progHeader.physAddr, progHeader.fileSize);
+				if (progHeader.fileSize < progHeader.memSize)
+					memset((uint8_t*)progHeader.physAddr + progHeader.fileSize, 0, progHeader.memSize - progHeader.fileSize);
+				if (progHeader.physAddr + progHeader.fileSize > highMem) highMem = progHeader.physAddr + progHeader.fileSize;
+				if (progHeader.physAddr < lowMem) lowMem = progHeader.physAddr + progHeader.align;
+				break;
+			case PT_INTERP:
+				DEBUG("[!] Interpreted ELFs are not supported");
+				return ERR_NOT_EXECUTABLE;
+		}
+		progIndex++;
+	}
+	
+    *start = header.entry;
+	return 0;
+}
+
+
 /*
  * Loader for the PGX binary file format
  *
@@ -1239,6 +1318,7 @@ short fsys_init() {
     /* Register the built-in binary file loaders */
     fsys_register_loader("PGZ", fsys_pgz_loader);
     fsys_register_loader("PGX", fsys_pgx_loader);
+    fsys_register_loader("ELF", fsys_elf_loader);
 
     /* Register the channel driver for files. */
 
