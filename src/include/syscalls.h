@@ -15,6 +15,7 @@
 #include "dev/channel.h"
 #include "dev/block.h"
 #include "dev/fsys.h"
+#include "dev/rtc.h"
 
 /*
  * Syscall function numbers
