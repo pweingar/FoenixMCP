@@ -27,8 +27,8 @@ export CC = vc
 export DEFINES = -DCPU=$(CPU) -DMODEL=$(MODEL) -DVER_MAJOR=$(VER_MAJOR) -DVER_MINOR=$(VER_MINOR) -DVER_BUILD=$(VER_BUILD) # -DKBD_POLLED
 
 ifeq ($(OS),Windows_NT)
-	# export CFLAGS = +$(VBCC)\config\m68k-foenix -I. -I$(CURDIR)\include -I$(CURDIR)
-	export CFLAGS = +$(VBCC)\config\a2560u_flash -I. -I$(CURDIR)\include -I$(CURDIR)
+	export CFLAGS = +$(VBCC)/config/m68k-foenix -I. -I$(CURDIR)/include -I$(CURDIR)
+	# export CFLAGS = +$(VBCC)/config/a2560u_flash -I. -I$(CURDIR)/include -I$(CURDIR)
 	export RM = cmd /C del /Q /F
 else
 	export CFLAGS = +$(VBCC)/config/m68k-foenix-linux -I. -I$(CURDIR)/include -I$(CURDIR)
