@@ -44,4 +44,36 @@
  * Bit[0..1] = Data rate
  */
 
+/*
+ * Controller status 1 register bits
+ */
+
+#define FDC_ST1_IC      0xC0    /* Interrupt code: 00 = normal, 01 = Abnormal termination, 10 = Invalid command, 11 = Abnormal termination (polling) */
+#define FDC_ST1_SE      0x20    /* Seek, Recalibrate finished */
+#define FDC_ST1_EC      0x10    /* Head failed to recalibrate to track 0 */
+#define FDC_ST1_HEAD    0x04    /* Head number */
+#define FDC_ST1_DS1     0x02    /* Drive select #1 */
+#define FDC_ST1_DS0     0x01    /* Drive select #0 */
+
+/*
+ * Controller status 2 register bits
+ */
+
+#define FDC_ST2_EN      0x80    /* End of cylinder... tried to access sector beyond last on track */
+#define FDC_ST2_DE      0x20    /* Data Error: bad CRC */
+#define FDC_ST2_OR      0x10    /* Overrun/Underrun error */
+#define FDC_ST2_ND      0x04    /* No data: could not find the sector, track, or ID */
+#define FDC_ST2_NW      0x02    /* Not writeable */
+#define FDC_ST2_MA      0x01    /* Missing address mark */
+
+/*
+ * Controller status 3 register bits
+ */
+
+#define FDC_ST3_WP      0x40    /* Write Protect tab */
+#define FDC_ST3_TRACK0  0x10    /* Track 0 indicator */
+#define FDC_ST3_HEAD    0x04    /* Head number */
+#define FDC_ST3_DS1     0x02    /* Drive Select #1 */
+#define FDC_ST3_DS0     0x01    /* Drive Select #0 */
+
 #endif

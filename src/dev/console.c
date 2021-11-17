@@ -163,7 +163,7 @@ void ansi_match_pattern(p_channel chan, p_console_data con_data) {
  * Add a character to the ANSI buffer... and process when an escape sequence is found
  */
 void ansi_process_c(p_channel chan, p_console_data con_data, char c) {
-    TRACE("ansi_process_c");
+    // TRACE("ansi_process_c");
 
     if (c == '\x1B') {
         /* Start the escape sequence */

@@ -2,6 +2,7 @@
  * A simple collection of I/O functions the kernel will need often
  */
 
+#include <ctype.h>
 #include <string.h>
 #include "syscalls.h"
 #include "simpleio.h"

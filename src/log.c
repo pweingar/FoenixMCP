@@ -106,10 +106,10 @@ void panic() {
 
     /* Re-initialize the text screen */
     text_init();
-    text_set_border(0, 0, 0, 0, 0);
-    text_set_color(0, 15, 1);
-    text_set_cursor(0, 0, 0, 0, 0);
-    text_clear(0, 2);
+    // text_set_border(0, 0, 0, 0, 0);
+    // text_set_color(0, 15, 1);
+    // text_set_cursor(0, 0, 0, 0, 0);
+    // text_clear(0, 2);
 
     text_set_xy(0, column, row++);
     sprintf(buffer, "\xDA\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xBF");

@@ -81,6 +81,7 @@ void sys_get_information(p_sys_info info) {
     }
 #endif
 
+#if MODEL == MODEL_FOENIX_A2560U || MODEL == MODEL_FOENIX_A2560U_PLUS
     info->fpga_date = *FPGA_DATE_YEAR << 16 | *FPGA_DATE_MONTHDAY;
     info->fpga_model = *FPGA_MODEL_H << 16 | *FPGA_MODEL_L;
     info->fpga_version = *FPGA_VER;
@@ -90,6 +91,17 @@ void sys_get_information(p_sys_info info) {
     info->pcb_version[1] = *PCB_REV_1 & 0xFF;
     info->pcb_version[2] = (*PCB_REV_2 & 0xFF00) >> 8;
     info->pcb_version[3] = 0;
+#else
+    info->fpga_date = 0;
+    info->fpga_model = 0;
+    info->fpga_version = 0;
+    info->fpga_subver = 0;
+
+    info->pcb_version[0] = '?';
+    info->pcb_version[1] = '?';
+    info->pcb_version[2] = '?';
+    info->pcb_version[3] = 0;
+#endif
 
     info->vicky_rev = 0x0000;       /* TODO: get this from VICKY */
 

@@ -10,6 +10,7 @@
 #include "cli/sound_cmds.h"
 #include "dev/block.h"
 #include "dev/channel.h"
+#include "dev/fdc.h"
 #include "dev/fsys.h"
 #include "dev/lpt.h"
 #include "dev/rtc.h"
@@ -189,6 +190,99 @@ short cli_mem_test(short channel, int argc, char * argv[]) {
     return 0;
 }
 
+short cli_test_recalibrate(short screen, int argc, char * argv[]) {
+    unsigned char buffer[512];
+    short i;
+    short result;
+
+    bdev_ioctrl(BDEV_FDC, FDC_CTRL_MOTOR_ON, 0, 0);
+
+    sprintf(buffer, "Recalibrating the floppy drive\n");
+    sys_chan_write(screen, buffer, strlen(buffer));
+
+    if (fdc_recalibrate() == 0) {
+        sprintf(buffer, "Success\n");
+        sys_chan_write(screen, buffer, strlen(buffer));
+    } else {
+        sprintf(buffer, "Failed\n");
+        sys_chan_write(screen, buffer, strlen(buffer));
+    }
+
+    bdev_ioctrl(BDEV_FDC, FDC_CTRL_MOTOR_OFF, 0, 0);
+    return 0;
+}
+
+short cli_test_seek(short screen, int argc, char * argv[]) {
+    unsigned char buffer[512];
+    short i;
+    unsigned char cylinder;
+    short result;
+
+    bdev_ioctrl(BDEV_FDC, FDC_CTRL_MOTOR_ON, 0, 0);
+
+    cylinder = (unsigned char)cli_eval_number(argv[1]);
+
+    sprintf(buffer, "Seeking to %d\n", cylinder);
+    sys_chan_write(screen, buffer, strlen(buffer));
+
+    if (fdc_seek(cylinder) == 0) {
+        sprintf(buffer, "Success\n");
+        sys_chan_write(screen, buffer, strlen(buffer));
+    } else {
+        sprintf(buffer, "Failed\n");
+        sys_chan_write(screen, buffer, strlen(buffer));
+    }
+
+    bdev_ioctrl(BDEV_FDC, FDC_CTRL_MOTOR_OFF, 0, 0);
+    return 0;
+}
+
+/*
+ * Test the FDC interface by reading the MBR
+ */
+short cli_test_fdc(short screen, int argc, char * argv[]) {
+    unsigned char buffer[512];
+    short i;
+    short scancode;
+    short n = 0;
+    short result;
+
+    bdev_ioctrl(BDEV_FDC, FDC_CTRL_MOTOR_ON, 0, 0);
+
+    result = fdc_init();
+
+    //result = bdev_init(BDEV_FDC);
+    if (result != 0) {
+        sprintf(buffer, "Could not initialize FDC: %s\n", sys_err_message(result));
+        sys_chan_write(screen, buffer, strlen(buffer));
+        return result;
+    }
+
+    while (1) {
+        for (i = 0; i < 512; i++) {
+            buffer[i] = 0xAA;
+        }
+
+        n = bdev_read(BDEV_FDC, 0, buffer, 512);
+        if (n < 0) {
+            err_print(screen, "Unable to read MBR", n);
+            bdev_ioctrl(BDEV_FDC, FDC_CTRL_MOTOR_OFF, 0, 0);
+            return n;
+        }
+
+        dump_buffer(screen, buffer, 512, 1);
+
+        print(screen, "\n\n");
+
+        scancode = sys_kbd_scancode();
+        if (scancode == 0x01) {
+            break;
+        }
+    }
+
+    bdev_ioctrl(BDEV_FDC, FDC_CTRL_MOTOR_OFF, 0, 0);
+}
+
 /*
  * Test the IDE interface by reading the MBR
  */
@@ -328,7 +422,7 @@ static t_cli_test_feature cli_test_features[] = {
     {"BITMAP", "BITMAP: test the bitmap screen", cli_test_bitmap},
     {"CREATE", "CREATE <path>: test creating a file", cli_test_create},
     {"IDE", "IDE: test reading the MBR of the IDE drive", cli_test_ide},
-    {"PANIC", "PANIC: test the kernel panic mechanism", cli_test_panic},
+    {"FDC", "FDC: test reading the MBR from the floppy drive", cli_test_fdc},
     {"LPT", "LPT: test the parallel port", cli_test_lpt},
     {"MEM", "MEM: test reading and writing memory", cli_mem_test},
     {"MIDILOOP", "MIDILOOP: perform a loopback test on the MIDI ports", midi_loop_test},
@@ -336,8 +430,11 @@ static t_cli_test_feature cli_test_features[] = {
     {"MIDITX", "MIDITX: send a note to a MIDI keyboard", midi_tx_test},
     {"OPL2", "OPL2: test the OPL2 sound chip", opl2_test},
     {"OPL3", "OPL3: test the OPL3 sound chip", opl3_test},
+    {"PANIC", "PANIC: test the kernel panic mechanism", cli_test_panic},
     {"PSG", "PSG: test the PSG sound chip", psg_test},
     {"PRINT", "PRINT: sent text to the printer", cmd_test_print},
+    {"RECALIBRATE", "RECALIBRATE: recalibrate the floppy drive", cli_test_recalibrate},
+    {"SEEK", "SEEK <track>: move the floppy drive head to a track", cli_test_seek},
     {"UART", "UART: test the serial port", cli_test_uart},
     {0, 0}
 };

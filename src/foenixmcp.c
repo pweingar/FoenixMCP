@@ -34,8 +34,12 @@
 #include "snd/sid.h"
 #include "fatfs/ff.h"
 #include "cli/cli.h"
-// #include "rsrc/bitmaps/splash_a2560k.h"
+
+#if MODEL == MODEL_FOENIX_A2560U || MODEL == MODEL_FOENIX_A2560U_PLUS
 #include "rsrc/bitmaps/splash_a2560u.h"
+#elif MODEL == MODEL_FOENIX_A2560K
+#include "rsrc/bitmaps/splash_a2560k.h"
+#endif
 
 const char* VolumeStr[FF_VOLUMES] = { "sd", "fd", "hd" };
 
@@ -134,9 +138,6 @@ void load_splashscreen() {
 
     /* Display the splashscreen: 640x480 */
     *MasterControlReg_A = VKY3_MCR_GRAPH_EN | VKY3_MCR_BITMAP_EN;
-
-    /* Play the SID test bong on the Gideon SID implementation */
-    sid_test_internal();
 }
 
 void print_error(short channel, char * message, short code) {
@@ -204,11 +205,18 @@ void initialize() {
 
     target_jiffies = sys_time_jiffies() + 300;     /* 5 seconds minimum */
 
+    log(LOG_TRACE, "target_jiffies assigned");
+
     /* Enable all interrupts */
     int_enable_all();
 
+    log(LOG_TRACE, "Interrupts enabled");
+
     /* Display the splash screen */
     load_splashscreen();
+
+    /* Play the SID test bong on the Gideon SID implementation */
+    sid_test_internal();
 
     if (res = pata_install()) {
         log_num(LOG_ERROR, "FAILED: PATA driver installation", res);
@@ -221,6 +229,14 @@ void initialize() {
     } else {
         log(LOG_INFO, "SDC driver installed.");
     }
+
+#if MODEL == MODEL_FOENIX_A2560K
+    if (res = fdc_install()) {
+        log_num(LOG_ERROR, "FAILED: Floppy drive initialization", res);
+    } else {
+        log(LOG_INFO, "Floppy drive initialized.");
+    }
+#endif
 
     // At this point, we should be able to call into to console to print to the screens
 

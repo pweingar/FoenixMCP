@@ -6,6 +6,7 @@
 #include "vicky_general.h"
 #include "text_screen_iii.h"
 #include "simpleio.h"
+#include "sys_general.h"
 #include "rsrc/font/MSX_CP437_8x8.h"
 
 #define MAX_TEXT_CHANNELS 2
@@ -83,6 +84,13 @@ int text_init() {
     short need_hires = 0;
     int i, x;
     p_text_channel chan_a = &text_channel[0];
+    unsigned long border_color = 0;
+
+#if MODEL == MODEL_FOENIX_A2560K
+    border_color = 0x00004000;          /* Dark blue border for the K */
+#elif MODEL == MODEL_FOENIX_A2560U || MODEL == MODEL_FOENIX_A2560U_PLUS
+    border_color = 0x00008080;          /* Dark blue border for the K */
+#endif
 
 #if MODEL == MODEL_FOENIX_A2560K
     p_text_channel chan_b = &text_channel[1];
@@ -118,7 +126,7 @@ int text_init() {
 
     /* Initialize everything... only do a screen if it's present */
 
-    need_hires = ((*VKY3_DIP_REG & VKY3_DIP_HIRES) == 0) ? 1 : 0;
+    // need_hires = ((*VKY3_DIP_REG & VKY3_DIP_HIRES) == 0) ? 1 : 0;
 
     chan_a->master_control = MasterControlReg_A;
     chan_a->text_cells = ScreenText_A;
@@ -133,9 +141,6 @@ int text_init() {
         *chan_a->master_control = VKY3_MCR_640x480 | VKY3_MCR_TEXT_EN;      /* Set to text only mode: 640x480 */
     }
 
-	chan_a->border_control[0] = 0x00102001;	// Enable
-	chan_a->border_control[1] = 0x00000040;	//Dark Blue
-
     /* Set the font for channel A */
 
     for (i = 0; i < 0x800; i++) {
@@ -143,7 +148,7 @@ int text_init() {
         VICKY_TXT_FONT_A[i] = b;
     }
 
-    text_set_border(0, 1, 0x20, 0x10, 0x00008080);
+    text_set_border(0, 1, 0x20, 0x10, border_color);
     text_setsizes(0);
     text_set_color(0, 0xf, 4);
     text_set_cursor(0, 0xF3, 0x7F, 1, 1);
@@ -165,9 +170,7 @@ int text_init() {
         *chan_b->master_control = VKY3_MCR_640x480 | VKY3_MCR_TEXT_EN;      /* Set to text only mode: 640x480 */
     }
 
-    chan_b->border_control[0] = 0x00102000;	// Enable
-	chan_b->border_control[1] = 0x00400000;	//Dark Red
-
+    text_set_border(0, 1, 0x20, 0x10, border_color);
     text_setsizes(1);
     text_set_color(1, 4, 3);
     text_clear(1, 2);

@@ -130,10 +130,9 @@ coldboot:   lea ___STACK,sp
             move.l #___BSSSIZE,d0
             beq	callmain
 
-            clr.l d1
-clrloop:    move.l d1,(a0)+
-            subq.l #4,d0
-            bne	clrloop
+            ; clrloop:    clr.l (a0)+
+            ; subq.l #4,d0
+            ; bne	clrloop
 
             ; Set TRAP #15 vector handler
             lea h_trap_15,a0        ; Address of the handler
