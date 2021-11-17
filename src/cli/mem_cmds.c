@@ -40,7 +40,7 @@ short mem_cmd_dump(short channel, int argc, char * argv[]) {
 
 short mem_cmd_dasm(short channel, int argc, char * argv[]) {
     unsigned long address = 0;
-    long count = 100;
+    long count = 1000;
     long i;
 
     TRACE("mem_cmd_dasm");
