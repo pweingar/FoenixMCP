@@ -17,7 +17,7 @@ PENDING_GRP0 = $00B00100
 PENDING_GRP1 = $00B00102
 PENDING_GRP2 = $00B00104
 
-            section "vectors",code
+            section "VECTORS",code
 
             dc.l ___STACK           ; 00 - Initial stack pointer
             dc.l coldboot           ; 01 - Initial PC

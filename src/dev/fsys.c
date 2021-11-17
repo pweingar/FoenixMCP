@@ -1031,7 +1031,8 @@ short fsys_elf_loader(short chan, long destination, long * start) {
 				return ERR_NOT_EXECUTABLE;
 			case PT_LOAD:
                 chan_seek(chan, progHeader.offset, 0);
-				numBytes = chan_read(chan, (uint8_t *) progHeader.physAddr, progHeader.fileSize);
+                uint8_t * write_buffer = (uint8_t *) progHeader.physAddr;
+				numBytes = chan_read(chan, write_buffer, progHeader.fileSize);
 				if (progHeader.fileSize < progHeader.memSize)
 					memset((uint8_t*)progHeader.physAddr + progHeader.fileSize, 0, progHeader.memSize - progHeader.fileSize);
 				if (progHeader.physAddr + progHeader.fileSize > highMem) highMem = progHeader.physAddr + progHeader.fileSize;
