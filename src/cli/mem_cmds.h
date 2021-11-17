@@ -5,12 +5,21 @@
 #ifndef __MEM_CMDS_H
 #define __MEM_CMDS_H
 
+#include "dis68k.h"
+
 /*
  * Print out the contents of a block of memory
  *
  * DUMP <address> [<count>]
  */
 extern short mem_cmd_dump(short channel, int argc, char * argv[]);
+
+/*
+ * Print out the dissassembly of a block of memory
+ *
+ * DASM <address> [<count>]
+ */
+extern short mem_cmd_dasm(short channel, int argc, char * argv[]);
 
 /*
  * Write an 8-bit byte to memory
