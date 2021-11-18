@@ -653,12 +653,20 @@ short fchan_seek(t_channel * chan, long position, short base) {
 
     file = fchan_to_file(chan);
     if (file) {
-        if (base == CDEV_SEEK_ABSOLUTE) {
+        if (base == CDEV_SEEK_START) {
+			/* Position relative to the start of the file */
             result = f_lseek(file, position);
             return fatfs_to_foenix(result);
+
         } else if (base == CDEV_SEEK_RELATIVE) {
+			/* Position relative to the current position */
             long current = f_tell(file);
             result = f_lseek(file, current + position);
+            return fatfs_to_foenix(result);
+
+        } else if (base == CDEV_SEEK_END) {
+			/* Position relative to the end of the file */
+            result = f_lseek(file, f_size(file) + position);
             return fatfs_to_foenix(result);
         }
     }
@@ -1044,7 +1052,7 @@ short fsys_elf_loader(short chan, long destination, long * start) {
 		}
 		progIndex++;
 	}
-	
+
     *start = header.entry;
 	return 0;
 }
