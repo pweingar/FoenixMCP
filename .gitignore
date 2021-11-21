@@ -1,6 +1,9 @@
 # Prerequisites
 *.d
 
+# Python cache
+C256Mgr/__pycache__/
+
 # Object files
 *.o
 *.ko
