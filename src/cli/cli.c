@@ -259,6 +259,7 @@ short cli_rerepl() {
 //
 short cli_repl(short channel) {
     char command_line[MAX_COMMAND_SIZE];
+    char cwd_buffer[MAX_PATH_LEN];
     char * arg;
     char * token_save;
     char * delim = " ";
@@ -268,7 +269,11 @@ short cli_repl(short channel) {
     g_current_channel = channel;
 
     while (1) {
-        sys_chan_write(channel, "\n> ", 3);                           // Print our prompt
+        sys_chan_write(channel, "\n", 1);
+        if(sys_fsys_get_cwd(cwd_buffer, MAX_PATH_LEN) == 0) {
+            sys_chan_write(channel, cwd_buffer, strlen(cwd_buffer));
+        }
+        sys_chan_write(channel, "> ", 2);                           // Print our prompt
         sys_chan_readline(channel, command_line, MAX_COMMAND_SIZE);   // Attempt to read line
         sys_chan_write(channel, "\n", 1);
 
