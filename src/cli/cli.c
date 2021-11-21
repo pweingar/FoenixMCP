@@ -56,6 +56,7 @@ const t_cli_command g_cli_commands[] = {
     { "HELP", "HELP : print this helpful message", cmd_help },
     { "CD", "CD <path> : sets the current directory", cmd_cd },
     { "CLS", "CLS : clear the screen", cmd_cls },
+    { "DASM", "DASM <addr> [<count>] : print a memory disassembly", mem_cmd_dasm},
     { "DEL", "DEL <path> : delete a file or directory", cmd_del },
     { "DIR", "DIR <path> : print directory listing", cmd_dir },
     { "DISKFILL", "DISKFILL <drive #> <sector #> <byte value>", cmd_diskfill },

@@ -31,7 +31,8 @@ ifeq ($(OS),Windows_NT)
 	# export CFLAGS = +$(VBCC)/config/a2560u_flash -I. -I$(CURDIR)/include -I$(CURDIR)
 	export RM = cmd /C del /Q /F
 else
-	export CFLAGS = +$(VBCC)/config/m68k-foenix-linux -I. -I$(CURDIR)/include -I$(CURDIR)
+	#export CFLAGS = +$(VBCC)/config/m68k-foenix-linux -I. -I$(CURDIR)/include -I$(CURDIR)
+	export CFLAGS = +$(VBCC)/config/a2560u_flash-linux -I. -I$(CURDIR)/include -I$(CURDIR)
 	export RM = rm -f
 endif
 

@@ -36,9 +36,9 @@
 #define CDEV_STAT_READABLE  0x04    // The channel has data to read (read will not block)
 #define CDEV_STAT_WRITABLE  0x08    // The channel can accept data (write will not block)
 
-#define CDEV_SEEK_ABSOLUTE  0
-#define CDEV_SEEK_RELATIVE  1
-#define CDEV_SEEK_END       2
+#define CDEV_SEEK_START     0       /* Seek from the start of the file */
+#define CDEV_SEEK_RELATIVE  1       /* Seek from the current position */
+#define CDEV_SEEK_END       2       /* Seek from teh end of the file */
 
 /*
  * Structure defining a channel
@@ -243,7 +243,8 @@ extern short chan_flush(short channel);
  * Inputs:
  *  channel = the number of the channel
  *  position = the position of the cursor
- *  base = whether the position is absolute or relative to the current position
+ *  base = whether the position is from the beginning of the channel, relative to the current position,
+ *         or relative to the end of the channel
  *
  * Returns:
  *  0 = success, a negative number is an error.

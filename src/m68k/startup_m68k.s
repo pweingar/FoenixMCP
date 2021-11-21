@@ -17,7 +17,7 @@ PENDING_GRP0 = $00B00100
 PENDING_GRP1 = $00B00102
 PENDING_GRP2 = $00B00104
 
-            section "vectors",code
+            section "VECTORS",code
 
             dc.l ___STACK           ; 00 - Initial stack pointer
             dc.l coldboot           ; 01 - Initial PC
@@ -380,7 +380,7 @@ _call_user:
             move.l (8,a7),a1            ; Get the pointer to the process's stack
             move.l (12,a7),d0           ; Get the number of parameters passed
             move.l (16,a7),a2           ; Get the pointer to the parameters
-            andi #$dfff,sr              ; Drop into user mode
+            ; andi #$dfff,sr              ; Drop into user mode
             movea.l a1,a7               ; Set the stack
 
             move.l a2,-(a7)             ; Push the parameters list

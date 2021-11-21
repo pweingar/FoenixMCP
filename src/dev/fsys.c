@@ -648,22 +648,26 @@ short fchan_flush(t_channel * chan) {
  */
 short fchan_seek(t_channel * chan, long position, short base) {
     FIL * file;
+    FRESULT result;
     FSIZE_t new_position;
 
     file = fchan_to_file(chan);
     if (file) {
-        switch (base) {
-        case CDEV_SEEK_ABSOLUTE:
-            new_position = position;    
-            break;
-        case CDEV_SEEK_RELATIVE:
-            new_position = f_tell(file) + position;
-            break;
-        case CDEV_SEEK_END:
-            new_position = f_size(file) - position;
-            break;
-        default:
-            return ERR_GENERAL; 
+        if (base == CDEV_SEEK_START) {
+			/* Position relative to the start of the file */
+            result = f_lseek(file, position);
+            return fatfs_to_foenix(result);
+
+        } else if (base == CDEV_SEEK_RELATIVE) {
+			/* Position relative to the current position */
+            long current = f_tell(file);
+            result = f_lseek(file, current + position);
+            return fatfs_to_foenix(result);
+
+        } else if (base == CDEV_SEEK_END) {
+			/* Position relative to the end of the file */
+            result = f_lseek(file, f_size(file) + position);
+            return fatfs_to_foenix(result);
         }
 
         return fatfs_to_foenix(f_lseek(file, new_position));
@@ -1037,7 +1041,8 @@ short fsys_elf_loader(short chan, long destination, long * start) {
 				return ERR_NOT_EXECUTABLE;
 			case PT_LOAD:
                 chan_seek(chan, progHeader.offset, 0);
-				numBytes = chan_read(chan, (uint8_t *) progHeader.physAddr, progHeader.fileSize);
+                uint8_t * write_buffer = (uint8_t *) progHeader.physAddr;
+				numBytes = chan_read(chan, write_buffer, progHeader.fileSize);
 				if (progHeader.fileSize < progHeader.memSize)
 					memset((uint8_t*)progHeader.physAddr + progHeader.fileSize, 0, progHeader.memSize - progHeader.fileSize);
 				if (progHeader.physAddr + progHeader.fileSize > highMem) highMem = progHeader.physAddr + progHeader.fileSize;
@@ -1049,7 +1054,7 @@ short fsys_elf_loader(short chan, long destination, long * start) {
 		}
 		progIndex++;
 	}
-	
+
     *start = header.entry;
 	return 0;
 }
