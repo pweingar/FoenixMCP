@@ -1,6 +1,6 @@
-asources = startup_m68k.s
+asources = startup_m68040.s
 aobjects = $(subst .s,.o,$(asources))
-csources = bios_m68k.c
+csources = bios_m68040.c
 cobjects = $(subst .c,.o,$(csources))
 
 .PHONY: all

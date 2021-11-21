@@ -265,6 +265,7 @@ short cli_test_fdc(short screen, int argc, char * argv[]) {
 
         n = bdev_read(BDEV_FDC, 0, buffer, 512);
         if (n < 0) {
+            dump_buffer(screen, buffer, 512, 1);
             err_print(screen, "Unable to read MBR", n);
             bdev_ioctrl(BDEV_FDC, FDC_CTRL_MOTOR_OFF, 0, 0);
             return n;
