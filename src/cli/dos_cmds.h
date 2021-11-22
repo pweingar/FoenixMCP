@@ -26,6 +26,11 @@ extern short cmd_mkdir(short screen, int argc, char * argv[]);
 extern short cmd_del(short screen, int argc, char * argv[]);
 
 /*
+ * Copies file(s) to destination
+ */
+extern short cmd_copy(short screen, int argc, char * argv[]);
+
+/*
  * Set the current working directory
  */
 extern short cmd_cd(short screen, int argc, char * argv[]);
