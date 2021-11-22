@@ -18,7 +18,7 @@
 1. [ ] Memory management
 1. [x] PGX file loader
 1. [x] PGZ file loader
-1. [ ] ELF file loader
+1. [x] ELF file loader
 1. [x] Command Line Interface
 1. [ ] Mouse driver
 
@@ -28,7 +28,7 @@
 1. [ ] Auto-run/configuration file
 1. Built-in commands:
     1. [x] DIR [path]
-    1. [ ] COPY [path] TO [path]
+    1. [x] COPY [path] TO [path]
     1. [ ] RENAME [path] TO [path]
     1. [x] DELETE [path]
     1. [x] CD [path]
