@@ -38,6 +38,36 @@ short mem_cmd_dump(short channel, int argc, char * argv[]) {
     }
 }
 
+short mem_cmd_dasm(short channel, int argc, char * argv[]) {
+    unsigned long address = 0;
+    long count = 1000;
+    long i;
+
+    TRACE("mem_cmd_dasm");
+
+#if defined(__m68k__) || defined(__M68K__)
+    if (argc >= 2) {
+        address = cli_eval_number(argv[1]);
+
+        if (argc > 2) {
+            count = cli_eval_number(argv[2]);
+        }
+        print(0, "=================\n");
+        disasm(address, address + count);
+        print(0, "=================\n");
+
+        return  0;
+    } else {
+        log(LOG_ERROR, "USAGE: DASM <address> <count>");
+        return -1;
+    }
+#else
+    log(LOG_ERROR, "DASM only available on m68k machines");
+    return -1;
+#endif
+
+}
+
 /*
  * Write an 8-bit byte to memory
  *

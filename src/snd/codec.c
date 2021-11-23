@@ -42,8 +42,9 @@ void codec_set_volume(unsigned char vol) {
     volume = vol;
 
     *CODEC = 0x0A00 | (0xFF - (vol & 0xFF));
-    *CODEC = 0x0400 | ((vol >> 1) & 0xff);
+    codec_wait();
 
+	*CODEC = 0x0400 | ((vol >> 1) & 0xff);
     codec_wait();
 }
 

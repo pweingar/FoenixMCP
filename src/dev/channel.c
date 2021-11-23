@@ -417,17 +417,18 @@ short chan_flush(short channel) {
     }
 }
 
-//
-// Attempt to set the position of the channel cursor (if supported)
-//
-// Inputs:
-//  channel = the number of the channel
-//  position = the position of the cursor
-//  base = whether the position is absolute or relative to the current position
-//
-// Returns:
-//  0 = success, a negative number is an error.
-//
+/*
+ * Attempt to set the position of the channel cursor (if supported)
+ *
+ * Inputs:
+ *  channel = the number of the channel
+ *  position = the position of the cursor
+ *  base = whether the position is from the beginning of the channel, relative to the current position,
+ *         or relative to the end of the channel
+ *
+ * Returns:
+ *  0 = success, a negative number is an error.
+ */
 short chan_seek(short channel, long position, short base) {
     p_channel chan;
     p_dev_chan cdev;
