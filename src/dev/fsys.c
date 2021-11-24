@@ -456,8 +456,7 @@ short fsys_set_cwd(const char * path) {
 short fsys_get_cwd(char * path, short size) {
     FRESULT result;
 
-    f_chdrive("");
-    result = f_getcwd(path);
+    result = f_getcwd(path, size);
     if (result == FR_OK) {
         return 0;
     } else {
