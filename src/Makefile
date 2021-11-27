@@ -6,7 +6,7 @@
 # CPU_M68030                  0x23  /* CPU code for the Motorola 68030 */
 # CPU_M68040                  0x24  /* CPU code for the Motorola 68040 */
 # CPU_I486DX                  0x34  /* CPU code for the Intel 486DX */
-export CPU=32
+export CPU=36
 
 # MODEL_FOENIX_FMX            0
 # MODEL_FOENIX_C256U          1
@@ -22,12 +22,12 @@ export VER_MINOR = 1
 export VER_BUILD = 11
 
 export AS = vasmm68k_mot
-export ASFLAGS = -quiet -Fvobj -nowarn=62
+export ASFLAGS = -m68040 -quiet -Fvobj -nowarn=62
 export CC = vc
 export DEFINES = -DCPU=$(CPU) -DMODEL=$(MODEL) -DVER_MAJOR=$(VER_MAJOR) -DVER_MINOR=$(VER_MINOR) -DVER_BUILD=$(VER_BUILD) # -DKBD_POLLED
 
 ifeq ($(OS),Windows_NT)
-	export CFLAGS = +$(VBCC)/config/m68k-foenix -I. -I$(CURDIR)/include -I$(CURDIR)
+	export CFLAGS = -cpu=68040 +$(VBCC)/config/a2560k_ram -I. -I$(CURDIR)/include -I$(CURDIR)
 	# export CFLAGS = +$(VBCC)/config/a2560u_flash -I. -I$(CURDIR)/include -I$(CURDIR)
 	export RM = cmd /C del /Q /F
 else
@@ -36,7 +36,7 @@ else
 	export RM = rm -f
 endif
 
-cpu = m68k
+cpu = m68040
 cpu_assembly_src := $(wildcard $(cpu)/*.s)
 cpu_c_src := $(wildcard $(cpu)/*.c)
 cpu_assembly_obj := $(subst .s,.o,$(cpu_assembly_src))

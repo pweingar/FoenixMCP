@@ -16,21 +16,21 @@ typedef void (*p_int_handler)();
 
 #if MODEL == MODEL_FOENIX_A2560K
 
-#define PENDING_GRP0 		((volatile unsigned short *)0x00C00100)
-#define PENDING_GRP1 		((volatile unsigned short *)0x00C00102)
-#define PENDING_GRP2 		((volatile unsigned short *)0x00C00104)
+#define PENDING_GRP0 		((volatile unsigned short *)0xFEC00100)
+#define PENDING_GRP1 		((volatile unsigned short *)0xFEC00102)
+#define PENDING_GRP2 		((volatile unsigned short *)0xFEC00104)
 
-#define POL_GRP0 			((volatile unsigned short *)0x00C00108)
-#define POL_GRP1 			((volatile unsigned short *)0x00C0010A)
-#define POL_GRP2 			((volatile unsigned short *)0x00C0010C)
+#define POL_GRP0 			((volatile unsigned short *)0xFEC00108)
+#define POL_GRP1 			((volatile unsigned short *)0xFEC0010A)
+#define POL_GRP2 			((volatile unsigned short *)0xFEC0010C)
 
-#define EDGE_GRP0 			((volatile unsigned short *)0x00C00110)
-#define EDGE_GRP1 			((volatile unsigned short *)0x00C00112)
-#define EDGE_GRP2 			((volatile unsigned short *)0x00C00114)
+#define EDGE_GRP0 			((volatile unsigned short *)0xFEC00110)
+#define EDGE_GRP1 			((volatile unsigned short *)0xFEC00112)
+#define EDGE_GRP2 			((volatile unsigned short *)0xFEC00114)
 
-#define MASK_GRP0 			((volatile unsigned short *)0x00C00118)
-#define MASK_GRP1 			((volatile unsigned short *)0x00C0011A)
-#define MASK_GRP2 			((volatile unsigned short *)0x00C0011C)
+#define MASK_GRP0 			((volatile unsigned short *)0xFEC00118)
+#define MASK_GRP1 			((volatile unsigned short *)0xFEC0011A)
+#define MASK_GRP2 			((volatile unsigned short *)0xFEC0011C)
 
 #elif MODEL == MODEL_FOENIX_A2560U || MODEL == MODEL_FOENIX_A2560U_PLUS
 

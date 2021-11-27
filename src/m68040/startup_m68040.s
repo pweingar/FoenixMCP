@@ -17,9 +17,9 @@
 ; PENDING_GRP1 = $00B00102
 ; PENDING_GRP2 = $00B00104
 
-PENDING_GRP0 = $00C00100
-PENDING_GRP1 = $00C00102
-PENDING_GRP2 = $00C00104
+PENDING_GRP0 = $FEC00100
+PENDING_GRP1 = $FEC00102
+PENDING_GRP2 = $FEC00104
 
             section "vectors",code
 
@@ -123,16 +123,17 @@ PENDING_GRP2 = $00C00104
 
             code
 
-coldboot:   lea ___STACK,sp
+coldboot:   move.w $2700,SR         ; Supervisor mode, Interrupt mode (68040), disable all interrupts
+            lea ___STACK,sp
             bsr _int_disable_all
 
             lea	___BSSSTART,a0
             move.l #___BSSSIZE,d0
             beq	callmain
 
-            ; clrloop:    clr.l (a0)+
-            ; subq.l #4,d0
-            ; bne	clrloop
+clrloop:    move.l #0,(a0)+
+            subq.l #4,d0
+            bne	clrloop
 
             ; Set TRAP #15 vector handler
             lea h_trap_15,a0        ; Address of the handler
@@ -209,10 +210,14 @@ interrupt_x12:
 ;
 interrupt_x1F:
             move.w #$8000,(PENDING_GRP1)    ; Clear the flag for INT 1F
-            movem.l d0-d7/a0-a6,-(a7)       ; Save affected registers
-            move.w #($1f<<2),d0             ; Get the offset to interrupt 0x1f
-            bra int_dispatch                ; And process the interrupt
-
+            clr.w d0
+            divu.w d0,d1
+            ; movem.l d0-d7/a0-a6,-(a7)       ; Save affected registers
+            ; move.w #($1f<<2),d0             ; Get the offset to interrupt 0x1f
+            ; bra int_dispatch                ; And process the interrupt
+            jsr _rtc_handle_int
+            ; movem.l (a7)+,d0-d7/a0-a6       ; Save affected registers
+            rte
 ;
 ; Interrupt Vector 0x21 -- SDCard Insert
 ;

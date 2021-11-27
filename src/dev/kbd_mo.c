@@ -12,8 +12,8 @@
 #include "ring_buffer.h"
 #include "gabe_reg.h"
 
-#define KBD_MO_DATA     ((volatile unsigned short *)0x00C00040)     /* Data register for the keyboard (scan codes will be here) */
-#define KBD_MO_STAT     ((volatile unsigned short *)0x00C00042)     /* Status register for the keyboard */
+#define KBD_MO_DATA     ((volatile unsigned short *)0xFEC00040)     /* Data register for the keyboard (scan codes will be here) */
+#define KBD_MO_STAT     ((volatile unsigned short *)0xFEC00042)     /* Status register for the keyboard */
 #define KBD_MO_EMPTY    0x8000                                      /* Status flag that will be set if the keyboard buffer is empty */
 #define KBD_MO_FULL     0x4000                                      /* Status flag that will be set if the keyboard buffer is full */
 

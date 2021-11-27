@@ -17,8 +17,15 @@ static long rtc_ticks;
 void rtc_handle_int() {
     unsigned char flags;
 
+    short x = 0;
+    short y = 10;
+    short z = y / x;
+
+    volatile char * screen = 0xFEC60000;
+
     /* Periodic interrupt: increment the ticks counter */
     rtc_ticks++;
+    screen[0]++;
 }
 
 /*
@@ -42,16 +49,17 @@ void rtc_init() {
      * the SOF A interrupt as a surrogate for the RTC jiffie timer
      */
 
-    // /* Set the periodic interrupt to 15 millisecs */
-    // *RTC_RATES = RTC_RATE_15ms;
+    /* Set the periodic interrupt to 15 millisecs */
+    *RTC_RATES = RTC_RATE_15ms;
 
-    // int_register(INT_RTC, rtc_handle_int);
+    int_register(INT_RTC, rtc_handle_int);
 
     /* Enable the periodic interrupt */
-    // flags = *RTC_FLAGS;
-    // *RTC_ENABLES = RTC_PIE;
+    flags = *RTC_FLAGS;
+    *RTC_ENABLES = RTC_PIE;
+    rtc_ticks = 0;
 
-    // int_enable(INT_RTC);
+    int_enable(INT_RTC);
 }
 
 /*
@@ -232,5 +240,5 @@ void rtc_get_time(p_time time) {
  * the number of jiffies since the last reset
  */
 long rtc_get_jiffies() {
-    return timers_jiffies();
+    return rtc_ticks;
 }

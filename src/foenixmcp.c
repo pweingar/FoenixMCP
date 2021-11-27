@@ -156,7 +156,7 @@ void initialize() {
     short res;
 
     /* Set the logging level */
-    log_setlevel(LOG_ERROR);
+    log_setlevel(LOG_DEBUG);
 
     // /* Hide the mouse */
     mouse_set_visible(0);
@@ -164,9 +164,9 @@ void initialize() {
     /* Initialize the text channels */
     text_init();
 
-    /* Initialize the indicators, and turn on the power indicator */
+    /* Initialize the indicators */
     ind_init();
-    ind_set(IND_POWER, IND_ON);
+    log(LOG_INFO, "Indicators initialized");
 
     /* Initialize the interrupt system */
     int_init();
@@ -204,19 +204,17 @@ void initialize() {
     rtc_init();
 
     target_jiffies = sys_time_jiffies() + 300;     /* 5 seconds minimum */
-
-    log(LOG_TRACE, "target_jiffies assigned");
+    log_num(LOG_DEBUG, "target_jiffies assigned: ", target_jiffies);
 
     /* Enable all interrupts */
     int_enable_all();
-
     log(LOG_TRACE, "Interrupts enabled");
 
-    /* Display the splash screen */
-    load_splashscreen();
+    // /* Display the splash screen */
+    // load_splashscreen();
 
     /* Play the SID test bong on the Gideon SID implementation */
-    sid_test_internal();
+    // sid_test_internal();
 
     if (res = pata_install()) {
         log_num(LOG_ERROR, "FAILED: PATA driver installation", res);
@@ -230,21 +228,21 @@ void initialize() {
         log(LOG_INFO, "SDC driver installed.");
     }
 
-#if MODEL == MODEL_FOENIX_A2560K
-    if (res = fdc_install()) {
-        log_num(LOG_ERROR, "FAILED: Floppy drive initialization", res);
-    } else {
-        log(LOG_INFO, "Floppy drive initialized.");
-    }
-#endif
+// #if MODEL == MODEL_FOENIX_A2560K
+//     if (res = fdc_install()) {
+//         log_num(LOG_ERROR, "FAILED: Floppy drive initialization", res);
+//     } else {
+//         log(LOG_INFO, "Floppy drive initialized.");
+//     }
+// #endif
 
     // At this point, we should be able to call into to console to print to the screens
-
-    if (res = ps2_init()) {
-        print_error(0, "FAILED: PS/2 keyboard initialization", res);
-    } else {
-        DEBUG("PS/2 keyboard initialized.");
-    }
+    //
+    // if (res = ps2_init()) {
+    //     print_error(0, "FAILED: PS/2 keyboard initialization", res);
+    // } else {
+    //     DEBUG("PS/2 keyboard initialized.");
+    // }
 
 #if MODEL == MODEL_FOENIX_A2560K
     if (res = kbdmo_init()) {
@@ -265,17 +263,17 @@ void initialize() {
     } else {
         log(LOG_INFO, "File system initialized.");
     }
-
-    /* Wait until the target duration has been reached _or_ the user presses a key */
-    while (target_jiffies > sys_time_jiffies()) {
-        short scan_code = sys_kbd_scancode();
-        if (scan_code != 0) {
-            break;
-        }
-    }
-
-    /* Go back to text mode */
-    text_init();
+    //
+    // /* Wait until the target duration has been reached _or_ the user presses a key */
+    // while (target_jiffies > sys_time_jiffies()) {
+    //     short scan_code = sys_kbd_scancode();
+    //     if (scan_code != 0) {
+    //         break;
+    //     }
+    // }
+    //
+    // /* Go back to text mode */
+    // text_init();
 }
 
 int main(int argc, char * argv[]) {
@@ -318,13 +316,6 @@ int main(int argc, char * argv[]) {
 
     sprintf(welcome, "Foenix/MCP v%02d.%02d-alpha+%04d\n\nType \"HELP\" or \"?\" for command summary.", VER_MAJOR, VER_MINOR, VER_BUILD);
     sys_chan_write(0, welcome, strlen(welcome));
-
-// #if MODEL == MODEL_FOENIX_A2560K
-//     fdc_init();
-//     if (fdc_ioctrl(FDC_CTRL_MOTOR_ON, 0, 0)) {
-//         log(LOG_ERROR, "Could not turn on the floppy drive motor.");
-//     }
-// #endif
 
     cli_repl(0);
 

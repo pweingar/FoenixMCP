@@ -504,7 +504,7 @@ short con_read_b(p_channel chan) {
 
 #if MODEL == MODEL_FOENIX_A2560K
 #ifdef KBD_POLLED
-            ps2_mouse_get_packet();
+            //ps2_mouse_get_packet();
             c = kbdmo_getc_poll();
 #else
             c = kbdmo_getc();

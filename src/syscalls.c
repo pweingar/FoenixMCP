@@ -600,7 +600,7 @@ short sys_fsys_register_loader(const char * extension, p_file_loader loader) {
  * Returns:
  * the number of jiffies since the last reset
  */
-extern long sys_time_jiffies() {
+long sys_time_jiffies() {
     return syscall(KFN_TIME_JIFFIES);
 }
 

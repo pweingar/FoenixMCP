@@ -15,21 +15,6 @@
 #include "dev/kbd_mo.h"
 #endif
 
-/*
- * Initialize the indicators
- *
- * Generally, this means the indicators will all be turned off
- */
-void ind_init() {
-#if MODEL == MODEL_FOENIX_A2560K
-    /* The keyboard LEDs will be initialized by the keyboard code */
-
-    /* Turn off the power LED */
-    *RGB_LED_L = 0x0000;
-    *RGB_LED_H = 0x0000;
-#endif
-}
-
 #if MODEL == MODEL_FOENIX_A2560K
 short ind_state_color(short state) {
     switch (state) {
@@ -50,21 +35,18 @@ short ind_state_color(short state) {
 void ind_set_power(short state) {
     switch (state) {
         case IND_ON:
-            /* Purple for on */
-            *RGB_LED_L = 0x00FF;
-            *RGB_LED_H = 0x00FF;
+            /* Dark green for on */
+            *RGB_LED = 0x00004000;
             break;
 
         case IND_ERROR:
             /* Red for error */
-            *RGB_LED_L = 0x0000;
-            *RGB_LED_H = 0x0000;
+            *RGB_LED = 0x00FF0000;
             break;
 
         default:
             /* Anything else is off */
-            *RGB_LED_L = 0x0000;
-            *RGB_LED_H = 0x0000;
+            *RGB_LED = 0;
             break;
     }
 }
@@ -127,4 +109,16 @@ void ind_set(short ind_number, short state) {
         default:
             break;
     }
+}
+
+/*
+ * Initialize the indicators
+ *
+ * Generally, this means the indicators will all be turned off
+ */
+void ind_init() {
+    ind_set(IND_POWER, IND_ON);
+    ind_set(IND_FDC, IND_OFF);
+    ind_set(IND_SDC, IND_OFF);
+    ind_set(IND_HDC, IND_OFF);
 }
