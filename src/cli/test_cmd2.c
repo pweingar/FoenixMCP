@@ -190,6 +190,7 @@ short cli_mem_test(short channel, int argc, char * argv[]) {
     return 0;
 }
 
+#if MODEL == MODEL_FOENIX_A2560K
 short cli_test_recalibrate(short screen, int argc, char * argv[]) {
     unsigned char buffer[512];
     short i;
@@ -283,6 +284,7 @@ short cli_test_fdc(short screen, int argc, char * argv[]) {
 
     bdev_ioctrl(BDEV_FDC, FDC_CTRL_MOTOR_OFF, 0, 0);
 }
+#endif
 
 /*
  * Test the IDE interface by reading the MBR
@@ -423,7 +425,9 @@ static t_cli_test_feature cli_test_features[] = {
     {"BITMAP", "BITMAP: test the bitmap screen", cli_test_bitmap},
     {"CREATE", "CREATE <path>: test creating a file", cli_test_create},
     {"IDE", "IDE: test reading the MBR of the IDE drive", cli_test_ide},
+#if MODEL == MODEL_FOENIX_A2560K
     {"FDC", "FDC: test reading the MBR from the floppy drive", cli_test_fdc},
+#endif
     {"LPT", "LPT: test the parallel port", cli_test_lpt},
     {"MEM", "MEM: test reading and writing memory", cli_mem_test},
     {"MIDILOOP", "MIDILOOP: perform a loopback test on the MIDI ports", midi_loop_test},
@@ -434,8 +438,10 @@ static t_cli_test_feature cli_test_features[] = {
     {"PANIC", "PANIC: test the kernel panic mechanism", cli_test_panic},
     {"PSG", "PSG: test the PSG sound chip", psg_test},
     {"PRINT", "PRINT: sent text to the printer", cmd_test_print},
+#if MODEL == MODEL_FOENIX_A2560K
     {"RECALIBRATE", "RECALIBRATE: recalibrate the floppy drive", cli_test_recalibrate},
     {"SEEK", "SEEK <track>: move the floppy drive head to a track", cli_test_seek},
+#endif
     {"UART", "UART: test the serial port", cli_test_uart},
     {0, 0}
 };

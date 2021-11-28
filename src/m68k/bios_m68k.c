@@ -224,21 +224,13 @@ unsigned long syscall_dispatch(int32_t function, int32_t param0, int32_t param1,
                     return 0;
 
                 case KFN_KBD_SCANCODE:
-#if MODEL == MODEL_FOENIX_A2560K
-                    return kbdmo_get_scancode();
-#else
                     return kbd_get_scancode();
-#endif
 
                 case KFN_ERR_MESSAGE:
                     return (unsigned long)err_message((short)param0);
 
                 case KFN_KBD_LAYOUT:
-#if MODEL == MODEL_FOENIX_A2560K
-                    return kbdmo_layout((const char *)param0);
-#else
                     return kbd_layout((const char *)param0);
-#endif
 
                 default:
                     return ERR_GENERAL;

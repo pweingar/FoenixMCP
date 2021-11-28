@@ -31,7 +31,7 @@ Please refer to processor specific building instructions that will be included.
 For the 65816 and 68000 computers, the project will be built using the VBCC
 compiler.
 
-### Building for the M68000 CPU
+### Building for the M68000 CPU Family
 
 Building this project requires the [VBCC](http://www.compilers.de/vbcc.html) compiler and the
 ```MAKE``` utility. Using your command line, go into the ```src``` directory and type:
@@ -48,13 +48,28 @@ To remove binaries and intermediate files:
 make clean
 ```
 
-#### Built Options
+#### Build Options
 
 There are three option variables that can be set in the makefile:
 
-* `CPU`: This specifies which CPU is the target. Currently only the M68000 is supported, with a CPU code of 32 (0x20).
-* `MODEL`: This species which Foenix model is the target. Currently only the Foenix A2560K is supported, with a code of 13.
+* `UNIT`: This specifies which Foenix model is the targetted machine for the build. There are currently two options:
+    1. `UNIT=a2560u`, this covers both the A2560U and A2560U+. It sets the CPU to be the M68000.
+    2. `UNIT=a2560k`, this covers the A2560K and sets the CPU to M68040.
+* `MEMORY`: This species where in memory Foenix/MCP will run. There are two values here:
+    1. `MEMORY=ram`: This specifies that the MCP will run from RAM.
+    2. `MEMORY=flash`: This specifies that the MCP will be programmed to flash memory.
 * `KBD_POLLED`: As a temporary feature, if this option variable is defined, it will specify to the kernel that polled I/O is to be used for keyboard access instead of interrupt driven I/O.
+
+Examples:
+```
+make all UNIT=a2560u MEMORY=ram
+```
+Builds an SREC file suitable for loading into RAM of the A2560U/U+.
+
+```
+make all UNIT=a2560k MEMORY=flash
+```
+Builds a binary file suitable for programming the flash of the A2560K.
 
 ## License
 
