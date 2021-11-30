@@ -317,7 +317,8 @@ int main(int argc, char * argv[]) {
     sprintf(welcome, "Foenix/MCP v%02d.%02d-alpha+%04d\n\nType \"HELP\" or \"?\" for command summary.", VER_MAJOR, VER_MINOR, VER_BUILD);
     sys_chan_write(0, welcome, strlen(welcome));
 
-    text_scroll(0);
+    short columns = 0, rows = 0;
+    text_getsize(0, &columns, &rows);
 
     cli_repl(0);
 

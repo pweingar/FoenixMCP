@@ -152,25 +152,24 @@ int text_init() {
     /* A2560K has support for 8x16 characters and therefore font sizes */
     chan_a->font_size_ctrl = FONT_Size_Ctrl_A;
     chan_a->font_count_ctrl = FONT_Count_Ctrl_A;
-    need_hires = 1;
+    need_hires = 0;
 
+    if (need_hires) {
+        *chan_a->master_control = VKY3_MCR_1024x768 | VKY3_MCR_TEXT_EN;      /* Set to text only mode: 800x600 */
+    } else {
+        *chan_a->master_control = VKY3_MCR_800x600 | VKY3_MCR_TEXT_EN;      /* Set to text only mode: 800x600 */
+    }
 #else
     /* All other models do not have this feature */
     chan_a->font_size_ctrl = 0;
     chan_a->font_count_ctrl = 0;
-#endif
 
     if (need_hires) {
         *chan_a->master_control = VKY3_MCR_800x600 | VKY3_MCR_TEXT_EN;      /* Set to text only mode: 800x600 */
     } else {
         *chan_a->master_control = VKY3_MCR_640x480 | VKY3_MCR_TEXT_EN;      /* Set to text only mode: 640x480 */
     }
-
-    text_setsizes(0);
-    text_set_color(0, 0xf, 4);
-    text_set_cursor(0, 0xF3, 0x7F, 1, 1);
-    text_set_xy(0, 0, 0);
-    text_clear(0, 2);
+#endif
 
     if (chan_a->font_size_ctrl) {
         *chan_a->font_size_ctrl = 0x10081008;       /* 8x16... and ... something? */
@@ -181,6 +180,13 @@ int text_init() {
         /* Set 8x8 */
         chan_a->font_size = 0;
     }
+
+    text_set_border(0, 1, 0x10, 0x10, border_color);
+    text_setsizes(0);
+    text_set_color(0, 0xf, 4);
+    text_set_cursor(0, 0xF3, 0x7F, 1, 1);
+    text_set_xy(0, 0, 0);
+    text_clear(0, 2);
 
     /* Set the font for channel A */
     if (chan_a->font_size == 1) {
@@ -222,9 +228,9 @@ int text_init() {
         *chan_b->master_control = VKY3_MCR_640x480 | VKY3_MCR_TEXT_EN;      /* Set to text only mode: 640x480 */
     }
 
-    text_set_border(0, 1, 0x20, 0x10, border_color);
+    text_set_border(1, 1, 0x20, 0x10, border_color);
     text_setsizes(1);
-    text_set_color(1, 4, 3);
+    text_set_color(1, 0x0f, 0x04);
     text_clear(1, 2);
     text_set_cursor(1, 0xF3, 0x7F, 1, 1);
     text_set_xy(1, 0, 0);
@@ -689,5 +695,23 @@ void text_put_raw(short screen, char c) {
             text_set_xy(screen, chan->x + 1, chan->y);
             break;
         }
+    }
+}
+
+/*
+ * Gets the size of the test screen in rows and columns
+ *
+ * Inputs:
+ * screen = the screen number 0 for channel A, 1 for channel B
+ * columns = pointer to a short in which to store the number of columns
+ * rows = pointer to a short in which to store the number of rows
+ */
+void text_getsize(short screen, short * columns, short * rows) {
+    if (screen < MAX_TEXT_CHANNELS) {
+        short x, y;
+        p_text_channel chan = &text_channel[screen];
+
+        *columns = chan->columns_visible;
+        *rows = chan->rows_visible;
     }
 }

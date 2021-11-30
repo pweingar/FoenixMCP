@@ -142,4 +142,14 @@ extern void text_delete(short screen, short count);
  */
 extern void text_scroll(short screen);
 
+/*
+ * Gets the size of the test screen in rows and columns
+ *
+ * Inputs:
+ * screen = the screen number 0 for channel A, 1 for channel B
+ * columns = pointer to a short in which to store the number of columns
+ * rows = pointer to a short in which to store the number of rows
+ */
+extern void text_getsize(short screen, short * columns, short * rows);
+
 #endif
