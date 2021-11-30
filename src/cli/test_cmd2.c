@@ -306,6 +306,8 @@ short cli_test_ide(short screen, int argc, char * argv[]) {
 
         print(screen, "\n\n");
 
+        return 0;
+
         scancode = sys_kbd_scancode();
         if (scancode == 0x01) {
             break;
@@ -433,7 +435,7 @@ static t_cli_test_feature cli_test_features[] = {
     {"MIDILOOP", "MIDILOOP: perform a loopback test on the MIDI ports", midi_loop_test},
     {"MIDIRX", "MIDIRX: perform a receive test on the MIDI ports", midi_rx_test},
     {"MIDITX", "MIDITX: send a note to a MIDI keyboard", midi_tx_test},
-    {"OPL2", "OPL2: test the OPL2 sound chip", opl2_test},
+    {"OPM", "OPM [EXT|INT]: test the OPM sound chip", opm_test},
     {"OPL3", "OPL3: test the OPL3 sound chip", opl3_test},
     {"PANIC", "PANIC: test the kernel panic mechanism", cli_test_panic},
     {"PSG", "PSG: test the PSG sound chip", psg_test},

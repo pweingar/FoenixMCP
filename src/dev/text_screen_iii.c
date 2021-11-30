@@ -599,6 +599,30 @@ void text_scroll(short screen) {
         short row, column;
         p_text_channel chan = &text_channel[screen];
 
+#if MODEL == MODEL_FOENIX_A2560K
+        for (row = 0; row < chan->rows_visible - 1; row++) {
+            short offset1 = row * chan->columns_max;
+            short offset2 = (row + 1) * chan->columns_max;
+            volatile unsigned char * text_dest = &chan->text_cells[offset1];
+            volatile unsigned char * color_dest = &chan->color_cells[offset1];
+            volatile unsigned char * text_src = &chan->text_cells[offset2];
+            volatile unsigned char * color_src = &chan->color_cells[offset2];
+
+            for (column = 0; column < chan->columns_max; column++) {
+                *text_dest++ = *text_src++;
+                *color_dest++ = *color_src++;
+            }
+        }
+
+        short offset3 = (chan->rows_visible - 1) * chan->columns_max;
+        volatile unsigned char * text_dest = &chan->text_cells[offset3];
+        volatile unsigned char * color_dest = &chan->color_cells[offset3];
+        uint8_t color = chan->current_color;
+        for (column = 0; column < chan->columns_max; column++) {
+            *text_dest++ = ' ';
+            *color_dest++ = color;
+        }
+#else
         for (row = 0; row < chan->rows_visible - 1; row++) {
             short offset1 = row * chan->columns_max;
             short offset2 = (row + 1) * chan->columns_max;
@@ -621,6 +645,7 @@ void text_scroll(short screen) {
             *text_dest++ = ' ';
             *color_dest++ = color << 8 | color;
         }
+#endif
     }
 }
 

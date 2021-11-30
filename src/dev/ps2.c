@@ -855,6 +855,12 @@ char kbd_getc() {
     }
 }
 
+
+char kbd_getc_poll() {
+    kbd_handle_irq();
+    return kbd_getc();
+}
+
 /*
  * Handle an interrupt from the PS/2 mouse port
  */

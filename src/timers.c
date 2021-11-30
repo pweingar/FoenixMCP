@@ -10,8 +10,6 @@ long jiffy_count;
  * NOTE: in time, this should be handled by the RTC or another timer.
  */
 void sof_a_handler() {
-    long jc_mod;
-
     jiffy_count++;
 }
 

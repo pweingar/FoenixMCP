@@ -12,8 +12,8 @@
 #include "ring_buffer.h"
 #include "gabe_reg.h"
 
-#define KBD_MO_DATA     ((volatile unsigned short *)0xFEC00040)     /* Data register for the keyboard (scan codes will be here) */
-#define KBD_MO_STAT     ((volatile unsigned short *)0xFEC00042)     /* Status register for the keyboard */
+#define KBD_MO_DATA     ((volatile unsigned int *)0xFEC00040)     /* Data register for the keyboard (scan codes will be here) */
+// #define KBD_MO_STAT     ((volatile unsigned short *)0xFEC00042)     /* Status register for the keyboard */
 #define KBD_MO_EMPTY    0x8000                                      /* Status flag that will be set if the keyboard buffer is empty */
 #define KBD_MO_FULL     0x4000                                      /* Status flag that will be set if the keyboard buffer is full */
 
@@ -179,13 +179,14 @@ static char g_us_sc_ctrl_shift[] = {
  * Make sure everything is removed from Mo's input buffer
  */
 void kbdmo_flush_out() {
+    long data;
+
     TRACE("kbdmo_flush_out");
 
     /* While there is data in the buffer ... */
-    while ((*KBD_MO_STAT & 0x00ff) != 0) {
-        /* Read and throw out the scan codes */
-        unsigned short dummy = *KBD_MO_DATA;
-    }
+    do {
+        data = *KBD_MO_DATA;
+    } while ((data & 0x00ff0000) != 0);
 }
 
 /*
@@ -325,23 +326,26 @@ void kbdmo_enqueue_scan(unsigned char scan_code) {
  * IRQ handler for the keyboard... read a scan code and queue it
  */
 void kbdmo_handle_irq() {
+    unsigned long data;
     /* We got an interrupt for MO.
      * While there is data in the input queue...
      */
 
     int_clear(INT_KBD_A2560K);
 
-    while ((*KBD_MO_STAT & 0x00ff) != 0) {
-        /* Get a scan code from the input buffer */
-        unsigned short scan_code = *KBD_MO_DATA;
+    /* While there is data in the buffer ... */
+    do {
+        data = *KBD_MO_DATA;
 
+        /* Read and throw out the scan codes */
+        unsigned short scan_code = data & 0xffff;
         if ((scan_code & 0x7fff) != 0) {
             /* TODO: beep if the input was full or the ring buffer is full */
 
             /* Process it and enqueue it */
             kbdmo_enqueue_scan((unsigned char)(scan_code & 0x00ff));
         }
-    }
+    } while ((data & 0x00ff0000) != 0);
 }
 
 
@@ -352,20 +356,23 @@ void kbdmo_handle_irq() {
  *      The next scancode to be processed, 0 if nothing.
  */
 unsigned short kbdmo_get_scancode() {
+    unsigned long data;
     unsigned short scan_code = rb_word_get(&g_kbdmo_control.sc_buf);
     if (scan_code != 0) {
         /* Got a result... return it */
         return scan_code;
 
     } else {
-        /* Nothing in the queue... let's make sure we haven't lost an interrupt */
-        if ((*KBD_MO_STAT & 0x00ff) != 0) {
-            /* Something is pending, process it as if an interrupt occurred */
-            kbdmo_handle_irq();
-            return rb_word_get(&g_kbdmo_control.sc_buf);
-        } else {
-            return 0;
-        }
+        return 0;
+
+        // /* Nothing in the queue... let's make sure we haven't lost an interrupt */
+        // if ((*KBD_MO_STAT & 0x00ff) != 0) {
+        //     /* Something is pending, process it as if an interrupt occurred */
+        //     kbdmo_handle_irq();
+        //     return rb_word_get(&g_kbdmo_control.sc_buf);
+        // } else {
+        //     return 0;
+        // }
     }
 }
 

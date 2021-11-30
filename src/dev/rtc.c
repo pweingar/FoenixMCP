@@ -17,15 +17,9 @@ static long rtc_ticks;
 void rtc_handle_int() {
     unsigned char flags;
 
-    short x = 0;
-    short y = 10;
-    short z = y / x;
-
-    volatile char * screen = 0xFEC60000;
-
     /* Periodic interrupt: increment the ticks counter */
+    flags = *RTC_FLAGS;
     rtc_ticks++;
-    screen[0]++;
 }
 
 /*
@@ -240,5 +234,5 @@ void rtc_get_time(p_time time) {
  * the number of jiffies since the last reset
  */
 long rtc_get_jiffies() {
-    return rtc_ticks;
+    return timers_jiffies();
 }

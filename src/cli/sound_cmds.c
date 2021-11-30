@@ -44,6 +44,204 @@ short psg_test(short channel, int argc, char * argv[]) {
     return 0;
 }
 
+/*
+ * Test tone for OPM: register, value
+ */
+const unsigned char opm_tone_on[] = {
+    0x01, 0x00,
+    0x0F, 0x00,             /* Turn off the noise generator */
+    0x14, 0x00,             /* Turn off the timers and their interrupts */
+    0x18, 0x00,             /* Turn off LFO */
+    0x19, 0x00,             /* Set AM depth to 0 */
+    0x19, 0x80,             /* Set PM depth to 0 */
+    0x1B, 0x00,             /* CT, W = 0 */
+
+    0x20, 0x07,             /* Channel 1: No feedback, pattern #7 */
+    0x21, 0x4A,             /* Key code: concert A (440Hz) */
+    0x22, 0x00,             /* Key fraction: 0 */
+    0x23, 0x00,             /* Phase and amplitude modulation off */
+
+    0x08, 0x08,             /* M1, Channel 1: on */
+
+    0x00, 0x00              /* END */
+};
+
+/*
+ * Test tone for OPM: register, value
+ */
+const unsigned char opm_tone_off[] = {
+    0x08, 0x00,             /* M1, Channel 1: off */
+
+    0x00, 0x00              /* END */
+};
+
+/*
+ * Play a sound on the OPM
+ */
+short opm_test(short channel, int argc, char * argv[]) {
+    short i;
+    unsigned char reg;
+    unsigned char data;
+    long target_time;
+    unsigned char * opm_base = OPM_INT_BASE;
+
+    if (argc >= 2) {
+        /* Allow the user to select the external OPM */
+        if ((strcmp(argv[1], "ext") == 0) || (strcmp(argv[1], "EXT") == 0)) {
+            opm_base = OPM_EXT_BASE;
+        }
+    }
+
+    /* Clear all the OPM registers */
+    for (i = 0; i < 0x100; i++) {
+        opm_base[reg] = 0;
+    }
+
+    i = 0;
+    while (1) {
+        reg = opm_tone_on[i++];
+        if (reg == 0x00) {
+            break;
+        } else {
+            data = opm_tone_on[i++];
+            opm_base[reg] = data;
+        }
+    }
+
+    target_time = sys_time_jiffies() + 60;
+    while (target_time > sys_time_jiffies()) ;
+
+    i = 0;
+    while (1) {
+        reg = opm_tone_off[i++];
+        if (reg == 0x00) {
+            break;
+        } else {
+            data = opm_tone_off[i++];
+            opm_base[reg] = data;
+        }
+    }
+
+    return 0;
+}
+
+/*
+ * Test tone for OPN: register, value
+ */
+const unsigned char opn_tone_on[] = {
+    0x22, 0x00,             /* Turn off LFO */
+    0x27, 0x00,             /* Turn off timers */
+
+    0x28, 0x00,             /* All channels off */
+    0x28, 0x01,
+    0x28, 0x02,
+    0x28, 0x04,
+    0x28, 0x05,
+    0x28, 0x06,
+
+    0x2B, 0x00,             /* Turn off DAC */
+
+    0x30, 0x71,             /* DT1/MUL */
+    0x34, 0x0D,             /* DT1/MUL */
+    0x38, 0x33,             /* DT1/MUL */
+    0x3C, 0x01,             /* DT1/MUL */
+
+    0x40, 0x23,             /* Total level */
+    0x44, 0x2D,
+    0x48, 0x26,
+    0x4C, 0x00,
+
+    0x50, 0x5F,             /* RS/AR */
+    0x54, 0x99,
+    0x58, 0x5F,
+    0x5C, 0x94,
+
+    0x60, 0x05,             /* AM/D1R */
+    0x64, 0x05,
+    0x68, 0x05,
+    0x6C, 0x07,
+
+    0x70, 0x02,             /* DR2 */
+    0x74, 0x02,
+    0x78, 0x02,
+    0x7C, 0x02,
+
+    0x80, 0x11,             /* D1L/RR */
+    0x84, 0x11,
+    0x88, 0x11,
+    0x8C, 0xA6,
+
+    0x90, 0x00,             /* Proprietary register: always 0 */
+    0x94, 0x00,
+    0x98, 0x00,
+    0x9C, 0x00,
+
+    0xB0, 0x32,             /* Feedback algorithm */
+    0xB4, 0xC0,             /* Both speakers on */
+
+    0x28, 0x00,             /* Key off */
+
+    0xA4, 0x22,             /* Set frequency */
+    0xA0, 0x69,
+
+    0x28, 0x10,             /* Operator 1, Channel 1: on */
+
+    0x00, 0x00              /* END */
+};
+
+/*
+ * Test tone for OPN: register, value
+ */
+const unsigned char opn_tone_off[] = {
+    0x28, 0x00,             /* Operator 1, Channel 1: off */
+    0x00, 0x00              /* END */
+};
+
+/*
+ * Play a sound on the OPN
+ */
+short opn_test(short channel, int argc, char * argv[]) {
+    short i;
+    unsigned char reg;
+    unsigned char data;
+    long target_time;
+    unsigned char * opn_base = OPN2_INT_BASE;
+
+    if (argc >= 2) {
+        /* Allow the user to select the external OPM */
+        if ((strcmp(argv[1], "ext") == 0) || (strcmp(argv[1], "EXT") == 0)) {
+            opn_base = OPN2_EXT_BASE;
+        }
+    }
+
+    i = 0;
+    while (1) {
+        reg = opn_tone_on[i++];
+        if (reg == 0x00) {
+            break;
+        } else {
+            data = opn_tone_on[i++];
+            opn_base[reg] = data;
+        }
+    }
+
+    target_time = sys_time_jiffies() + 60;
+    while (target_time > sys_time_jiffies()) ;
+
+    i = 0;
+    while (1) {
+        reg = opn_tone_off[i++];
+        if (reg == 0x00) {
+            break;
+        } else {
+            data = opn_tone_off[i++];
+            opn_base[reg] = data;
+        }
+    }
+
+    return 0;
+}
+
 const unsigned char opl3_tone_on[] = {
     0x01,0x00,              /* initialise */
     0x05,0x01,              /* OPL3 mode, necessary for stereo */
@@ -127,7 +325,6 @@ short opl3_test(short channel, int argc, char * argv[]) {
     return 0;
 }
 
-
 /*
  * Perform a transmit test on the MIDI ports
  */
@@ -193,7 +390,6 @@ short midi_rx_test(short channel, int argc, char * argv[]) {
     return 0;
 }
 
-
 /*
  * Perform a loopback test on the MIDI ports
  */
@@ -235,269 +431,5 @@ short midi_loop_test(short channel, int argc, char * argv[]) {
 
     sys_chan_write(channel, "\n", 1);
 #endif
-    return 0;
-}
-
-/*
- * Test the OPL2
- */
-short opl2_test(short channel, int argc, char * argv[]) {
-    unsigned char i;
-
-    OPN2_INT_BASE[OPN2_22_LFO] = 0;     /* LFO off */
-    OPN2_INT_BASE[OPN2_27_CHANEL_3_MODE] = 0;   /* chanel 3 in normal mode */
-
-    /* switch off all chanal */
-    for (i = 0; i < 7; i++) {
-        OPN2_INT_BASE[OPN2_28_KEY_ON_OFF] = i;
-    }
-
-    /* ADC off */
-    OPN2_INT_BASE[OPN2_2B_ADC_EN] = 0;
-
-    /* DT1/MUL */
-    OPN2_INT_BASE[OPN2_30_ADSR__DT1_MUL__CH1_OP1] = 0x71;
-    OPN2_INT_BASE[OPN2_31_ADSR__DT1_MUL__CH2_OP1] = 0x71;
-    OPN2_INT_BASE[OPN2_32_ADSR__DT1_MUL__CH3_OP1] = 0x71;
-    OPN2_INT_BASE[OPN2_30_ADSR__DT1_MUL__CH1_OP5] = 0x71;
-    OPN2_INT_BASE[OPN2_31_ADSR__DT1_MUL__CH2_OP5] = 0x71;
-    OPN2_INT_BASE[OPN2_32_ADSR__DT1_MUL__CH3_OP5] = 0x71;
-
-    OPN2_INT_BASE[OPN2_34_ADSR__DT1_MUL__CH1_OP2] = 0x0D;
-    OPN2_INT_BASE[OPN2_35_ADSR__DT1_MUL__CH2_OP2] = 0x0D;
-    OPN2_INT_BASE[OPN2_36_ADSR__DT1_MUL__CH3_OP2] = 0x0D;
-    OPN2_INT_BASE[OPN2_34_ADSR__DT1_MUL__CH1_OP6] = 0x0D;
-    OPN2_INT_BASE[OPN2_35_ADSR__DT1_MUL__CH2_OP6] = 0x0D;
-    OPN2_INT_BASE[OPN2_36_ADSR__DT1_MUL__CH3_OP6] = 0x0D;
-
-    OPN2_INT_BASE[OPN2_38_ADSR__DT1_MUL__CH1_OP3] = 0x33;
-    OPN2_INT_BASE[OPN2_39_ADSR__DT1_MUL__CH2_OP3] = 0x33;
-    OPN2_INT_BASE[OPN2_3A_ADSR__DT1_MUL__CH3_OP3] = 0x33;
-    OPN2_INT_BASE[OPN2_38_ADSR__DT1_MUL__CH1_OP7] = 0x33;
-    OPN2_INT_BASE[OPN2_39_ADSR__DT1_MUL__CH2_OP7] = 0x33;
-    OPN2_INT_BASE[OPN2_3A_ADSR__DT1_MUL__CH3_OP7] = 0x33;
-
-    OPN2_INT_BASE[OPN2_3C_ADSR__DT1_MUL__CH1_OP4] = 0x01;
-    OPN2_INT_BASE[OPN2_3D_ADSR__DT1_MUL__CH2_OP4] = 0x01;
-    OPN2_INT_BASE[OPN2_3E_ADSR__DT1_MUL__CH3_OP4] = 0x01;
-    OPN2_INT_BASE[OPN2_3C_ADSR__DT1_MUL__CH1_OP8] = 0x01;
-    OPN2_INT_BASE[OPN2_3D_ADSR__DT1_MUL__CH2_OP8] = 0x01;
-    OPN2_INT_BASE[OPN2_3E_ADSR__DT1_MUL__CH3_OP8] = 0x01;
-
-    /* Total Level */
-    OPN2_INT_BASE[OPN2_40_ADSR__LT__CH1_OP1] = 0x23;
-    OPN2_INT_BASE[OPN2_41_ADSR__LT__CH2_OP1] = 0x23;
-    OPN2_INT_BASE[OPN2_42_ADSR__LT__CH3_OP1] = 0x23;
-    OPN2_INT_BASE[OPN2_40_ADSR__LT__CH1_OP5] = 0x23;
-    OPN2_INT_BASE[OPN2_41_ADSR__LT__CH2_OP5] = 0x23;
-    OPN2_INT_BASE[OPN2_42_ADSR__LT__CH3_OP5] = 0x23;
-
-    OPN2_INT_BASE[OPN2_44_ADSR__LT__CH1_OP2] = 0x2D;
-    OPN2_INT_BASE[OPN2_45_ADSR__LT__CH2_OP2] = 0x2D;
-    OPN2_INT_BASE[OPN2_46_ADSR__LT__CH3_OP2] = 0x2D;
-    OPN2_INT_BASE[OPN2_44_ADSR__LT__CH1_OP6] = 0x2D;
-    OPN2_INT_BASE[OPN2_45_ADSR__LT__CH2_OP6] = 0x2D;
-    OPN2_INT_BASE[OPN2_46_ADSR__LT__CH3_OP6] = 0x2D;
-
-    OPN2_INT_BASE[OPN2_48_ADSR__LT__CH1_OP3] = 0x26;
-    OPN2_INT_BASE[OPN2_49_ADSR__LT__CH2_OP3] = 0x26;
-    OPN2_INT_BASE[OPN2_4A_ADSR__LT__CH3_OP3] = 0x26;
-    OPN2_INT_BASE[OPN2_48_ADSR__LT__CH1_OP7] = 0x26;
-    OPN2_INT_BASE[OPN2_49_ADSR__LT__CH2_OP7] = 0x26;
-    OPN2_INT_BASE[OPN2_4A_ADSR__LT__CH3_OP7] = 0x26;
-
-    OPN2_INT_BASE[OPN2_4C_ADSR__LT__CH1_OP4] = 0x00;
-    OPN2_INT_BASE[OPN2_4D_ADSR__LT__CH2_OP4] = 0x00;
-    OPN2_INT_BASE[OPN2_4E_ADSR__LT__CH3_OP4] = 0x00;
-    OPN2_INT_BASE[OPN2_4C_ADSR__LT__CH1_OP8] = 0x00;
-    OPN2_INT_BASE[OPN2_4D_ADSR__LT__CH2_OP8] = 0x00;
-    OPN2_INT_BASE[OPN2_4E_ADSR__LT__CH3_OP8] = 0x00;
-
-    /* RS/AR */
-
-    OPN2_INT_BASE[OPN2_50_ADSR__SR_AR__CH1_OP1] = 0x5F;
-    OPN2_INT_BASE[OPN2_51_ADSR__SR_AR__CH2_OP1] = 0x5F;
-    OPN2_INT_BASE[OPN2_52_ADSR__SR_AR__CH3_OP1] = 0x5F;
-    OPN2_INT_BASE[OPN2_50_ADSR__SR_AR__CH1_OP5] = 0x5F;
-    OPN2_INT_BASE[OPN2_51_ADSR__SR_AR__CH2_OP5] = 0x5F;
-    OPN2_INT_BASE[OPN2_52_ADSR__SR_AR__CH3_OP5] = 0x5F;
-
-    OPN2_INT_BASE[OPN2_54_ADSR__SR_AR__CH1_OP2] = 0x99;
-    OPN2_INT_BASE[OPN2_55_ADSR__SR_AR__CH2_OP2] = 0x99;
-    OPN2_INT_BASE[OPN2_56_ADSR__SR_AR__CH3_OP2] = 0x99;
-    OPN2_INT_BASE[OPN2_54_ADSR__SR_AR__CH1_OP6] = 0x99;
-    OPN2_INT_BASE[OPN2_55_ADSR__SR_AR__CH2_OP6] = 0x99;
-    OPN2_INT_BASE[OPN2_56_ADSR__SR_AR__CH3_OP6] = 0x99;
-
-    OPN2_INT_BASE[OPN2_58_ADSR__SR_AR__CH1_OP3] = 0x5F;
-    OPN2_INT_BASE[OPN2_59_ADSR__SR_AR__CH2_OP3] = 0x5F;
-    OPN2_INT_BASE[OPN2_5A_ADSR__SR_AR__CH3_OP3] = 0x5F;
-    OPN2_INT_BASE[OPN2_58_ADSR__SR_AR__CH1_OP7] = 0x5F;
-    OPN2_INT_BASE[OPN2_59_ADSR__SR_AR__CH2_OP7] = 0x5F;
-    OPN2_INT_BASE[OPN2_5A_ADSR__SR_AR__CH3_OP7] = 0x5F;
-
-    OPN2_INT_BASE[OPN2_5C_ADSR__SR_AR__CH1_OP4] = 0x94;
-    OPN2_INT_BASE[OPN2_5D_ADSR__SR_AR__CH2_OP4] = 0x94;
-    OPN2_INT_BASE[OPN2_5E_ADSR__SR_AR__CH3_OP4] = 0x94;
-    OPN2_INT_BASE[OPN2_5C_ADSR__SR_AR__CH1_OP8] = 0x94;
-    OPN2_INT_BASE[OPN2_5D_ADSR__SR_AR__CH2_OP8] = 0x94;
-    OPN2_INT_BASE[OPN2_5E_ADSR__SR_AR__CH3_OP8] = 0x94;
-
-    /* AM/D1R */
-
-    OPN2_INT_BASE[OPN2_60_ADSR__AM_D1R__CH1_OP1] = 0x07;
-    OPN2_INT_BASE[OPN2_61_ADSR__AM_D1R__CH2_OP1] = 0x07;
-    OPN2_INT_BASE[OPN2_62_ADSR__AM_D1R__CH3_OP1] = 0x07;
-    OPN2_INT_BASE[OPN2_60_ADSR__AM_D1R__CH1_OP5] = 0x07;
-    OPN2_INT_BASE[OPN2_61_ADSR__AM_D1R__CH2_OP5] = 0x07;
-    OPN2_INT_BASE[OPN2_62_ADSR__AM_D1R__CH3_OP5] = 0x07;
-
-    OPN2_INT_BASE[OPN2_64_ADSR__AM_D1R__CH1_OP2] = 0x07;
-    OPN2_INT_BASE[OPN2_65_ADSR__AM_D1R__CH2_OP2] = 0x07;
-    OPN2_INT_BASE[OPN2_66_ADSR__AM_D1R__CH3_OP2] = 0x07;
-    OPN2_INT_BASE[OPN2_64_ADSR__AM_D1R__CH1_OP6] = 0x07;
-    OPN2_INT_BASE[OPN2_65_ADSR__AM_D1R__CH2_OP6] = 0x07;
-    OPN2_INT_BASE[OPN2_66_ADSR__AM_D1R__CH3_OP6] = 0x07;
-
-    OPN2_INT_BASE[OPN2_68_ADSR__AM_D1R__CH1_OP3] = 0x05;
-    OPN2_INT_BASE[OPN2_69_ADSR__AM_D1R__CH2_OP3] = 0x05;
-    OPN2_INT_BASE[OPN2_6A_ADSR__AM_D1R__CH3_OP3] = 0x05;
-    OPN2_INT_BASE[OPN2_68_ADSR__AM_D1R__CH1_OP7] = 0x05;
-    OPN2_INT_BASE[OPN2_69_ADSR__AM_D1R__CH2_OP7] = 0x05;
-    OPN2_INT_BASE[OPN2_6A_ADSR__AM_D1R__CH3_OP7] = 0x05;
-
-    OPN2_INT_BASE[OPN2_6C_ADSR__AM_D1R__CH1_OP4] = 0x07;
-    OPN2_INT_BASE[OPN2_6D_ADSR__AM_D1R__CH2_OP4] = 0x07;
-    OPN2_INT_BASE[OPN2_6E_ADSR__AM_D1R__CH3_OP4] = 0x07;
-    OPN2_INT_BASE[OPN2_6C_ADSR__AM_D1R__CH1_OP8] = 0x07;
-    OPN2_INT_BASE[OPN2_6D_ADSR__AM_D1R__CH2_OP8] = 0x07;
-    OPN2_INT_BASE[OPN2_6E_ADSR__AM_D1R__CH3_OP8] = 0x07;
-
-
-    /* D2R */
-
-    OPN2_INT_BASE[OPN2_70_ADSR__D2R__CH1_OP1] = 0x02;
-    OPN2_INT_BASE[OPN2_71_ADSR__D2R__CH2_OP1] = 0x02;
-    OPN2_INT_BASE[OPN2_72_ADSR__D2R__CH3_OP1] = 0x02;
-    OPN2_INT_BASE[OPN2_70_ADSR__D2R__CH1_OP5] = 0x02;
-    OPN2_INT_BASE[OPN2_71_ADSR__D2R__CH2_OP5] = 0x02;
-    OPN2_INT_BASE[OPN2_72_ADSR__D2R__CH3_OP5] = 0x02;
-
-    OPN2_INT_BASE[OPN2_74_ADSR__D2R__CH1_OP2] = 0x02;
-    OPN2_INT_BASE[OPN2_75_ADSR__D2R__CH2_OP2] = 0x02;
-    OPN2_INT_BASE[OPN2_76_ADSR__D2R__CH3_OP2] = 0x02;
-    OPN2_INT_BASE[OPN2_74_ADSR__D2R__CH1_OP6] = 0x02;
-    OPN2_INT_BASE[OPN2_75_ADSR__D2R__CH2_OP6] = 0x02;
-    OPN2_INT_BASE[OPN2_76_ADSR__D2R__CH3_OP6] = 0x02;
-
-    OPN2_INT_BASE[OPN2_78_ADSR__D2R__CH1_OP3] = 0x02;
-    OPN2_INT_BASE[OPN2_79_ADSR__D2R__CH2_OP3] = 0x02;
-    OPN2_INT_BASE[OPN2_7A_ADSR__D2R__CH3_OP3] = 0x02;
-    OPN2_INT_BASE[OPN2_78_ADSR__D2R__CH1_OP7] = 0x02;
-    OPN2_INT_BASE[OPN2_79_ADSR__D2R__CH2_OP7] = 0x02;
-    OPN2_INT_BASE[OPN2_7A_ADSR__D2R__CH3_OP7] = 0x02;
-
-    OPN2_INT_BASE[OPN2_7C_ADSR__D2R__CH1_OP4] = 0x02;
-    OPN2_INT_BASE[OPN2_7D_ADSR__D2R__CH2_OP4] = 0x02;
-    OPN2_INT_BASE[OPN2_7E_ADSR__D2R__CH3_OP4] = 0x02;
-    OPN2_INT_BASE[OPN2_7C_ADSR__D2R__CH1_OP8] = 0x02;
-    OPN2_INT_BASE[OPN2_7D_ADSR__D2R__CH2_OP8] = 0x02;
-    OPN2_INT_BASE[OPN2_7E_ADSR__D2R__CH3_OP8] = 0x02;
-
-    /* D1L/RR */
-
-    OPN2_INT_BASE[OPN2_80_ADSR__D1L_RR__CH1_OP1] = 0x11;
-    OPN2_INT_BASE[OPN2_81_ADSR__D1L_RR__CH2_OP1] = 0x11;
-    OPN2_INT_BASE[OPN2_82_ADSR__D1L_RR__CH3_OP1] = 0x11;
-    OPN2_INT_BASE[OPN2_80_ADSR__D1L_RR__CH1_OP5] = 0x11;
-    OPN2_INT_BASE[OPN2_81_ADSR__D1L_RR__CH2_OP5] = 0x11;
-    OPN2_INT_BASE[OPN2_82_ADSR__D1L_RR__CH3_OP5] = 0x11;
-
-    OPN2_INT_BASE[OPN2_84_ADSR__D1L_RR__CH1_OP2] = 0x11;
-    OPN2_INT_BASE[OPN2_85_ADSR__D1L_RR__CH2_OP2] = 0x11;
-    OPN2_INT_BASE[OPN2_86_ADSR__D1L_RR__CH3_OP2] = 0x11;
-    OPN2_INT_BASE[OPN2_84_ADSR__D1L_RR__CH1_OP6] = 0x11;
-    OPN2_INT_BASE[OPN2_85_ADSR__D1L_RR__CH2_OP6] = 0x11;
-    OPN2_INT_BASE[OPN2_86_ADSR__D1L_RR__CH3_OP6] = 0x11;
-
-    OPN2_INT_BASE[OPN2_88_ADSR__D1L_RR__CH1_OP3] = 0x11;
-    OPN2_INT_BASE[OPN2_89_ADSR__D1L_RR__CH2_OP3] = 0x11;
-    OPN2_INT_BASE[OPN2_8A_ADSR__D1L_RR__CH3_OP3] = 0x11;
-    OPN2_INT_BASE[OPN2_88_ADSR__D1L_RR__CH1_OP7] = 0x11;
-    OPN2_INT_BASE[OPN2_89_ADSR__D1L_RR__CH2_OP7] = 0x11;
-    OPN2_INT_BASE[OPN2_8A_ADSR__D1L_RR__CH3_OP7] = 0x11;
-
-    OPN2_INT_BASE[OPN2_8C_ADSR__D1L_RR__CH1_OP4] = 0xA6;
-    OPN2_INT_BASE[OPN2_8D_ADSR__D1L_RR__CH2_OP4] = 0xA6;
-    OPN2_INT_BASE[OPN2_8E_ADSR__D1L_RR__CH3_OP4] = 0xA6;
-    OPN2_INT_BASE[OPN2_8C_ADSR__D1L_RR__CH1_OP8] = 0xA6;
-    OPN2_INT_BASE[OPN2_8D_ADSR__D1L_RR__CH2_OP8] = 0xA6;
-    OPN2_INT_BASE[OPN2_8E_ADSR__D1L_RR__CH3_OP8] = 0xA6;
-
-    /* Proprietary */
-
-    OPN2_INT_BASE[OPN2_90_ADSR__D1L_RR__CH1_OP1] = 0x00;
-    OPN2_INT_BASE[OPN2_91_ADSR__D1L_RR__CH2_OP1] = 0x00;
-    OPN2_INT_BASE[OPN2_92_ADSR__D1L_RR__CH3_OP1] = 0x00;
-    OPN2_INT_BASE[OPN2_90_ADSR__D1L_RR__CH4_OP1] = 0x00;
-    OPN2_INT_BASE[OPN2_91_ADSR__D1L_RR__CH5_OP1] = 0x00;
-    OPN2_INT_BASE[OPN2_92_ADSR__D1L_RR__CH6_OP1] = 0x00;
-
-    OPN2_INT_BASE[OPN2_94_ADSR__D1L_RR__CH1_OP2] = 0x00;
-    OPN2_INT_BASE[OPN2_95_ADSR__D1L_RR__CH2_OP2] = 0x00;
-    OPN2_INT_BASE[OPN2_96_ADSR__D1L_RR__CH3_OP2] = 0x00;
-    OPN2_INT_BASE[OPN2_94_ADSR__D1L_RR__CH4_OP2] = 0x00;
-    OPN2_INT_BASE[OPN2_95_ADSR__D1L_RR__CH5_OP2] = 0x00;
-    OPN2_INT_BASE[OPN2_96_ADSR__D1L_RR__CH6_OP2] = 0x00;
-
-    OPN2_INT_BASE[OPN2_98_ADSR__D1L_RR__CH1_OP3] = 0x00;
-    OPN2_INT_BASE[OPN2_99_ADSR__D1L_RR__CH2_OP3] = 0x00;
-    OPN2_INT_BASE[OPN2_9A_ADSR__D1L_RR__CH3_OP3] = 0x00;
-    OPN2_INT_BASE[OPN2_98_ADSR__D1L_RR__CH4_OP3] = 0x00;
-    OPN2_INT_BASE[OPN2_99_ADSR__D1L_RR__CH5_OP3] = 0x00;
-    OPN2_INT_BASE[OPN2_9A_ADSR__D1L_RR__CH6_OP3] = 0x00;
-
-    OPN2_INT_BASE[OPN2_9C_ADSR__D1L_RR__CH1_OP4] = 0x00;
-    OPN2_INT_BASE[OPN2_9D_ADSR__D1L_RR__CH2_OP4] = 0x00;
-    OPN2_INT_BASE[OPN2_9E_ADSR__D1L_RR__CH3_OP4] = 0x00;
-    OPN2_INT_BASE[OPN2_9C_ADSR__D1L_RR__CH4_OP4] = 0x00;
-    OPN2_INT_BASE[OPN2_9D_ADSR__D1L_RR__CH5_OP4] = 0x00;
-    OPN2_INT_BASE[OPN2_9E_ADSR__D1L_RR__CH6_OP4] = 0x00;
-
-
-    /* Feedback/algorithm */
-    OPN2_INT_BASE[OPN2_B0_CH1_FEEDBACK_ALGO] = 0x32;
-    OPN2_INT_BASE[OPN2_B1_CH2_FEEDBACK_ALGO] = 0x32;
-    OPN2_INT_BASE[OPN2_B2_CH3_FEEDBACK_ALGO] = 0x32;
-
-    /* 	Both speakers on */
-    OPN2_INT_BASE[OPN2_B4_CH1_L_R_AMS_FMS] = 0xC0;
-    OPN2_INT_BASE[OPN2_B5_CH2_L_R_AMS_FMS] = 0xC0;
-    OPN2_INT_BASE[OPN2_B6_CH3_L_R_AMS_FMS] = 0xC0;
-
-    /* Set frequency */
-    OPN2_INT_BASE[OPN2_A4_CH1_OCTAVE_FRECANCY_H] = 0x23;
-    OPN2_INT_BASE[OPN2_A5_CH2_OCTAVE_FRECANCY_H] = 0x22;
-    OPN2_INT_BASE[OPN2_A6_CH3_OCTAVE_FRECANCY_H] = 0x22;
-
-    OPN2_INT_BASE[OPN2_A0_CH1_FRECANCY_L] = 0x96;
-    OPN2_INT_BASE[OPN2_A1_CH2_FRECANCY_L] = 0x96;
-    OPN2_INT_BASE[OPN2_A2_CH3_FRECANCY_L] = 0x24;
-
-    /* Key off */
-    OPN2_INT_BASE[OPN2_28_KEY_ON_OFF] = 0x00;
-
-
-    for (i = 0xF0; i < 0xF7; i++) {
-        OPN2_INT_BASE[OPN2_28_KEY_ON_OFF] = i;
-    }
-
-    long target_ticks = sys_time_jiffies();
-    while (target_ticks > sys_time_jiffies() + 300) ;
-
-    for (i = 0x00; i < 0x07; i++) {
-        OPN2_INT_BASE[OPN2_28_KEY_ON_OFF] = i;
-    }
-
     return 0;
 }

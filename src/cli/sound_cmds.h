@@ -16,9 +16,9 @@ extern short psg_test(short channel, int argc, char * argv[]);
 extern short opl3_test(short channel, int argc, char * argv[]);
 
 /*
- * Test the OPL2
+ * Play a sound on the OPM
  */
-extern short opl2_test(short channel, int argc, char * argv[]);
+extern short opm_test(short channel, int argc, char * argv[]);
 
 /*
  * Perform a transmit test on the MIDI ports
