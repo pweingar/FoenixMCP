@@ -125,11 +125,10 @@ coldboot:   lea ___STACK,sp
             ; Clear BSS segment
             lea	   ___BSSSTART,a0            
             move.l #___BSSSIZE,d0
-            add.l  a0,d0
             beq.s  callmain
 
 clrloop:    clr.l  (a0)+
-            cmpa.l d0,a0
+            subq.l #4,d0
             bne.s  clrloop
 
             ; Set TRAP #15 vector handler
