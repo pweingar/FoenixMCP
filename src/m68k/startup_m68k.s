@@ -122,13 +122,15 @@ PENDING_GRP2 = $00B00104
 coldboot:   lea ___STACK,sp
             bsr _int_disable_all
 
-            lea	___BSSSTART,a0
+            ; Clear BSS segment
+            lea	   ___BSSSTART,a0            
             move.l #___BSSSIZE,d0
-            beq	callmain
+            add.l  a0,d0
+            beq.s  callmain
 
-            ; clrloop:    clr.l (a0)+
-            ; subq.l #4,d0
-            ; bne	clrloop
+clrloop:    clr.l  (a0)+
+            cmpa.l d0,a0
+            bne.s  clrloop
 
             ; Set TRAP #15 vector handler
             lea h_trap_15,a0        ; Address of the handler
