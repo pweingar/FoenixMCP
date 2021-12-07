@@ -123,15 +123,17 @@ coldboot:   lea ___STACK,sp
             bsr _int_disable_all
 
             ; Clear BSS segment
-            lea	   ___BSSSTART,a0            
+            lea	   ___BSSSTART,a0
             move.l #___BSSSIZE,d0
             beq.s  callmain
+
+            move.l #0,d1
 
 clrloop:    ; We don't use clr.l because it's a read-modify-write operation
             ; that is not yet supported by the FPGA's bus logic for now.
             ; So we use a move instead.
             ; clr.l  (a0)+
-            move.l #0,(a0)+
+            move.l d1,(a0)+
             subq.l #4,d0
             bne.s  clrloop
 
