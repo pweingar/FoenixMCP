@@ -105,7 +105,7 @@ PENDING_GRP2 = $FEC00104
             dc.l interrupt_x1F      ; 79 - Interrupt 0x1F - Real Time Clock
 
             dc.l not_impl           ; 80 - Interrupt 0x20 - IDE HDD Generated Interrupt
-            dc.l not_impl           ; 81 - Interrupt 0x21 - SDCard Insert
+            dc.l interrupt_x21      ; 81 - Interrupt 0x21 - SDCard Insert
             dc.l not_impl           ; 82 - Interrupt 0x22 - SDCard Controller
             dc.l not_impl           ; 83 - Interrupt 0x23 - Internal OPM
             dc.l not_impl           ; 84 - Interrupt 0x24 - External OPN2
@@ -219,8 +219,9 @@ interrupt_x1F:
 ; Interrupt Vector 0x21 -- SDCard Insert
 ;
 interrupt_x21:
+            move.w #$0002,(PENDING_GRP2)    ; Clear the flag for INT 21
             movem.l d0-d7/a0-a6,-(a7)       ; Save affected registers
-            move.w #($21<<2),d0             ; Get the offset to interrupt 0x1f
+            move.w #($21<<2),d0             ; Get the offset to interrupt 0x21
             bra int_dispatch                ; And process the interrupt
 
 ;
