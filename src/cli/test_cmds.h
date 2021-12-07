@@ -8,6 +8,6 @@
 /*
  * Test command
  */
-extern short cmd_test(short channel, int argc, char * argv[]);
+extern int cmd_test(short channel, int argc, char * argv[]);
 
 #endif

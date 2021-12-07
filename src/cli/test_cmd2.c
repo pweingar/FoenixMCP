@@ -57,7 +57,7 @@ typedef struct s_cli_test_feature {
  * Tests...
  */
 
-short cli_test_bitmap(short channel, int argc, char * argv[]) {
+int cli_test_bitmap(short channel, int argc, char * argv[]) {
     int i,m,p;
     unsigned char j;
     unsigned short k;
@@ -79,7 +79,7 @@ short cli_test_bitmap(short channel, int argc, char * argv[]) {
     }
 }
 
-short cli_test_uart(short channel, int argc, char * argv[]) {
+int cli_test_uart(short channel, int argc, char * argv[]) {
     char c;
     char buffer[80];
 
@@ -104,7 +104,7 @@ short cli_test_uart(short channel, int argc, char * argv[]) {
     }
 }
 
-short cli_test_panic(short channel, int argc, char * argv[]) {
+int cli_test_panic(short channel, int argc, char * argv[]) {
     volatile int x = 0;
     return argc / x;
 }
@@ -112,7 +112,7 @@ short cli_test_panic(short channel, int argc, char * argv[]) {
 /*
  * Try using the RTC periodic interrupt in polled mode
  */
-short cli_test_rtc(short channel, int argc, char * argv[]) {
+int cli_test_rtc(short channel, int argc, char * argv[]) {
     char buffer[80];
     char * spinner = "|/-\\";
     short count = 0;
@@ -142,7 +142,7 @@ short cli_test_rtc(short channel, int argc, char * argv[]) {
 /*
  * Test the memory
  */
-short cli_mem_test(short channel, int argc, char * argv[]) {
+int cli_mem_test(short channel, int argc, char * argv[]) {
     volatile unsigned char * memory = 0x00000000;
     t_sys_info sys_info;
     const long mem_start = 0x00050000;
@@ -191,7 +191,7 @@ short cli_mem_test(short channel, int argc, char * argv[]) {
 }
 
 #if MODEL == MODEL_FOENIX_A2560K
-short cli_test_recalibrate(short screen, int argc, char * argv[]) {
+int cli_test_recalibrate(short screen, int argc, char * argv[]) {
     unsigned char buffer[512];
     short i;
     short result;
@@ -213,7 +213,7 @@ short cli_test_recalibrate(short screen, int argc, char * argv[]) {
     return 0;
 }
 
-short cli_test_seek(short screen, int argc, char * argv[]) {
+int cli_test_seek(short screen, int argc, char * argv[]) {
     unsigned char buffer[512];
     short i;
     unsigned char cylinder;
@@ -241,7 +241,7 @@ short cli_test_seek(short screen, int argc, char * argv[]) {
 /*
  * Test the FDC interface by reading the MBR
  */
-short cli_test_fdc(short screen, int argc, char * argv[]) {
+int cli_test_fdc(short screen, int argc, char * argv[]) {
     unsigned char buffer[512];
     short i;
     short scancode;
@@ -289,7 +289,7 @@ short cli_test_fdc(short screen, int argc, char * argv[]) {
 /*
  * Test the IDE interface by reading the MBR
  */
-short cli_test_ide(short screen, int argc, char * argv[]) {
+int cli_test_ide(short screen, int argc, char * argv[]) {
     unsigned char buffer[512];
     short i;
     short scancode;
@@ -318,7 +318,7 @@ short cli_test_ide(short screen, int argc, char * argv[]) {
 /*
  * Test file creation
  */
-short cli_test_create(short screen, int argc, char * argv[]) {
+int cli_test_create(short screen, int argc, char * argv[]) {
     short n;
 
     if (argc > 1) {
@@ -344,7 +344,7 @@ short cli_test_create(short screen, int argc, char * argv[]) {
     }
 }
 
-short cli_test_lpt(short screen, int argc, char * argv[]) {
+int cli_test_lpt(short screen, int argc, char * argv[]) {
 #if MODEL == MODEL_FOENIX_A2560K
     char message[80];
     unsigned char scancode;
@@ -400,7 +400,7 @@ short cli_test_lpt(short screen, int argc, char * argv[]) {
     return 0;
 }
 
-short cmd_test_print(short screen, int argc, char * argv[]) {
+int cmd_test_print(short screen, int argc, char * argv[]) {
 #if MODEL == MODEL_FOENIX_A2560K
     const char * test_pattern = "0123456789ABCDEFGHIJKLMNOPQRTSUVWZXYZ\r\n";
 
@@ -423,7 +423,7 @@ short cmd_test_print(short screen, int argc, char * argv[]) {
     return 0;
 }
 
-static t_cli_test_feature cli_test_features[] = {
+const t_cli_test_feature cli_test_features[] = {
     {"BITMAP", "BITMAP: test the bitmap screen", cli_test_bitmap},
     {"CREATE", "CREATE <path>: test creating a file", cli_test_create},
     {"IDE", "IDE: test reading the MBR of the IDE drive", cli_test_ide},
@@ -444,25 +444,30 @@ static t_cli_test_feature cli_test_features[] = {
     {"RECALIBRATE", "RECALIBRATE: recalibrate the floppy drive", cli_test_recalibrate},
     {"SEEK", "SEEK <track>: move the floppy drive head to a track", cli_test_seek},
 #endif
-    {"UART", "UART: test the serial port", cli_test_uart},
-    {0, 0}
+    {"UART","UART: test the serial port",cli_test_uart},
+    {"END", "END", 0}
 };
 
 void test_help(short screen) {
     p_cli_test_feature f;
+    short i;
+    short count;
 
     print(screen, "USAGE: TEST <feature>\nFeatures supported...\n");
 
-    for (f = cli_test_features; f->name != 0; f++) {
-        print(screen, f->help);
-        print(screen, "\n");
+    count = sizeof(cli_test_features) / sizeof(t_cli_test_feature);
+    for (i = 0; i < count - 1; i++) {
+        if (cli_test_features[i].help != 0) {
+            print(screen, cli_test_features[i].help);
+            print(screen, "\n");
+        }
     }
 }
 
 /*
  * Test command
  */
-short cmd_test(short screen, int argc, char * argv[]) {
+int cmd_test(short screen, int argc, char * argv[]) {
     short i;
     p_cli_test_feature f;
 

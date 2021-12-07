@@ -213,11 +213,6 @@ interrupt_x12:
 interrupt_x1F:
             move.w #$8000,(PENDING_GRP1)    ; Clear the flag for INT 1F
             movem.l d0-d7/a0-a6,-(a7)       ; Save affected registers
-
-            move.b ($FEC60000),d0
-            addq.b #1,d0
-            move.b d0,($FEC60000)
-
             move.w #($1f<<2),d0             ; Get the offset to interrupt 0x1f
             bra int_dispatch                ; And process the interrupt
 ;
