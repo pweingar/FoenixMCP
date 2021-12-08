@@ -53,6 +53,7 @@ unsigned char g_fil_state[MAX_FILES];       /* Whether or not a file descriptor 
 FIL g_file[MAX_FILES];                      /* The file descriptors */
 t_dev_chan g_file_dev;                      /* The descriptor to use for the file channels */
 t_loader_record g_file_loader[MAX_LOADERS]; /* Array of file types the loader will understand */
+char g_current_directory[MAX_PATH_LEN];		/* Our current working directory */
 
 /**
  * Convert a FATFS FRESULT code to the Foenix kernel's internal error codes
@@ -434,8 +435,11 @@ short fsys_rename(const char * old_path, const char * new_path) {
 short fsys_set_cwd(const char * path) {
     FRESULT result;
 
+	/* Send the path to FatFS */
     result = f_chdir(path);
     if (result == FR_OK) {
+		/* Set our copy of the current directory */
+		f_getcwd(g_current_directory, MAX_PATH_LEN);
         return 0;
     } else {
         log_num(LOG_ERROR, "fsys_set_cwd error: ", result);
@@ -454,15 +458,8 @@ short fsys_set_cwd(const char * path) {
  * 0 on success, negative number on failure.
  */
 short fsys_get_cwd(char * path, short size) {
-    FRESULT result;
-
-    result = f_getcwd(path, size);
-    if (result == FR_OK) {
-        return 0;
-    } else {
-        log_num(LOG_ERROR, "fsys_get_cwd error: ", result);
-        return fatfs_to_foenix(result);
-    }
+    strncpy(path, g_current_directory, size);
+	return 0;
 }
 
 short fchan_init() {
@@ -1297,6 +1294,11 @@ short fsys_register_loader(const char * extension, p_file_loader loader) {
  */
 short fsys_init() {
     int i, j;
+
+	/* Set the default working directory.
+	 * TODO: set this based on the boot drive.
+	 */
+	strcpy(g_current_directory, "/sd");
 
     /* Mark all directories as available */
     for (i = 0; i < MAX_DIRECTORIES; i++) {

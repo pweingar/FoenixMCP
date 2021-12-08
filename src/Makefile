@@ -17,14 +17,11 @@ export CPU=32
 # MODEL_FOENIX_A2560U         9
 # MODEL_FOENIX_A2560K         13
 export MODEL=9
-export VER_MAJOR = 0
-export VER_MINOR = 1
-export VER_BUILD = 11
 
 export AS = vasmm68k_mot
 export ASFLAGS = -quiet -Fvobj -nowarn=62
 export CC = vc
-export DEFINES = -DCPU=$(CPU) -DMODEL=$(MODEL) -DVER_MAJOR=$(VER_MAJOR) -DVER_MINOR=$(VER_MINOR) -DVER_BUILD=$(VER_BUILD) # -DKBD_POLLED
+export DEFINES = -DCPU=$(CPU) -DMODEL=$(MODEL) # -DKBD_POLLED
 
 ifeq ($(OS),Windows_NT)
 	export CFLAGS = +$(VBCC)/config/m68k-foenix -I. -I$(CURDIR)/include -I$(CURDIR)

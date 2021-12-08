@@ -69,3 +69,7 @@ src/foenixmcp_ram.bin
 src/foenixmcp_flash.bin
 src/bin/archive/foenixmcp_u_flash_20211111_03.bin
 src/bin/archive/foenixmcp_u_flash_20211112_06.bin
+src/bin/archive/foenixmcp_u_ram_20211206_02.bin
+src/bin/archive/foenixmcp_u_ram_20211206_01.bin
+src/bin/archive/foenixmcp_u_flash_20211206_02.bin
+src/bin/archive/foenixmcp_u_flash_20211206_01.bin
