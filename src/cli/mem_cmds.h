@@ -12,55 +12,55 @@
  *
  * DUMP <address> [<count>]
  */
-extern short mem_cmd_dump(short channel, int argc, char * argv[]);
+extern short mem_cmd_dump(short channel, int argc, const char * argv[]);
 
 /*
  * Print out the dissassembly of a block of memory
  *
  * DASM <address> [<count>]
  */
-extern short mem_cmd_dasm(short channel, int argc, char * argv[]);
+extern short mem_cmd_dasm(short channel, int argc, const char * argv[]);
 
 /*
  * Write an 8-bit byte to memory
  *
  * POKE8 <address> <value>
  */
-extern short mem_cmd_poke8(short channel, int argc, char * argv[]);
+extern short mem_cmd_poke8(short channel, int argc, const char * argv[]);
 
 /*
  * Read an 8-bit byte from memory and display it
  *
  * PEEK8 <address>
  */
-extern short mem_cmd_peek8(short channel, int argc, char * argv[]);
+extern short mem_cmd_peek8(short channel, int argc, const char * argv[]);
 
 /*
  * Write an 16-bit word to memory
  *
  * POKE16 <address> <value>
  */
-extern short mem_cmd_poke16(short channel, int argc, char * argv[]);
+extern short mem_cmd_poke16(short channel, int argc, const char * argv[]);
 
 /*
  * Read an 16-bit word from memory and display it
  *
  * PEEK16 <address>
  */
-extern short mem_cmd_peek16(short channel, int argc, char * argv[]);
+extern short mem_cmd_peek16(short channel, int argc, const char * argv[]);
 
 /*
  * Write an 32-bit long word to memory
  *
  * POKE32 <address> <value>
  */
-extern short mem_cmd_poke32(short channel, int argc, char * argv[]);
+extern short mem_cmd_poke32(short channel, int argc, const char * argv[]);
 
 /*
  * Read an 32-bit long word from memory and display it
  *
  * PEEK32 <address>
  */
-extern short mem_cmd_peek32(short channel, int argc, char * argv[]);
+extern short mem_cmd_peek32(short channel, int argc, const char * argv[]);
 
 #endif
