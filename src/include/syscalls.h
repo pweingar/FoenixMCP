@@ -245,7 +245,7 @@ extern short sys_chan_write_b(short channel, unsigned char b);
  * Returns:
  *  number of bytes written, any negative number is an error code
  */
-extern short sys_chan_write(short channel, unsigned char * buffer, short size);
+extern short sys_chan_write(short channel, const unsigned char * buffer, short size);
 
 /*
  * Return the status of the channel device

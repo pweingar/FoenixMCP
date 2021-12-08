@@ -29,24 +29,26 @@ extern void cli_set_init();
  * Returns:
  * 0 on success, any other number is an error
  */
-extern short cli_set_register(const char * name, cli_setter setter, cli_getter getter);
+extern short cli_set_register(const char * name, const char * help, cli_setter setter, cli_getter getter);
 
 /*
  * Set the value of a setting
  *
  * Inputs:
+ * channel = the channel to use for reporting success or error
  * name = the name of the setting to update (case insensitive)
  * value = the value to store in the setting (may be interpreted by the setting)
  *
  * Returns:
  * 0 on success, any other number is an error
  */
-extern short cli_set_value(const char * name, const char * value);
+extern short cli_set_value(short channel, const char * name, const char * value);
 
 /*
  * Get the value of a setting
  *
  * Inputs:
+ * channel = the channel to use for reporting success or error
  * name = the name of the setting to update (case insensitive)
  * buffer = the place to copy a string representing the value of the setting
  * size = the number of characters that can be stored in the buffer
@@ -54,12 +56,12 @@ extern short cli_set_value(const char * name, const char * value);
  * Returns:
  * 0 on success, any other number is an error
  */
-extern short cli_get_value(const char * name, char * buffer, short size);
+extern short cli_get_value(short channel, char * name, char * buffer, short size);
 
 /*
  * Command to set the value of a setting
  */
-extern short cli_cmd_set(short screen, int argc, char * argv[]);
+extern short cli_cmd_set(short screen, int argc, const char * argv[]);
 
 /*
  * Command to set the value of a setting
