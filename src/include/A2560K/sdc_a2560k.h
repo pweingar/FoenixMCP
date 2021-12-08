@@ -5,9 +5,13 @@
 #ifndef __SDC_A2560K_H
 #define __SDC_A2560K_H
 
-#define GABE_SDC_REG            ((volatile unsigned short *)0xFEC0051A)
-#define GABE_SDC_PRESENT        0x0010      /* Is an SD card present? --- 0:Yes, 1:No */
-#define GABE_SDC_WPROT          0x0020      /* Is the SD card write protected? --- 0:Yes, 1:No */
+#define GABE_SDC_REG            ((volatile unsigned int *)0xFEC00518)
+#define GABE_SDC_PRESENT        0x01000000      /* Is an SD card present? --- 0:Yes, 1:No */
+#define GABE_SDC_WPROT          0x02000000      /* Is the SD card write protected? --- 0:Yes, 1:No */
+#define GABE_BOOTMODE_0         0x00000001      /* DIP switch: boot mode 0 */
+#define GABE_BOOTMODE_1         0x00000002      /* DIP switch: boot mode 1 */
+#define GABE_DIP_USER_0         0x00000100      /* DIP switch: User 0 */
+#define GABE_DIP_USER_1         0x00000200      /* DIP switch: User 1 */
 
 #define SDC_VERSION_REG         ((unsigned char *)0xFEC00300)
 #define SDC_CONTROL_REG         ((unsigned char *)0xFEC00301)

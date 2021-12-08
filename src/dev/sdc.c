@@ -49,14 +49,14 @@ void sdc_reset() {
 // Return true if there is an SD card in the slot
 //
 short sdc_detected() {
-    return 1; // (*GABE_SDC_REG & GABE_SDC_PRESENT) != GABE_SDC_PRESENT;
+    return (*GABE_SDC_REG & GABE_SDC_PRESENT) != GABE_SDC_PRESENT;
 }
 
 //
 // Return true if there is an SD card is protected
 //
 short sdc_protected() {
-    return 0; // (*GABE_SDC_REG & GABE_SDC_WPROT) != GABE_SDC_WPROT;
+    return (*GABE_SDC_REG & GABE_SDC_WPROT) != GABE_SDC_WPROT;
 }
 
 //
