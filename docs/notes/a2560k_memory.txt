@@ -34,3 +34,16 @@ VICKY_MASTER_REG[8]     <= 32'h1008_1008;        // FONT Manager - Font Containe
                 default: begin    CPU_D_o = 32'hDEAF_B00B; end
             endcase
         end
+
+        assign NES_PORT_0_ENABLE = SNES_CTRL_REG[0];
+        assign NES_PORT_1_ENABLE = SNES_CTRL_REG[1];
+        assign NES_SNES_PORT_0_CHOICE = !SNES_CTRL_REG[2];
+        assign NES_SNES_PORT_1_CHOICE = !SNES_CTRL_REG[3];
+        This is new:
+        assign JOYSTICK0_RLY_o = SNES_CTRL_REG[8];
+        assign JOYSTICK1_RLY_o = SNES_CTRL_REG[9];
+        this control the relay to swap the Button1 and Button2 (I think) to relay the signal to the Analog Input of the Super IO
+        Mimiru Miru — Today at 9:46 PM
+        ahhh ok
+        c256foenix — Today at 9:46 PM
+        SNES_CTRL_REG[7] is start the Transfer 

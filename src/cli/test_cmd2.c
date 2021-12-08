@@ -58,14 +58,21 @@ typedef struct s_cli_test_feature {
  * Tests...
  */
 
+/*
+ * Test the joystick ports
+ */
 int cli_test_joystick(short channel, int argc, char * argv[]) {
     char message[80];
     volatile unsigned int * joystick_port = 0xFEC00500;
+    volatile unsigned int * game_ctrl_port = 0xFEC00504;
     unsigned int joy_state = 0, old_joy_state = 0xffffffff;
     unsigned short scancode = 0;
 
     sprintf(message, "Plug a joystick into either port 0 or port 1... ESC to quit.\n");
     sys_chan_write(channel, message, strlen(message));
+
+    /* Make sure we're in Atari joystick mode */
+    *game_ctrl_port = 0;
 
     while (scancode != 0x01) {
         joy_state = *joystick_port;
@@ -77,6 +84,77 @@ int cli_test_joystick(short channel, int argc, char * argv[]) {
 
         scancode = sys_kbd_scancode();
     }
+
+    return 0;
+}
+
+/*
+ * Test SNES gamepads
+ */
+int cli_test_gamepad(short channel, int argc, char * argv[]) {
+    char message[80];
+    volatile unsigned int * game_ctrl_port = 0xFEC00504;
+    volatile unsigned int * game_0_0_port = 0xFEC00508;
+    volatile unsigned int * game_0_1_port = 0xFEC0050C;
+    volatile unsigned int * game_1_0_port = 0xFEC00510;
+    volatile unsigned int * game_1_1_port = 0xFEC00514;
+    unsigned int game_ctrl;
+    unsigned int game_status;
+    unsigned int game_state_0 = 0;
+    unsigned int game_state_1 = 0;
+    unsigned int old_game_state_0 = 0xffffffff;
+    unsigned int old_game_state_1 = 0xffffffff;
+    unsigned short scancode = 0;
+    unsigned short port = 0;
+
+    if (argc > 1) {
+        port = (unsigned short)(cli_eval_number(argv[1]) & 0x0000ffff);
+        if (port > 1) {
+            port = 1;
+        }
+    }
+
+    sprintf(message, "Testing SNES gamepad port %d... ESC to quit.\n", port);
+    sys_chan_write(channel, message, strlen(message));
+
+    /* Make sure we're in SNES mode */
+    if (port == 0) {
+        /* Port #0 is SNES */
+        game_ctrl = 0x00000005;
+    } else {
+        /* Port #1 is SNES */
+        game_ctrl = 0x0000000A;
+    }
+
+    *game_ctrl_port = game_ctrl;
+
+    while (scancode != 0x01) {
+        /* Start transferring the data and wait for completion */
+        *game_ctrl_port = game_ctrl | 0x00000080;
+        do {
+            game_status = *game_ctrl_port;
+        } while ((game_status & 0x00000040) == 0) ;
+
+        if (port == 0) {
+            game_state_0 = *game_0_0_port;
+            game_state_1 = *game_0_1_port;
+        } else {
+            game_state_0 = *game_1_0_port;
+            game_state_1 = *game_1_1_port;
+        }
+
+        if ((game_state_0 != old_game_state_0) || (game_state_1 != old_game_state_1)) {
+            old_game_state_0 = game_state_0;
+            old_game_state_1 = game_state_1;
+            sprintf(message, "Gamepads: %08X %08X\n", game_state_0, game_state_1);
+            sys_chan_write(channel, message, strlen(message));
+        }
+
+        scancode = sys_kbd_scancode();
+    }
+
+    *game_ctrl_port = 0;
+    return 0;
 }
 
 int cli_test_bitmap(short channel, int argc, char * argv[]) {
@@ -451,8 +529,9 @@ const t_cli_test_feature cli_test_features[] = {
     {"IDE", "IDE: test reading the MBR of the IDE drive", cli_test_ide},
 #if MODEL == MODEL_FOENIX_A2560K
     {"FDC", "FDC: test reading the MBR from the floppy drive", cli_test_fdc},
-#endif
+    {"GAMEPAD", "GAMEPAD [0 | 1]: test SNES gamepads", cli_test_gamepad},
     {"JOY", "JOY: test the joystick", cli_test_joystick},
+#endif
     {"LPT", "LPT: test the parallel port", cli_test_lpt},
     {"MEM", "MEM: test reading and writing memory", cli_mem_test},
     {"MIDILOOP", "MIDILOOP: perform a loopback test on the MIDI ports", midi_loop_test},
