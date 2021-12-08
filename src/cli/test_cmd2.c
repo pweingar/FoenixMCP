@@ -4,6 +4,7 @@
 
 #include <ctype.h>
 #include <string.h>
+#include <stdio.h>
 
 #include "cli.h"
 #include "cli/test_cmds.h"
@@ -16,6 +17,8 @@
 #include "dev/uart.h"
 #include "fatfs/ff.h"
 #include "interrupt.h"
+#include "log.h"
+#include "dev/ps2.h"
 #include "rtc_reg.h"
 #include "simpleio.h"
 #include "syscalls.h"
@@ -76,6 +79,8 @@ short cli_test_bitmap(short channel, int argc, char * argv[]) {
     for (i = 0; i< 640 * 480; i++) {
         VRAM_Bank0[i] = i & 0xff;
     }
+
+    return 0;
 }
 
 short cli_test_uart(short channel, int argc, char * argv[]) {
@@ -89,7 +94,7 @@ short cli_test_uart(short channel, int argc, char * argv[]) {
     sprintf(buffer, "COM1: 115200, no parity, 1 stop bit, 8 data bits\nPress ESC to finish (%d).\n", UART_115200);
     sys_chan_write(0, buffer, strlen(buffer));
 
-    while (1) {
+    for (;;) {
         c = kbd_getc();
         if (c != 0) {
             if (c == 0x1b) {
@@ -101,6 +106,8 @@ short cli_test_uart(short channel, int argc, char * argv[]) {
             sys_chan_write_b(channel, c);
         }
     }
+
+    return 0;
 }
 
 short cli_test_panic(short channel, int argc, char * argv[]) {
@@ -123,19 +130,21 @@ short cli_test_rtc(short channel, int argc, char * argv[]) {
 
     ticks = sys_time_jiffies();
 
-    sprintf(buffer, "Waiting for updated ticks starting from %d\n", ticks);
+    sprintf(buffer, "Waiting for updated ticks starting from %ld\n", ticks);
     sys_chan_write(channel, buffer, strlen(buffer));
 
-    while (1) {
+    for (;;) {
         if (ticks < sys_time_jiffies()) {
             /* We got the periodic interrupt */
 
-            sprintf(buffer, "Tick! %d\n", ticks);
+            sprintf(buffer, "Tick! %ld\n", ticks);
             sys_chan_write(channel, buffer, strlen(buffer));
 
             ticks = sys_time_jiffies();
         }
     }
+
+    return 0;
 }
 
 /*
@@ -158,27 +167,27 @@ short cli_mem_test(short channel, int argc, char * argv[]) {
     for (i = mem_start; i < mem_end; i++) {
         memory[i] = 0x55;
         if (memory[i] != 0x55) {
-            sprintf(message, "\x1B[1;2H\x1B[KFailed to write 0x55... read %02X at %08X\n\n", memory[i], i);
+            sprintf(message, "\x1B[1;2H\x1B[KFailed to write 0x55... read %02X at %p\n\n", memory[i], (void*)i);
             sys_chan_write(channel, message, strlen(message));
-            return -1;
+            return ERR_GENERAL;
         }
 
         memory[i] = 0xAA;
         if (memory[i] != 0xAA) {
-            sprintf(message, "\x1B[1;2H\x1B[KFailed to write 0xAA... read %02X at %08X\n\n", memory[i], i);
+            sprintf(message, "\x1B[1;2H\x1B[KFailed to write 0xAA... read %02X at %p\n\n", memory[i], (void*)i);
             sys_chan_write(channel, message, strlen(message));
-            return -1;
+            return ERR_GENERAL;
         }
 
         memory[i] = 0x00;
         if (memory[i] != 0x00) {
-            sprintf(message, "\x1B[1;2H\x1B[KFailed to write 0x00... read %02X at %08\n\nX", memory[i], i);
+            sprintf(message, "\x1B[1;2H\x1B[KFailed to write 0x00... read %02X at %p\n\nX", memory[i], (void*)i);
             sys_chan_write(channel, message, strlen(message));
-            return -1;
+            return ERR_GENERAL;
         }
 
         if ((i % 1024) == 0) {
-            sprintf(message, "\x1B[H\x1B[0KMemory tested: %08X", i);
+            sprintf(message, "\x1B[H\x1B[0KMemory tested: %p", (void*)i);
             sys_chan_write(channel, message, strlen(message));
         }
     }
@@ -198,7 +207,7 @@ short cli_test_ide(short screen, int argc, char * argv[]) {
     short scancode;
     short n = 0;
 
-    while (1) {
+    for (;;) {
         n = bdev_read(BDEV_HDC, 0, buffer, 512);
         if (n <= 0) {
             err_print(screen, "Unable to read MBR", n);
@@ -214,6 +223,8 @@ short cli_test_ide(short screen, int argc, char * argv[]) {
             break;
         }
     }
+
+    return 0;
 }
 
 /*
@@ -236,12 +247,12 @@ short cli_test_create(short screen, int argc, char * argv[]) {
 
         } else {
             err_print(screen, "Unable to open to file", channel);
-            return -1;
+            return ERR_GENERAL;
         }
 
     } else {
         print(screen, "USAGE: TEST CREATE <path>\n");
-        return -1;
+        return ERR_GENERAL;
     }
 }
 
@@ -374,7 +385,7 @@ short cmd_test(short screen, int argc, char * argv[]) {
             feature_upcase[i] = toupper(feature_upcase[i]);
         }
 
-        for (f = cli_test_features; f->name != 0; f++) {
+        for (f = (p_cli_test_feature)cli_test_features; f->name != 0; f++) {
             if (strcmp(f->name, feature_upcase) == 0) {
                 f->handler(screen, argc - 1, &argv[1]);
                 return 0;
@@ -382,9 +393,11 @@ short cmd_test(short screen, int argc, char * argv[]) {
         }
 
         test_help(screen);
-        return -1;
+        return ERR_GENERAL;
     } else {
         test_help(screen);
-        return -1;
+        return ERR_GENERAL;
     }
+
+    return 0;
 }
