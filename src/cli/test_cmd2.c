@@ -3,6 +3,7 @@
  */
 
 #include <ctype.h>
+#include <stdio.h>
 #include <string.h>
 
 #include "cli.h"
@@ -56,6 +57,27 @@ typedef struct s_cli_test_feature {
 /*
  * Tests...
  */
+
+int cli_test_joystick(short channel, int argc, char * argv[]) {
+    char message[80];
+    volatile unsigned int * joystick_port = 0xFEC00500;
+    unsigned int joy_state = 0, old_joy_state = 0xffffffff;
+    unsigned short scancode = 0;
+
+    sprintf(message, "Plug a joystick into either port 0 or port 1... ESC to quit.\n");
+    sys_chan_write(channel, message, strlen(message));
+
+    while (scancode != 0x01) {
+        joy_state = *joystick_port;
+        if (joy_state != old_joy_state) {
+            old_joy_state = joy_state;
+            sprintf(message, "Joystick: %08X\n", joy_state);
+            sys_chan_write(channel, message, strlen(message));
+        }
+
+        scancode = sys_kbd_scancode();
+    }
+}
 
 int cli_test_bitmap(short channel, int argc, char * argv[]) {
     int i,m,p;
@@ -430,6 +452,7 @@ const t_cli_test_feature cli_test_features[] = {
 #if MODEL == MODEL_FOENIX_A2560K
     {"FDC", "FDC: test reading the MBR from the floppy drive", cli_test_fdc},
 #endif
+    {"JOY", "JOY: test the joystick", cli_test_joystick},
     {"LPT", "LPT: test the parallel port", cli_test_lpt},
     {"MEM", "MEM: test reading and writing memory", cli_mem_test},
     {"MIDILOOP", "MIDILOOP: perform a loopback test on the MIDI ports", midi_loop_test},
