@@ -7,7 +7,9 @@
  */
 
 #include <ctype.h>
+#include <stdio.h>
 #include <stdlib.h>
+
 #include <string.h>
 #include "log.h"
 #include "syscalls.h"
@@ -731,7 +733,7 @@ short fsys_getlabel(char * path, char * label) {
  * drive = drive number
  * label = buffer that holds the label
  */
-short fsys_setlabel(short drive, char * label) {
+short fsys_setlabel(short drive, const char * label) {
     FRESULT fres;
     char buffer[80];
 

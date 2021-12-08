@@ -56,7 +56,7 @@ extern short cli_set_value(short channel, const char * name, const char * value)
  * Returns:
  * 0 on success, any other number is an error
  */
-extern short cli_get_value(short channel, char * name, char * buffer, short size);
+extern short cli_get_value(short channel, const char * name, char * buffer, short size);
 
 /*
  * Command to set the value of a setting
@@ -66,6 +66,6 @@ extern short cli_cmd_set(short screen, int argc, const char * argv[]);
 /*
  * Command to set the value of a setting
  */
-extern short cli_cmd_get(short screen, int argc, char * argv[]);
+extern short cli_cmd_get(short screen, int argc, const char * argv[]);
 
 #endif

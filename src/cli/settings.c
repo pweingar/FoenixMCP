@@ -158,7 +158,7 @@ short cli_set_value(short channel, const char * name, const char * value) {
  * Returns:
  * 0 on success, any other number is an error
  */
-short cli_get_value(short channel, char * name, char * buffer, short size) {
+short cli_get_value(short channel, const char * name, char * buffer, short size) {
     p_setting setting = cli_find_setting(name);
     if (setting == 0) {
         /* Setting not found... */
@@ -214,7 +214,7 @@ short cli_cmd_set(short channel, int argc, const char * argv[]) {
 /*
  * Command to set the value of a setting
  */
-short cli_cmd_get(short channel, int argc, char * argv[]) {
+short cli_cmd_get(short channel, int argc, const char * argv[]) {
     char buffer[128];
     short result;
 
@@ -224,7 +224,7 @@ short cli_cmd_get(short channel, int argc, char * argv[]) {
             cli_set_help(channel);
 
         } else {
-            result = cli_get_value(channel, argv[1], buffer, 128);
+            result = cli_get_value(channel, (char*)argv[1], buffer, 128);
             if (result == 0) {
                 print(channel, buffer);
                 print(channel, "\n");

@@ -59,7 +59,7 @@ typedef struct s_cli_test_feature {
  * Tests...
  */
 
-short cli_test_bitmap(short channel, int argc, char * argv[]) {
+short cli_test_bitmap(short channel, int argc, const char * argv[]) {
     int i,m,p;
     unsigned char j;
     unsigned short k;
@@ -83,7 +83,7 @@ short cli_test_bitmap(short channel, int argc, char * argv[]) {
     return 0;
 }
 
-short cli_test_uart(short channel, int argc, char * argv[]) {
+short cli_test_uart(short channel, int argc, const char * argv[]) {
     char c;
     char buffer[80];
 
@@ -110,7 +110,7 @@ short cli_test_uart(short channel, int argc, char * argv[]) {
     return 0;
 }
 
-short cli_test_panic(short channel, int argc, char * argv[]) {
+short cli_test_panic(short channel, int argc, const char * argv[]) {
     volatile int x = 0;
     return argc / x;
 }
@@ -118,7 +118,7 @@ short cli_test_panic(short channel, int argc, char * argv[]) {
 /*
  * Try using the RTC periodic interrupt in polled mode
  */
-short cli_test_rtc(short channel, int argc, char * argv[]) {
+short cli_test_rtc(short channel, int argc, const char * argv[]) {
     char buffer[80];
     char * spinner = "|/-\\";
     short count = 0;
@@ -150,7 +150,7 @@ short cli_test_rtc(short channel, int argc, char * argv[]) {
 /*
  * Test the memory
  */
-short cli_mem_test(short channel, int argc, char * argv[]) {
+short cli_mem_test(short channel, int argc, const char * argv[]) {
     volatile unsigned char * memory = 0x00000000;
     t_sys_info sys_info;
     const long mem_start = 0x00050000;
@@ -201,7 +201,7 @@ short cli_mem_test(short channel, int argc, char * argv[]) {
 /*
  * Test the IDE interface by reading the MBR
  */
-short cli_test_ide(short screen, int argc, char * argv[]) {
+short cli_test_ide(short screen, int argc, const char * argv[]) {
     unsigned char buffer[512];
     short i;
     short scancode;
@@ -230,7 +230,7 @@ short cli_test_ide(short screen, int argc, char * argv[]) {
 /*
  * Test file creation
  */
-short cli_test_create(short screen, int argc, char * argv[]) {
+short cli_test_create(short screen, int argc, const char * argv[]) {
     short n;
 
     if (argc > 1) {
@@ -256,7 +256,7 @@ short cli_test_create(short screen, int argc, char * argv[]) {
     }
 }
 
-short cli_test_lpt(short screen, int argc, char * argv[]) {
+short cli_test_lpt(short screen, int argc, const char * argv[]) {
 #if MODEL == MODEL_FOENIX_A2560K
     char message[80];
     unsigned char scancode;
@@ -312,7 +312,7 @@ short cli_test_lpt(short screen, int argc, char * argv[]) {
     return 0;
 }
 
-short cmd_test_print(short screen, int argc, char * argv[]) {
+short cmd_test_print(short screen, int argc, const char * argv[]) {
 #if MODEL == MODEL_FOENIX_A2560K
     const char * test_pattern = "0123456789ABCDEFGHIJKLMNOPQRTSUVWZXYZ\r\n";
 
@@ -372,7 +372,7 @@ void test_help(short screen) {
 /*
  * Test command
  */
-short cmd_test(short screen, int argc, char * argv[]) {
+short cmd_test(short screen, int argc, const char * argv[]) {
     short i;
     p_cli_test_feature f;
 
