@@ -34,7 +34,7 @@ short cmd_diskread(short screen, int argc, char * argv[]) {
     bdev_number = (short)cli_eval_number(argv[1]);
     lba = cli_eval_number(argv[2]);
 
-    sprintf(buffer, "Reading drive #%d, sector 0x%X\n", bdev_number, lba);
+    sprintf(buffer, "Reading drive #%d, sector 0x%p\n", bdev_number, (void*)lba);
     print(screen, buffer);
 
     result = bdev_read(bdev_number, lba, buffer, 512);
@@ -70,7 +70,7 @@ short cmd_diskfill(short screen, int argc, char * argv[]) {
     lba = cli_eval_number(argv[2]);
     value = (unsigned char)cli_eval_number(argv[3]);
 
-    sprintf(buffer, "Filling drive #%d, sector 0x%X with 0x%02X\n", bdev_number, lba, value);
+    sprintf(buffer, "Filling drive #%d, sector %p with 0x%02X\n", bdev_number, (void*)lba, (short)value);
     print(screen, buffer);
 
     for (i = 0; i < 512; i++) {
