@@ -153,7 +153,7 @@ short cli_test_rtc(short channel, int argc, const char * argv[]) {
 short cli_mem_test(short channel, int argc, const char * argv[]) {
     volatile unsigned char * memory = 0x00000000;
     t_sys_info sys_info;
-    const long mem_start = 0x00050000;
+    const long mem_start = 0x00050000; /* TODO find out better where the kernel stop */
     long mem_end;
     char message[80];
     long i;
@@ -165,14 +165,14 @@ short cli_mem_test(short channel, int argc, const char * argv[]) {
     sys_chan_write(channel, message, strlen(message));
 
     for (i = mem_start; i < mem_end; i++) {
-        memory[i] = 0x55;
+        memory[i] = 0x55; /* Every other bit starting with 1 */
         if (memory[i] != 0x55) {
             sprintf(message, "\x1B[1;2H\x1B[KFailed to write 0x55... read %02X at %p\n\n", memory[i], (void*)i);
             sys_chan_write(channel, message, strlen(message));
             return ERR_GENERAL;
         }
 
-        memory[i] = 0xAA;
+        memory[i] = 0xAA; /* Every other bit starting with 0 */
         if (memory[i] != 0xAA) {
             sprintf(message, "\x1B[1;2H\x1B[KFailed to write 0xAA... read %02X at %p\n\n", memory[i], (void*)i);
             sys_chan_write(channel, message, strlen(message));
