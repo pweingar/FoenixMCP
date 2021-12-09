@@ -4,7 +4,7 @@
 
 #include "snd/codec.h"
 
-static unsigned byte volume = 0xff;
+static unsigned char volume = 0xff;
 
 /*
  * Wait for the CODEC to be ready to receive more data.
@@ -41,10 +41,10 @@ void init_codec() {
 void codec_set_volume(unsigned char vol) {
     volume = vol;
 
-    *CODEC = 0x0A00 | (0xFF - (vol & 0xFF));
+    *CODEC = 0x0A00 | (0xFF - vol);
     codec_wait();
 
-	*CODEC = 0x0400 | ((vol >> 1) & 0xff);
+	*CODEC = 0x0400 | (vol >> 1);
     codec_wait();
 }
 

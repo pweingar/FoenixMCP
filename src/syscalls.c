@@ -175,7 +175,7 @@ short sys_chan_write_b(short channel, unsigned char b) {
  * Returns:
  *  number of bytes written, any negative number is an error code
  */
-short sys_chan_write(short channel, unsigned char * buffer, short size) {
+short sys_chan_write(short channel, const unsigned char * buffer, short size) {
     return syscall(KFN_CHAN_WRITE, channel, buffer, size);
 }
 

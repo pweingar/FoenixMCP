@@ -115,7 +115,7 @@ extern void text_clear(short screen, short mode);
  *        1: erase from cursor to end of the line,
  *        2: erase entire line
  */
-extern text_clear_line(short screen, short mode);
+extern void text_clear_line(short screen, short mode);
 
 /*
  * Insert a number of characters at the cursor position
