@@ -375,7 +375,6 @@ short fsys_mkdir(const char * path) {
 
     result = f_mkdir(path);
     if (result == FR_OK) {
-        log_num(LOG_ERROR, "fsys_mkdir error: ", result);
         return 0;
     } else {
         log_num(LOG_ERROR, "fsys_mkdir error: ", result);
