@@ -5,8 +5,9 @@
 #include "timers.h"
 #include "sound_cmds.h"
 #include "sound_reg.h"
-#include "snd/psg.h"
 #include "snd/opl2.h"
+#include "snd/psg.h"
+#include "snd/sid.h"
 #include "dev/midi.h"
 
 /*
@@ -40,6 +41,28 @@ short psg_test(short channel, int argc, char * argv[]) {
     psg_tone(1, 0);
     psg_attenuation(2, 15);
     psg_tone(2, 0);
+
+    return 0;
+}
+
+/*
+ * Play a sound on the SID
+ */
+short sid_test(short channel, int argc, char * argv[]) {
+    short i;
+    unsigned char reg;
+    unsigned char data;
+    long target_time;
+    unsigned char * opm_base = OPM_INT_BASE;
+
+    if (argc >= 2) {
+        /* Allow the user to select the external OPM */
+        if ((strcmp(argv[1], "ext") == 0) || (strcmp(argv[1], "EXT") == 0)) {
+            sid_test_external();
+        } else {
+            sid_test_internal();
+        }
+    }
 
     return 0;
 }

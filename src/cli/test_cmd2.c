@@ -546,6 +546,7 @@ const t_cli_test_feature cli_test_features[] = {
 #if MODEL == MODEL_FOENIX_A2560K
     {"RECALIBRATE", "RECALIBRATE: recalibrate the floppy drive", cli_test_recalibrate},
     {"SEEK", "SEEK <track>: move the floppy drive head to a track", cli_test_seek},
+    {"SID", "SID [EXT|INT]: test the SID sound chips", sid_test},
 #endif
     {"UART","UART: test the serial port",cli_test_uart},
     {"END", "END", 0}
