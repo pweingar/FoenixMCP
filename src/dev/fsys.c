@@ -9,16 +9,16 @@
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
-
 #include <string.h>
-#include "log.h"
-#include "syscalls.h"
-#include "fsys.h"
-#include "fatfs/ff.h"
+
 #include "dev/channel.h"
-#include "simpleio.h"
 #include "errors.h"
 #include "elf.h"
+#include "fsys.h"
+#include "fatfs/ff.h"
+#include "log.h"
+#include "syscalls.h"
+#include "simpleio.h"
 
 #define MAX_DRIVES      8       /* Maximum number of drives */
 #define MAX_DIRECTORIES 8       /* Maximum number of open directories */
@@ -332,7 +332,7 @@ short fsys_findnext(short dir, p_file_info file) {
     FRESULT fres;
 
     if (g_dir_state[dir]) {
-        fres = f_findnext(&g_dir_state[dir], &finfo);
+        fres = f_findnext(&g_directory[dir], &finfo);
         if (fres != FR_OK) {
             return fatfs_to_foenix(fres);
 
@@ -539,7 +539,7 @@ short fchan_read_b(t_channel * chan) {
 
     file = fchan_to_file(chan);
     if (file) {
-        result = f_read(file, buffer, 1, &total_read);
+        result = f_read(file, (void*)buffer, 1, (UINT*)&total_read);
         if (result == FR_OK) {
             return (short)(buffer[0] & 0x00ff);
         } else {
@@ -991,7 +991,7 @@ short fsys_elf_loader(short chan, long destination, long * start) {
 	elf32_program_header progHeader;
 
     chan_seek(chan, 0, 0);
-    numBytes = chan_read(chan, &header, sizeof(header));
+    numBytes = chan_read(chan, (uint8_t*)&header, sizeof(header));
 
 	if (header.ident.magic[0] != 0x7F ||
 		header.ident.magic[1] != 'E' ||
@@ -1002,7 +1002,7 @@ short fsys_elf_loader(short chan, long destination, long * start) {
 	}
 
 	if (header.machine != CPU_ARCH) {
-		sprintf(&log_buffer, "[!] Incompatible CPU arch: expected %s, but found %s\n", elf_cpu_desc[CPU_ARCH], elf_cpu_desc[header.machine]);
+		sprintf((char*)&log_buffer, "[!] Incompatible CPU arch: expected %s, but found %s\n", (char*)elf_cpu_desc[CPU_ARCH], (char*)elf_cpu_desc[header.machine]);
 		DEBUG(log_buffer);
         return ERR_BAD_BINARY;
 	}
@@ -1024,7 +1024,7 @@ short fsys_elf_loader(short chan, long destination, long * start) {
 
 	while (progIndex < header.progNum) {
 		chan_seek(chan, progIndex * header.progSize + header.progOffset, 0);
-		numBytes = chan_read(chan, &progHeader, sizeof(progHeader));
+		numBytes = chan_read(chan, (uint8_t*)&progHeader, sizeof(progHeader));
 		switch (progHeader.type) {
 			case PT_NULL:
 			case PT_PHDR:

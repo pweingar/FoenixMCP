@@ -111,7 +111,7 @@ extern int32_t syscall(int32_t function, ...);
  * Inputs:
  * result = the code to return to the kernel
  */
-extern void sys_exit(int result);
+extern void sys_exit(short result);
 
 /*
  * Enable all interrupts
@@ -307,7 +307,7 @@ extern short sys_chan_ioctrl(short channel, short command, uint8_t * buffer, sho
  * Returns:
  * the number of the channel opened, negative number on error
  */
-extern short sys_chan_open(short dev, uint8_t * path, short mode);
+extern short sys_chan_open(short dev, const uint8_t * path, short mode);
 
 /*
  * Close a channel
