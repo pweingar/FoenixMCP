@@ -324,7 +324,7 @@ short cmd_test_print(short screen, int argc, char * argv[]) {
     return 0;
 }
 
-static t_cli_test_feature cli_test_features[] = {
+const t_cli_test_feature cli_test_features[] = {
     {"BITMAP", "BITMAP: test the bitmap screen", cli_test_bitmap},
     {"CREATE", "CREATE <path>: test creating a file", cli_test_create},
     {"IDE", "IDE: test reading the MBR of the IDE drive", cli_test_ide},
@@ -339,17 +339,22 @@ static t_cli_test_feature cli_test_features[] = {
     {"PSG", "PSG: test the PSG sound chip", psg_test},
     {"PRINT", "PRINT: sent text to the printer", cmd_test_print},
     {"UART", "UART: test the serial port", cli_test_uart},
-    {0, 0}
+    {"END", "END", 0}
 };
 
 void test_help(short screen) {
     p_cli_test_feature f;
+    int i;
+    int count;
 
     print(screen, "USAGE: TEST <feature>\nFeatures supported...\n");
 
-    for (f = cli_test_features; f->name != 0; f++) {
-        print(screen, f->help);
-        print(screen, "\n");
+    count = sizeof(cli_test_features) / sizeof(t_cli_test_feature);
+    for (i = 0; i < count - 1; i++) {
+        if (cli_test_features[i].help != 0) {
+            print(screen, cli_test_features[i].help);
+            print(screen, "\n");
+        }
     }
 }
 

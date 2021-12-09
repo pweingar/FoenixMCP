@@ -7,9 +7,9 @@
 
 /*
  * A function pointer for command implementations:
- *  int cmd_foo(short screen, char * parameters) { ... }
+ *  short cmd_foo(short screen, char * parameters) { ... }
  */
-typedef int (*cli_cmd_handler)(short screen, int argc, char * argv[]);
+typedef short (*cli_cmd_handler)(short screen, int argc, char * argv[]);
 
 /**
  * About the CLI...

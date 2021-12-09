@@ -9,7 +9,6 @@
 #include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdbool.h>
 #include "log.h"
 #include "syscalls.h"
 #include "fsys.h"
@@ -54,6 +53,7 @@ unsigned char g_fil_state[MAX_FILES];       /* Whether or not a file descriptor 
 FIL g_file[MAX_FILES];                      /* The file descriptors */
 t_dev_chan g_file_dev;                      /* The descriptor to use for the file channels */
 t_loader_record g_file_loader[MAX_LOADERS]; /* Array of file types the loader will understand */
+char g_current_directory[MAX_PATH_LEN];		/* Our current working directory */
 
 /**
  * Convert a FATFS FRESULT code to the Foenix kernel's internal error codes
@@ -435,8 +435,11 @@ short fsys_rename(const char * old_path, const char * new_path) {
 short fsys_set_cwd(const char * path) {
     FRESULT result;
 
+	/* Send the path to FatFS */
     result = f_chdir(path);
     if (result == FR_OK) {
+		/* Set our copy of the current directory */
+		f_getcwd(g_current_directory, MAX_PATH_LEN);
         return 0;
     } else {
         log_num(LOG_ERROR, "fsys_set_cwd error: ", result);
@@ -455,15 +458,8 @@ short fsys_set_cwd(const char * path) {
  * 0 on success, negative number on failure.
  */
 short fsys_get_cwd(char * path, short size) {
-    FRESULT result;
-
-    result = f_getcwd(path, size);
-    if (result == FR_OK) {
-        return 0;
-    } else {
-        log_num(LOG_ERROR, "fsys_get_cwd error: ", result);
-        return fatfs_to_foenix(result);
-    }
+    strncpy(path, g_current_directory, size);
+	return 0;
 }
 
 short fchan_init() {
@@ -1141,43 +1137,50 @@ short fsys_pgx_loader(short chan, long destination, long * start) {
     return result;
 }
 
-static bool get_app_ext(const char * path, char * extension) {
-    char * point = strrchr(path, '.');
-    extension[0] = 0;
-    if (point != 0) {
-        point++;
-        for (int i = 0; i < MAX_EXT; i++) {
-            char c = *point++;
-            if (c) {
-                extension[i] = toupper(c);
-            } else {
-                extension[i] = 0;
-                return true;
-            }
-        }
-    } else {
-        return false;
-    }
-}
-
-static bool loader_exists(const char * extension) {
+/*
+ * Load a file into memory at the designated destination address.
+ *
+ * If destination = 0, the file must be in a recognized binary format
+ * that specifies its own loading address.
+ *
+ * Inputs:
+ * path = the path to the file to load
+ * destination = the destination address (0 for use file's address)
+ * start = pointer to the long variable to fill with the starting address
+ *         (0 if not an executable, any other number if file is executable
+ *         with a known starting address)
+ *
+ * Returns:
+ * 0 on success, negative number on error
+ */
+short fsys_load(const char * path, long destination, long * start) {
     int i;
-    for (i = 0; i < MAX_LOADERS; i++) {
-        if (g_file_loader[i].status) {
-            if (strcmp(g_file_loader[i].extension, extension) == 0) {
-                return true;
-            }
-        }
-    }
-    return false;
-}
-
-static short fsys_load_ext(const char * path, const char * extension, long destination, long * start) {
-    int i;
+    char extension[MAX_EXT];
     short chan = -1;
     p_file_loader loader = 0;
 
     TRACE("fsys_load");
+
+    /* Clear out the extension */
+    for (i = 0; i <= MAX_EXT; i++) {
+        extension[i] = 0;
+    }
+
+    if (destination == 0) {
+        /* Find the extension */
+        char * point = strrchr(path, '.');
+        if (point != 0) {
+            point++;
+            for (i = 0; i < MAX_EXT; i++) {
+                char c = *point++;
+                if (c) {
+                    extension[i] = toupper(c);
+                } else {
+                    break;
+                }
+            }
+        }
+    }
 
     log2(LOG_VERBOSE, "fsys_load ext: ", extension);
 
@@ -1244,72 +1247,6 @@ static short fsys_load_ext(const char * path, const char * extension, long desti
 }
 
 /*
- * Load a file into memory at the designated destination address.
- *
- * If destination = 0, the file must be in a recognized binary format
- * that specifies its own loading address.
- *
- * Inputs:
- * path = the path to the file to load
- * destination = the destination address (0 for use file's address)
- * start = pointer to the long variable to fill with the starting address
- *         (0 if not an executable, any other number if file is executable
- *         with a known starting address)
- *
- * Returns:
- * 0 on success, negative number on error
- */
-short fsys_load(const char * path, long destination, long * start) {
-    int i;
-    char extension[MAX_EXT];
-    char spath[MAX_PATH_LEN];
-    bool found_extension = false;
-    bool found_loader = false;
-
-    FRESULT fr;     /* Return value */
-    DIR dj;         /* Directory object */
-    FILINFO fno;    /* File information */
-
-    /* Clear out the extension */
-    for (i = 0; i <= MAX_EXT; i++) {
-        extension[i] = 0;
-    }
-
-    found_extension = get_app_ext(path, extension);
-
-    if (found_extension || destination != 0) {
-        // extension provided, pass to loader
-        fsys_load_ext(path, extension, destination, start);
-    } else {
-        // extension not provided, search for a matching file.
-        strcpy(spath, path);
-        strcat(spath, ".*");
-
-        // TODO: Iterate through path, and replace "".
-        fr = f_findfirst(&dj, &fno, "", spath);       /* Start to search for executables */        
-        while (fr == FR_OK && fno.fname[0]) {         /* Repeat while an item is found */
-            get_app_ext(fno.fname, extension);
-            if (loader_exists(extension)) {
-                strcpy(spath, fno.fname);
-                found_loader = true;
-                break;
-            }
-            fr = f_findnext(&dj, &fno);               /* Search for next item */
-        }
-        f_closedir(&dj);
-
-        if(found_loader) {
-            // Found path with valid loader
-            fsys_load_ext(spath, extension, destination, start);
-        } else {
-            log(LOG_ERROR, "Command not found.");
-        }
-    }
-}
-
-
-
-/*
  * Register a file loading routine
  *
  * A file loader, takes a channel number to load from and returns a
@@ -1357,6 +1294,11 @@ short fsys_register_loader(const char * extension, p_file_loader loader) {
  */
 short fsys_init() {
     int i, j;
+
+	/* Set the default working directory.
+	 * TODO: set this based on the boot drive.
+	 */
+	strcpy(g_current_directory, "/sd");
 
     /* Mark all directories as available */
     for (i = 0; i < MAX_DIRECTORIES; i++) {
