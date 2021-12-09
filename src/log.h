@@ -72,7 +72,7 @@ extern void log2(short level, char * message1, char * message2);
  * message2 = the second part of the message to log
  * message3 = the third part of the message to log
  */
-extern void log3(short level, char * message1, char * message2, char * message3);
+extern void log3(short level, const char * message1, const char * message2, const char * message3);
 
 /*
  * Log a message with a number

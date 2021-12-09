@@ -19,7 +19,7 @@
  *
  * DISKREAD <drive #> <sector #>
  */
-short cmd_diskread(short screen, int argc, char * argv[]) {
+short cmd_diskread(short screen, int argc, const char * argv[]) {
     unsigned char buffer[512];
     short bdev_number = 0;
     long lba = 0;
@@ -34,7 +34,7 @@ short cmd_diskread(short screen, int argc, char * argv[]) {
     bdev_number = (short)cli_eval_number(argv[1]);
     lba = cli_eval_number(argv[2]);
 
-    sprintf(buffer, "Reading drive #%d, sector 0x%X\n", bdev_number, lba);
+    sprintf(buffer, "Reading drive #%d, sector %p\n", bdev_number, (void*)lba);
     print(screen, buffer);
 
     result = bdev_read(bdev_number, lba, buffer, 512);
@@ -53,7 +53,7 @@ short cmd_diskread(short screen, int argc, char * argv[]) {
  *
  * DISKFILL <drive #> <sector #> <value>
  */
-short cmd_diskfill(short screen, int argc, char * argv[]) {
+short cmd_diskfill(short screen, int argc, const char * argv[]) {
     unsigned char buffer[512];
     unsigned char value;
     short bdev_number = 0;
@@ -70,7 +70,7 @@ short cmd_diskfill(short screen, int argc, char * argv[]) {
     lba = cli_eval_number(argv[2]);
     value = (unsigned char)cli_eval_number(argv[3]);
 
-    sprintf(buffer, "Filling drive #%d, sector 0x%X with 0x%02X\n", bdev_number, lba, value);
+    sprintf(buffer, "Filling drive #%d, sector %p with 0x%02X\n", bdev_number, (void*)lba, (short)value);
     print(screen, buffer);
 
     for (i = 0; i < 512; i++) {
@@ -93,7 +93,7 @@ short cmd_diskfill(short screen, int argc, char * argv[]) {
  *
  * Command name is in argv[0].
  */
-short cmd_run(short screen, int argc, char * argv[]) {
+short cmd_run(short screen, int argc, const char * argv[]) {
     TRACE("cmd_run");
 
     short result = proc_run(argv[0], argc, argv);
@@ -108,7 +108,7 @@ short cmd_run(short screen, int argc, char * argv[]) {
 /*
  * Create a directory
  */
-short cmd_mkdir(short screen, int argc, char * argv[]) {
+short cmd_mkdir(short screen, int argc, const char * argv[]) {
 
     TRACE("cmd_mkdir");
 
@@ -127,7 +127,7 @@ short cmd_mkdir(short screen, int argc, char * argv[]) {
 /*
  * Delete a file
  */
-short cmd_del(short screen, int argc, char * argv[]) {
+short cmd_del(short screen, int argc, const char * argv[]) {
 
     TRACE("cmd_del");
 
@@ -143,7 +143,7 @@ short cmd_del(short screen, int argc, char * argv[]) {
     }
 }
 
-short cmd_copy(short screen, int argc, char * argv[]) {
+short cmd_copy(short screen, int argc, const char * argv[]) {
     FRESULT find_result;
     FRESULT result;
     DIR dir;         /* Directory object */
@@ -228,7 +228,7 @@ error:
 /*
  * Change the directory
  */
-short cmd_cd(short screen, int argc, char * argv[]) {
+short cmd_cd(short screen, int argc, const char * argv[]) {
 
     TRACE("cmd_cd");
 
@@ -253,7 +253,7 @@ short cmd_cd(short screen, int argc, char * argv[]) {
 /*
  * Change the directory
  */
-short cmd_pwd(short screen, int argc, char * argv[]) {
+short cmd_pwd(short screen, int argc, const char * argv[]) {
     char buffer[128];
 
     TRACE("cmd_pwd");
@@ -271,7 +271,7 @@ short cmd_pwd(short screen, int argc, char * argv[]) {
 /*
  * Rename a file or directory
  */
-short cmd_rename(short screen, int argc, char * argv[]) {
+short cmd_rename(short screen, int argc, const char * argv[]) {
 
     TRACE("cmd_rename");
 
@@ -286,7 +286,7 @@ short cmd_rename(short screen, int argc, char * argv[]) {
     return 0;
 }
 
-short cmd_dir(short screen, int argc, char * argv[]) {
+short cmd_dir(short screen, int argc, const char * argv[]) {
     short result;
     char buffer[80];
     t_file_info my_file;
@@ -294,7 +294,7 @@ short cmd_dir(short screen, int argc, char * argv[]) {
     char label[40];
 
     if (argc > 1) {
-        path = argv[1];
+        path = (char*)(argv[1]);
     }
 
     short dir = fsys_opendir(path);
@@ -342,11 +342,11 @@ short cmd_dir(short screen, int argc, char * argv[]) {
 /*
  * Print the contents of a file to the screen
  */
-short cmd_type(short screen, int argc, char * argv[]) {
+short cmd_type(short screen, int argc, const char * argv[]) {
     if (argc > 1) {
         unsigned char buffer[128];
 
-        log3(LOG_INFO, "Attempting to type [", argv[1], "]");
+        log3(LOG_INFO, "Attempting to type [", (char*)(argv[1]), "]");
         short fd = fsys_open(argv[1], FA_READ);
         if (fd >= 0) {
             log_num(LOG_INFO, "File open: ", fd);
@@ -379,7 +379,7 @@ short cmd_type(short screen, int argc, char * argv[]) {
  * Load a binary file into memory
  * parameters: path [address]
  */
-short cmd_load(short screen, int argc, char * argv[]) {
+short cmd_load(short screen, int argc, const char * argv[]) {
     if (argc > 1) {
         long start = 0;
         long destination = 0;
@@ -413,7 +413,7 @@ short cmd_load(short screen, int argc, char * argv[]) {
  * LABEL <drive #> <label>
  *
  */
-short cmd_label(short screen, int argc, char * argv[]) {
+short cmd_label(short screen, int argc, const char * argv[]) {
     if (argc > 2) {
         short drive = cli_eval_number(argv[1]);
         short result = fsys_setlabel(drive, argv[2]);
@@ -433,7 +433,7 @@ short cmd_label(short screen, int argc, char * argv[]) {
  *
  * FORMAT <drive #>
  */
-short cmd_format(short screen, int argc, char * argv[]) {
+short cmd_format(short screen, int argc, const char * argv[]) {
     if (argc > 1) {
         short drive = cli_eval_number(argv[1]);
         short result = fsys_mkfs(drive, "");

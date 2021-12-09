@@ -25,10 +25,12 @@ void print_c(short channel, char c) {
  * channel = the number of the channel
  * message = the ASCII-Z string to print
  */
-void print(short channel, char * message) {
-    int i;
-    for (i = 0; i < strlen(message); i++) {
-        print_c(channel, message[i]);
+void print(short channel, const char * message) {
+    char *p = (char*)message;
+    char c;
+
+    while ((c = *p++)) {
+        print_c(channel, c);
     }
     // sys_chan_write(channel, message, strlen(message));
 }
@@ -158,7 +160,7 @@ unsigned char i_to_bcd(unsigned short n) {
  * size = the number of bytes to print
  * labels = 0: none, 1: offset, 2: address
  */
-void dump_buffer(short channel, unsigned char * buffer, short size, short labels) {
+void dump_buffer(short channel, const unsigned char * buffer, short size, short labels) {
     short i, j, ascii_idx;
     char ascii_buffer[17];
     unsigned char c;
