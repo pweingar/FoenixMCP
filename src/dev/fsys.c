@@ -539,7 +539,7 @@ short fchan_read_b(t_channel * chan) {
 
     file = fchan_to_file(chan);
     if (file) {
-        result = f_read(file, (void*)buffer, 1, (UINT*)&total_read);
+        result = f_read(file, buffer, 1, (UINT*)&total_read);
         if (result == FR_OK) {
             return (short)(buffer[0] & 0x00ff);
         } else {
