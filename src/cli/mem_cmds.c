@@ -14,7 +14,7 @@
  *
  * DUMP <address> [<count>]
  */
-short mem_cmd_dump(short channel, int argc, char * argv[]) {
+short mem_cmd_dump(short channel, int argc, const char * argv[]) {
     unsigned char * address = 0;
     long count = 16;
     long i;
@@ -38,7 +38,7 @@ short mem_cmd_dump(short channel, int argc, char * argv[]) {
     }
 }
 
-short mem_cmd_dasm(short channel, int argc, char * argv[]) {
+short mem_cmd_dasm(short channel, int argc, const char * argv[]) {
     unsigned long address = 0;
     long count = 1000;
     long i;
@@ -73,7 +73,7 @@ short mem_cmd_dasm(short channel, int argc, char * argv[]) {
  *
  * POKE8 <address> <value>
  */
-short mem_cmd_poke8(short channel, int argc, char * argv[]) {
+short mem_cmd_poke8(short channel, int argc, const char * argv[]) {
     TRACE("mem_cmd_poke8");
 
     if (argc == 3) {
@@ -93,7 +93,7 @@ short mem_cmd_poke8(short channel, int argc, char * argv[]) {
  *
  * PEEK8 <address>
  */
-short mem_cmd_peek8(short channel, int argc, char * argv[]) {
+short mem_cmd_peek8(short channel, int argc, const char * argv[]) {
 
     TRACE("mem_cmd_peek8");
 
@@ -114,7 +114,7 @@ short mem_cmd_peek8(short channel, int argc, char * argv[]) {
  *
  * POKE16 <address> <value>
  */
-short mem_cmd_poke16(short channel, int argc, char * argv[]) {
+short mem_cmd_poke16(short channel, int argc, const char * argv[]) {
     TRACE("mem_cmd_poke16");
 
     if (argc == 3) {
@@ -134,11 +134,11 @@ short mem_cmd_poke16(short channel, int argc, char * argv[]) {
  *
  * PEEK16 <address>
  */
-short mem_cmd_peek16(short channel, int argc, char * argv[]) {
+short mem_cmd_peek16(short channel, int argc, const char * argv[]) {
     TRACE("mem_cmd_peek16");
 
     if (argc == 2) {
-        unsigned short * address = (unsigned char *)cli_eval_number(argv[1]);
+        unsigned short * address = (unsigned short *)cli_eval_number(argv[1]);
         unsigned short c = *address;
         print_hex_16(channel, c);
 
@@ -154,7 +154,7 @@ short mem_cmd_peek16(short channel, int argc, char * argv[]) {
  *
  * POKE32 <address> <value>
  */
-short mem_cmd_poke32(short channel, int argc, char * argv[]) {
+short mem_cmd_poke32(short channel, int argc, const char * argv[]) {
     TRACE("mem_cmd_poke32");
 
     if (argc == 3) {
@@ -174,11 +174,11 @@ short mem_cmd_poke32(short channel, int argc, char * argv[]) {
  *
  * PEEK32 <address>
  */
-short mem_cmd_peek32(short channel, int argc, char * argv[]) {
+short mem_cmd_peek32(short channel, int argc, const char * argv[]) {
     TRACE("mem_cmd_peek32");
 
     if (argc == 2) {
-        unsigned long * address = (unsigned char *)cli_eval_number(argv[1]);
+        unsigned long * address = (unsigned long *)cli_eval_number(argv[1]);
         unsigned long c = *address;
         print_hex_32(channel, c);
 

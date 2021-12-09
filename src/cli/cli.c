@@ -3,7 +3,9 @@
  */
 
 #include <ctype.h>
+#include <stdio.h>
 #include <string.h>
+
 #include "log.h"
 #include "types.h"
 #include "interrupt.h"
@@ -39,11 +41,11 @@ typedef struct s_cli_command {
     cli_cmd_handler handler;
 } t_cli_command, *p_cli_command;
 
-extern short cmd_sysinfo(short channel, int argc, char * argv[]);
-extern short cmd_cls(short channel, int argc, char * argv[]);
-extern short cmd_showint(short channel, int argc, char * argv[]);
-extern short cmd_getjiffies(short channel, int argc, char * argv[]);
-extern short cmd_get_ticks(short channel, int argc, char * argv[]);
+extern short cmd_sysinfo(short channel, int argc, const char * argv[]);
+extern short cmd_cls(short channel, int argc, const char * argv[]);
+extern short cmd_showint(short channel, int argc, const char * argv[]);
+extern short cmd_getjiffies(short channel, int argc, const char * argv[]);
+extern short cmd_get_ticks(short channel, int argc, const char * argv[]);
 
 /*
  * Variables
@@ -89,20 +91,20 @@ const t_cli_command g_cli_commands[] = {
 //
 // List all the commands
 //
-int cmd_help(short channel, int argc, char * argv[]) {
+short cmd_help(short channel, int argc, const char * argv[]) {
     p_cli_command command;
 
-    for (command = g_cli_commands; (command != 0) && (command->name != 0); command++) {
+    for (command = (p_cli_command)g_cli_commands; (command != 0) && (command->name != 0); command++) {
         sys_chan_write(channel, command->help, strlen(command->help));
         sys_chan_write(channel, "\n", 2);
     }
     return 0;
 }
 
-short cmd_getjiffies(short channel, int argc, char * argv[]) {
+short cmd_getjiffies(short channel, int argc, const char * argv[]) {
     char buffer[80];
 
-    sprintf(buffer, "%d\n", timers_jiffies());
+    sprintf(buffer, "%ld\n", timers_jiffies());
     sys_chan_write(channel, buffer, strlen(buffer));;
     return 0;
 }
@@ -110,10 +112,10 @@ short cmd_getjiffies(short channel, int argc, char * argv[]) {
 /*
  * Print the number of ticks since last restart
  */
-short cmd_get_ticks(short channel, int argc, char * argv[]) {
+short cmd_get_ticks(short channel, int argc, const char * argv[]) {
     char buffer[80];
 
-    sprintf(buffer, "%d\n", rtc_get_jiffies());
+    sprintf(buffer, "%ld\n", rtc_get_jiffies());
     sys_chan_write(channel, buffer, strlen(buffer));
     return 0;
 }
@@ -121,7 +123,7 @@ short cmd_get_ticks(short channel, int argc, char * argv[]) {
 /*
  * Clear the screen
  */
-short cmd_cls(short channel, int argc, char * argv[]) {
+short cmd_cls(short channel, int argc, const char * argv[]) {
     const char * ansi_cls = "\x1B[2J\x1B[H";
 
     sys_chan_write(channel, ansi_cls, strlen(ansi_cls));
@@ -131,7 +133,7 @@ short cmd_cls(short channel, int argc, char * argv[]) {
 /*
  * Display information about the system
  */
-short cmd_sysinfo(short channel, int argc, char * argv[]) {
+short cmd_sysinfo(short channel, int argc, const char * argv[]) {
     t_sys_info info;
     char buffer[80];
 
@@ -143,22 +145,22 @@ short cmd_sysinfo(short channel, int argc, char * argv[]) {
     sprintf(buffer, "\nCPU: %s", info.cpu_name);
     sys_chan_write(channel, buffer, strlen(buffer));
 
-    sprintf(buffer, "\nSystem Memory: 0x%X", info.system_ram_size);
+    sprintf(buffer, "\nSystem Memory: 0x%lX", info.system_ram_size);
     sys_chan_write(channel, buffer, strlen(buffer));
 
-    sprintf(buffer, "\nPCB version: %s", &info.pcb_version);
+    sprintf(buffer, "\nPCB version: %s", (char*)&info.pcb_version);
     sys_chan_write(channel, buffer, strlen(buffer));
 
-    sprintf(buffer, "\nFPGA Date: %08X", info.fpga_date);
+    sprintf(buffer, "\nFPGA Date: %08lX", info.fpga_date);
     sys_chan_write(channel, buffer, strlen(buffer));
 
-    sprintf(buffer, "\nFPGA Model: %08X", info.fpga_model);
+    sprintf(buffer, "\nFPGA Model: %08lX", info.fpga_model);
     sys_chan_write(channel, buffer, strlen(buffer));
 
     sprintf(buffer, "\nFPGA Version: %04X.%04X", info.fpga_version, info.fpga_subver);
     sys_chan_write(channel, buffer, strlen(buffer));
 
-    sprintf(buffer, "\nMCP version: v%02d.%02d.%04d\n", info.mcp_version, info.mcp_rev, info.mcp_build);
+    sprintf(buffer, "\nMCP version: v%02u.%02u.%04u\n", info.mcp_version, info.mcp_rev, info.mcp_build);
     sys_chan_write(channel, buffer, strlen(buffer));
 
     return 0;
@@ -167,7 +169,7 @@ short cmd_sysinfo(short channel, int argc, char * argv[]) {
 /*
  * Show information about the interrupt registers
  */
-short cmd_showint(short channel, int argc, char * argv[]) {
+short cmd_showint(short channel, int argc, const char * argv[]) {
     char buffer[80];
 
     TRACE("cmd_showint");
@@ -197,9 +199,9 @@ short cmd_showint(short channel, int argc, char * argv[]) {
 //  command = the upper case name of the command (first word of the command line)
 //  parameters = the string of parameters to be passed to the command
 //
-short cli_exec(short channel, char * command, int argc, char * argv[]) {
+short cli_exec(short channel, char * command, int argc, const char * argv[]) {
     const char * cmd_not_found = "Command not found.\n";
-    p_cli_command commands = g_cli_commands;
+    p_cli_command commands = (p_cli_command)g_cli_commands;
 
     log3(LOG_INFO, "cli_exec: '", argv[0], "'");
     log_num(LOG_INFO, "argc = ", argc);
@@ -249,7 +251,7 @@ char * strtok_r(char * source, const char * delimiter, char ** saveptr) {
     return x;
 }
 
-short cli_rerepl() {
+void cli_rerepl() {
     while (1) {
         cli_repl(g_current_channel);
     }
