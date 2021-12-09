@@ -34,7 +34,7 @@ short cmd_diskread(short screen, int argc, const char * argv[]) {
     bdev_number = (short)cli_eval_number(argv[1]);
     lba = cli_eval_number(argv[2]);
 
-    sprintf(buffer, "Reading drive #%d, sector 0x%p\n", bdev_number, (void*)lba);
+    sprintf(buffer, "Reading drive #%d, sector %p\n", bdev_number, (void*)lba);
     print(screen, buffer);
 
     result = bdev_read(bdev_number, lba, buffer, 512);
