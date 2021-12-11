@@ -247,7 +247,7 @@ short sys_chan_ioctrl(short channel, short command, uint8_t * buffer, short size
  * Returns:
  * the number of the channel opened, negative number on error
  */
-short sys_chan_open(short dev, uint8_t * path, short mode) {
+short sys_chan_open(short dev, const uint8_t * path, short mode) {
     return syscall(KFN_CHAN_OPEN, path, mode);
 }
 
@@ -272,7 +272,7 @@ short sys_chan_close(short chan) {
  * screen = the screen number 0 for channel A, 1 for channel B
  */
 void sys_text_setsizes(short chan) {
-    return syscall(KFN_TEXT_SETSIZES, chan);
+    syscall(KFN_TEXT_SETSIZES, chan);
 }
 
 /***
@@ -467,7 +467,7 @@ short sys_fsys_findnext(short dir, p_file_info file) {
  * path = path to the drive
  * label = buffer that will hold the label... should be at least 35 bytes
  */
-short sys_fsys_get_label(char * path, char * label) {
+short sys_fsys_get_label(const char * path, char * label) {
     return (short)syscall(KFN_GET_LABEL, path, label);
 }
 
@@ -600,7 +600,7 @@ short sys_fsys_register_loader(const char * extension, p_file_loader loader) {
  * Returns:
  * the number of jiffies since the last reset
  */
-extern long sys_time_jiffies() {
+long sys_time_jiffies() {
     return syscall(KFN_TIME_JIFFIES);
 }
 

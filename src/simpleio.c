@@ -2,9 +2,11 @@
  * A simple collection of I/O functions the kernel will need often
  */
 
+#include <ctype.h>
 #include <string.h>
 #include "syscalls.h"
 #include "simpleio.h"
+#include "dev/text_screen_iii.h"
 
 /*
  * Print a character to a channel
@@ -94,7 +96,7 @@ void print_hex_16(short channel, unsigned short x) {
  * channel = the number of the channel
  * n = the number to print
  */
-void print_hex_32(short channel, long n) {
+void print_hex_32(short channel, unsigned long n) {
     char number[9];
     short digit;
     short i;

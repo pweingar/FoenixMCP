@@ -58,6 +58,7 @@ extern void ansi_el(p_channel chan, short arg_count, short args[]);
 extern void ansi_ich(p_channel chan, short arg_count, short args[]);
 extern void ansi_dch(p_channel chan, short arg_count, short args[]);
 extern void ansi_sgr(p_channel chan, short arg_count, short args[]);
+static short con_flush(p_channel chan);
 
 /*
  * Console variables and constants
@@ -414,7 +415,7 @@ short con_init() {
  * Returns
  * 0 on success, negative number on failure
  */
-short con_open(p_channel chan, uint8_t * path, short mode) {
+short con_open(p_channel chan, const uint8_t * path, short mode) {
     int i;
     p_console_data con_data;
 
@@ -422,7 +423,7 @@ short con_open(p_channel chan, uint8_t * path, short mode) {
 
     /* Initialize the console data for this channel */
 
-    con_data = &(chan->data);
+    con_data = (p_console_data)&(chan->data);
     con_data->control = CON_CTRL_ANSI;
     con_data->ansi_buffer_count = 0;
     for (i = 0; i < ANSI_BUFFER_SIZE; i++) {
@@ -439,11 +440,11 @@ short con_open(p_channel chan, uint8_t * path, short mode) {
  * Really only does something if the console is set to process ANSI escape codes
  *
  */
-short con_flush(p_channel chan) {
+static short con_flush(p_channel chan) {
     int i;
     p_console_data con_data;
 
-    con_data = &(chan->data);
+    con_data = (p_console_data)&(chan->data);
     if (con_data->control & CON_CTRL_ANSI) {
         for (i = 0; i < con_data->ansi_buffer_count; i++) {
             text_put_raw(chan->dev, con_data->ansi_buffer[i]);
@@ -473,7 +474,7 @@ short con_write_b(p_channel chan, uint8_t b) {
     p_console_data con_data;
 
     /* Check to see if we need to process ANSI codes */
-    con_data = &(chan->data);
+    con_data = (p_console_data)&(chan->data);
     if (con_data->control & CON_CTRL_ANSI) {
         /* ANSI codes are to be processed */
         ansi_process_c(chan, con_data, (char)b);
@@ -492,7 +493,7 @@ short con_read_b(p_channel chan) {
     p_console_data con_data;
 
     /* Check to see if we need to process ANSI codes */
-    con_data = &(chan->data);
+    con_data = (p_console_data)&(chan->data);
 
     char c;
     do {
@@ -625,7 +626,7 @@ short con_has_input(p_channel chan) {
     char c;
 
     /* Check to see if we need to process ANSI codes */
-    con_data = &(chan->data);
+    con_data = (p_console_data)&(chan->data);
 
     if (con_data->key_buffer != 0) {
         /* If we already peeked and have a character... return true */
@@ -685,7 +686,7 @@ short con_ioctrl(p_channel chan, short command, uint8_t * buffer, short size) {
     p_console_data con_data;
 
     /* Check to see if we need to process ANSI codes */
-    con_data = &(chan->data);
+    con_data = (p_console_data)&(chan->data);
 
     switch (command) {
         case CON_IOCTRL_ANSI_ON:
