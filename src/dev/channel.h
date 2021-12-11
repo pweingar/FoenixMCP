@@ -65,12 +65,12 @@ typedef struct s_dev_chan {
     short number;           // The number of the device (assigned by registration)
     char * name;            // The name of the device
     FUNC_V_2_S init;        // short init() -- Initialize the device
-    FUNC_CBS_2_S open;      // short open(t_channel * chan, uint8_t * path, short mode) -- open a channel for the device
+    FUNC_CcBS_2_S open;     // short open(t_channel * chan, const uint8_t * path, short mode) -- open a channel for the device
     FUNC_V_2_S close;       // short close(t_channel * chan) -- called when a channel is closed
     FUNC_CBS_2_S read;      // short read(t_channel *, uint8_t * buffer, short size) -- Read a a buffer from the device
     FUNC_CBS_2_S readline;  // short readline(t_channel *, uint8_t * buffer, short size) -- Read a line of text from the device
     FUNC_C_2_S read_b;      // short read_b(t_channel *) -- read a single uint8_t from the device
-    FUNC_CcBS_2_S write;    // short write(t_channel *, uint8_t * buffer, short size) -- Write a buffer to the device
+    FUNC_CcBS_2_S write;    // short write(t_channel *, const uint8_t * buffer, short size) -- Write a buffer to the device
     FUNC_CB_2_S write_b;    // short write_b(t_channel *, const uint8_t b) -- Write a single uint8_t to the device
     FUNC_C_2_S status;      // short status(t_channel *) -- Get the status of the device
     FUNC_C_2_S flush;       // short flush(t_channel *) -- Ensure that any pending writes to teh device have been completed
@@ -140,7 +140,7 @@ extern short cdev_init(short dev);
  * Returns:
  * the number of the channel opened, negative number on error
  */
-extern short chan_open(short dev, uint8_t * path, short mode);
+extern short chan_open(short dev, const uint8_t * path, short mode);
 
 /*
  * Close a channel

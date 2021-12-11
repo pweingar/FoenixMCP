@@ -41,11 +41,11 @@ unsigned long syscall_dispatch(int32_t function, int32_t param0, int32_t param1,
 
                 case KFN_INT_ENABLE:
                     int_enable((unsigned short)param0);
-                    return;
+                    return 0;
 
                 case KFN_INT_DISABLE:
                     int_disable((unsigned short)param0);
-                    return;
+                    return 0;
 
                 case KFN_INT_ENABLE_ALL:
                     return int_enable_all();
@@ -55,14 +55,14 @@ unsigned long syscall_dispatch(int32_t function, int32_t param0, int32_t param1,
 
                 case KFN_INT_CLEAR:
                     int_clear((unsigned short)param0);
-                    return;
+                    return 0;
 
                 case KFN_INT_PENDING:
                     return int_pending((unsigned short)param0);
 
                 case KFN_SYS_GET_INFO:
                     sys_get_information((p_sys_info)param0);
-                    return;
+                    return 0;
 
                 default:
                     return ERR_GENERAL;
@@ -82,10 +82,10 @@ unsigned long syscall_dispatch(int32_t function, int32_t param0, int32_t param1,
                     return chan_read_b((short)param0);
 
                 case KFN_CHAN_READ:
-                    return chan_read((short)param0, (const uint8_t *)param1, (short)param2);
+                    return chan_read((short)param0, (uint8_t *)param1, (short)param2);
 
                 case KFN_CHAN_READ_LINE:
-                    return chan_readline((short)param0, (const uint8_t *)param1, (short)param2);
+                    return chan_readline((short)param0, (uint8_t *)param1, (short)param2);
 
                 case KFN_CHAN_STATUS:
                     return chan_status((short)param0);
@@ -100,7 +100,7 @@ unsigned long syscall_dispatch(int32_t function, int32_t param0, int32_t param1,
                     return chan_ioctrl((short)param0, (short)param1, (unsigned char *)param2, (short)param3);
 
                 case KFN_CHAN_OPEN:
-                    return chan_open((short)param0, (const char *)param1, (short)param2);
+                    return chan_open((short)param0, (const uint8_t *)param1, (short)param2);
 
                 case KFN_CHAN_CLOSE:
                     return chan_close((short)param0);
@@ -183,7 +183,7 @@ unsigned long syscall_dispatch(int32_t function, int32_t param0, int32_t param1,
                     return fsys_setlabel((short)param0, (char *)param1);
 
                 case KFN_GET_CWD:
-                    return fsys_get_cwd((char *)param0);
+                    return fsys_get_cwd((char *)param0, (short)param1);
 
                 case KFN_SET_CWD:
                     return fsys_set_cwd((char *)param0);
@@ -201,7 +201,7 @@ unsigned long syscall_dispatch(int32_t function, int32_t param0, int32_t param1,
             /* Process and Memory functions */
             switch (function) {
                 case KFN_RUN:
-                    return proc_run((char *)param0, (int)param1, (char *)param2);
+                    return proc_run((char *)param0, (int)param1, (char **)param2);
                     break;
 
                 default:
