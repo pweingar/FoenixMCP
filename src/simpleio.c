@@ -6,6 +6,7 @@
 #include <string.h>
 #include "syscalls.h"
 #include "simpleio.h"
+#include "dev/text_screen_iii.h"
 
 /*
  * Print a character to a channel
@@ -26,10 +27,12 @@ void print_c(short channel, char c) {
  * channel = the number of the channel
  * message = the ASCII-Z string to print
  */
-void print(short channel, char * message) {
-    int i;
-    for (i = 0; i < strlen(message); i++) {
-        print_c(channel, message[i]);
+void print(short channel, const char * message) {
+    char *p = (char*)message;
+    char c;
+
+    while ((c = *p++)) {
+        print_c(channel, c);
     }
     // sys_chan_write(channel, message, strlen(message));
 }
@@ -93,7 +96,7 @@ void print_hex_16(short channel, unsigned short x) {
  * channel = the number of the channel
  * n = the number to print
  */
-void print_hex_32(short channel, long n) {
+void print_hex_32(short channel, unsigned long n) {
     char number[9];
     short digit;
     short i;
@@ -159,7 +162,7 @@ unsigned char i_to_bcd(unsigned short n) {
  * size = the number of bytes to print
  * labels = 0: none, 1: offset, 2: address
  */
-void dump_buffer(short channel, unsigned char * buffer, short size, short labels) {
+void dump_buffer(short channel, const unsigned char * buffer, short size, short labels) {
     short i, j, ascii_idx;
     char ascii_buffer[17];
     unsigned char c;

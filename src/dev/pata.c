@@ -542,7 +542,7 @@ short pata_ioctrl(short command, unsigned char * buffer, short size) {
             break;
 
         case PATA_GET_DRIVE_INFO:
-            p_info = (p_drive_info *)buffer;
+            p_info = (p_drive_info)buffer;
             result = pata_identity(p_info);
             if (result != 0) {
                 return result;

@@ -3,12 +3,14 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include "errors.h"
 #include "log.h"
 #include "types.h"
 #include "ring_buffer.h"
 #include "interrupt.h"
+#include "simpleio.h"
 #include "vicky_general.h"
 #include "dev/ps2.h"
 #include "dev/rtc.h"
@@ -1101,14 +1103,14 @@ short kbd_layout(const char * tables) {
         }
 
         /* Reset the translation tables to their default values */
-        g_kbd_control.keys_unmodified = g_us_sc_unmodified;
-        g_kbd_control.keys_shift = g_us_sc_shift;
-        g_kbd_control.keys_control = g_us_sc_ctrl;
-        g_kbd_control.keys_control_shift = g_us_sc_ctrl_shift;
-        g_kbd_control.keys_caps = g_us_sc_lock;
-        g_kbd_control.keys_caps_shift = g_us_sc_lock_shift;
-        g_kbd_control.keys_r_alt = g_us_sc_alt;
-        g_kbd_control.keys_r_alt_shift = g_us_sc_alt_shift;
+        g_kbd_control.keys_unmodified = (char*)g_us_sc_unmodified;
+        g_kbd_control.keys_shift = (char*)g_us_sc_shift;
+        g_kbd_control.keys_control = (char*)g_us_sc_ctrl;
+        g_kbd_control.keys_control_shift = (char*)g_us_sc_ctrl_shift;
+        g_kbd_control.keys_caps = (char*)g_us_sc_lock;
+        g_kbd_control.keys_caps_shift = (char*)g_us_sc_lock_shift;
+        g_kbd_control.keys_r_alt = (char*)g_us_sc_alt;
+        g_kbd_control.keys_r_alt_shift = (char*)g_us_sc_alt_shift;
 
     } else {
         /* No: we're setting new tables */
@@ -1162,14 +1164,14 @@ short ps2_init() {
 
     // Set the default keyboard layout to US
 
-    g_kbd_control.keys_unmodified = g_us_sc_unmodified;
-    g_kbd_control.keys_shift = g_us_sc_shift;
-    g_kbd_control.keys_control = g_us_sc_ctrl;
-    g_kbd_control.keys_control_shift = g_us_sc_ctrl_shift;
-    g_kbd_control.keys_caps = g_us_sc_lock;
-    g_kbd_control.keys_caps_shift = g_us_sc_lock_shift;
-    g_kbd_control.keys_r_alt = g_us_sc_alt;
-    g_kbd_control.keys_r_alt_shift = g_us_sc_alt_shift;
+    g_kbd_control.keys_unmodified = (char*)g_us_sc_unmodified;
+    g_kbd_control.keys_shift = (char*)g_us_sc_shift;
+    g_kbd_control.keys_control = (char*)g_us_sc_ctrl;
+    g_kbd_control.keys_control_shift = (char*)g_us_sc_ctrl_shift;
+    g_kbd_control.keys_caps = (char*)g_us_sc_lock;
+    g_kbd_control.keys_caps_shift = (char*)g_us_sc_lock_shift;
+    g_kbd_control.keys_r_alt = (char*)g_us_sc_alt;
+    g_kbd_control.keys_r_alt_shift = (char*)g_us_sc_alt_shift;
     g_kbd_control.translation_table = 0;
 
     // Disable the PS/2 interrupts...

@@ -2,6 +2,7 @@
  * Startup file for the Foenix/MCP
  */
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "sys_general.h"
@@ -105,7 +106,7 @@ void load_splashscreen() {
     long target_ticks;
     int i;
     unsigned char * pixels;
-    unsigned char * vram = VRAM_Bank0;
+    volatile unsigned char * vram = VRAM_Bank0;
 
     /* Turn off the screen */
     *MasterControlReg_A = VKY3_MCR_BLANK_EN;

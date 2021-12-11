@@ -189,7 +189,7 @@ short cdev_init(short dev) {
  * Returns:
  * the number of the channel opened, negative number on error
  */
-short chan_open(short dev, uint8_t * path, short mode) {
+short chan_open(short dev, const uint8_t * path, short mode) {
     short result;
     p_channel chan;
     p_dev_chan cdev;

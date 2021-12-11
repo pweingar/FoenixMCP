@@ -12,7 +12,7 @@
  * channel = the number of the channel
  * message = the ASCII-Z string to print
  */
-extern void print(short channel, char * message);
+extern void print(short channel, const char * message);
 
 /*
  * Print a character to a channel
@@ -30,7 +30,7 @@ extern void print_c(short channel, char c);
  * channel = the number of the channel
  * n = the number to print
  */
-extern void print_hex_8(short channel, short n);
+extern void print_hex_8(short channel, unsigned short n);
 
 /*
  * Print an 16-bit number as hex to a channel
@@ -39,7 +39,7 @@ extern void print_hex_8(short channel, short n);
  * channel = the number of the channel
  * n = the number to print
  */
-extern void print_hex_16(short channel, short n);
+extern void print_hex_16(short channel, unsigned short n);
 
 /*
  * Print an 32-bit number as hex to a channel
@@ -48,7 +48,7 @@ extern void print_hex_16(short channel, short n);
  * channel = the number of the channel
  * n = the number to print
  */
-extern void print_hex_32(short channel, long n);
+extern void print_hex_32(short channel, unsigned long n);
 
 /*
  * Convert a BCD byte to an integer
@@ -81,6 +81,6 @@ extern unsigned char i_to_bcd(unsigned short n);
  * size = the number of bytes to print
  * labels = 0: none, 1: offset, 2: address
  */
-extern void dump_buffer(short channel, unsigned char * buffer, short size, short labels);
+extern void dump_buffer(short channel, const unsigned char * buffer, short size, short labels);
 
 #endif

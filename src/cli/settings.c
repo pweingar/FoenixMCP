@@ -6,8 +6,10 @@
 
 #include <ctype.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 
+#include "cli.h"
 #include "log.h"
 #include "errors.h"
 #include "settings.h"
@@ -73,7 +75,8 @@ short cli_set_register(const char * name, const char * help, cli_setter setter, 
     } else {
         /* Set the fields for the setting */
         cli_name_upper(setting->name, name);
-        strncpy(setting->help, help);
+        strncpy(setting->help, help, MAX_SETTING_HELP);
+        setting->help[MAX_SETTING_HELP] = '\0';
         setting->setter = setter;
         setting->getter = getter;
         setting->next = 0;
@@ -181,14 +184,12 @@ void cli_set_help(short channel) {
         sys_chan_write(channel, setting->help, strlen(setting->help));
         sys_chan_write(channel, "\n", 1);
     }
-
-    return 0;
 }
 
 /*
  * Command to set the value of a setting
  */
-short cli_cmd_set(short channel, int argc, char * argv[]) {
+short cli_cmd_set(short channel, int argc, const char * argv[]) {
     char message[80];
     short result;
 
@@ -201,7 +202,7 @@ short cli_cmd_set(short channel, int argc, char * argv[]) {
         }
         return result;
 
-    } else if ((argc == 2) && ((strcmp(argv[1], "HELP") == 0) || (strcmp(argv[1], "help") == 0) || (strcmp(argv[1], "?") == 0)) {
+    } else if ((argc == 2) && (strcmp(argv[1], "HELP") == 0 || strcmp(argv[1], "help") == 0 || strcmp(argv[1], "?") == 0)) {
         cli_set_help(channel);
 
     } else {
@@ -213,7 +214,7 @@ short cli_cmd_set(short channel, int argc, char * argv[]) {
 /*
  * Command to set the value of a setting
  */
-short cli_cmd_get(short channel, int argc, char * argv[]) {
+short cli_cmd_get(short channel, int argc, const char * argv[]) {
     char buffer[128];
     short result;
 
@@ -223,7 +224,7 @@ short cli_cmd_get(short channel, int argc, char * argv[]) {
             cli_set_help(channel);
 
         } else {
-            result = cli_get_value(channel, argv[1], buffer, 128);
+            result = cli_get_value(channel, (char*)argv[1], buffer, 128);
             if (result == 0) {
                 print(channel, buffer);
                 print(channel, "\n");
@@ -328,19 +329,19 @@ short cli_date_set(short channel, const char * date) {
         if ((i == 4) || (i == 7)) {
             if (date[i] != '-') {
                 sys_chan_write(channel, usage, strlen(usage));
-                return -1;
+                return ERR_GENERAL;
             }
         } else {
             if ((date[i] < '0') || (date[i] > '9')) {
                 sys_chan_write(channel, usage, strlen(usage));
-                return -1;
+                return ERR_GENERAL;
             }
         }
     }
 
-    date_time.year = atoi_n(&date[0], 4);
-    date_time.month = atoi_n(&date[5], 2);
-    date_time.day = atoi_n(&date[8], 2);
+    date_time.year = atoi_n(&((char*)date)[0], 4);
+    date_time.month = atoi_n(&((char*)date)[5], 2);
+    date_time.day = atoi_n(&((char*)date)[8], 2);
 
     rtc_set_time(&date_time);
 
@@ -350,7 +351,7 @@ short cli_date_set(short channel, const char * date) {
 /*
  * DATE getter
  */
-short cli_date_get(short channel, char * value) {
+short cli_date_get(short channel, char * value, short size) {
     t_time time;
 
     rtc_get_time(&time);
@@ -377,19 +378,19 @@ short cli_time_set(short channel, const char * time) {
         if ((i == 2) || (i == 5)) {
             if (time[i] != ':') {
                 sys_chan_write(channel, usage, strlen(usage));
-                return -1;
+                return ERR_GENERAL;
             }
         } else {
             if ((time[i] < '0') || (time[i] > '9')) {
                 sys_chan_write(channel, usage, strlen(usage));
-                return -1;
+                return ERR_GENERAL;
             }
         }
     }
 
-    date_time.hour = atoi_n(&time[0], 2);
-    date_time.minute = atoi_n(&time[3], 2);
-    date_time.second = atoi_n(&time[6], 2);
+    date_time.hour = atoi_n(&((char*)time)[0], 2);
+    date_time.minute = atoi_n(&((char*)time)[3], 2);
+    date_time.second = atoi_n(&((char*)time)[6], 2);
 
     rtc_set_time(&date_time);
 
@@ -399,7 +400,7 @@ short cli_time_set(short channel, const char * time) {
 /*
  * TIME getter
  */
-short cli_time_get(short channel, char * value) {
+short cli_time_get(short channel, char * value, short size) {
     t_time time;
 
     rtc_get_time(&time);
@@ -443,7 +444,7 @@ short cli_font_set(short screen, const char * value) {
 /*
  * Font setter -- GET FONT <path>
  */
-short cli_font_get(short channel, char * value) {
+short cli_font_get(short channel, char * value, short size) {
     /* We don't keep the font path */
     *value = 0;
     return 0;
@@ -452,7 +453,7 @@ short cli_font_get(short channel, char * value) {
 /*
  * Volume setter -- SET VOLUME <value>
  */
-short cli_volume_set(short channel, char * value) {
+short cli_volume_set(short channel, const char * value) {
     unsigned char volume = (unsigned char)cli_eval_number(value);
     codec_set_volume(volume);
     return 0;
@@ -461,8 +462,8 @@ short cli_volume_set(short channel, char * value) {
 /*
  * Volume getter -- GET VOLUME
  */
-short cli_volume_get(short channel, char * value) {
-    sprintf(value, "%d", codec_get_volume());
+short cli_volume_get(short channel, char * value, short size) {
+    sprintf(value, "%d", (short)codec_get_volume());
     return 0;
 }
 
@@ -494,7 +495,7 @@ short cli_layout_set(short channel, const char * value) {
 /*
  * Get the keyboard layout given a keyboard layout file -- GET LAYOUT
  */
-short cli_layout_get(short channel, char * value) {
+short cli_layout_get(short channel, char * value, short size) {
     return 0;
 }
 

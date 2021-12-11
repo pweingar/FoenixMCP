@@ -9,11 +9,12 @@
 #include "snd/psg.h"
 #include "snd/sid.h"
 #include "dev/midi.h"
+#include "syscalls.h"
 
 /*
  * Play a sound on the PSG
  */
-short psg_test(short channel, int argc, char * argv[]) {
+short psg_test(short channel, int argc, const char * argv[]) {
     int i;
     long target_time;
 
@@ -314,7 +315,7 @@ const unsigned char opl3_tone_off[] = {
 /*
  * Play a sound on the OPL3
  */
-short opl3_test(short channel, int argc, char * argv[]) {
+short opl3_test(short channel, int argc, const char * argv[]) {
     short i;
     unsigned char reg;
     unsigned char data;
@@ -351,7 +352,7 @@ short opl3_test(short channel, int argc, char * argv[]) {
 /*
  * Perform a transmit test on the MIDI ports
  */
-short midi_tx_test(short channel, int argc, char * argv[]) {
+short midi_tx_test(short channel, int argc, const char * argv[]) {
 #if MODEL == MODEL_FOENIX_A2560K
     const char note_on[] = { 0x90, 0x3c, 0xff };
     const char note_off[] = { 0x80, 0x3c, 0x00 };
@@ -377,7 +378,7 @@ short midi_tx_test(short channel, int argc, char * argv[]) {
 /*
  * Perform a receive test on the MIDI ports
  */
-short midi_rx_test(short channel, int argc, char * argv[]) {
+short midi_rx_test(short channel, int argc, const char * argv[]) {
 #if MODEL == MODEL_FOENIX_A2560K
     char message[80];
     unsigned short scancode = 0;
@@ -416,7 +417,7 @@ short midi_rx_test(short channel, int argc, char * argv[]) {
 /*
  * Perform a loopback test on the MIDI ports
  */
-short midi_loop_test(short channel, int argc, char * argv[]) {
+short midi_loop_test(short channel, int argc, const char * argv[]) {
 #if MODEL == MODEL_FOENIX_A2560K
     char message[80];
     unsigned short scancode = 0;

@@ -7,6 +7,7 @@
 #include "gabe_reg.h"
 #include "rtc.h"
 #include "rtc_reg.h"
+#include "simpleio.h"
 #include "timers.h"
 
 static long rtc_ticks;

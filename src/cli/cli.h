@@ -7,9 +7,9 @@
 
 /*
  * A function pointer for command implementations:
- *  int cmd_foo(short screen, char * parameters) { ... }
+ *  short cmd_foo(short screen, char * parameters) { ... }
  */
-typedef int (*cli_cmd_handler)(short screen, int argc, char * argv[]);
+typedef short (*cli_cmd_handler)(short screen, int argc, const char * argv[]);
 
 /**
  * About the CLI...
@@ -42,6 +42,6 @@ extern long cli_eval_number(const char * arg);
 /*
  * Print a help message
  */
-extern int cmd_help(short channel, int argc, char * argv[]);
+extern short cmd_help(short channel, int argc, const char * argv[]);
 
 #endif

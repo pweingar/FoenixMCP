@@ -124,23 +124,23 @@ static void sprintmode(unsigned int mode, unsigned int reg, unsigned int size, c
 	const char ir[2] = {'W','L'}; /* for mode 6 */
 
 	switch(mode) {
-		case 0  : sprintf(out_s, "D%i", reg);		break;
-		case 1  : sprintf(out_s, "A%i", reg);		break;
-		case 2  : sprintf(out_s, "(A%i)", reg);		break;
-		case 3  : sprintf(out_s, "(A%i)+", reg);	break;
-		case 4  : sprintf(out_s, "-(A%i)", reg);	break;
+		case 0  : sprintf(out_s, "D%u", reg);		break;
+		case 1  : sprintf(out_s, "A%u", reg);		break;
+		case 2  : sprintf(out_s, "(A%u)", reg);		break;
+		case 3  : sprintf(out_s, "(A%u)+", reg);	break;
+		case 4  : sprintf(out_s, "-(A%u)", reg);	break;
 		case 5  : /* reg + disp */
 		case 9  : { /* pcr + disp */
 			int32_t displacement = (int32_t) getword();
 			if (displacement >= 32768) displacement -= 65536;
 			if (mode == 5) {
-				sprintf(out_s, "%+i(A%i)", displacement, reg);
+				sprintf(out_s, "%+li(A%u)", displacement, reg);
 			} else {
 				const uint32_t ldata = address - 2 + displacement;
 				if (!rawmode) {
-					sprintf(out_s, "%+i(PC) {$%08u}", displacement, ldata);
+					sprintf(out_s, "%+li(PC) {$%08lu}", displacement, ldata);
 				} else {
-					sprintf(out_s, "%+i(PC)", displacement);
+					sprintf(out_s, "%+li(PC)", displacement);
 				}
 			}
 		} break;
@@ -157,15 +157,15 @@ static void sprintmode(unsigned int mode, unsigned int reg, unsigned int size, c
 
 			if (mode == 6) {
 				if (itype == 0) {
-					sprintf(out_s, "%+i(A%i,D%i.%c)", displacement, reg, ireg, ir[isize]);
+					sprintf(out_s, "%+d(A%u,D%d.%c)", displacement, reg, ireg, ir[isize]);
 				} else {
-					sprintf(out_s, "%+i(A%i,A%i.%c)", displacement, reg, ireg, ir[isize]);
+					sprintf(out_s, "%+d(A%u,A%d.%c)", displacement, reg, ireg, ir[isize]);
 				}
 			} else { /* PC */
 				if (itype == 0) {
-					sprintf(out_s, "%+i(PC,D%i.%c)", displacement, ireg, ir[isize]);
+					sprintf(out_s, "%+d(PC,D%d.%c)", displacement, ireg, ir[isize]);
 				} else {
-					sprintf(out_s, "%+i(PC,A%i.%c)", displacement, ireg, ir[isize]);
+					sprintf(out_s, "%+d(PC,A%d.%c)", displacement, ireg, ir[isize]);
 				}
 			}
 		} break;
@@ -191,7 +191,7 @@ static void sprintmode(unsigned int mode, unsigned int reg, unsigned int size, c
 			}
 		} break;
 		default : {
-			sprintf(line_buf, "Mode out of range in sprintmode = %i\n", mode);
+			sprintf(line_buf, "Mode out of range in sprintmode = %u\n", mode);
 			print(0,line_buf);
 			break;
 		}
@@ -224,7 +224,7 @@ void disasm(unsigned long int start, unsigned long int end) {
 	char operand_s[100];
 
 	while (address < end) {
-		sprintf(line_buf, "%08x : ", address);
+		sprintf(line_buf, "%p : ", (void*)address);
 		print(0, line_buf);
 
 		const uint32_t start_address = address;
@@ -505,11 +505,11 @@ void disasm(unsigned long int start, unsigned long int end) {
 						int offset = (word & 0x00FF);
 						if (offset != 0) {
 							if (offset >= 128) offset -= 256;							
-							sprintf(operand_s, "$%08x", address + offset);							
+							sprintf(operand_s, "$%p", (void*)(address + offset));							
 						} else {
 							offset = getword();
 							if (offset >= 32768l) offset -= 65536l;
-							sprintf(operand_s, "$%08x" , address - 2 + offset);
+							sprintf(operand_s, "$%p" , (void*)(address - 2 + offset));
 						}
 						decoded = true;
 					} break;
@@ -652,7 +652,7 @@ void disasm(unsigned long int start, unsigned long int end) {
 						int offset = getword();
 						if (offset >= 32768) offset -= 65536;
 						const int dreg = word & 0x0007;
-						sprintf(operand_s, "D%i,$%08x", dreg, address - 2 + offset);
+						sprintf(operand_s, "D%d,$%p", dreg, (void*)(address - 2 + offset));
 						decoded = true;
 					} break;
 					case 33 : { /* EXG */
@@ -1094,7 +1094,7 @@ void disasm(unsigned long int start, unsigned long int end) {
 		//for (int i = 0 ; i < (5 - fetched); ++i) print(0,"     ");
 		
 		if (decoded != 0) {
-			sprintf(line_buf, "%-8s %s\n", opcode_s, operand_s)
+			sprintf(line_buf, "%-8s %s\n", opcode_s, operand_s);
 			print(0,line_buf);
 		} else {
 			print(0,"???\n");

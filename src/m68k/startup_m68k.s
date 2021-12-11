@@ -13,13 +13,9 @@
 ;
 ; Interrupt registers for A2560U and U+
 ;
-; PENDING_GRP0 = $00B00100
-; PENDING_GRP1 = $00B00102
-; PENDING_GRP2 = $00B00104
-
-PENDING_GRP0 = $00C00100
-PENDING_GRP1 = $00C00102
-PENDING_GRP2 = $00C00104
+PENDING_GRP0 = $00B00100
+PENDING_GRP1 = $00B00102
+PENDING_GRP2 = $00B00104
 
             section "VECTORS",code
 
@@ -49,11 +45,11 @@ PENDING_GRP2 = $00C00104
             dc.l not_impl           ; 23 - Reserved
             dc.l _handle_spurious   ; 24 - Spurious Interrupt
             dc.l not_impl           ; 25 - Level 1 Interrupt Autovector
-            dc.l autovec2           ; 26 - Level 2 Interrupt Autovector
+            dc.l not_impl           ; 26 - Level 2 Interrupt Autovector
             dc.l not_impl           ; 27 - Level 3 Interrupt Autovector
             dc.l not_impl           ; 28 - Level 4 Interrupt Autovector
             dc.l not_impl           ; 29 - Level 5 Interrupt Autovector
-            dc.l not_impl           ; 30 - Level 6 Interrupt Autovector
+            dc.l autovec2           ; 30 - Level 6 Interrupt Autovector
             dc.l not_impl           ; 31 - Level 7 Interrupt Autovector
             dc.l not_impl           ; 32 - TRAP #0
             dc.l not_impl           ; 33 - TRAP #1
@@ -126,14 +122,20 @@ PENDING_GRP2 = $00C00104
 coldboot:   lea ___STACK,sp
             bsr _int_disable_all
 
-            lea	___BSSSTART,a0
+            ; Clear BSS segment
+            lea	   ___BSSSTART,a0
             move.l #___BSSSIZE,d0
-            beq	callmain
+            beq.s  callmain
 
-            clr.l d1
-clrloop:    move.l d1,(a0)+
+            move.l #0,d1
+
+clrloop:    ; We don't use clr.l because it's a read-modify-write operation
+            ; that is not yet supported by the FPGA's bus logic for now.
+            ; So we use a move instead.
+            ; clr.l  (a0)+
+            move.l d1,(a0)+
             subq.l #4,d0
-            bne	clrloop
+            bne.s  clrloop
 
             ; Set TRAP #15 vector handler
             lea h_trap_15,a0        ; Address of the handler

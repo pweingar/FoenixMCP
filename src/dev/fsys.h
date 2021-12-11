@@ -141,7 +141,7 @@ extern short fsys_getlabel(char * path, char * label);
  * drive = drive number
  * label = buffer that holds the label
  */
-extern short fsys_setlabel(short drive, char * label);
+extern short fsys_setlabel(short drive, const char * label);
 
 /*
  * Format a drive

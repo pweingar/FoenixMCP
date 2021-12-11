@@ -102,6 +102,7 @@ int text_init() {
 #endif
 
     for (i = 0; i < MAX_TEXT_CHANNELS; i++) {
+        #pragma dontwarn 113 // only 0 should be assigned to pointer
         text_channel[i].master_control = 0xffffffff;
         text_channel[i].text_cells = 0xffffffff;
         text_channel[i].color_cells = 0xffffffff;
@@ -110,6 +111,7 @@ int text_init() {
         text_channel[i].border_control = 0xffffffff;
         text_channel[i].text_cursor_ptr = 0xffffffff;
         text_channel[i].color_cursor_ptr = 0xffffffff;
+        #pragma popwarn
         text_channel[i].current_color = 0;
         text_channel[i].columns_max = 0;
         text_channel[i].rows_max = 0;
@@ -632,10 +634,10 @@ void text_scroll(short screen) {
         for (row = 0; row < chan->rows_visible - 1; row++) {
             short offset1 = row * chan->columns_max;
             short offset2 = (row + 1) * chan->columns_max;
-            volatile short * text_dest = &chan->text_cells[offset1];
-            volatile short * color_dest = &chan->color_cells[offset1];
-            volatile short * text_src = &chan->text_cells[offset2];
-            volatile short * color_src = &chan->color_cells[offset2];
+            volatile short * text_dest = (short*)&chan->text_cells[offset1];
+            volatile short * color_dest = (short*)&chan->color_cells[offset1];
+            volatile short * text_src = (short*)&chan->text_cells[offset2];
+            volatile short * color_src = (short*)&chan->color_cells[offset2];
 
             for (column = 0; column < chan->columns_max; column += 2) {
                 *text_dest++ = *text_src++;
@@ -644,8 +646,8 @@ void text_scroll(short screen) {
         }
 
         short offset3 = (chan->rows_visible - 1) * chan->columns_max;
-        volatile short * text_dest = &chan->text_cells[offset3];
-        volatile short * color_dest = &chan->color_cells[offset3];
+        volatile short * text_dest = (short*)&chan->text_cells[offset3];
+        volatile short * color_dest = (short*)&chan->color_cells[offset3];
         uint8_t color = chan->current_color;
         for (column = 0; column < chan->columns_max; column += 2) {
             *text_dest++ = ' ';

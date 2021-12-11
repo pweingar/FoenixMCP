@@ -33,7 +33,7 @@ extern void err_print(short channel, const char * message, short err_number);
  * Inputs:
  * vector = the number of the vector that was called
  */
-extern void panic(unsigned short exception_number);
+extern void panic(void);
 
 /*
  * Set the maximum level of verbosity in logging.
@@ -72,7 +72,7 @@ extern void log2(short level, char * message1, char * message2);
  * message2 = the second part of the message to log
  * message3 = the third part of the message to log
  */
-extern void log3(short level, char * message1, char * message2, char * message3);
+extern void log3(short level, const char * message1, const char * message2, const char * message3);
 
 /*
  * Log a message with a number
