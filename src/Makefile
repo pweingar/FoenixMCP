@@ -1,3 +1,14 @@
+# Makefile for FoenixMCP
+
+.PHONY: help
+help:
+	@echo Target          Description
+	@echo --------------  ---------------------------
+	@echo foenixmcp.bin   ROM image to flash using e.g. C256Mgr
+	@echo foenixmcp.s68   S-record that can be uploaded to memory for testing purposes
+	@echo all             Builds all of the above
+	@echo clean           Removes all compilation products and by-products
+
 
 # CPU_WDC65816                0x16  /* CPU code for the Western Design Center 65816 */
 # CPU_M68000                  0x20  /* CPU code for the Motorola 68000 */
@@ -17,24 +28,44 @@ export CPU=32
 # MODEL_FOENIX_A2560U         9
 # MODEL_FOENIX_A2560K         13
 export MODEL=9
+ifeq ($(MODEL),9)
+	export MACHINE_TYPE=MACHINE_TYPE_A2560U
+	export CPU=68000
+else ifeq ($(MODEL),13)
+	export MACHINE_TYPE=MACHINE_TYPE_A2560K
+	export CPU=68040
+else
+	# TODO
+endif
 
-export AS = vasmm68k_mot
-export ASFLAGS = -quiet -Fvobj -nowarn=62
-export CC = vc
-export DEFINES = -DCPU=$(CPU) -DMODEL=$(MODEL) # -DKBD_POLLED
-
+# OS tools
 ifeq ($(OS),Windows_NT)
-	export CFLAGS = +$(VBCC)/config/m68k-foenix -I. -I$(CURDIR)/include -I$(CURDIR)
-	# export CFLAGS = +$(VBCC)/config/a2560u_flash -I. -I$(CURDIR)/include -I$(CURDIR)
 	export RM = cmd /C del /Q /F
 else
-	#export CFLAGS = +$(VBCC)/config/m68k-foenix-linux -I. -I$(CURDIR)/include -I$(CURDIR)
-	export CFLAGS = +$(VBCC)/config/a2560u_flash-linux -I. -I$(CURDIR)/include -I$(CURDIR)
 	export RM = rm -f
 endif
 
+# VBCC suite commands
+# The VBCC environment variable is supposed to be set ! See VBCC documentation.
+export AS = vasmm68k_mot
+export ASFLAGS = -quiet -Fvobj -nowarn=62
+export CC = vc
+
+# Compilation flags, defines, optimization etc.
+DEFINES = -DCPU=$(CPU) -DMODEL=$(MODEL) -D$(MACHINE_TYPE) # -DKBD_POLLED
+CFLAG_OPTFLAGS=-O0
+CFLAGS_COMMON=-I. -I$(CURDIR)/include -I$(CURDIR) -cpu=$(CPU) $(CFLAG_OPTFLAGS)
+
+# Adapt configuration file to use according to OS
+# (configs flavors have backward or forward slashes in them)
+ifneq ($(OS),Windows_NT)
+	VBCC_CONFIG_SUFFIX=-linux
+endif
+export CFLAGS = +$(VBCC)/config/$(VBCC_CONFIG)$(VBCC_CONFIG_SUFFIX) $(CFLAGS_COMMON) $(DEFINES)
+
+# Prepare list of files making up FoenixMCP
 cpu = m68k
-cpu_assembly_src := $(wildcard $(cpu)/*.s)
+cpu_assembly_src :=
 cpu_c_src := $(wildcard $(cpu)/*.c)
 cpu_assembly_obj := $(subst .s,.o,$(cpu_assembly_src))
 cpu_c_obj := $(subst .c,.o,$(cpu_c_src))
@@ -48,36 +79,40 @@ cli_c_src := $(wildcard cli/*.c)
 cli_c_obj := $(subst .c,.o,$(cli_c_src))
 c_src :=  $(wildcard *.c)
 c_obj := $(subst .c,.o,$(c_src))
+OBJS=$(c_obj) $(cpu_assembly_obj) $(cpu_c_obj) $(dev_c_obj) $(fat_c_obj) $(snd_c_obj) $(cli_c_obj)
 
-.PHONY: all $(cpu) dev fatfs snd cli
 
-all: foenixmcp.s68 $(cpu) dev snd cli
+.PHONY: all clean $(cpu) dev fatfs snd cli
+all: foenixmcp.s68 foenixmcp.bin $(cpu) dev snd cli
 
-$(cpu):
-	$(MAKE) --directory=$@
+# Don't display "Entering/leaving directory x".
+MAKEFLAGS = --no-print-directory
 
-dev:
-	$(MAKE) --directory=dev
+# Build subdirectories
+SUBDIRS := $(cpu) dev fatfs snd cli
+.PHONY: $(SUBDIRS)
+$(SUBDIRS):
+	$(MAKE) -C $@
 
-fatfs:
-	$(MAKE) --directory=fatfs
+.PHONY: all_foenixmcp_objects
+all_foenixmcp_objects: $(c_obj) $(cpu) dev fatfs snd cli
 
-snd:
-	$(MAKE) --directory=snd
+foenixmcp.bin: VBCC_CONFIG=a2560u_flash
+foenixmcp.bin: export CFLAGS=+$(VBCC)/config/$(VBCC_CONFIG)$(VBCC_CONFIG_SUFFIX) $(CFLAGS_COMMON) $(DEFINES)
+foenixmcp.bin: all_foenixmcp_objects
+	$(CC) $(CFLAGS) -o $@ $(OBJS)
 
-cli:
-	$(MAKE) --directory=cli
+foenixmcp.s68: VBCC_CONFIG=m68k-foenix
+foenixmcp.s68: export CFLAGS=+$(VBCC)/config/$(VBCC_CONFIG)$(VBCC_CONFIG_SUFFIX) $(CFLAGS_COMMON) $(DEFINES)
+foenixmcp.s68: all_foenixmcp_objects
+	$(CC) $(CFLAGS) -o $@ $(OBJS)
 
-foenixmcp.s68: $(c_obj) $(cpu) dev fatfs snd cli
-	$(CC) $(CFLAGS) $(DEFINES) -o foenixmcp.s68 $(c_obj) $(cpu_c_obj) $(dev_c_obj) $(fat_c_obj) $(snd_c_obj) $(cli_c_obj)
-
+# VBCC reciepe for C files
 %.o: %.c $(DEPS)
-	$(CC) -S -c -o $@ $< $(CFLAGS) $(DEFINES)
-
-.PHONEY: clean
+	$(CC) -S -c -o $@ $< $(CFLAGS)
 
 clean:
-	$(RM) *.s68 *.o *.asm
+	$(RM) foenixmcp.s68 foenixmcp.bin *.o *.asm
 	$(MAKE) --directory=$(cpu) clean
 	$(MAKE) --directory=dev clean
 	$(MAKE) --directory=fatfs clean
