@@ -714,7 +714,7 @@ void kbd_handle_irq() {
             default:
                 // TODO: kernel panic?
                 ;
-        }
+            }
         }
     }
 }

@@ -62,6 +62,27 @@ typedef struct s_cli_test_feature {
  */
 
 /*
+ * Test the PS/2 keyboard
+ */
+int cli_test_ps2(short channel, int argc, char * argv[]) {
+    char message[80];
+    unsigned short scancode = 0;
+
+    sprintf(message, "Press keys on a PS/2 keyboard... ESC to quit.\n");
+    sys_chan_write(channel, message, strlen(message));
+
+    while (scancode != 0x01) {
+        scancode = kbd_get_scancode();
+        if (scancode != 0) {
+            sprintf(message, "Scan code: %04x\n", scancode);
+            sys_chan_write(channel, message, strlen(message));
+        }
+    }
+
+    return 0;
+}
+
+/*
  * Test the joystick ports
  */
 int cli_test_joystick(short channel, int argc, char * argv[]) {
@@ -552,6 +573,7 @@ const t_cli_test_feature cli_test_features[] = {
     {"OPN", "OPN [EXT|INT]: test the OPN sound chip", opm_test},
     {"OPM", "OPM [EXT|INT]: test the OPM sound chip", opm_test},
     {"PANIC", "PANIC: test the kernel panic mechanism", cli_test_panic},
+    {"PS2", "PS2: test the PS/2 keyboard", cli_test_ps2},
     {"PSG", "PSG: test the PSG sound chip", psg_test},
     {"PRINT", "PRINT: sent text to the printer", cmd_test_print},
 #if MODEL == MODEL_FOENIX_A2560K

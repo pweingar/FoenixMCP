@@ -109,7 +109,11 @@ void load_splashscreen() {
     volatile unsigned char * vram = VRAM_Bank0;
 
     /* Turn off the screen */
+#if MODEL == MODEL_FOENIX_A2560K
+    *MasterControlReg_B = VKY3_MCR_BLANK_EN;
+#else
     *MasterControlReg_A = VKY3_MCR_BLANK_EN;
+#endif
 
     for (i = 0; i < 256; i++) {
         LUT_0[4*i] = splashscreen_lut[4*i];
@@ -132,13 +136,25 @@ void load_splashscreen() {
     *BM0_Control_Reg = 1;
 
     /* Turn off the border */
+#if MODEL == MODEL_FOENIX_A2560K
+    *BorderControlReg_L_B = 0;
+#else
     *BorderControlReg_L_A = 0;
+#endif
 
     /* Set a background color for the bitmap mode */
-    *BackGroundControlReg_A = 0x00800000;
+#if MODEL == MODEL_FOENIX_A2560K
+    *BackGroundControlReg_B = 0x00202020;
+#else
+    *BackGroundControlReg_A = 0x00202020;
+#endif
 
     /* Display the splashscreen: 640x480 */
+#if MODEL == MODEL_FOENIX_A2560K
+    *MasterControlReg_B = VKY3_MCR_GRAPH_EN | VKY3_MCR_BITMAP_EN;
+#else
     *MasterControlReg_A = VKY3_MCR_GRAPH_EN | VKY3_MCR_BITMAP_EN;
+#endif
 }
 
 void print_error(short channel, char * message, short code) {
@@ -212,7 +228,7 @@ void initialize() {
     log(LOG_TRACE, "Interrupts enabled");
 
     // /* Display the splash screen */
-    // load_splashscreen();
+    load_splashscreen();
 
     /* Play the SID test bong on the Gideon SID implementation */
     sid_test_internal();
@@ -242,7 +258,7 @@ void initialize() {
     if (res = ps2_init()) {
         print_error(0, "FAILED: PS/2 keyboard initialization", res);
     } else {
-        DEBUG("PS/2 keyboard initialized.");
+        log(LOG_INFO, "PS/2 keyboard initialized.");
     }
 
 #if MODEL == MODEL_FOENIX_A2560K
