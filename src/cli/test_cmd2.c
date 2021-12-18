@@ -271,20 +271,37 @@ short cli_test_rtc(short channel, int argc, const char * argv[]) {
 
 /*
  * Test the memory
+ * MEM [SYS|MERA]
  */
 short cli_mem_test(short channel, int argc, const char * argv[]) {
     volatile unsigned char * memory = 0x00000000;
     t_sys_info sys_info;
-    const long mem_start = 0x00050000; /* TODO find out better where the kernel stop */
-    long mem_end;
+    unsigned long mem_start = 0x00050000; /* TODO find out better where the kernel stop */
+    unsigned long mem_end;
     char message[80];
-    long i;
+    unsigned long i;
 
-    sys_get_info(&sys_info);
-    mem_end = sys_info.system_ram_size;
+    if (argc > 1) {
+#if MODEL == MODEL_FOENIX_A2560K
+        if ((strcmp(argv[1], "MERA") == 0) || (strcmp(argv[1], "mera") == 0)) {
+            mem_start = 0x02000000;
+            mem_end = 0x06000000;
 
-    sprintf(message, "\x1B[H\x1B[2JTesting memory...");
-    sys_chan_write(channel, message, strlen(message));
+            sprintf(message, "\x1B[H\x1B[2JTesting MERA memory...");
+            sys_chan_write(channel, message, strlen(message));
+        }
+#else
+            sprintf(message, "MERA memory is not present on this system.\n");
+            sys_chan_write(channel, message, strlen(message));
+            return 0;
+#endif
+    } else {
+        sys_get_info(&sys_info);
+        mem_end = sys_info.system_ram_size;
+
+        sprintf(message, "\x1B[H\x1B[2JTesting system memory...");
+        sys_chan_write(channel, message, strlen(message));
+    }
 
     for (i = mem_start; i < mem_end; i++) {
         memory[i] = 0x55; /* Every other bit starting with 1 */
@@ -565,7 +582,7 @@ const t_cli_test_feature cli_test_features[] = {
     {"JOY", "JOY: test the joystick", cli_test_joystick},
 #endif
     {"LPT", "LPT: test the parallel port", cli_test_lpt},
-    {"MEM", "MEM: test reading and writing memory", cli_mem_test},
+    {"MEM", "MEM [SYS|MERA]: test reading and writing of system or MERA memory", cli_mem_test},
     {"MIDILOOP", "MIDILOOP: perform a loopback test on the MIDI ports", midi_loop_test},
     {"MIDIRX", "MIDIRX: perform a receive test on the MIDI ports", midi_rx_test},
     {"MIDITX", "MIDITX: send a note to a MIDI keyboard", midi_tx_test},

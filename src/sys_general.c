@@ -21,7 +21,8 @@ void sys_get_information(p_sys_info info) {
 #if MODEL == MODEL_FOENIX_A2560K
     info->model = MODEL_FOENIX_A2560K;
     info->model_name = "Foenix A2560K";
-    info->cpu_name = "m68000";
+    info->cpu = CPU_M68040;
+    info->cpu_name = "M68040V";
     info->has_floppy = 1;
 #else
 

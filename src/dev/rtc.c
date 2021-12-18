@@ -44,17 +44,17 @@ void rtc_init() {
      * the SOF A interrupt as a surrogate for the RTC jiffie timer
      */
 
-    /* Set the periodic interrupt to 15 millisecs */
-    *RTC_RATES = RTC_RATE_15ms;
-
-    int_register(INT_RTC, rtc_handle_int);
-
-    /* Enable the periodic interrupt */
-    flags = *RTC_FLAGS;
-    *RTC_ENABLES = RTC_PIE;
-    rtc_ticks = 0;
-
-    int_enable(INT_RTC);
+    // /* Set the periodic interrupt to 15 millisecs */
+    // *RTC_RATES = RTC_RATE_15ms;
+    //
+    // int_register(INT_RTC, rtc_handle_int);
+    //
+    // /* Enable the periodic interrupt */
+    // flags = *RTC_FLAGS;
+    // *RTC_ENABLES = RTC_PIE;
+    // rtc_ticks = 0;
+    //
+    // int_enable(INT_RTC);
 }
 
 /*
