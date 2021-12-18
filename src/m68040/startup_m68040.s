@@ -90,36 +90,36 @@ PENDING_GRP2 = $FEC00104
             dc.l interrupt_x10      ; 64 - Interrupt 0x10 - SuperIO - PS/2 Keyboard
             dc.l interrupt_x11      ; 65 - Interrupt 0x11 - A2560K Built-in Keyboard (Mo)
             dc.l interrupt_x12      ; 66 - Interrupt 0x12 - SuperIO - PS/2 Mouse
-            dc.l not_impl           ; 67 - Interrupt 0x13 - SuperIO - COM1
-            dc.l not_impl           ; 68 - Interrupt 0x14 - SuperIO - COM2
-            dc.l not_impl           ; 69 - Interrupt 0x15 - SuperIO - LPT1
-            dc.l not_impl           ; 70 - Interrupt 0x16 - SuperIO - Floppy Disk Controller
-            dc.l not_impl           ; 71 - Interrupt 0x17 - SuperIO - MIDI
-            dc.l not_impl           ; 72 - Interrupt 0x18 - Timer 0
-            dc.l not_impl           ; 73 - Interrupt 0x19 - Timer 1
-            dc.l not_impl           ; 74 - Interrupt 0x1A - Timer 2
-            dc.l not_impl           ; 76 - Interrupt 0x1B - Timer 3
-            dc.l not_impl           ; 75 - Interrupt 0x1C - Timer 4
-            dc.l not_impl           ; 77 - Interrupt 0x1D - Reserved
-            dc.l not_impl           ; 78 - Interrupt 0x1E - Reserved
+            dc.l interrupt_x13      ; 67 - Interrupt 0x13 - SuperIO - COM1
+            dc.l interrupt_x14      ; 68 - Interrupt 0x14 - SuperIO - COM2
+            dc.l interrupt_x15      ; 69 - Interrupt 0x15 - SuperIO - LPT1
+            dc.l interrupt_x16      ; 70 - Interrupt 0x16 - SuperIO - Floppy Disk Controller
+            dc.l interrupt_x17      ; 71 - Interrupt 0x17 - SuperIO - MIDI
+            dc.l interrupt_x18      ; 72 - Interrupt 0x18 - Timer 0
+            dc.l interrupt_x19      ; 73 - Interrupt 0x19 - Timer 1
+            dc.l interrupt_x1A      ; 74 - Interrupt 0x1A - Timer 2
+            dc.l interrupt_x1B      ; 76 - Interrupt 0x1B - Timer 3
+            dc.l interrupt_x1C      ; 75 - Interrupt 0x1C - Timer 4
+            dc.l interrupt_x1D      ; 77 - Interrupt 0x1D - Reserved
+            dc.l interrupt_x1E      ; 78 - Interrupt 0x1E - Reserved
             dc.l interrupt_x1F      ; 79 - Interrupt 0x1F - Real Time Clock
 
-            dc.l not_impl           ; 80 - Interrupt 0x20 - IDE HDD Generated Interrupt
+            dc.l interrupt_x20      ; 80 - Interrupt 0x20 - IDE HDD Generated Interrupt
             dc.l interrupt_x21      ; 81 - Interrupt 0x21 - SDCard Insert
-            dc.l not_impl           ; 82 - Interrupt 0x22 - SDCard Controller
-            dc.l not_impl           ; 83 - Interrupt 0x23 - Internal OPM
-            dc.l not_impl           ; 84 - Interrupt 0x24 - External OPN2
-            dc.l not_impl           ; 85 - Interrupt 0x25 - External OPL3
-            dc.l not_impl           ; 86 - Interrupt 0x26 - Reserved
-            dc.l not_impl           ; 87 - Interrupt 0x27 - Reserved
-            dc.l not_impl           ; 88 - Interrupt 0x28 - Beatrix Interrupt 0
-            dc.l not_impl           ; 89 - Interrupt 0x29 - Beatrix Interrupt 1
-            dc.l not_impl           ; 90 - Interrupt 0x2A - Beatrix Interrupt 2
-            dc.l not_impl           ; 91 - Interrupt 0x2B - Beatrix Interrupt 3
-            dc.l not_impl           ; 92 - Interrupt 0x2C - Reserved
-            dc.l not_impl           ; 93 - Interrupt 0x2D - DAC1 Playback Done Interrupt (48K)
-            dc.l not_impl           ; 94 - Interrupt 0x2E - Reserved
-            dc.l not_impl           ; 95 - Interrupt 0x2F - DAC0 Playback Done Interrupt (44.1K)
+            dc.l interrupt_x22      ; 82 - Interrupt 0x22 - SDCard Controller
+            dc.l interrupt_x23      ; 83 - Interrupt 0x23 - Internal OPM
+            dc.l interrupt_x24      ; 84 - Interrupt 0x24 - External OPN2
+            dc.l interrupt_x25      ; 85 - Interrupt 0x25 - External OPL3
+            dc.l interrupt_x26      ; 86 - Interrupt 0x26 - Reserved
+            dc.l interrupt_x27      ; 87 - Interrupt 0x27 - Reserved
+            dc.l interrupt_x28      ; 88 - Interrupt 0x28 - Beatrix Interrupt 0
+            dc.l interrupt_x29      ; 89 - Interrupt 0x29 - Beatrix Interrupt 1
+            dc.l interrupt_x2A      ; 90 - Interrupt 0x2A - Beatrix Interrupt 2
+            dc.l interrupt_x2B      ; 91 - Interrupt 0x2B - Beatrix Interrupt 3
+            dc.l interrupt_x2C      ; 92 - Interrupt 0x2C - Reserved
+            dc.l interrupt_x2D      ; 93 - Interrupt 0x2D - DAC1 Playback Done Interrupt (48K)
+            dc.l interrupt_x2E      ; 94 - Interrupt 0x2E - Reserved
+            dc.l interrupt_x2F      ; 95 - Interrupt 0x2F - DAC0 Playback Done Interrupt (44.1K)
 
             code
 
@@ -180,49 +180,65 @@ int_dispatch:
 intdis_end: movem.l (a7)+,d0-d7/a0-a6       ; Restore affected registers
             rte
 
-;
-; Interrupt Vector 0x10 -- SuperIO Keyboard
-;
-interrupt_x10:
-            move.w #$0001,(PENDING_GRP1)    ; Clear the flag for INT 10
-            movem.l d0-d7/a0-a6,-(a7)       ; Save affected registers'
-            move.w #($10<<2),d0             ; Get the offset to interrupt 0x11
+            ;
+            ; Macro to implement an interrupt handler for the user interrupt vectors
+            ;
+            ; Standard handlers will:
+            ; 1. Save all registers
+            ; 2. Clear the pending flag for this interrupt
+            ; 3. Look for a handler registered through the system calls
+            ; 4. Call the handler (if found)
+            ; 5. Restore all registers
+            ; 6. Return to the interrupted code
+            ;
+            macro inthandler                ; Individual interrupt handler. Parameters: interrupt number, interrupt mask, pending register
+            movem.l d0-d7/a0-a6,-(a7)       ; Save affected registers
+            move.w #\2,(\3)                 ; Clear the flag for the interrupt
+            move.w #(\1<<2),d0              ; Get the offset to interrupt 0x11
             bra int_dispatch
+            endm
 
 ;
-; Interrupt Vector 0x11 -- A2560K "Mo" keyboard
+; Group 1 Interrupt Handlers
 ;
-interrupt_x11:
-            move.w #$0002,(PENDING_GRP1)    ; Clear the flag for INT 11
-            movem.l d0-d7/a0-a6,-(a7)       ; Save affected registers
-            move.w #($11<<2),d0             ; Get the offset to interrupt 0x11
-            bra int_dispatch                ; And process the interrupt
+
+interrupt_x10:  inthandler $10, $0001, PENDING_GRP1     ; Interrupt Vector 0x10 -- SuperIO Keyboard
+interrupt_x11:  inthandler $11, $0002, PENDING_GRP1     ; Interrupt Vector 0x11 -- A2560K "Mo" keyboard
+interrupt_x12:  inthandler $12, $0004, PENDING_GRP1     ; Interrupt Vector 0x12 -- SuperIO Mouse
+interrupt_x13:  inthandler $13, $0008, PENDING_GRP1     ; Interrupt Vector 0x13 -- COM1
+interrupt_x14:  inthandler $14, $0010, PENDING_GRP1     ; Interrupt Vector 0x14 -- COM2
+interrupt_x15:  inthandler $15, $0020, PENDING_GRP1     ; Interrupt Vector 0x15 -- LPT1
+interrupt_x16:  inthandler $16, $0040, PENDING_GRP1     ; Interrupt Vector 0x16 -- Floppy drive controller
+interrupt_x17:  inthandler $17, $0080, PENDING_GRP1     ; Interrupt Vector 0x17 -- MIDI
+interrupt_x18:  inthandler $18, $0100, PENDING_GRP1     ; Interrupt Vector 0x18 -- Timer 0
+interrupt_x19:  inthandler $19, $0200, PENDING_GRP1     ; Interrupt Vector 0x19 -- Timer 1
+interrupt_x1A:  inthandler $1A, $0400, PENDING_GRP1     ; Interrupt Vector 0x1A -- Timer 2
+interrupt_x1B:  inthandler $1B, $0800, PENDING_GRP1     ; Interrupt Vector 0x1B -- Timer 3
+interrupt_x1C:  inthandler $1C, $1000, PENDING_GRP1     ; Interrupt Vector 0x1C -- Timer 4
+interrupt_x1D:  inthandler $1D, $2000, PENDING_GRP1     ; Interrupt Vector 0x1D -- Reserved
+interrupt_x1E:  inthandler $1E, $4000, PENDING_GRP1     ; Interrupt Vector 0x1E -- Reserved
+interrupt_x1F:  inthandler $1F, $8000, PENDING_GRP1     ; Interrupt Vector 0x1F -- Real Time Clock
 
 ;
-; Interrupt Vector 0x12 -- SuperIO Mouse
+; Group 2 Interrupt Handlers
 ;
-interrupt_x12:
-            move.w #$0004,(PENDING_GRP1)    ; Clear the flag for INT 12
-            movem.l d0-d7/a0-a6,-(a7)       ; Save affected registers
-            move.w #($12<<2),d0             ; Get the offset to interrupt 0x11
-            bra int_dispatch                ; And process the interrupt
 
-;
-; Interrupt Vector 0x1F -- RTC
-;
-interrupt_x1F:
-            move.w #$8000,(PENDING_GRP1)    ; Clear the flag for INT 1F
-            movem.l d0-d7/a0-a6,-(a7)       ; Save affected registers
-            move.w #($1f<<2),d0             ; Get the offset to interrupt 0x1f
-            bra int_dispatch                ; And process the interrupt
-;
-; Interrupt Vector 0x21 -- SDCard Insert
-;
-interrupt_x21:
-            move.w #$0002,(PENDING_GRP2)    ; Clear the flag for INT 21
-            movem.l d0-d7/a0-a6,-(a7)       ; Save affected registers
-            move.w #($21<<2),d0             ; Get the offset to interrupt 0x21
-            bra int_dispatch                ; And process the interrupt
+interrupt_x20:  inthandler $20, $0001, PENDING_GRP2     ; Interrupt Vector 0x20 -- IDE HDD Generated Interrupt
+interrupt_x21:  inthandler $21, $0002, PENDING_GRP2     ; Interrupt Vector 0x21 -- SDCard Insert
+interrupt_x22:  inthandler $22, $0004, PENDING_GRP2     ; Interrupt Vector 0x22 -- SDCard Controller
+interrupt_x23:  inthandler $23, $0008, PENDING_GRP2     ; Interrupt Vector 0x23 -- Internal OPM
+interrupt_x24:  inthandler $24, $0010, PENDING_GRP2     ; Interrupt Vector 0x24 -- External OPN2
+interrupt_x25:  inthandler $25, $0020, PENDING_GRP2     ; Interrupt Vector 0x25 -- External OPL3
+interrupt_x26:  inthandler $26, $0040, PENDING_GRP2     ; Interrupt Vector 0x26 -- Reserved
+interrupt_x27:  inthandler $27, $0080, PENDING_GRP2     ; Interrupt Vector 0x27 -- Reserved
+interrupt_x28:  inthandler $28, $0100, PENDING_GRP2     ; Interrupt Vector 0x28 -- Beatrix Interrupt 0
+interrupt_x29:  inthandler $29, $0200, PENDING_GRP2     ; Interrupt Vector 0x29 -- Beatrix Interrupt 1
+interrupt_x2A:  inthandler $2A, $0400, PENDING_GRP2     ; Interrupt Vector 0x2A -- Beatrix Interrupt 2
+interrupt_x2B:  inthandler $2B, $0800, PENDING_GRP2     ; Interrupt Vector 0x2B -- Beatrix Interrupt 3
+interrupt_x2C:  inthandler $2C, $1000, PENDING_GRP2     ; Interrupt Vector 0x2C -- Reserved
+interrupt_x2D:  inthandler $2D, $2000, PENDING_GRP2     ; Interrupt Vector 0x2D -- DAC1 Playback Done Interrupt (48K)
+interrupt_x2E:  inthandler $2E, $4000, PENDING_GRP2     ; Interrupt Vector 0x2E -- Reserved
+interrupt_x2F:  inthandler $2F, $8000, PENDING_GRP2     ; Interrupt Vector 0x2F -- DAC0 Playback Done Interrupt (44.1K)
 
 ;
 ; Unimplemented Exception Handler -- just return
