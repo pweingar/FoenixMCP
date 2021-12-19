@@ -154,14 +154,6 @@ void sid_test_external() {
 	unsigned int j;
     long jiffies;
 
-#if MODEL == MODEL_FOENIX_A2560K
-
-    // Clear all Channels
-    //	for (i = 0; i<24 ; i++) {
-    //		SID_INT_L_V1_FREQ_LO[i] = 0x00;
-    //		SID_INT_R_V1_FREQ_LO[i] = 0x00;
-    //	}
-
     // Attack = 2, Decay = 9
     *SID_EXT_L_V1_ATCK_DECY = 0x29;
     *SID_EXT_L_V2_ATCK_DECY = 0x29;
@@ -242,5 +234,4 @@ void sid_test_external() {
     *SID_EXT_L_MODE_VOL = 0;
     *SID_EXT_R_MODE_VOL = 0;
 
-#endif
 }

@@ -587,11 +587,11 @@ const t_cli_test_feature cli_test_features[] = {
     {"MIDIRX", "MIDIRX: perform a receive test on the MIDI ports", midi_rx_test},
     {"MIDITX", "MIDITX: send a note to a MIDI keyboard", midi_tx_test},
     {"OPL3", "OPL3: test the OPL3 sound chip", opl3_test},
-    {"OPN", "OPN [EXT|INT]: test the OPN sound chip", opm_test},
+    {"OPN", "OPN [EXT|INT]: test the OPN sound chip", opn_test},
     {"OPM", "OPM [EXT|INT]: test the OPM sound chip", opm_test},
     {"PANIC", "PANIC: test the kernel panic mechanism", cli_test_panic},
     {"PS2", "PS2: test the PS/2 keyboard", cli_test_ps2},
-    {"PSG", "PSG: test the PSG sound chip", psg_test},
+    {"PSG", "PSG [EXT|INTL|INTR|INTS]: test the PSG sound chip", psg_test},
     {"PRINT", "PRINT: sent text to the printer", cmd_test_print},
 #if MODEL == MODEL_FOENIX_A2560K
     {"RECALIBRATE", "RECALIBRATE: recalibrate the floppy drive", cli_test_recalibrate},

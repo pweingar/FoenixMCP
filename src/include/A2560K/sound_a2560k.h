@@ -6,6 +6,9 @@
 #define __SOUND_A2560K_H
 
 #define PSG_PORT        ((volatile unsigned char *)0xFEC20100)  /* Control register for the SN76489 */
+#define PSG_INT_L_PORT  ((volatile unsigned char *)0xFEC20110)  /* Control register for the SN76489 */
+#define PSG_INT_R_PORT  ((volatile unsigned char *)0xFEC20120)  /* Control register for the SN76489 */
+#define PSG_INT_S_PORT  ((volatile unsigned char *)0xFEC20130)  /* Control register for the SN76489 */
 #define OPL3_PORT       ((volatile unsigned char *)0xFEC20200)  /* Access port for the OPL3 */
 #define OPM_EXT_BASE    ((volatile unsigned char *)0xFEC20600)  /* External OPM base address */
 #define OPN2_EXT_BASE   ((volatile unsigned char *)0xFEC20400)  /* External OPN2 base address */
