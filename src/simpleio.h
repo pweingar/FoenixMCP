@@ -30,7 +30,7 @@ extern void print_c(short channel, char c);
  * channel = the number of the channel
  * n = the number to print
  */
-extern void print_hex_8(short channel, short n);
+extern void print_hex_8(short channel, unsigned short n);
 
 /*
  * Print an 16-bit number as hex to a channel
@@ -39,7 +39,7 @@ extern void print_hex_8(short channel, short n);
  * channel = the number of the channel
  * n = the number to print
  */
-extern void print_hex_16(short channel, short n);
+extern void print_hex_16(short channel, unsigned short n);
 
 /*
  * Print an 32-bit number as hex to a channel
@@ -48,7 +48,7 @@ extern void print_hex_16(short channel, short n);
  * channel = the number of the channel
  * n = the number to print
  */
-extern void print_hex_32(short channel, long n);
+extern void print_hex_32(short channel, unsigned long n);
 
 /*
  * Convert a BCD byte to an integer
