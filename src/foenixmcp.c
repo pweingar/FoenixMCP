@@ -33,6 +33,7 @@
 #include "snd/codec.h"
 #include "snd/psg.h"
 #include "snd/sid.h"
+#include "snd/yamaha.h"
 #include "fatfs/ff.h"
 #include "cli/cli.h"
 
@@ -66,7 +67,7 @@ const char* VolumeStr[FF_VOLUMES] = { "sd", "fd", "hd" };
  	*GP30_REG = 0x01;
  	*GP31_REG = 0x01;
  	*GP32_REG = 0x01;
- 	*GP33_REG = 0x01;
+ 	*GP33_REG = 0x04; // FAN1 GPIO Config
  	*GP34_REG = 0x01;
  	*GP35_REG = 0x01;
  	*GP36_REG = 0x01;
@@ -96,6 +97,10 @@ const char* VolumeStr[FF_VOLUMES] = { "sd", "fd", "hd" };
 
  	*LED1_REG = 0x01;
  	*LED2_REG = 0x02;
+
+    *FAN1_REG = 0xE0;       // <= Value to change to Get the Fan running.
+                            // See doc for more options, need to set $80 to get it started and use other bits to change the PWN...
+    *FAN_CTRL_REG = 0x01;
  }
 #endif
 
@@ -110,9 +115,9 @@ void load_splashscreen() {
 
     /* Turn off the screen */
 #if MODEL == MODEL_FOENIX_A2560K
-    *MasterControlReg_B = VKY3_MCR_BLANK_EN;
+    *MasterControlReg_B = VKY3_MCR_VIDEO_DISABLE;
 #else
-    *MasterControlReg_A = VKY3_MCR_BLANK_EN;
+    *MasterControlReg_A = VKY3_MCR_VIDEO_DISABLE;
 #endif
 
     for (i = 0; i < 256; i++) {
@@ -196,11 +201,14 @@ void initialize() {
     /* Mute the PSG */
     psg_mute_all();
 
+    /* Initialize and mute the SID chips */
+    sid_init_all();
+
+    /* Initialize the Yamaha sound chips (well, turn their volume down at least) */
+    ym_init();
+
     /* Initialize the CODEC */
     init_codec();
-
-    /* Initialize the SID chips */
-    sid_init_all();
 
     cdev_init_system();   // Initialize the channel device system
     log(LOG_INFO, "Channel device system ready.");

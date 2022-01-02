@@ -7,7 +7,7 @@
 #include "timers.h"
 #include "sound_cmds.h"
 #include "sound_reg.h"
-#include "snd/opl2.h"
+#include "snd/opn2.h"
 #include "snd/psg.h"
 #include "snd/sid.h"
 #include "dev/midi.h"

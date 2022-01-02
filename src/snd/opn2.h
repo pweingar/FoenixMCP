@@ -1,9 +1,9 @@
 /*
- * Definitions for the OPL2
+ * Definitions for the OPN2
  */
 
-#ifndef __OPL2_H
-#define __OPL2_H
+#ifndef __OPN2_H
+#define __OPN2_H
 
 #define OPN2_OFFSET_PART_II		0x100
 

@@ -2,10 +2,12 @@
  * A simple utility to convert Motorola SREC to the Foenix PGZ file format
  */
 
+#include <ctype.h>
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 #define MAX_BUFFER 128
 
