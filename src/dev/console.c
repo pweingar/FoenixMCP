@@ -21,8 +21,13 @@
 #define MAX_ANSI_ARGS       10
 
 #define CON_CTRL_ANSI       0x80            /* Set to enable ANSI escape processing */
+#define CON_CTRL_ECHO       0x40            /* Set to enable echo of input characters */
+
 #define CON_IOCTRL_ANSI_ON  0x01            /* IOCTRL Command: turn on ANSI terminal codes */
 #define CON_IOCTRL_ANSI_OFF 0x02            /* IOCTRL Command: turn off ANSI terminal codes */
+#define CON_IOCTRL_ECHO_ON  0x03            /* IOCTRL Command: turn on echo of input characters */
+#define CON_IOCTRL_ECHO_OFF 0x04            /* IOCTRL Command: turn off echo of input characters */
+#define CON_IOCTRL_BREAK    0x05            /* IOCTRL Command: return the status of the keyboard BREAK */
 
 typedef void (*ansi_handler)(p_channel, short, short[]);
 
@@ -424,7 +429,7 @@ short con_open(p_channel chan, const uint8_t * path, short mode) {
     /* Initialize the console data for this channel */
 
     con_data = (p_console_data)&(chan->data);
-    con_data->control = CON_CTRL_ANSI;
+    con_data->control = CON_CTRL_ANSI | CON_CTRL_ECHO;
     con_data->ansi_buffer_count = 0;
     for (i = 0; i < ANSI_BUFFER_SIZE; i++) {
         con_data->ansi_buffer[i] = 0;
@@ -521,8 +526,10 @@ short con_read_b(p_channel chan) {
 
     } while (c == 0);
 
-    // Echo the character to the screen
-    con_write_b(chan, c);
+    if ((con_data->control & CON_CTRL_ECHO) != 0) {
+        // Echo the character to the screen
+        con_write_b(chan, c);
+    }
 
     return (short)(c & 0x00ff);
 }
@@ -695,9 +702,28 @@ short con_ioctrl(p_channel chan, short command, uint8_t * buffer, short size) {
             return 0;
 
         case CON_IOCTRL_ANSI_OFF:
-            /* Turn on ANSI interpreting */
+            /* Turn off ANSI interpreting */
             con_data->control &= ~CON_CTRL_ANSI;
             return 0;
+
+        case CON_IOCTRL_ECHO_ON:
+            /* Turn on echo interpreting */
+            con_data->control |= CON_CTRL_ECHO;
+            return 0;
+
+        case CON_IOCTRL_ECHO_OFF:
+            /* Turn off echo */
+            con_data->control &= ~CON_CTRL_ECHO;
+            return 0;
+
+        case CON_IOCTRL_BREAK:
+            /* Return the result of the BREAK key test */
+#if MODEL == MODEL_FOENIX_A2560K
+            return kbdmo_break();
+#else
+            /* TODO: flesh this out for the A2560U */
+            return 0;
+#endif
 
         default:
             break;

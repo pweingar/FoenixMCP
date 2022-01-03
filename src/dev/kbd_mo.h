@@ -19,6 +19,17 @@
 extern short kbdmo_init();
 
 /*
+ * Check to see if a BREAK code has been pressed recently
+ * If so, return 1 and reset the internal flag.
+ *
+ * BREAK will be F-ESC on the A2560K
+ *
+ * Returns:
+ * 1 if a BREAK has been pressed since the last check
+ */
+extern short kbdmo_break();
+
+/*
  * Try to retrieve the next scancode from the keyboard.
  *
  * Returns:

@@ -31,6 +31,11 @@
 #define KBD_MOD_MENU        0x80
 
 /*
+ * Status codes
+ */
+#define KBD_STAT_BREAK      0x80        /* BREAK has been pressed recently */
+
+/*
  * Structure to track the keyboard input
  */
 struct s_kdbmo_kbd {
@@ -190,6 +195,26 @@ void kbdmo_flush_out() {
 }
 
 /*
+ * Check to see if a BREAK code has been pressed recently
+ * If so, return 1 and reset the internal flag.
+ *
+ * BREAK will be F-ESC on the A2560K
+ *
+ * Returns:
+ * 1 if a BREAK has been pressed since the last check
+ */
+short kbdmo_break() {
+    if (g_kbdmo_control.status & KBD_STAT_BREAK) {
+        /* BREAK was pressed: clear the flag and return a 1 */
+        g_kbdmo_control.status &= ~KBD_STAT_BREAK;
+        return 1;
+    } else {
+        /* BREAK was not pressed: return a 0 */
+        return 0;
+    }
+}
+
+/*
  * Initialize the PS2 controller and any attached devices
  * Enable keyboard and mouse interrupts as appropriate.
  *
@@ -279,6 +304,14 @@ void kbdmo_enqueue_scan(unsigned char scan_code) {
         // Check the scan code to see if it's a modifier key or a lock key
         // update the modifier and lock variables accordingly...
         switch (scan_code & 0x7f) {
+            case 0x01:
+                /* ESC key pressed... check to see if it's a press with the Foenix key */
+                if (((g_kbdmo_control.modifiers & KBD_MOD_OS) != 0) && (is_break == 0) {
+                    /* ESC pressed with Foenix key... flag a BREAK. */
+                    g_kbdmo_control.status |= KBD_STAT_BREAK;
+                }
+                break;
+
             case 0x2A:
             case 0x36:
                 kbdmo_makebreak_modifier(KBD_MOD_SHIFT, is_break);

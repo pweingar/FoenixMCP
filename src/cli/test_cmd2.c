@@ -62,6 +62,14 @@ typedef struct s_cli_test_feature {
  */
 
 /*
+ * Return true if the BREAK key has been pressed
+ */
+short kbd_break() {
+    /* Channel 0, CON_IOCTRL_BREAK */
+    return sys_chan_ioctrl(0, 5, 0, 0);
+}
+
+/*
  * Test the PS/2 keyboard
  */
 int cli_test_ps2(short channel, int argc, char * argv[]) {
@@ -98,7 +106,7 @@ int cli_test_joystick(short channel, int argc, char * argv[]) {
     /* Make sure we're in Atari joystick mode */
     *game_ctrl_port = 0;
 
-    while (scancode != 0x01) {
+    while ((scancode != 0x01) && !kbd_break()){
         joy_state = *joystick_port;
         if (joy_state != old_joy_state) {
             old_joy_state = joy_state;
