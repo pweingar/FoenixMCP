@@ -8,6 +8,13 @@
 #include "dis68k.h"
 
 /*
+ * Command to start execution in supervisor mode at a location in memory:
+ *
+ * CALL <address>
+ */
+extern short mem_cmd_call(short channel, int argc, const char * argv[]);
+
+/*
  * Print out the contents of a block of memory
  *
  * DUMP <address> [<count>]

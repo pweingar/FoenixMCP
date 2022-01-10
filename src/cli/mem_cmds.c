@@ -38,6 +38,30 @@ short mem_cmd_dump(short channel, int argc, const char * argv[]) {
     }
 }
 
+/* Pointer to a function taking void and returning void */
+typedef void (*p_thunk)();
+
+void test_thunk() {
+    log(LOG_ERROR, "CALL is working.");
+}
+
+/*
+ * Command to start execution in supervisor mode at a location in memory:
+ *
+ * CALL <address>
+ */
+short mem_cmd_call(short channel, int argc, const char * argv[]) {
+    p_thunk thunk = 0;
+    TRACE ("mem_cmd_call");
+
+    thunk = (p_thunk)cli_eval_number(argv[1]);
+    if (thunk) {
+        thunk();
+    }
+
+    return 0;
+}
+
 short mem_cmd_dasm(short channel, int argc, const char * argv[]) {
     unsigned long address = 0;
     long count = 1000;
