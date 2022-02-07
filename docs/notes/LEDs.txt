@@ -1,0 +1,16 @@
+so for your information, to program the RGB led for the keyboard Keys..
+the addresses for each line (it starts at the bottom right)
+FEC0_1000 (Space bar line)
+FEC0_1020
+FEC0_1040
+FEC0_1060
+FEC0_1080 (Number Keys)
+FEC0_10A0 (Function Keys)
+the color information is in a 16bits Value
+4 bits for R/G/B
+[3:0] Blue
+[7:4] Green
+[11:8] Red
+So, you will need write Shorts for every LED
+There are 16 column and 6 Rows... Obviously there will be holes and the LED might not line up properly.
+So, I was thinking that it would be sweet to have some kind of RGB testing sweeps at boot time.

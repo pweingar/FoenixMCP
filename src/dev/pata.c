@@ -39,8 +39,8 @@ short g_pata_status = PATA_STAT_NOINIT;     // Status of the PATA interface
 //
 short pata_wait_not_busy() {
     long target_ticks;
-    long ticks;
-    char status;
+    long ticks = 0;
+    char status = 0;
 
     TRACE("pata_wait_not_busy");
 
@@ -68,8 +68,8 @@ short pata_wait_not_busy() {
 //
 short pata_wait_ready() {
     long target_ticks;
-    long ticks;
-    char status;
+    long ticks = 0;
+    char status = 0;
 
     TRACE("pata_wait_ready");
 
@@ -94,9 +94,9 @@ short pata_wait_ready() {
 //  0 on success (PATA drive is ready and not busy), DEV_TIMEOUT on timeout
 //
 short pata_wait_ready_not_busy() {
-    long target_ticks;
-    long ticks;
-    char status;
+    long target_ticks = 0;
+    long ticks = 0;
+    char status = 0;
 
     TRACE("pata_wait_ready_not_busy");
 
@@ -115,6 +115,7 @@ short pata_wait_ready_not_busy() {
         log(LOG_ERROR, "pata_wait_ready_not_busy: timeout");
         log_num(LOG_ERROR, "target_ticks: ", (int)target_ticks);
         log_num(LOG_ERROR, "ticks: ", (int)ticks);
+
         return DEV_TIMEOUT;
     } else {
         return 0;
@@ -128,9 +129,9 @@ short pata_wait_ready_not_busy() {
 //  0 on success (PATA drive is ready to transfer data), DEV_TIMEOUT on timeout
 //
 short pata_wait_data_request() {
-    long target_ticks;
-    long ticks;
-    char status;
+    long target_ticks = 0;
+    long ticks = 0;
+    char status = 0;
 
     TRACE("pata_wait_data_request");
 
@@ -390,7 +391,7 @@ short pata_write(long lba, const unsigned char * buffer, short size) {
     if (pata_wait_ready_not_busy()) {
         /* Turn off the HDD LED */
         // ind_set(IND_HDC, IND_OFF);
-
+        log(LOG_ERROR, "pata_write: pata_wait_ready_not_busy timeout 1");
         return DEV_TIMEOUT;
     }
 
@@ -399,7 +400,7 @@ short pata_write(long lba, const unsigned char * buffer, short size) {
     if (pata_wait_ready_not_busy()) {
         /* Turn off the HDD LED */
         // ind_set(IND_HDC, IND_OFF);
-
+        log(LOG_ERROR, "pata_write: pata_wait_ready_not_busy timeout 2");
         return DEV_TIMEOUT;
     }
 
@@ -417,7 +418,7 @@ short pata_write(long lba, const unsigned char * buffer, short size) {
     if (pata_wait_ready_not_busy()) {
         /* Turn off the HDD LED */
         // ind_set(IND_HDC, IND_OFF);
-
+        log(LOG_ERROR, "pata_write: pata_wait_ready_not_busy timeout 3");
         return DEV_TIMEOUT;
     }
 
@@ -426,18 +427,18 @@ short pata_write(long lba, const unsigned char * buffer, short size) {
         *PATA_DATA_16 = *wptr++;
     }
 
-    // Give the controller some time...
-    for (i = 0; i < 32000; i++) ;
+    // // Give the controller some time...
+    // for (i = 0; i < 32000; i++) ;
 
     if (pata_wait_ready_not_busy()) {
         /* Turn off the HDD LED */
         // ind_set(IND_HDC, IND_OFF);
-
+        log(LOG_ERROR, "pata_write: pata_wait_ready_not_busy timeout 4");
         return DEV_TIMEOUT;
     }
 
     // Give the controller some time...
-    for (i = 0; i < 32000; i++) ;
+    // for (i = 0; i < 32000; i++) ;
 
     status = *PATA_CMD_STAT;
     if ((status & PATA_STAT_DF) != 0){

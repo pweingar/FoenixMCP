@@ -56,7 +56,7 @@ short sdc_detected() {
 // Return true if there is an SD card is protected
 //
 short sdc_protected() {
-    return (*GABE_SDC_REG & GABE_SDC_WPROT) != GABE_SDC_WPROT;
+    return (*GABE_SDC_REG & GABE_SDC_WPROT) == GABE_SDC_WPROT;
 }
 
 //

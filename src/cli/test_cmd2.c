@@ -292,8 +292,8 @@ short cli_mem_test(short channel, int argc, const char * argv[]) {
     if (argc > 1) {
 #if MODEL == MODEL_FOENIX_A2560K
         if ((strcmp(argv[1], "MERA") == 0) || (strcmp(argv[1], "mera") == 0)) {
-            mem_start = 0x02000000;
-            mem_end = 0x06000000;
+            mem_start = 0x00400000;
+            mem_end = 0x00600000;
 
             sprintf(message, "\x1B[H\x1B[2JTesting MERA memory...");
             sys_chan_write(channel, message, strlen(message));

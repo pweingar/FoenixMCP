@@ -174,9 +174,9 @@ int text_init() {
 #endif
 
     if (chan_a->font_size_ctrl) {
-        *chan_a->font_size_ctrl = 0x10081008;       /* 8x16... and ... something? */
-        *chan_a->font_count_ctrl = 0x00002564;      /* Ehhh? */
-        chan_a->font_size = 1;                      /* Set 8x16 */
+        *chan_a->font_size_ctrl = 0x08080808;       /* 8x16... and ... something? */
+        *chan_a->font_count_ctrl = 0x00004B64;      /* Row and column count */
+        chan_a->font_size = 0;                      /* Set 8x16 */
 
     } else {
         /* Set 8x8 */

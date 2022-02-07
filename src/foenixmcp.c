@@ -110,7 +110,7 @@ const char* VolumeStr[FF_VOLUMES] = { "sd", "fd", "hd" };
 void load_splashscreen() {
     long target_ticks;
     int i;
-    unsigned char * pixels;
+    const unsigned char * pixels;
     volatile unsigned char * vram = VRAM_Bank0;
 
     /* Turn off the screen */

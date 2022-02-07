@@ -79,7 +79,6 @@ const t_cli_command g_cli_commands[] = {
     { "POKE32", "POKE32 <addr> <value> : write the 32-bit value to the address in memory", mem_cmd_poke32 },
     { "PWD", "PWD : prints the current directory", cmd_pwd },
     { "REN", "REN <old path> <new path> : rename a file or directory", cmd_rename },
-    { "RUN", "RUN <path> : execute a binary file",  cmd_run },
     { "SET", "SET <name> <value> : set the value of a setting", cli_cmd_set },
     { "GET", "GET <name> : get the value of a setting", cli_cmd_get },
     { "SHOWINT", "SHOWINT : Show information about the interrupt registers", cmd_showint },

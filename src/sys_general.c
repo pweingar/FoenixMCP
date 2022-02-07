@@ -16,7 +16,7 @@ void sys_get_information(p_sys_info info) {
 
     info->has_floppy = 0;
 
-    info->system_ram_size = 0x200000;
+    info->system_ram_size = 0x400000;
 
 #if MODEL == MODEL_FOENIX_A2560K
     info->model = MODEL_FOENIX_A2560K;
