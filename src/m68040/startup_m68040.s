@@ -295,8 +295,8 @@ _handle_bus_err:
                     lea _panic_pc,a1
                     lea _panic_address,a2
                     move.w #2,(a0)
-                    move.l (10,a7),(a1)
-                    move.l (2,a7),(a2)
+                    move.l (2,a7),(a1)
+                    move.l (8,a7),(a2)
                     bra call_panic
 
 _handle_addr_err:
@@ -304,8 +304,8 @@ _handle_addr_err:
                     lea _panic_pc,a1
                     lea _panic_address,a2
                     move.w #3,(a0)
-                    move.l (10,a7),(a1)
-                    move.l (2,a7),(a2)
+                    move.l (2,a7),(a1)
+                    move.l (8,a7),(a2)
                     bra call_panic
 
 _handle_inst_err:
