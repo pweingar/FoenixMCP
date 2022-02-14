@@ -14,7 +14,7 @@ void psg_mute_all() {
 
     for (chip = 0; chip < 4; chip++) {
         /* Set attenuation on all voices to full */
-        for (voice = 0; voice < 3; voice++) {
+        for (voice = 0; voice < 4; voice++) {
             psg_attenuation(chip, voice, 15);
         }
     }

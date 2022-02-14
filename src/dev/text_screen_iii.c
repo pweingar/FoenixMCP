@@ -86,7 +86,7 @@ const unsigned short bg_color_lut [32] = {
  * Initialize the text screen driver
  */
 int text_init() {
-    short need_hires = 0;
+    short need_hires = 1;
     int i, x;
     p_text_channel chan_a = &text_channel[0];
     unsigned long border_color = 0;
@@ -157,7 +157,7 @@ int text_init() {
     need_hires = 0;
 
     if (need_hires) {
-        *chan_a->master_control = VKY3_MCR_1024x768 | VKY3_MCR_TEXT_EN;      /* Set to text only mode: 800x600 */
+        *chan_a->master_control = VKY3_MCRA_1024x768 | VKY3_MCR_TEXT_EN;    /* Set to text only mode: 800x600 */
     } else {
         *chan_a->master_control = VKY3_MCR_800x600 | VKY3_MCR_TEXT_EN;      /* Set to text only mode: 800x600 */
     }
@@ -174,12 +174,11 @@ int text_init() {
 #endif
 
     if (chan_a->font_size_ctrl) {
-        *chan_a->font_size_ctrl = 0x08080808;       /* 8x16... and ... something? */
-        *chan_a->font_count_ctrl = 0x00004B64;      /* Row and column count */
+        *chan_a->font_size_ctrl = 0x08080808;       /* Font and container are 8x8 */
+        *chan_a->font_count_ctrl = 0x00004B64;      /* 75 rows and 100 columns */
         chan_a->font_size = 0;                      /* Set 8x16 */
 
     } else {
-        /* Set 8x8 */
         chan_a->font_size = 0;
     }
 

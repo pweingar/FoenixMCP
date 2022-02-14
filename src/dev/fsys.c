@@ -265,6 +265,44 @@ short fsys_readdir(short dir, p_file_info file) {
 }
 
 /**
+ * Check to see if the file is present.
+ * If it is not, return a file not found error.
+ * If it is, populate the file info record
+ *
+ * Inputs:
+ * path = the path to the file to check
+ * file = pointer to a file info record to fill in, if the file is found.
+ */
+short fsys_stat(const char * path, p_file_info file) {
+	FRESULT fres;
+	FILINFO finfo;
+
+	fres = f_stat(path, &finfo);
+	if (fres == FR_OK) {
+		int i;
+
+		/* Copy file information into the kernel table */
+		file->size = finfo.fsize;
+		file->date = finfo.fdate;
+		file->time = finfo.ftime;
+		file->attributes = finfo.fattrib;
+
+		for (i = 0; i < MAX_PATH_LEN; i++) {
+			file->name[i] = finfo.fname[i];
+			if (file->name[i] == 0) {
+				break;
+			}
+		}
+
+		return 0;
+
+	} else {
+		/* There was an error... return it to the caller */
+		return fatfs_to_foenix(fres);
+	}
+}
+
+/**
  * Open a directory given the path and search for the first file matching the pattern.
  *
  * Inputs:

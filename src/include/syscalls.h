@@ -59,6 +59,7 @@
 #define KFN_BDEV_STATUS         0x23    /* Get the status of a block device */
 #define KFN_BDEV_IOCTRL         0x24    /* Send a command to a block device (device dependent functionality) */
 #define KFN_BDEV_REGISTER       0x25    /* Register a block device driver */
+#define KFN_STAT                0x2F    /* Check for file existance and return file information */
 
 /* File/Directory system calls */
 

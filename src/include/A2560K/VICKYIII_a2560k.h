@@ -20,6 +20,7 @@
 #define VKY3_MCR_800x600            0x00000100
 #define VKY3_MCR_1024x768           0x00000200
 #define VKY3_MCR_640x400            0x00000300
+#define VKY3_MCRA_1024x768          0x00000800
 #define VKY3_MCR_DOUBLE_EN          0x00000400  /* Doubling Pixel */
 #define VKY3_MCR_GAMMA_EN           0x00010000  /* GAMMA Enable */
 #define VKY3_MCR_MANUAL_GAMMA_EN    0x00020000  /* Enable Manual GAMMA Enable */

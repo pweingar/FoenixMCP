@@ -138,6 +138,9 @@ unsigned long syscall_dispatch(int32_t function, int32_t param0, int32_t param1,
                 case KFN_BDEV_REGISTER:
                     return bdev_register((p_dev_block)param0);
 
+                case KFN_STAT:
+                    return fsys_stat((const char *)param0, (p_file_info)param1);
+
                 default:
                     return ERR_GENERAL;
             }
