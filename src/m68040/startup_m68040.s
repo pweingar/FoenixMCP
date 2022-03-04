@@ -135,11 +135,6 @@ clrloop:    move.l #0,(a0)+
             subq.l #4,d0
             bne	clrloop
 
-            ; Set TRAP #15 vector handler
-            lea h_trap_15,a0        ; Address of the handler
-            move.l #(13+32)<<2,a1   ; TRAP#15 vector address
-            move.l a0,(a1)          ; Set the vector
-
 callmain:   jsr ___main             ; call __main to transfer to the C code
 
 ;	endless loop; can be changed accordingly

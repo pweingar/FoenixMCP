@@ -24,6 +24,10 @@
 #include "dev/console.h"
 #include "dev/fdc.h"
 #include "dev/text_screen_iii.h"
+
+#include "dev/txt_screen.h"
+#include "dev/txt_a2560k_a.h"
+
 #include "dev/pata.h"
 #include "dev/ps2.h"
 #include "dev/rtc.h"
@@ -189,6 +193,16 @@ void initialize() {
     /* Initialize the indicators */
     ind_init();
     log(LOG_INFO, "Indicators initialized");
+
+    // txt_init();
+    // if (res = txt_a2560k_a_install()) {
+    //     log(LOG_ERROR, "Could not install A2560K Channel A driver");
+    // } else {
+    //     log(LOG_ERROR, "A2560K Channel A driver installed");
+    // }
+    // txt_init_screen(TXT_SCREEN_A2560K_A);
+    //
+    // while (1) ;
 
     /* Initialize the interrupt system */
     int_init();
