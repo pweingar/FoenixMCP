@@ -306,95 +306,32 @@ short txt_a2560k_a_set_color(unsigned char foreground, unsigned char background)
  * @param vertical the number of rows to scroll (negative is down, positive is up)
  */
 void txt_a2560k_a_scroll(short horizontal, short vertical) {
-    long offset_from, offset_to;
-    short x, y;
+    short x0, x1, x, y0, y1, y, dx, dy;
 
-    if (vertical < 0) {
-        if (horizontal < 0) {
-            /* moving to upper left */
-            for (y = 0; y < a2560k_a_region.size.height; y++) {
-                offset_to = (a2560k_a_region.origin.y + y) * a2560k_a_max_size.width;
-                offset_from = (a2560k_a_region.origin.y + y - vertical) * a2560k_a_max_size.width;
-                for (x = 0; x < a2560k_a_region.size.width; x++) {
-                    offset_to += a2560k_a_region.origin.x + x;
-                    if ((y > a2560k_a_region.size.height + vertical) || (x > a2560k_a_region.size.width + horizontal)) {
-                        /* In area that should be made blank */
-                        VKY3_A_TEXT_MATRIX[offset_to] = ' ';
-                        VKY3_A_COLOR_MATRIX[offset_to] = a2560k_a_color;
+    // TODO: currently this handles only scrolling vertically by one it needs to work in the general case
+    // TODO: optimize this!
 
-                    } else {
-                        /* Copy the character and color */
-                        offset_from += a2560k_a_region.origin.x + x - horizontal;
-                        VKY3_A_TEXT_MATRIX[offset_to] = VKY3_A_TEXT_MATRIX[offset_from];
-                        VKY3_A_COLOR_MATRIX[offset_to] = VKY3_A_COLOR_MATRIX[offset_from];
-                    }
-                }
-            }
+    x0 = a2560k_a_region.origin.x;
+    y0 = a2560k_a_region.origin.y;
+    x1 = a2560k_a_region.origin.x + a2560k_a_region.size.width;
+    y1 = a2560k_a_region.origin.y + a2560k_a_region.size.height;
 
-        } else {
-            /* move to upper right */
-            for (y = 0; y < a2560k_a_region.size.height; y++) {
-                offset_to = (a2560k_a_region.origin.y + y) * a2560k_a_max_size.width;
-                offset_from = (a2560k_a_region.origin.y + y - vertical) * a2560k_a_max_size.width;
-                for (x = a2560k_a_region.size.width - 1; x >= 0; x--) {
-                    offset_to += a2560k_a_region.origin.x + x;
-                    if ((y > a2560k_a_region.size.height + vertical) || (x < horizontal)) {
-                        /* In area that should be made blank */
-                        VKY3_A_TEXT_MATRIX[offset_to] = ' ';
-                        VKY3_A_COLOR_MATRIX[offset_to] = a2560k_a_color;
+    dx = 0;
+    dy = 1;
 
-                    } else {
-                        /* Copy the character and color */
-                        offset_from += a2560k_a_region.origin.x + x - horizontal;
-                        VKY3_A_TEXT_MATRIX[offset_to] = VKY3_A_TEXT_MATRIX[offset_from];
-                        VKY3_A_COLOR_MATRIX[offset_to] = VKY3_A_COLOR_MATRIX[offset_from];
-                    }
-                }
-            }
+    for (y = y0; y < y1 - 1; y++) {
+        for (x = x0; x < x1; x++) {
+            int offset_dst = y * a2560k_a_max_size.width + x;
+            int offset_src = (y + 1) * a2560k_a_max_size.width + x;
+            VKY3_A_TEXT_MATRIX[offset_dst] = VKY3_A_TEXT_MATRIX[offset_src];
+            VKY3_A_COLOR_MATRIX[offset_dst] = VKY3_A_COLOR_MATRIX[offset_src];
         }
-    } else {
-        if (horizontal < 0) {
-            /* move to lower left */
-            for (y = a2560k_a_region.size.height - 1; y >= 0; y--) {
-                offset_to = (a2560k_a_region.origin.y + y) * a2560k_a_max_size.width;
-                offset_from = (a2560k_a_region.origin.y + y - vertical) * a2560k_a_max_size.width;
-                for (x = 0; x < a2560k_a_region.size.width; x++) {
-                    offset_to += a2560k_a_region.origin.x + x;
-                    if ((y < vertical) || (x > a2560k_a_region.size.width + horizontal)) {
-                        /* In area that should be made blank */
-                        VKY3_A_TEXT_MATRIX[offset_to] = ' ';
-                        VKY3_A_COLOR_MATRIX[offset_to] = a2560k_a_color;
+    }
 
-                    } else {
-                        /* Copy the character and color */
-                        offset_from += a2560k_a_region.origin.x + x - horizontal;
-                        VKY3_A_TEXT_MATRIX[offset_to] = VKY3_A_TEXT_MATRIX[offset_from];
-                        VKY3_A_COLOR_MATRIX[offset_to] = VKY3_A_COLOR_MATRIX[offset_from];
-                    }
-                }
-            }
-
-        } else {
-            /* move to lower right */
-            for (y = a2560k_a_region.size.height - 1; y >= 0; y--) {
-                offset_to = (a2560k_a_region.origin.y + y) * a2560k_a_max_size.width;
-                offset_from = (a2560k_a_region.origin.y + y - vertical) * a2560k_a_max_size.width;
-                for (x = a2560k_a_region.size.width - 1; x >= 0; x--) {
-                    offset_to += a2560k_a_region.origin.x + x;
-                    if ((y < vertical) || (x < horizontal)) {
-                        /* In area that should be made blank */
-                        VKY3_A_TEXT_MATRIX[offset_to] = ' ';
-                        VKY3_A_COLOR_MATRIX[offset_to] = a2560k_a_color;
-
-                    } else {
-                        /* Copy the character and color */
-                        offset_from += a2560k_a_region.origin.x + x - horizontal;
-                        VKY3_A_TEXT_MATRIX[offset_to] = VKY3_A_TEXT_MATRIX[offset_from];
-                        VKY3_A_COLOR_MATRIX[offset_to] = VKY3_A_COLOR_MATRIX[offset_from];
-                    }
-                }
-            }
-        }
+    for (x = x0; x < x1; x++) {
+        int offset_dst = (y1 - 1) * a2560k_a_max_size.width + x;
+        VKY3_A_TEXT_MATRIX[offset_dst] = ' ';
+        VKY3_A_COLOR_MATRIX[offset_dst] = a2560k_a_color;
     }
 }
 
@@ -439,7 +376,7 @@ void txt_a2560k_a_set_xy(short x, short y) {
     /* Make sure Y is within range for the current region... scroll if not */
     if (y < 0) {
         y = 0;
-    } else if (y >= a2560k_a_region.size.width) {
+    } else if (y >= a2560k_a_region.size.height) {
         txt_a2560k_a_scroll(0, y - a2560k_a_region.size.height + 1);
         y = a2560k_a_region.size.height - 1;
     }
@@ -448,7 +385,7 @@ void txt_a2560k_a_set_xy(short x, short y) {
     a2560k_a_cursor.y = y;
 
     /* Set register */
-    *VKY3_A_CPR = (((a2560k_a_region.origin.y + y) & 0xffff) << 8) || ((a2560k_a_region.origin.x + x) & 0xffff);
+    *VKY3_A_CPR = (((a2560k_a_region.origin.y + y) & 0xffff) << 16) | ((a2560k_a_region.origin.x + x) & 0xffff);
 }
 
 /**
@@ -600,45 +537,28 @@ void txt_a2560k_a_init() {
     txt_a2560k_a_set_xy(0, 0);
 
     // /* Clear the screen */
-    txt_a2560k_a_fill('.');
+    txt_a2560k_a_fill(' ');
 
-    /* Set region to default */
-    region.origin.x = 50;
-    region.origin.y = 10;
-    region.size.width = 20;
-    region.size.height = 20;
-    txt_a2560k_a_set_region(&region);
-
-    // /* Clear the screen */
-    txt_a2560k_a_fill(0x01);
-
-    /* Set region to default */
-    region.origin.x = 0;
-    region.origin.y = 0;
-    region.size.width = 0;
-    region.size.height = 0;
-    txt_a2560k_a_set_region(&region);
-
-    sprintf(buffer, "Resolution: %dx%d pixels", a2560k_a_resolution.width, a2560k_a_resolution.height);
-    log(LOG_ERROR, buffer);
-
-    sprintf(buffer, "Font Size: %dx%d pixels", a2560k_a_font_size.width, a2560k_a_font_size.height);
-    log(LOG_ERROR, buffer);
-
-    sprintf(buffer, "Region: (%d, %d) - (%d, %d)", a2560k_a_region.origin.x, a2560k_a_region.origin.y,
-                                                   a2560k_a_region.size.width, a2560k_a_region.size.height);
-    log(LOG_ERROR, buffer);
-
-    sprintf(buffer, "Buffer Size: %dx%d characters", a2560k_a_max_size.width, a2560k_a_max_size.height);
-    log(LOG_ERROR, buffer);
-
-    sprintf(buffer, "Visible Size: %dx%d characters", a2560k_a_visible_size.width, a2560k_a_visible_size.height);
-    log(LOG_ERROR, buffer);
-
-    sprintf(buffer, "Color: %02X", a2560k_a_color);
-    log(LOG_ERROR, buffer);
-
-    log(LOG_ERROR, "txt_a2560k_a_init complete");
+    // sprintf(buffer, "Resolution: %dx%d pixels", a2560k_a_resolution.width, a2560k_a_resolution.height);
+    // log(LOG_ERROR, buffer);
+    //
+    // sprintf(buffer, "Font Size: %dx%d pixels", a2560k_a_font_size.width, a2560k_a_font_size.height);
+    // log(LOG_ERROR, buffer);
+    //
+    // sprintf(buffer, "Region: (%d, %d) - (%d, %d)", a2560k_a_region.origin.x, a2560k_a_region.origin.y,
+    //                                                a2560k_a_region.size.width, a2560k_a_region.size.height);
+    // log(LOG_ERROR, buffer);
+    //
+    // sprintf(buffer, "Buffer Size: %dx%d characters", a2560k_a_max_size.width, a2560k_a_max_size.height);
+    // log(LOG_ERROR, buffer);
+    //
+    // sprintf(buffer, "Visible Size: %dx%d characters", a2560k_a_visible_size.width, a2560k_a_visible_size.height);
+    // log(LOG_ERROR, buffer);
+    //
+    // sprintf(buffer, "Color: %02X", a2560k_a_color);
+    // log(LOG_ERROR, buffer);
+    //
+    // log(LOG_ERROR, "txt_a2560k_a_init complete");
 }
 
 /**
@@ -657,7 +577,9 @@ short txt_a2560k_a_install() {
     device.set_mode = txt_a2560k_a_set_mode;
     device.set_resolution = txt_a2560k_a_set_resolution;
     device.set_border = txt_a2560k_a_set_border;
+    device.set_border_color = txt_a2560k_a_set_border_color;
     device.set_font = txt_a2560k_a_set_font;
+    device.set_cursor = txt_a2560k_a_set_cursor;
     device.set_region = txt_a2560k_a_set_region;
     device.set_color = txt_a2560k_a_set_color;
     device.set_xy = txt_a2560k_a_set_xy;

@@ -252,6 +252,14 @@ extern void txt_get_xy(short screen, p_point position);
 extern void txt_put(short screen, char c);
 
 /**
+ * Print an ASCII Z string to the screen
+ *
+ * @param screen the number of the text device
+ * @param c the ASCII Z string to print
+ */
+extern void txt_print(short screen, const char * message);
+
+/**
  * Scroll the text in the current region
  *
  * @param screen the number of the text device

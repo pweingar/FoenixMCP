@@ -202,6 +202,27 @@ void initialize() {
     // }
     // txt_init_screen(TXT_SCREEN_A2560K_A);
     //
+    // txt_set_xy(TXT_SCREEN_A2560K_A, 0, 0);
+    // for (int x = 0; x < 1000; x++) {
+    //     txt_print(TXT_SCREEN_A2560K_A, "Hello! ");
+    // }
+    //
+    // t_rect region;
+    // region.origin.x = 50;
+    // region.origin.y = 10;
+    // region.size.width = 40;
+    // region.size.height = 10;
+    // txt_set_region(TXT_SCREEN_A2560K_A, &region);
+    // txt_set_color(TXT_SCREEN_A2560K_A, 0x07, 0x00);
+    // txt_set_xy(TXT_SCREEN_A2560K_A, 0, 0);
+    // txt_fill(TXT_SCREEN_A2560K_A, ' ');
+    //
+    // for (int x = 0; x < 15; x++) {
+    //     char buffer[80];
+    //     sprintf(buffer, "Line %d...\n\r", x);
+    //     txt_print(TXT_SCREEN_A2560K_A, buffer);
+    // }
+    //
     // while (1) ;
 
     /* Initialize the interrupt system */

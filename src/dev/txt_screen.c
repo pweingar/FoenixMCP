@@ -33,7 +33,9 @@ void txt_init() {
         txt_device_driver[i].set_mode = 0;
         txt_device_driver[i].set_resolution = 0;
         txt_device_driver[i].set_border = 0;
+        txt_device_driver[i].set_border_color = 0;
         txt_device_driver[i].set_font = 0;
+        txt_device_driver[i].set_cursor = 0;
         txt_device_driver[i].set_region = 0;
         txt_device_driver[i].set_color = 0;
         txt_device_driver[i].set_xy = 0;
@@ -59,7 +61,7 @@ void txt_init() {
 short txt_register(p_txt_device device) {
     if (device->number < TXT_CNT_SCREENS) {
         int i = device->number;
-        
+
         txt_device_driver[i].number = device->number;
         txt_device_driver[i].name = device->name;
 
@@ -68,7 +70,9 @@ short txt_register(p_txt_device device) {
         txt_device_driver[i].set_mode = device->set_mode;
         txt_device_driver[i].set_resolution = device->set_resolution;
         txt_device_driver[i].set_border = device->set_border;
+        txt_device_driver[i].set_border_color = device->set_border_color;
         txt_device_driver[i].set_font = device->set_font;
+        txt_device_driver[i].set_cursor = device->set_cursor;
         txt_device_driver[i].set_region = device->set_region;
         txt_device_driver[i].set_color = device->set_color;
         txt_device_driver[i].set_xy = device->set_xy;
@@ -332,6 +336,20 @@ void txt_put(short screen, char c) {
         if (device->put) {
             device->put(c);
         }
+    }
+}
+
+/**
+ * Print an ASCII Z string to the screen
+ *
+ * @param screen the number of the text device
+ * @param c the ASCII Z string to print
+ */
+void txt_print(short screen, const char * message) {
+    const char * x = message;
+
+    while (*x) {
+        txt_put(screen, *x++);
     }
 }
 
