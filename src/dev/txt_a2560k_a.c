@@ -10,6 +10,10 @@ extern const unsigned char MSX_CP437_8x8_bin[];
 #include "dev/txt_screen.h"
 #include "dev/txt_a2560k_a.h"
 
+#define min(x, y) ((x < y) ? x : y)
+#define max(x, y) ((x < y) ? y : x)
+#define abs(x) ((x >= 0) ? x : 0 - x)
+
 /** Master Control Register for Channel A, and its supported bits */
 #define VKY3_A_MCR          ((volatile unsigned long *)0xFEC40000)
 #define VKY3_A_MCR_TEXT     0x00000001  /**< Text mode enable bit */
@@ -306,32 +310,84 @@ short txt_a2560k_a_set_color(unsigned char foreground, unsigned char background)
  * @param vertical the number of rows to scroll (negative is down, positive is up)
  */
 void txt_a2560k_a_scroll(short horizontal, short vertical) {
-    short x0, x1, x, y0, y1, y, dx, dy;
+    short x, x0, x1, x2, x3, dx;
+    short y, y0, y1, y2, y3, dy;
 
-    // TODO: currently this handles only scrolling vertically by one it needs to work in the general case
-    // TODO: optimize this!
+    /*
+     * Determine limits of rectangles to move and fill and directions of loops
+     * x0 and y0 are the positions of the first cell to be over-written
+     * x1 and y1 are the positions of the first cell to be copyed... TEXT[x0,y0] := TEXT[x1,y1]
+     * x2 and y2 are the position of the last cell to be over-written
+     * x3 and y3 are the position of the last cell to be copied... TEXT[x2,y2] := TEXT[x3,y3]
+     *
+     * When blanking, the rectangles (x2,y0) - (x3,y3) and (x0,y2) - (x2,y3) are cleared
+     */
 
-    x0 = a2560k_a_region.origin.x;
-    y0 = a2560k_a_region.origin.y;
-    x1 = a2560k_a_region.origin.x + a2560k_a_region.size.width;
-    y1 = a2560k_a_region.origin.y + a2560k_a_region.size.height;
+    // Determine the row limits
 
-    dx = 0;
-    dy = 1;
+    if (vertical >= 0) {
+        y0 = a2560k_a_region.origin.y;
+        y1 = y0 + vertical;
+        y3 = a2560k_a_region.origin.y + a2560k_a_region.size.height;
+        y2 = y3 - vertical;
+        dy = 1;
+    } else {
+        y0 = a2560k_a_region.origin.y + a2560k_a_region.size.height - 1;
+        y1 = y0 + vertical;
+        y3 = a2560k_a_region.origin.y - 1;
+        y2 = y3 - vertical;
+        dy = -1;
+    }
 
-    for (y = y0; y < y1 - 1; y++) {
-        for (x = x0; x < x1; x++) {
-            int offset_dst = y * a2560k_a_max_size.width + x;
-            int offset_src = (y + 1) * a2560k_a_max_size.width + x;
+    // Determine the column limits
+
+    if (horizontal >= 0) {
+        x0 = a2560k_a_region.origin.x;
+        x1 = x0 + horizontal;
+        x3 = a2560k_a_region.origin.x + a2560k_a_region.size.width;
+        x2 = x3 - horizontal;
+        dx = 1;
+    } else {
+        x0 = a2560k_a_region.origin.x + a2560k_a_region.size.width - 1;
+        x1 = x0 + horizontal;
+        x3 = a2560k_a_region.origin.x - 1;
+        x2 = x3 - horizontal;
+        dx = -1;
+    }
+
+    /* Copy the rectangle */
+
+    for (y = y0; y != y2; y += dy) {
+        int row_dst = y * a2560k_a_max_size.width;
+        int row_src = (y + vertical) * a2560k_a_max_size.width;
+        for (x = x0; x != x2; x += dx) {
+            int offset_dst = row_dst + x;
+            int offset_src = row_src + x + horizontal;
             VKY3_A_TEXT_MATRIX[offset_dst] = VKY3_A_TEXT_MATRIX[offset_src];
             VKY3_A_COLOR_MATRIX[offset_dst] = VKY3_A_COLOR_MATRIX[offset_src];
         }
     }
 
-    for (x = x0; x < x1; x++) {
-        int offset_dst = (y1 - 1) * a2560k_a_max_size.width + x;
-        VKY3_A_TEXT_MATRIX[offset_dst] = ' ';
-        VKY3_A_COLOR_MATRIX[offset_dst] = a2560k_a_color;
+    /* Clear the rectangles */
+
+    if (horizontal != 0) {
+        for (y = y0; y != y3; y += dy) {
+            int row_dst = y * a2560k_a_max_size.width;
+            for (x = x2; x != x3; x += dx) {
+                VKY3_A_TEXT_MATRIX[row_dst + x] = ' ';
+                VKY3_A_COLOR_MATRIX[row_dst + x] = a2560k_a_color;
+            }
+        }
+    }
+
+    if (vertical != 0) {
+        for (y = y2; y != y3; y += dy) {
+            int row_dst = y * a2560k_a_max_size.width;
+            for (x = x0; x != x3; x += dx) {
+                VKY3_A_TEXT_MATRIX[row_dst + x] = ' ';
+                VKY3_A_COLOR_MATRIX[row_dst + x] = a2560k_a_color;
+            }
+        }
     }
 }
 
@@ -536,29 +592,8 @@ void txt_a2560k_a_init() {
     /* Home the cursor */
     txt_a2560k_a_set_xy(0, 0);
 
-    // /* Clear the screen */
+    /* Clear the screen */
     txt_a2560k_a_fill(' ');
-
-    // sprintf(buffer, "Resolution: %dx%d pixels", a2560k_a_resolution.width, a2560k_a_resolution.height);
-    // log(LOG_ERROR, buffer);
-    //
-    // sprintf(buffer, "Font Size: %dx%d pixels", a2560k_a_font_size.width, a2560k_a_font_size.height);
-    // log(LOG_ERROR, buffer);
-    //
-    // sprintf(buffer, "Region: (%d, %d) - (%d, %d)", a2560k_a_region.origin.x, a2560k_a_region.origin.y,
-    //                                                a2560k_a_region.size.width, a2560k_a_region.size.height);
-    // log(LOG_ERROR, buffer);
-    //
-    // sprintf(buffer, "Buffer Size: %dx%d characters", a2560k_a_max_size.width, a2560k_a_max_size.height);
-    // log(LOG_ERROR, buffer);
-    //
-    // sprintf(buffer, "Visible Size: %dx%d characters", a2560k_a_visible_size.width, a2560k_a_visible_size.height);
-    // log(LOG_ERROR, buffer);
-    //
-    // sprintf(buffer, "Color: %02X", a2560k_a_color);
-    // log(LOG_ERROR, buffer);
-    //
-    // log(LOG_ERROR, "txt_a2560k_a_init complete");
 }
 
 /**

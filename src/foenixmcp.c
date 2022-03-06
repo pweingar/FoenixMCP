@@ -223,6 +223,8 @@ void initialize() {
     //     txt_print(TXT_SCREEN_A2560K_A, buffer);
     // }
     //
+    // txt_scroll(TXT_SCREEN_A2560K_A, -2, 2);
+    //
     // while (1) ;
 
     /* Initialize the interrupt system */
