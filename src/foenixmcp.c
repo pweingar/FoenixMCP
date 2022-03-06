@@ -27,6 +27,7 @@
 
 #include "dev/txt_screen.h"
 #include "dev/txt_a2560k_a.h"
+#include "dev/txt_a2560k_b.h"
 
 #include "dev/pata.h"
 #include "dev/ps2.h"
@@ -194,37 +195,40 @@ void initialize() {
     ind_init();
     log(LOG_INFO, "Indicators initialized");
 
-    // txt_init();
-    // if (res = txt_a2560k_a_install()) {
-    //     log(LOG_ERROR, "Could not install A2560K Channel A driver");
-    // } else {
-    //     log(LOG_ERROR, "A2560K Channel A driver installed");
-    // }
-    // txt_init_screen(TXT_SCREEN_A2560K_A);
-    //
-    // txt_set_xy(TXT_SCREEN_A2560K_A, 0, 0);
-    // for (int x = 0; x < 1000; x++) {
-    //     txt_print(TXT_SCREEN_A2560K_A, "Hello! ");
-    // }
-    //
-    // t_rect region;
-    // region.origin.x = 50;
-    // region.origin.y = 10;
-    // region.size.width = 40;
-    // region.size.height = 10;
-    // txt_set_region(TXT_SCREEN_A2560K_A, &region);
-    // txt_set_color(TXT_SCREEN_A2560K_A, 0x07, 0x00);
-    // txt_set_xy(TXT_SCREEN_A2560K_A, 0, 0);
-    // txt_fill(TXT_SCREEN_A2560K_A, ' ');
-    //
+    txt_init();
+    if (res = txt_a2560k_b_install()) {
+        log(LOG_ERROR, "Could not install A2560K Channel B driver");
+    } else {
+        log(LOG_ERROR, "A2560K Channel B driver installed");
+    }
+    txt_init_screen(TXT_SCREEN_A2560K_B);
+    txt_set_border(TXT_SCREEN_A2560K_B, 0, 0);
+    txt_set_region(TXT_SCREEN_A2560K_B, 0);
+    txt_fill(TXT_SCREEN_A2560K_B, 'Y');
+
+    txt_set_xy(TXT_SCREEN_A2560K_B, 0, 0);
+    for (int x = 0; x < 600; x++) {
+        txt_print(TXT_SCREEN_A2560K_B, "Hello! ");
+    }
+
+    t_rect region;
+    region.origin.x = 5;
+    region.origin.y = 10;
+    region.size.width = 20;
+    region.size.height = 10;
+    txt_set_region(TXT_SCREEN_A2560K_B, &region);
+    txt_set_color(TXT_SCREEN_A2560K_B, 0x07, 0x00);
+    txt_set_xy(TXT_SCREEN_A2560K_B, 0, 0);
+    txt_fill(TXT_SCREEN_A2560K_B, ' ');
+
     // for (int x = 0; x < 15; x++) {
     //     char buffer[80];
     //     sprintf(buffer, "Line %d...\n\r", x);
-    //     txt_print(TXT_SCREEN_A2560K_A, buffer);
+    //     txt_print(TXT_SCREEN_A2560K_B, buffer);
     // }
-    //
-    // txt_scroll(TXT_SCREEN_A2560K_A, -2, 2);
-    //
+
+    // txt_scroll(TXT_SCREEN_A2560K_B, -2, 2);
+
     // while (1) ;
 
     /* Initialize the interrupt system */
@@ -273,7 +277,7 @@ void initialize() {
     log(LOG_TRACE, "Interrupts enabled");
 
     // /* Display the splash screen */
-    load_splashscreen();
+    //load_splashscreen();
 
     /* Play the SID test bong on the Gideon SID implementation */
     sid_test_internal();

@@ -7,52 +7,10 @@ extern const unsigned char MSX_CP437_8x8_bin[];
 #include <string.h>
 #include <stdio.h>
 #include "log.h"
+#include "utilities.h"
+#include "A2560K/vky_chan_a.h"
 #include "dev/txt_screen.h"
 #include "dev/txt_a2560k_a.h"
-
-#define min(x, y) ((x < y) ? x : y)
-#define max(x, y) ((x < y) ? y : x)
-#define abs(x) ((x >= 0) ? x : 0 - x)
-
-/** Master Control Register for Channel A, and its supported bits */
-#define VKY3_A_MCR          ((volatile unsigned long *)0xFEC40000)
-#define VKY3_A_MCR_TEXT     0x00000001  /**< Text mode enable bit */
-#define VKY3_A_MCR_SLEEP    0x00040000  /**< Monitor sleep (synch disable) bit */
-#define VKY3_A_1024x768     0x00000100  /**< Bit to select 1024x768 screen resolution */
-
-/** Border control register for Channel A */
-#define VKY3_A_BCR          ((volatile unsigned long *)0xFEC40004)
-#define VKY3_A_BCR_ENABLE   0x00000001  /**< Bit to enable the display of the border */
-
-/** Border color register for Channel A */
-#define VKY3_A_BRDCOLOR     ((volatile unsigned long *)0xFEC40008)
-
-/** Cursor Control Register for Channel A */
-#define VKY3_A_CCR          ((volatile unsigned long *)0xFEC40010)
-#define VKY3_A_CCR_ENABLE   0x00000001  /**< Bit to enable the display of the cursor */
-#define VKY3_A_CCR_RATE0    0x00000002  /**< Bit0 to specify the blink rate */
-#define VKY3_A_CCR_RATE1    0x00000004  /**< Bit1 to specify the blink rate */
-
-/** Cursor Position Register for Channel A */
-#define VKY3_A_CPR          ((volatile unsigned long *)0xFEC40014)
-
-/** Font Manager Registers for Channel A */
-#define VKY3_A_FM0          ((volatile unsigned long *)0xFEC40020)
-#define VKY3_A_FM1          ((volatile unsigned long *)0xFEC40024)
-
-/** Font memory block for Channel A */
-#define VKY3_A_FONT_MEMORY  ((volatile unsigned char *)0xFEC48000)
-
-/** Text Matrix for Channel A */
-#define VKY3_A_TEXT_MATRIX  ((volatile unsigned char *)0xFEC60000)
-
-/** Color Matrix for Channel A */
-#define VKY3_A_COLOR_MATRIX ((volatile unsigned char *)0xFEC68000)
-
-/* Text Color LUTs for Channel A */
-#define VKY3_A_LUT_SIZE     16
-#define VKY3_A_TEXT_LUT_FG  ((volatile unsigned char *)0xFEC6C400)  /**< Text foreground color look up table for channel A */
-#define VKY3_A_TEXT_LUT_BG  ((volatile unsigned char *)0xFEC6C440)  /**< Text background color look up table for channel A */
 
 /* Default text color lookup table values (AARRGGBB) */
 const unsigned long a2560k_a_lut[VKY3_A_LUT_SIZE] = {
@@ -176,6 +134,10 @@ short txt_a2560k_a_set_resolution(short width, short height) {
     if ((width == 800) && (height == 600)) {
         a2560k_a_resolution.width = width;
         a2560k_a_resolution.height = height;
+
+        // Recalculate the size of the screen
+        txt_a2560k_a_set_sizes();
+
         *VKY3_A_MCR = msr_shadow;
         return 0;
 
@@ -183,6 +145,10 @@ short txt_a2560k_a_set_resolution(short width, short height) {
         msr_shadow |= VKY3_A_1024x768;
         a2560k_a_resolution.width = width;
         a2560k_a_resolution.height = height;
+
+        // Recalculate the size of the screen
+        txt_a2560k_a_set_sizes();
+
         *VKY3_A_MCR = msr_shadow;
         return 0;
 
@@ -204,10 +170,16 @@ void txt_a2560k_a_set_border(short width, short height) {
         a2560k_a_border_height = height;
         *VKY3_A_BCR = (height & 0x3f) << 16 | (width & 0x3f) << 8 | VKY3_A_BCR_ENABLE;
 
+        // Recalculate the size of the screen
+        txt_a2560k_a_set_sizes();
+
     } else {
         a2560k_a_border_width = 0;
         a2560k_a_border_height = 0;
         *VKY3_A_BCR = 0;
+
+        // Recalculate the size of the screen
+        txt_a2560k_a_set_sizes();
     }
 }
 
@@ -245,6 +217,9 @@ short txt_a2560k_a_set_font(short width, short height, unsigned char * data) {
         for (i = 0; i < 256 * height; i++) {
             VKY3_A_FONT_MEMORY[i] = data[i];
         }
+
+        // Recalculate the size of the screen
+        txt_a2560k_a_set_sizes();
 
         return 0;
 
