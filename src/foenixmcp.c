@@ -195,31 +195,31 @@ void initialize() {
     ind_init();
     log(LOG_INFO, "Indicators initialized");
 
-    txt_init();
-    if (res = txt_a2560k_b_install()) {
-        log(LOG_ERROR, "Could not install A2560K Channel B driver");
-    } else {
-        log(LOG_ERROR, "A2560K Channel B driver installed");
-    }
-    txt_init_screen(TXT_SCREEN_A2560K_B);
-    txt_set_border(TXT_SCREEN_A2560K_B, 0, 0);
-    txt_set_region(TXT_SCREEN_A2560K_B, 0);
-    txt_fill(TXT_SCREEN_A2560K_B, 'Y');
-
-    txt_set_xy(TXT_SCREEN_A2560K_B, 0, 0);
-    for (int x = 0; x < 600; x++) {
-        txt_print(TXT_SCREEN_A2560K_B, "Hello! ");
-    }
-
-    t_rect region;
-    region.origin.x = 5;
-    region.origin.y = 10;
-    region.size.width = 20;
-    region.size.height = 10;
-    txt_set_region(TXT_SCREEN_A2560K_B, &region);
-    txt_set_color(TXT_SCREEN_A2560K_B, 0x07, 0x00);
-    txt_set_xy(TXT_SCREEN_A2560K_B, 0, 0);
-    txt_fill(TXT_SCREEN_A2560K_B, ' ');
+    // txt_init();
+    // if (res = txt_a2560k_b_install()) {
+    //     log(LOG_ERROR, "Could not install A2560K Channel B driver");
+    // } else {
+    //     log(LOG_ERROR, "A2560K Channel B driver installed");
+    // }
+    // txt_init_screen(TXT_SCREEN_A2560K_B);
+    // txt_set_border(TXT_SCREEN_A2560K_B, 0, 0);
+    // txt_set_region(TXT_SCREEN_A2560K_B, 0);
+    // txt_fill(TXT_SCREEN_A2560K_B, 'Y');
+    //
+    // txt_set_xy(TXT_SCREEN_A2560K_B, 0, 0);
+    // for (int x = 0; x < 600; x++) {
+    //     txt_print(TXT_SCREEN_A2560K_B, "Hello! ");
+    // }
+    //
+    // t_rect region;
+    // region.origin.x = 5;
+    // region.origin.y = 10;
+    // region.size.width = 20;
+    // region.size.height = 10;
+    // txt_set_region(TXT_SCREEN_A2560K_B, &region);
+    // txt_set_color(TXT_SCREEN_A2560K_B, 0x07, 0x00);
+    // txt_set_xy(TXT_SCREEN_A2560K_B, 0, 0);
+    // txt_fill(TXT_SCREEN_A2560K_B, ' ');
 
     // for (int x = 0; x < 15; x++) {
     //     char buffer[80];
