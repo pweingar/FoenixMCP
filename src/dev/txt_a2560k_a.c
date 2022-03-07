@@ -535,7 +535,7 @@ void txt_a2560k_a_init() {
     txt_a2560k_a_set_mode(TXT_MODE_TEXT);
 
     /* Set the resolution */
-    txt_a2560k_a_set_resolution(800, 600);                  /* Default resolution is 800x600 */
+    txt_a2560k_a_set_resolution(800, 600);                      /* Default resolution is 800x600 */
 
     /* Set the default color: light grey on blue */
     txt_a2560k_a_set_color(0x07, 0x04);
@@ -547,7 +547,7 @@ void txt_a2560k_a_init() {
     txt_a2560k_a_set_cursor(1, 0, 0xB1);
 
     /* Set the border */
-    txt_a2560k_a_set_border(32, 32);                        /* No border for now */
+    txt_a2560k_a_set_border(32, 32);                            /* Set up the border */
     txt_a2560k_a_set_border_color(0x7f, 0x00, 0x7f);
 
     /*

@@ -11,7 +11,7 @@
 #define VKY3_A_MCR          ((volatile unsigned long *)0xFEC40000)
 #define VKY3_A_MCR_TEXT     0x00000001  /**< Text mode enable bit */
 #define VKY3_A_MCR_SLEEP    0x00040000  /**< Monitor sleep (synch disable) bit */
-#define VKY3_A_1024x768     0x00000100  /**< Bit to select 1024x768 screen resolution */
+#define VKY3_A_1024x768     0x00000800  /**< Bit to select 1024x768 screen resolution */
 
 /** Border control register for Channel A */
 #define VKY3_A_BCR          ((volatile unsigned long *)0xFEC40004)
