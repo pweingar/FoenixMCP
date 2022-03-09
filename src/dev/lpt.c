@@ -4,7 +4,7 @@
 
 #include "log.h"
 #include "dev/lpt.h"
-#include "dev/text_screen_iii.h"
+#include "dev/txt_screen.h"
 #include "sys_general.h"
 
 #if MODEL == MODEL_FOENIX_A2560K

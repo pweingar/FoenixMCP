@@ -67,7 +67,7 @@ cpu_c_src := $(wildcard $(cpu)/*.c)
 cpu_assembly_obj := $(subst .s,.o,$(cpu_assembly_src))
 cpu_c_obj := $(subst .c,.o,$(cpu_c_src))
 
-dev_base_sources = dev/block.c dev/channel.c dev/console.c dev/fsys.c dev/pata.c dev/ps2.c dev/rtc.c dev/sdc.c dev/text_screen_iii.c dev/txt_screen.o dev/uart.c
+dev_base_sources = dev/block.c dev/channel.c dev/console.c dev/fsys.c dev/pata.c dev/ps2.c dev/rtc.c dev/sdc.c dev/txt_screen.c dev/uart.c
 ifeq ($(UNIT),a2560k)
 dev_c_src := $(dev_base_sources) dev/fdc.c dev/kbd_mo.c dev/lpt.c dev/midi.c dev/txt_a2560k_a.o dev/txt_a2560k_b.o
 else

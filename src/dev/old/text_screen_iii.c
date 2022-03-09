@@ -4,7 +4,7 @@
 
 #include "constants.h"
 #include "vicky_general.h"
-#include "text_screen_iii.h"
+#include "dev/txt_screen.h"
 #include "simpleio.h"
 #include "sys_general.h"
 #include "rsrc/font/MSX_CP437_8x8.h"

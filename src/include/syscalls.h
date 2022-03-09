@@ -328,7 +328,7 @@ extern short sys_chan_close(short chan);
  * Inputs:
  * screen = the screen number 0 for channel A, 1 for channel B
  */
-extern void text_setsizes(short chan);
+extern void sys_text_setsizes(short chan);
 
 /***
  *** Block device system calls

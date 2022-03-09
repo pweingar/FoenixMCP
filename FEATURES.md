@@ -5,9 +5,9 @@
 1. [x] A2560K "Moe" keyboard driver
 1. [x] PS/2 keyboard driver
 1. [x] Channel (Stream) driver model
-1. [ ] System call library
+1. [-] System call library (implemented by daschewie)
 1. [x] Channel driver for console (raw output and ANSI output)
-1. [ ] Channel driver for the serial ports
+1. [x] Channel driver for the serial ports
 1. [ ] Channel driver for the parallel port
 1. [ ] Channel driver for the MIDI ports
 1. [x] Block driver model
@@ -29,7 +29,7 @@
 1. Built-in commands:
     1. [x] DIR [path]
     1. [x] COPY [path] TO [path]
-    1. [ ] RENAME [path] TO [path]
+    1. [x] RENAME [path] TO [path]
     1. [x] DELETE [path]
     1. [x] CD [path]
     1. [x] PWD
@@ -37,7 +37,7 @@
     1. [ ] PRINT [expression]
     1. [x] POKE [address], [value] -- value to an address
     1. [x] PEEK [address] -- value from an address
-    1. [ ] CALL [address] -- Start running assembly code
+    1. [x] CALL [address] -- Start running assembly code
     1. [x] DUMP [address], [size]
     1. [ ] SETCOLOR [lut], [index], [r], [g], [b] -- set a color LUT value
     1. [x] SETTIME

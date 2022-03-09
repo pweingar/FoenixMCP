@@ -3,14 +3,16 @@
  * Text screen driver for A2560K Channel A
  */
 
-extern const unsigned char MSX_CP437_8x8_bin[];
 #include <string.h>
 #include <stdio.h>
+#include "constants.h"
 #include "log.h"
 #include "utilities.h"
 #include "A2560K/vky_chan_a.h"
 #include "dev/txt_screen.h"
 #include "dev/txt_a2560k_a.h"
+
+extern const unsigned char foenix_st_8x8[];
 
 /* Default text color lookup table values (AARRGGBB) */
 const unsigned long a2560k_a_lut[VKY3_A_LUT_SIZE] = {
@@ -240,6 +242,22 @@ void txt_a2560k_a_set_cursor(short enable, short rate, char c) {
 }
 
 /**
+ * get the current region
+ *
+ * @param region pointer to a t_rect describing the rectangular region (using character cells for size and size)
+ *
+ * @return 0 on success, any other number means the region was invalid
+ */
+short txt_a2560k_a_get_region(p_rect region) {
+    region->origin.x = a2560k_a_region.origin.x;
+    region->origin.y = a2560k_a_region.origin.y;
+    region->size.width = a2560k_a_region.size.width;
+    region->size.height = a2560k_a_region.size.height;
+
+    return 0;
+}
+
+/**
  * Set a region to restrict further character display, scrolling, etc.
  * Note that a region of zero size will reset the region to the full size of the screen.
  *
@@ -266,13 +284,25 @@ short txt_a2560k_a_set_region(p_rect region) {
 }
 
 /**
+ * Get the default foreground and background colors for printing
+ *
+ * @param pointer to the foreground the Text LUT index of the new current foreground color (0 - 15)
+ * @param pointer to the background the Text LUT index of the new current background color (0 - 15)
+ */
+short txt_a2560k_a_get_color(unsigned char * foreground, unsigned char * background) {
+    *foreground = (a2560k_a_color & 0xf0) >> 4;
+    *background = a2560k_a_color & 0x0f;
+    return 0;
+}
+
+/**
  * Set the default foreground and background colors for printing
  *
  * @param foreground the Text LUT index of the new current foreground color (0 - 15)
  * @param background the Text LUT index of the new current background color (0 - 15)
  */
 short txt_a2560k_a_set_color(unsigned char foreground, unsigned char background) {
-    a2560k_a_color = ((foreground & 0x0f) << 4) | (background & 0x0f);
+    a2560k_a_color = ((foreground & 0x0f) << 4) + (background & 0x0f);
     return 0;
 }
 
@@ -433,15 +463,6 @@ void txt_a2560k_a_get_xy(p_point position) {
 /**
  * Print a character to the current cursor position in the current color
  *
- * Most character codes will result in a glyph being displayed at the current
- * cursor position, advancing the cursor one spot. There are some exceptions that
- * will be treated as control codes:
- *
- * 0x08 - BS - Move the cursor back one position, erasing the character underneath
- * 0x09 - HT - Move forward to the next TAB stop
- * 0x0A - LF - Move the cursor down one line (line feed)
- * 0x0D - CR - Move the cursor to column 0 (carriage return)
- *
  * @param screen the number of the text device
  * @param c the character to print
  */
@@ -450,35 +471,13 @@ void txt_a2560k_a_put(char c) {
     short y;
     unsigned int offset;
 
-    switch (c) {
-        case 0x08:
-            /* Backspace */
-            break;
+    x = a2560k_a_region.origin.x + a2560k_a_cursor.x;
+    y = a2560k_a_region.origin.y + a2560k_a_cursor.y;
+    offset = y * a2560k_a_max_size.width + x;
+    VKY3_A_TEXT_MATRIX[offset] = c;
+    VKY3_A_COLOR_MATRIX[offset] = a2560k_a_color;
 
-        case 0x09:
-            /* horizontal tab */
-            break;
-
-        case 0x0A:
-            /* line feed */
-            txt_a2560k_a_set_xy(a2560k_a_cursor.x, a2560k_a_cursor.y + 1);
-            break;
-
-        case 0x0D:
-            /* carriage return */
-            txt_a2560k_a_set_xy(0, a2560k_a_cursor.y);
-            break;
-
-        default:
-            x = a2560k_a_region.origin.x + a2560k_a_cursor.x;
-            y = a2560k_a_region.origin.y + a2560k_a_cursor.y;
-            offset = y * a2560k_a_max_size.width + x;
-            VKY3_A_TEXT_MATRIX[offset] = c;
-            VKY3_A_COLOR_MATRIX[offset] = a2560k_a_color;
-
-            txt_a2560k_a_set_xy(a2560k_a_cursor.x + 1, a2560k_a_cursor.y);
-            break;
-    }
+    txt_a2560k_a_set_xy(a2560k_a_cursor.x + 1, a2560k_a_cursor.y);
 }
 
 /**
@@ -541,14 +540,14 @@ void txt_a2560k_a_init() {
     txt_a2560k_a_set_color(0x07, 0x04);
 
     /* Set the font */
-    txt_a2560k_a_set_font(8, 8, MSX_CP437_8x8_bin);             /* Use 8x8 font */
+    txt_a2560k_a_set_font(8, 8, foenix_st_8x8);             /* Use 8x8 font */
 
     /* Set the cursor */
     txt_a2560k_a_set_cursor(1, 0, 0xB1);
 
     /* Set the border */
-    txt_a2560k_a_set_border(32, 32);                            /* Set up the border */
-    txt_a2560k_a_set_border_color(0x7f, 0x00, 0x7f);
+    txt_a2560k_a_set_border(16, 16);                            /* Set up the border */
+    txt_a2560k_a_set_border_color(0, 0, 0x3f);
 
     /*
      * Enable set_sizes, now that everything is set up initially
@@ -585,12 +584,15 @@ short txt_a2560k_a_install() {
     device.init = txt_a2560k_a_init;
     device.get_capabilities = txt_a2560k_a_get_capabilities;
     device.set_mode = txt_a2560k_a_set_mode;
+    device.set_sizes = txt_a2560k_a_set_sizes;
     device.set_resolution = txt_a2560k_a_set_resolution;
     device.set_border = txt_a2560k_a_set_border;
     device.set_border_color = txt_a2560k_a_set_border_color;
     device.set_font = txt_a2560k_a_set_font;
     device.set_cursor = txt_a2560k_a_set_cursor;
+    device.get_region = txt_a2560k_a_get_region;
     device.set_region = txt_a2560k_a_set_region;
+    device.get_color = txt_a2560k_a_get_color;
     device.set_color = txt_a2560k_a_set_color;
     device.set_xy = txt_a2560k_a_set_xy;
     device.get_xy = txt_a2560k_a_get_xy;

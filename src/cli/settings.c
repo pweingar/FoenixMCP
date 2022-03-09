@@ -18,7 +18,6 @@
 #include "interrupt.h"
 #include "rtc_reg.h"
 #include "dev/rtc.h"
-#include "dev/text_screen_iii.h"
 #include "snd/codec.h"
 #include "vicky_general.h"
 
@@ -425,7 +424,6 @@ short cli_font_set(short screen, const char * value) {
                 char message[80];
 
                 /* Reset the text screen */
-                text_init();
                 fsys_close(chan);
 
                 sprintf(message, "Unable to read font file: %d\n", b);

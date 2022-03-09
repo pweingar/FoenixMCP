@@ -9,7 +9,6 @@
 
 #include "log.h"
 #include "dev/block.h"
-#include "dev/text_screen_iii.h"
 #include "ff.h"			/* Obtains integer types */
 #include "diskio.h"		/* Declarations of disk functions */
 #include "simpleio.h"

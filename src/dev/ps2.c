@@ -14,7 +14,7 @@
 #include "vicky_general.h"
 #include "dev/ps2.h"
 #include "dev/rtc.h"
-#include "dev/text_screen_iii.h"
+#include "dev/txt_screen.h"
 #include "rsrc/bitmaps/mouse_pointer.h"
 
 #define PS2_TIMEOUT_JF          10          /* Timeout in jiffies: 1/60 second units */

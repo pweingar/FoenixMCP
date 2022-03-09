@@ -13,6 +13,7 @@
 #include "dev/block.h"
 #include "dev/fsys.h"
 #include "dev/rtc.h"
+#include "dev/txt_screen.h"
 #include "sys_general.h"
 
 #if MODEL == MODEL_FOENIX_A2560K
@@ -109,7 +110,7 @@ unsigned long syscall_dispatch(int32_t function, int32_t param0, int32_t param1,
                     return cdev_register((p_dev_chan)param0);
 
                 case KFN_TEXT_SETSIZES:
-                    text_setsizes((short)param0);
+                    txt_setsizes((short)param0);
                     return 0;
 
                 default:

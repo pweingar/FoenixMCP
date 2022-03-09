@@ -3,8 +3,6 @@
  * Text screen driver for A2560K Channel B
  */
 
-extern const unsigned char MSX_CP437_8x8_bin[];
-
 #include <string.h>
 #include <stdio.h>
 #include "log.h"
@@ -12,6 +10,8 @@ extern const unsigned char MSX_CP437_8x8_bin[];
 #include "A2560K/vky_chan_b.h"
 #include "dev/txt_screen.h"
 #include "dev/txt_a2560k_b.h"
+
+extern const unsigned char foenix_st_8x8[];
 
 /* Default text color lookup table values (AARRGGBB) */
 const unsigned long a2560k_b_lut[VKY3_B_LUT_SIZE] = {
@@ -462,15 +462,6 @@ void txt_a2560k_b_get_xy(p_point position) {
 /**
  * Print a character to the current cursor position in the current color
  *
- * Most character codes will result in a glyph being displayed at the current
- * cursor position, advancing the cursor one spot. There are some exceptions that
- * will be treated as control codes:
- *
- * 0x08 - BS - Move the cursor back one position, erasing the character underneath
- * 0x09 - HT - Move forward to the next TAB stop
- * 0x0A - LF - Move the cursor down one line (line feed)
- * 0x0D - CR - Move the cursor to column 0 (carriage return)
- *
  * @param screen the number of the text device
  * @param c the character to print
  */
@@ -479,35 +470,13 @@ void txt_a2560k_b_put(char c) {
     short y;
     unsigned int offset;
 
-    switch (c) {
-        case 0x08:
-            /* Backspace */
-            break;
+    x = a2560k_b_region.origin.x + a2560k_b_cursor.x;
+    y = a2560k_b_region.origin.y + a2560k_b_cursor.y;
+    offset = y * a2560k_b_max_size.width + x;
+    VKY3_B_TEXT_MATRIX[offset] = c;
+    VKY3_B_COLOR_MATRIX[offset] = a2560k_b_color;
 
-        case 0x09:
-            /* horizontal tab */
-            break;
-
-        case 0x0A:
-            /* line feed */
-            txt_a2560k_b_set_xy(a2560k_b_cursor.x, a2560k_b_cursor.y + 1);
-            break;
-
-        case 0x0D:
-            /* carriage return */
-            txt_a2560k_b_set_xy(0, a2560k_b_cursor.y);
-            break;
-
-        default:
-            x = a2560k_b_region.origin.x + a2560k_b_cursor.x;
-            y = a2560k_b_region.origin.y + a2560k_b_cursor.y;
-            offset = y * a2560k_b_max_size.width + x;
-            VKY3_B_TEXT_MATRIX[offset] = c;
-            VKY3_B_COLOR_MATRIX[offset] = a2560k_b_color;
-
-            txt_a2560k_b_set_xy(a2560k_b_cursor.x + 1, a2560k_b_cursor.y);
-            break;
-    }
+    txt_a2560k_b_set_xy(a2560k_b_cursor.x + 1, a2560k_b_cursor.y);
 }
 
 /**
@@ -575,7 +544,7 @@ void txt_a2560k_b_init() {
     txt_a2560k_b_set_color(0x07, 0x04);
 
     /* Set the font */
-    txt_a2560k_b_set_font(8, 8, MSX_CP437_8x8_bin);             /* Use 8x8 font */
+    txt_a2560k_b_set_font(8, 8, foenix_st_8x8);             /* Use 8x8 font */
 
     /* Set the cursor */
     txt_a2560k_b_set_cursor(1, 0, 0xB1);
@@ -602,7 +571,7 @@ void txt_a2560k_b_init() {
     txt_a2560k_b_set_xy(0, 0);
 
     /* Clear the screen */
-    txt_a2560k_b_fill('X');
+    txt_a2560k_b_fill(' ');
 }
 
 /**
@@ -619,6 +588,7 @@ short txt_a2560k_b_install() {
     device.init = txt_a2560k_b_init;
     device.get_capabilities = txt_a2560k_b_get_capabilities;
     device.set_mode = txt_a2560k_b_set_mode;
+    device.set_sizes = txt_a2560k_b_set_sizes;
     device.set_resolution = txt_a2560k_b_set_resolution;
     device.set_border = txt_a2560k_b_set_border;
     device.set_border_color = txt_a2560k_b_set_border_color;

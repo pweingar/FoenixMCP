@@ -9,7 +9,7 @@
 #include "indicators.h"
 #include "dev/block.h"
 #include "dev/pata.h"
-#include "dev/text_screen_iii.h"
+#include "dev/txt_screen.h"
 #include "dev/rtc.h"
 #include "pata_reg.h"
 

@@ -6,7 +6,7 @@
 #include <string.h>
 #include "syscalls.h"
 #include "simpleio.h"
-#include "dev/text_screen_iii.h"
+#include "dev/txt_screen.h"
 
 /*
  * Print a character to a channel
@@ -17,7 +17,7 @@
  */
 void print_c(short channel, char c) {
     //sys_chan_write_b(channel, c);
-    text_put_raw(channel, c);
+    txt_put(channel, c);
 }
 
 /*

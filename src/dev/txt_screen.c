@@ -7,6 +7,7 @@
  * to the low level drivers (e.g. txt_a2560k_a) registered with it.
  */
 
+#include "constants.h"
 #include "log.h"
 #include "dev/txt_screen.h"
 
@@ -31,12 +32,15 @@ void txt_init() {
         txt_device_driver[i].init = 0;
         txt_device_driver[i].get_capabilities = 0;
         txt_device_driver[i].set_mode = 0;
+        txt_device_driver[i].set_sizes = 0;
         txt_device_driver[i].set_resolution = 0;
         txt_device_driver[i].set_border = 0;
         txt_device_driver[i].set_border_color = 0;
         txt_device_driver[i].set_font = 0;
         txt_device_driver[i].set_cursor = 0;
+        txt_device_driver[i].get_region = 0;
         txt_device_driver[i].set_region = 0;
+        txt_device_driver[i].get_color = 0;
         txt_device_driver[i].set_color = 0;
         txt_device_driver[i].set_xy = 0;
         txt_device_driver[i].get_xy = 0;
@@ -68,12 +72,15 @@ short txt_register(p_txt_device device) {
         txt_device_driver[i].init = device->init;
         txt_device_driver[i].get_capabilities = device->get_capabilities;
         txt_device_driver[i].set_mode = device->set_mode;
+        txt_device_driver[i].set_sizes = device->set_sizes;
         txt_device_driver[i].set_resolution = device->set_resolution;
         txt_device_driver[i].set_border = device->set_border;
         txt_device_driver[i].set_border_color = device->set_border_color;
         txt_device_driver[i].set_font = device->set_font;
         txt_device_driver[i].set_cursor = device->set_cursor;
+        txt_device_driver[i].get_region = device->get_region;
         txt_device_driver[i].set_region = device->set_region;
+        txt_device_driver[i].get_color = device->get_color;
         txt_device_driver[i].set_color = device->set_color;
         txt_device_driver[i].set_xy = device->set_xy;
         txt_device_driver[i].get_xy = device->get_xy;
@@ -101,7 +108,6 @@ p_txt_device txt_get_device(short screen) {
             return device;
         } else {
             log_num(LOG_ERROR, "txt_get_device: number mismatch ", screen);
-            log_num(LOG_ERROR, "txt_get_device: number mismatch ", device->number);
         }
     }
 
@@ -153,6 +159,22 @@ short txt_set_mode(short screen, short mode) {
     if (device) {
         if (device->set_mode) {
             return device->set_mode(mode);
+        }
+    }
+    return -1;
+}
+
+/**
+ * Recalculate the size of the text screen
+ *
+ * @return 0 on success, any other number means the mode is invalid for the screen
+ */
+short txt_setsizes(short screen) {
+    p_txt_device device = txt_get_device(screen);
+    if (device) {
+        if (device->set_sizes) {
+            device->set_sizes();
+            return 0;
         }
     }
     return -1;
@@ -246,6 +268,24 @@ void txt_set_cursor(short screen, short enable, short rate, char c) {
 }
 
 /**
+ * Get the current region.
+ *
+ * @param screen the number of the text device
+ * @param region pointer to a t_rect describing the rectangular region (using character cells for size and size)
+ *
+ * @return 0 on success, any other number means the region was invalid
+ */
+short txt_get_region(short screen, p_rect region) {
+    p_txt_device device = txt_get_device(screen);
+    if (device) {
+        if (device->get_region) {
+            return device->get_region(region);
+        }
+    }
+    return -1;
+}
+
+/**
  * Set a region to restrict further character display, scrolling, etc.
  * Note that a region of zero size will reset the region to the full size of the screen.
  *
@@ -279,6 +319,23 @@ short txt_set_color(short screen, unsigned char foreground, unsigned char backgr
         }
     }
     return -1;
+}
+
+/*
+ * Get the foreground and background color for printing
+ *
+ * Inputs:
+ * screen = the screen number 0 for channel A, 1 for channel B
+ * foreground = pointer to the foreground color number
+ * background = pointer to the background color number
+ */
+void txt_get_color(short screen, unsigned char * foreground, unsigned char * background) {
+    p_txt_device device = txt_get_device(screen);
+    if (device) {
+        if (device->get_color) {
+            return device->get_color(foreground, background);
+        }
+    }
 }
 
 /**
@@ -331,12 +388,56 @@ void txt_get_xy(short screen, p_point position) {
  * @param c the character to print
  */
 void txt_put(short screen, char c) {
+    t_point cursor;
+
     p_txt_device device = txt_get_device(screen);
     if (device) {
         if (device->put) {
-            device->put(c);
+            switch (c) {
+                case CHAR_BS:
+                    /* Backspace */
+                    txt_get_xy(screen, &cursor);
+                    if (cursor.x > 0) {
+                        txt_set_xy(screen, cursor.x - 1, cursor.y);
+                        device->put(' ');
+                        txt_set_xy(screen, cursor.x - 1, cursor.y);
+                    }
+                    break;
+
+                case CHAR_TAB:
+                    /* horizontal tab */
+                    txt_get_xy(screen, &cursor);
+                    txt_set_xy(screen, ((cursor.x >> 3) + 1) << 3, cursor.y);
+                    break;
+
+                case CHAR_NL:
+                    /* line feed */
+                    txt_get_xy(screen, &cursor);
+                    txt_set_xy(screen, 0, cursor.y + 1);
+                    break;
+
+                case CHAR_CR:
+                    /* carriage return */
+                    break;
+
+                default:
+                    device->put(c);
+                    break;
+            }
         }
     }
+}
+
+/*
+ * Send a character to the screen without any escape code interpretation
+ *
+ * Deprecated legacy function
+ *
+ * @param screen the screen number 0 for channel A, 1 for channel B
+ * @param c the character to print
+ */
+void text_put_raw(short screen, char c) {
+    txt_put(screen, c);
 }
 
 /**
@@ -381,5 +482,198 @@ void txt_fill(short screen, char c) {
         if (device->fill) {
             device->fill(c);
         }
+    }
+}
+
+/*
+ * Clear the screen of data
+ *
+ * Inputs:
+ * screen = the screen number 0 for channel A, 1 for channel B
+ * mode = 0: erase from the cursor to the end of the screen,
+          1: erase from start of the screen to the cursor,
+          2: erase entire screen
+*/
+void txt_clear(short screen, short mode) {
+    t_point cursor;
+    t_rect old_region, region;
+
+    txt_get_xy(screen, &cursor);
+    txt_get_region(screen, &old_region);
+
+    switch (mode) {
+        case 0:
+            // Erase from cursor to end of region
+
+            // Clear the end of the line
+            region.origin.x = old_region.origin.x + cursor.x;
+            region.origin.y = old_region.origin.y + cursor.y;
+            region.size.width = old_region.size.width - cursor.x;
+            region.size.height = 1;
+            txt_set_region(screen, &region);
+            txt_fill(screen, ' ');
+
+            // Clear the region after the cursor
+            region.origin.x = old_region.origin.x;
+            region.origin.y = old_region.origin.y + cursor.y + 1;
+            region.size.width = old_region.size.width;
+            region.size.height = old_region.size.height - cursor.y;
+            txt_set_region(screen, &region);
+            txt_fill(screen, ' ');
+
+            // Restore the original region
+            txt_set_region(screen, &old_region);
+            break;
+
+        case 1:
+            // Erase from start of region to cursor
+
+            // Clear the region to the cursor line
+            region.origin.x = old_region.origin.x;
+            region.origin.y = old_region.origin.y;
+            region.size.width = old_region.size.width;
+            region.size.height = cursor.y;
+            txt_set_region(screen, &region);
+            txt_fill(screen, ' ');
+
+            // Clear the end of the line
+            region.origin.x = old_region.origin.x;
+            region.origin.y = old_region.origin.y + cursor.y;
+            region.size.width = cursor.x;
+            region.size.height = 1;
+            txt_set_region(screen, &region);
+            txt_fill(screen, ' ');
+
+            // Restore the original region
+            txt_set_region(screen, &old_region);
+            break;
+
+        case 2:
+            // Erase entire region
+            txt_fill(screen, ' ');
+            break;
+
+        default:
+            break;
+    }
+}
+
+/*
+ * Clear part or all of the current line
+ *
+ * Inputs:
+ * screen = the screen number 0 for channel A, 1 for channel B
+ * mode = 0: erase from the start of the line to the cursor,
+ *        1: erase from cursor to end of the line,
+ *        2: erase entire line
+ */
+void txt_clear_line(short screen, short mode) {
+    t_point cursor;
+    t_rect old_region, region;
+
+    txt_get_xy(screen, &cursor);
+    txt_get_region(screen, &old_region);
+
+    switch (mode) {
+        case 0:
+            // Erase from cursor to end of line
+
+            // Clear the end of the line
+            region.origin.x = old_region.origin.x + cursor.x;
+            region.origin.y = old_region.origin.y + cursor.y;
+            region.size.width = old_region.size.width - cursor.x;
+            region.size.height = 1;
+            txt_set_region(screen, &region);
+            txt_fill(screen, ' ');
+
+            // Restore the original region
+            txt_set_region(screen, &old_region);
+            break;
+
+        case 1:
+            // Erase from start of line to cursor
+
+            // Clear the end of the line
+            region.origin.x =old_region.origin.x;
+            region.origin.y = old_region.origin.y + cursor.y;
+            region.size.width = cursor.x;
+            region.size.height = 1;
+            txt_set_region(screen, &region);
+            txt_fill(screen, ' ');
+
+            // Restore the original region
+            txt_set_region(screen, &old_region);
+            break;
+
+        case 2:
+            // Clear the line
+            region.origin.x = old_region.origin.x;
+            region.origin.y = old_region.origin.y + cursor.y;
+            region.size.width = old_region.size.width;
+            region.size.height = 1;
+            txt_set_region(screen, &region);
+            txt_fill(screen, ' ');
+
+            // Restore the original region
+            txt_set_region(screen, &old_region);
+            break;
+
+        default:
+            break;
+    }
+}
+
+/*
+ * Insert a number of characters at the cursor position
+ *
+ * Inputs:
+ * screen = the screen number 0 for channel A, 1 for channel B
+ * count = the number of characters to insert
+ */
+void txt_insert(short screen, short count) {
+    t_point cursor;
+    t_rect old_region, region;
+
+    if (count > 0) {
+        txt_get_xy(screen, &cursor);
+        txt_get_region(screen, &old_region);
+
+        region.origin.x = old_region.origin.x + cursor.x;
+        region.origin.y = old_region.origin.y + cursor.y;
+        region.size.width = old_region.size.width - cursor.x;
+        region.size.height = 1;
+        txt_set_region(screen, &region);
+        txt_scroll(screen, count, 0);
+        txt_set_region(screen, &old_region);
+    }
+}
+
+/*
+ * Delete a number of characters at the cursor position
+ *
+ * Inputs:
+ * screen = the screen number 0 for channel A, 1 for channel B
+ * count = the number of characters to delete
+ */
+void txt_delete(short screen, short count) {
+    t_point cursor;
+    t_rect old_region, region;
+    short left;
+
+    if (count > 0) {
+        txt_get_xy(screen, &cursor);
+        txt_get_region(screen, &old_region);
+
+        if (count > cursor.x) {
+            count = cursor.x;
+        }
+
+        region.origin.x = old_region.origin.x + cursor.x - count;
+        region.origin.y = old_region.origin.y + cursor.y;
+        region.size.width = old_region.size.width - cursor.x + count;
+        region.size.height = 1;
+        txt_set_region(screen, &region);
+        txt_scroll(screen, 0-count, 0);
+        txt_set_region(screen, &old_region);
     }
 }

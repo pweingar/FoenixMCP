@@ -12,7 +12,6 @@
 #include "sdc_reg.h"
 #include "dev/rtc.h"
 #include "dev/sdc.h"
-#include "dev/text_screen_iii.h"
 
 //
 // Constants

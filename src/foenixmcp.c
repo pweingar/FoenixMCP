@@ -23,8 +23,7 @@
 #include "dev/channel.h"
 #include "dev/console.h"
 #include "dev/fdc.h"
-#include "dev/text_screen_iii.h"
-
+// #include "dev/text_screen_iii.h"
 #include "dev/txt_screen.h"
 #include "dev/txt_a2560k_a.h"
 #include "dev/txt_a2560k_b.h"
@@ -47,6 +46,8 @@
 #elif MODEL == MODEL_FOENIX_A2560K
 #include "rsrc/bitmaps/splash_a2560k.h"
 #endif
+
+#include "rsrc/font/foenix_st_8_8.h"
 
 const char* VolumeStr[FF_VOLUMES] = { "sd", "fd", "hd" };
 
@@ -183,51 +184,22 @@ void initialize() {
     short res;
 
     /* Set the logging level */
-    log_setlevel(LOG_ERROR);
+    log_setlevel(LOG_FATAL);
 
     // /* Hide the mouse */
     mouse_set_visible(0);
 
     /* Initialize the text channels */
-    text_init();
+    txt_init();
+    txt_a2560k_a_install();
+    txt_a2560k_b_install();
+    txt_init_screen(1);
+    txt_init_screen(0);
+    log(LOG_INFO, "Text system initialized");
 
     /* Initialize the indicators */
     ind_init();
     log(LOG_INFO, "Indicators initialized");
-
-    txt_init();
-    if (res = txt_a2560k_a_install()) {
-        log(LOG_ERROR, "Could not install A2560K Channel B driver");
-    } else {
-        log(LOG_ERROR, "A2560K Channel B driver installed");
-    }
-    txt_init_screen(TXT_SCREEN_A2560K_A);
-    txt_fill(TXT_SCREEN_A2560K_A, 'Y');
-
-    txt_set_xy(TXT_SCREEN_A2560K_A, 0, 0);
-    for (int x = 0; x < 600; x++) {
-        txt_print(TXT_SCREEN_A2560K_A, "Hello! ");
-    }
-
-    t_rect region;
-    region.origin.x = 5;
-    region.origin.y = 10;
-    region.size.width = 20;
-    region.size.height = 10;
-    txt_set_region(TXT_SCREEN_A2560K_A, &region);
-    txt_set_color(TXT_SCREEN_A2560K_A, 0x07, 0x00);
-    txt_set_xy(TXT_SCREEN_A2560K_A, 0, 0);
-    txt_fill(TXT_SCREEN_A2560K_A, ' ');
-
-    for (int x = 0; x < 15; x++) {
-        char buffer[80];
-        sprintf(buffer, "Line %d...\n\r", x);
-        txt_print(TXT_SCREEN_A2560K_A, buffer);
-    }
-
-    txt_scroll(TXT_SCREEN_A2560K_A, -2, 2);
-
-    while (1) ;
 
     /* Initialize the interrupt system */
     int_init();
@@ -328,16 +300,13 @@ void initialize() {
         log(LOG_INFO, "File system initialized.");
     }
 
-    /* Wait until the target duration has been reached _or_ the user presses a key */
-    while (target_jiffies > sys_time_jiffies()) {
-        short scan_code = sys_kbd_scancode();
-        if (scan_code != 0) {
-            break;
-        }
-    }
-
-    /* Go back to text mode */
-    // text_init();
+    // /* Wait until the target duration has been reached _or_ the user presses a key */
+    // while (target_jiffies > sys_time_jiffies()) {
+    //     short scan_code = sys_kbd_scancode();
+    //     if (scan_code != 0) {
+    //         break;
+    //     }
+    // }
 }
 
 int main(int argc, char * argv[]) {
@@ -380,9 +349,6 @@ int main(int argc, char * argv[]) {
 
     sprintf(welcome, "Foenix/MCP v%02d.%02d-alpha+%04d\n\nType \"HELP\" or \"?\" for command summary.", VER_MAJOR, VER_MINOR, VER_BUILD);
     sys_chan_write(0, welcome, strlen(welcome));
-
-    short columns = 0, rows = 0;
-    text_getsize(0, &columns, &rows);
 
     cli_repl(0);
 

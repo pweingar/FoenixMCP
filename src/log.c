@@ -9,7 +9,7 @@
 #include "log.h"
 #include "simpleio.h"
 #include "syscalls.h"
-#include "dev/text_screen_iii.h"
+#include "dev/txt_screen.h"
 
 static short log_channel = 0;
 static short log_level = 999;
@@ -109,29 +109,29 @@ void panic(void) {
     int_disable_all();
 
     /* Re-initialize the text screen */
-    text_init();
-    // text_set_border(0, 0, 0, 0, 0);
-    // text_set_color(0, 15, 1);
-    // text_set_cursor(0, 0, 0, 0, 0);
-    // text_clear(0, 2);
+    txt_init_screen(0);
+    txt_set_border(0, 0);
+    txt_set_color(0, 15, 1);
+    txt_set_cursor(0, 0, 0, 0);
+    txt_clear(0, 2);
 
-    text_set_xy(0, column, row++);
+    txt_set_xy(0, column, row++);
     sprintf(buffer, "\xDA\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xBF");
     print(0, buffer);
 
-    text_set_xy(0, column, row++);
+    txt_set_xy(0, column, row++);
     sprintf(buffer, "\xB3                                          \xB3");
     print(0, buffer);
 
-    text_set_xy(0, column, row++);
+    txt_set_xy(0, column, row++);
     sprintf(buffer, "\xB3 Oh dear, something has gone wrong...     \xB3");
     print(0, buffer);
 
-    text_set_xy(0, column, row++);
+    txt_set_xy(0, column, row++);
     sprintf(buffer, "\xB3                                          \xB3");
     print(0, buffer);
 
-    text_set_xy(0, column, row++);
+    txt_set_xy(0, column, row++);
     switch (panic_number) {
         case 2:
             sprintf(buffer, "\xB3 Bus Error                                \xB3");
@@ -166,29 +166,29 @@ void panic(void) {
     }
     print(0, buffer);
 
-    text_set_xy(0, column, row++);
+    txt_set_xy(0, column, row++);
     sprintf(buffer, "\xB3                                          \xB3");
     print(0, buffer);
 
     if (address_expected) {
-        text_set_xy(0, column, row++);
+        txt_set_xy(0, column, row++);
         print(0, "\xB3 PC: ");
         print_hex_32(0, panic_pc);
         print(0, "           Address: ");
         print_hex_32(0, panic_address);
         print(0, " \xB3");
     } else {
-        text_set_xy(0, column, row++);
+        txt_set_xy(0, column, row++);
         print(0, "\xB3 PC: ");
         print_hex_32(0, panic_pc);
         print(0, "                             \xB3");
     }
 
-    text_set_xy(0, column, row++);
+    txt_set_xy(0, column, row++);
     sprintf(buffer, "\xB3                                          \xB3");
     print(0, buffer);
 
-    text_set_xy(0, column, row++);
+    txt_set_xy(0, column, row++);
     sprintf(buffer, "\xC0\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xD9");
     print(0, buffer);
 
