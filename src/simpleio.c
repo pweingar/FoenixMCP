@@ -28,13 +28,7 @@ void print_c(short channel, char c) {
  * message = the ASCII-Z string to print
  */
 void print(short channel, const char * message) {
-    char *p = (char*)message;
-    char c;
-
-    while ((c = *p++)) {
-        print_c(channel, c);
-    }
-    // sys_chan_write(channel, message, strlen(message));
+    sys_chan_write(channel, message, strlen(message));
 }
 
 const unsigned char hex_digits[] = "0123456789ABCDEF";

@@ -5,7 +5,6 @@
 #include <ctype.h>
 #include <stdio.h>
 #include <string.h>
-#include <stdio.h>
 
 #include "cli.h"
 #include "cli/test_cmds.h"
@@ -16,6 +15,7 @@
 #include "dev/fsys.h"
 #include "dev/lpt.h"
 #include "dev/rtc.h"
+#include "dev/txt_screen.h"
 #include "dev/uart.h"
 #include "fatfs/ff.h"
 #include "interrupt.h"
@@ -580,7 +580,99 @@ short cmd_test_print(short screen, int argc, const char * argv[]) {
     return 0;
 }
 
+/**
+ * Test the ANSI escape codes
+ */
+short cmd_test_ansi(short screen, int argc, const char * argv[]) {
+    t_rect old_region, region;
+    char buffer[255];
+
+    // Clear the screen and home the cursor
+    print(screen, "\x1b[2J\x1b[H0_________1_________2_________3_________\n");
+    print(screen, "0123456789012345678901234567890123456789\n");
+
+    // Test some positioning
+    print(screen, "\x1b[21;3H20\x1b[50;1HU\x1b[BR\x1b[3DL\x1b[1BD\n");
+
+    // Test color bars
+    for (int i = 0; i < 7; i++) {
+        char * color_name;
+        switch (i) {
+            case 0: color_name = "BLACK"; break;
+            case 1: color_name = "RED"; break;
+            case 2: color_name = "GREEN"; break;
+            case 3: color_name = "YELLOW"; break;
+            case 4: color_name = "BLUE"; break;
+            case 5: color_name = "ORANGE"; break;
+            case 6: color_name = "CYAN"; break;
+            case 7: color_name = "GREY"; break;
+            default: color_name = "???"; break;
+        }
+
+        sprintf(buffer, "\x1b[%dm%10s\x1b[37;44m \x1b[30;%dm%10s\x1b[37;44m", 30 + i, color_name, 40 + i, color_name);
+        sys_chan_write(screen, buffer, strlen(buffer));
+
+        sprintf(buffer, "\t\x1b[%dm%10s\x1b[37;44m \x1b[30;%dm%10s\x1b[37;44m\n", 90 + i, color_name, 100 + i, color_name);
+        sys_chan_write(screen, buffer, strlen(buffer));
+    }
+
+    print(screen, "\x1b[1;13H0123456789ABCDEF\x1b[6;13H\x1b[2@^^\x1b[20;13H<--2 characters inserted");
+    print(screen, "\x1b[1;14H0123456789ABCDEF\x1b[6;14H\x1b[2P\x1b[20;14H<--2 characters deleted");
+    print(screen, "\x1b[1;15H0123456789ABCDEF\x1b[8;15H\x1b[0K\x1b[20;15H<--2nd half deleted");
+    print(screen, "\x1b[1;16H0123456789ABCDEF\x1b[8;16H\x1b[1K\x1b[20;16H<--1st half deleted");
+    print(screen, "\x1b[1;17H0123456789ABCDEF\x1b[8;17H\x1b[2K\x1b[20;17H<-- Whole line deleted...\n");
+
+    print(screen, "\x1b[1;20HDelete 2nd Half\x1b[22;20HDelete 1st Half\x1b[43;20HDelete All");
+
+    txt_get_region(screen, &old_region);
+
+    region.origin.x = 0;
+    region.origin.y = 20;
+    region.size.width = 20;
+    region.size.height = 10;
+    txt_set_region(screen, &region);
+    txt_fill(screen, 'X');
+    region.origin.x = 1;
+    region.origin.y = 21;
+    region.size.width = 18;
+    region.size.height = 8;
+    txt_set_region(screen, &region);
+    print(screen, "\x1b[10;4H\x1b[0J");
+
+    region.origin.x = 21;
+    region.origin.y = 20;
+    region.size.width = 20;
+    region.size.height = 10;
+    txt_set_region(screen, &region);
+    txt_fill(screen, 'X');
+    region.origin.x = 22;
+    region.origin.y = 21;
+    region.size.width = 18;
+    region.size.height = 8;
+    txt_set_region(screen, &region);
+    // print(screen, "\x1b[1;4H\x1b[1J");
+
+    region.origin.x = 42;
+    region.origin.y = 20;
+    region.size.width = 20;
+    region.size.height = 10;
+    txt_set_region(screen, &region);
+    txt_fill(screen, 'X');
+    region.origin.x = 43;
+    region.origin.y = 21;
+    region.size.width = 18;
+    region.size.height = 8;
+    txt_set_region(screen, &region);
+    print(screen, "\x1b[1;4H\x1b[2J");
+
+    txt_set_region(screen, &old_region);
+    print(screen, "\x1b[1;35H\x1b[0;44;37mDone!\n");
+
+    return 0;
+}
+
 const t_cli_test_feature cli_test_features[] = {
+    {"ANSI", "ANSI: test the ANSI escape codes", cmd_test_ansi},
     {"BITMAP", "BITMAP: test the bitmap screen", cli_test_bitmap},
     {"CREATE", "CREATE <path>: test creating a file", cli_test_create},
     {"IDE", "IDE: test reading the MBR of the IDE drive", cli_test_ide},
