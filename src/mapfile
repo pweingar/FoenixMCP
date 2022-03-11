@@ -59,7 +59,7 @@ Files:
   ps2.o:  CODE 2aeb4(195c), DATA 42a78(5c), BSS 46e98(234) hex
   rtc.o:  CODE 2c810(8d0), BSS 470cc(4) hex
   sdc.o:  CODE 2d0e0(5ac), DATA 42ad4(5) hex
-  txt_screen.o:  CODE 2d68c(e74), BSS 470d0(186) hex
+  txt_screen.o:  CODE 2d68c(e72), BSS 470d0(186) hex
   uart.o:  CODE 2e500(214) hex
   fdc.o:  CODE 2e714(16ec), DATA 42adc(16) hex
   kbd_mo.o:  CODE 2fe00(600), DATA 42af4(304), BSS 47258(224) hex
@@ -131,7 +131,7 @@ Section mapping (numbers in hex):
            0002aeb4 - 0002c810 ps2.o(CODE)
            0002c810 - 0002d0e0 rtc.o(CODE)
            0002d0e0 - 0002d68c sdc.o(CODE)
-           0002d68c - 0002e500 txt_screen.o(CODE)
+           0002d68c - 0002e4fe txt_screen.o(CODE)
            0002e500 - 0002e714 uart.o(CODE)
            0002e714 - 0002fe00 fdc.o(CODE)
            0002fe00 - 00030400 kbd_mo.o(CODE)
@@ -3896,14 +3896,14 @@ Symbols of text:
   0x0002e38e l227: local reloc, size 0
   0x0002e398 _txt_insert: global reloc, size 0
   0x0002e3ae l237: local reloc, size 0
-  0x0002e438 l238: local reloc, size 0
-  0x0002e438 l235: local reloc, size 0
+  0x0002e43a l238: local reloc, size 0
+  0x0002e43a l235: local reloc, size 0
   0x0002e444 _txt_delete: global reloc, size 0
   0x0002e458 l244: local reloc, size 0
   0x0002e486 l246: local reloc, size 0
   0x0002e48a l247: local reloc, size 0
-  0x0002e4f6 l242: local reloc, size 0
-  0x0002e4f6 l245: local reloc, size 0
+  0x0002e4f4 l242: local reloc, size 0
+  0x0002e4f4 l245: local reloc, size 0
   0x0002e500 _uart_get_base: global reloc, size 0
   0x0002e506 l3: local reloc, size 0
   0x0002e50e l4: local reloc, size 0

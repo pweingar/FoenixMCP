@@ -643,7 +643,7 @@ void txt_insert(short screen, short count) {
         region.size.width = old_region.size.width - cursor.x;
         region.size.height = 1;
         txt_set_region(screen, &region);
-        txt_scroll(screen, count, 0);
+        txt_scroll(screen, 0 - count, 0);
         txt_set_region(screen, &old_region);
     }
 }
@@ -673,7 +673,7 @@ void txt_delete(short screen, short count) {
         region.size.width = old_region.size.width - cursor.x + count;
         region.size.height = 1;
         txt_set_region(screen, &region);
-        txt_scroll(screen, 0-count, 0);
+        txt_scroll(screen, count, 0);
         txt_set_region(screen, &old_region);
     }
 }
