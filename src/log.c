@@ -101,16 +101,22 @@ void err_print(short channel, const char * message, short err_number) {
  */
 void panic(void) {
     char buffer[80];
-    short column = 18;
-    short row = 10;
+    short column = 2;
+    short row = 2;
     short address_expected = 0;
+    t_rect region;
 
     /* Shut off all interrupts */
     int_disable_all();
 
     /* Re-initialize the text screen */
     txt_init_screen(0);
-    txt_set_border(0, 0);
+    txt_set_border(0, 0, 0);
+    region.origin.x = 0;
+    region.origin.y = 0;
+    region.size.width = 0;
+    region.size.height = 0;
+    txt_set_region(0, &region)
     txt_set_color(0, 15, 1);
     txt_set_cursor(0, 0, 0, 0);
     txt_clear(0, 2);

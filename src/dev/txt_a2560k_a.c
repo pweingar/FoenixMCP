@@ -85,10 +85,15 @@ void txt_a2560k_a_set_sizes() {
         /*
          * Calculate the characters that are visible in whole or in part
          */
-        short border_width = (2 * a2560k_a_border_width) / a2560k_a_font_size.width;
-        short border_height = (2 * a2560k_a_border_height) / a2560k_a_font_size.height;
-        a2560k_a_visible_size.width = a2560k_a_max_size.width - border_width;
-        a2560k_a_visible_size.height = a2560k_a_max_size.height - border_height;
+        if ((a2560k_a_border_width != 0) && (a2560k_a_border_height != 0)) {
+            short border_width = (2 * a2560k_a_border_width) / a2560k_a_font_size.width;
+            short border_height = (2 * a2560k_a_border_height) / a2560k_a_font_size.height;
+            a2560k_a_visible_size.width = a2560k_a_max_size.width - border_width;
+            a2560k_a_visible_size.height = a2560k_a_max_size.height - border_height;
+        } else {
+            a2560k_a_visible_size.width = a2560k_a_max_size.width;
+            a2560k_a_visible_size.height = a2560k_a_max_size.height;
+        }
     }
 }
 
