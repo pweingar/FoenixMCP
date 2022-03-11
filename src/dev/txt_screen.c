@@ -517,7 +517,7 @@ void txt_clear(short screen, short mode) {
             region.origin.x = old_region.origin.x;
             region.origin.y = old_region.origin.y + cursor.y + 1;
             region.size.width = old_region.size.width;
-            region.size.height = old_region.size.height - cursor.y;
+            region.size.height = old_region.size.height - cursor.y - 1;
             txt_set_region(screen, &region);
             txt_fill(screen, ' ');
 
@@ -539,7 +539,7 @@ void txt_clear(short screen, short mode) {
             // Clear the end of the line
             region.origin.x = old_region.origin.x;
             region.origin.y = old_region.origin.y + cursor.y;
-            region.size.width = cursor.x;
+            region.size.width = cursor.x + 1;
             region.size.height = 1;
             txt_set_region(screen, &region);
             txt_fill(screen, ' ');
