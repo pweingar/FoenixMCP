@@ -586,6 +586,26 @@ short sys_fsys_register_loader(const char * extension, p_file_loader loader) {
     return (short)syscall(KFN_LOAD_REGISTER, extension, loader);
 }
 
+/**
+ * Return the top of system RAM... the user program must not use any
+ * system memory from this address and above.
+ *
+ * @return the address of the first byte of reserved system RAM (one above the last byte the user program can use)
+ */
+unsigned long sys_mem_get_ramtop() {
+    return (short)syscall(KFN_MEM_GET_RAMTOP);
+}
+
+/**
+ * Reserve a block of memory at the top of system RAM.
+ *
+ * @param bytes the number of bytes to reserve
+ * @return address of the first byte of the reserved block
+ */
+ unsigned long sys_mem_reserve(unsigned long bytes) {
+     return (short)syscall(KFN_MEM_RESERVE, bytes);
+ }
+
 /*
  * Miscellaneous
  */

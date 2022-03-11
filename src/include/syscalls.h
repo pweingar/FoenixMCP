@@ -83,6 +83,8 @@
 /* Process and memory calls */
 
 #define KFN_RUN                 0x40    /* Load an execute a binary file */
+#define KFN_MEM_GET_RAMTOP      0x41    /* Get the upper limit of the top of system RAM */
+#define KFN_MEM_RESERVE         0x42    /* Reserve a block of memory at the top of system RAM */
 
 /* Misc calls */
 

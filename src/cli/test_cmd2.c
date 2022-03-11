@@ -592,10 +592,10 @@ short cmd_test_ansi(short screen, int argc, const char * argv[]) {
     print(screen, "0123456789012345678901234567890123456789\n");
 
     // Test some positioning
-    print(screen, "\x1b[21;3H20\x1b[50;1HU\x1b[BR\x1b[3DL\x1b[1BD\n");
+    print(screen, "\x1b[21;3H20\x1b[50;1H\x1b[31m\x03\x1b[B\x1b[30m\x05\x1b[3D\x06\x1b[1B\x1b[31m\x04\n");
 
     // Test color bars
-    for (int i = 0; i < 7; i++) {
+    for (int i = 0; i < 8; i++) {
         char * color_name;
         switch (i) {
             case 0: color_name = "BLACK"; break;
@@ -618,8 +618,8 @@ short cmd_test_ansi(short screen, int argc, const char * argv[]) {
 
     print(screen, "\x1b[1;13H0123456789ABCDEF\x1b[6;13H\x1b[2@^^\x1b[20;13H<--2 characters inserted");
     print(screen, "\x1b[1;14H0123456789ABCDEF\x1b[6;14H\x1b[2P\x1b[20;14H<--2 characters deleted");
-    print(screen, "\x1b[1;15H0123456789ABCDEF\x1b[8;15H\x1b[0K\x1b[20;15H<--2nd half deleted");
-    print(screen, "\x1b[1;16H0123456789ABCDEF\x1b[8;16H\x1b[1K\x1b[20;16H<--1st half deleted");
+    print(screen, "\x1b[1;15H0123456789ABCDEF\x1b[8;15H\x1b[0K\x1b[20;15H<--2nd half of line deleted");
+    print(screen, "\x1b[1;16H0123456789ABCDEF\x1b[8;16H\x1b[1K\x1b[20;16H<--1st half of line deleted");
     print(screen, "\x1b[1;17H0123456789ABCDEF\x1b[8;17H\x1b[2K\x1b[20;17H<-- Whole line deleted...\n");
 
     print(screen, "\x1b[1;20HDelete 2nd Half\x1b[22;20HDelete 1st Half\x1b[43;20HDelete All");
@@ -650,7 +650,7 @@ short cmd_test_ansi(short screen, int argc, const char * argv[]) {
     region.size.width = 18;
     region.size.height = 8;
     txt_set_region(screen, &region);
-    // print(screen, "\x1b[1;4H\x1b[1J");
+    print(screen, "\x1b[10;4H\x1b[1J");
 
     region.origin.x = 42;
     region.origin.y = 20;

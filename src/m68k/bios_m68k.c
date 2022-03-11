@@ -8,6 +8,7 @@
 #include "types.h"
 #include "syscalls.h"
 #include "interrupt.h"
+#include "memory.h"
 #include "proc.h"
 #include "dev/channel.h"
 #include "dev/block.h"
@@ -138,6 +139,9 @@ unsigned long syscall_dispatch(int32_t function, int32_t param0, int32_t param1,
                 case KFN_BDEV_REGISTER:
                     return bdev_register((p_dev_block)param0);
 
+                case KFN_STAT:
+                    return fsys_stat((const char *)param0, (p_file_info)param1);
+
                 default:
                     return ERR_GENERAL;
             }
@@ -201,8 +205,13 @@ unsigned long syscall_dispatch(int32_t function, int32_t param0, int32_t param1,
             /* Process and Memory functions */
             switch (function) {
                 case KFN_RUN:
-                    return proc_run((char *)param0, (int)param1, (char **)param2);
-                    break;
+                    return proc_run((char *)param0, (int)param1, (char *)param2);
+
+                case KFN_MEM_GET_RAMTOP:
+                    return mem_get_ramtop();
+
+                case KFN_MEM_RESERVE:
+                    return mem_reserve((unsigned long)param0);
 
                 default:
                     return ERR_GENERAL;

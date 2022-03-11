@@ -7,20 +7,21 @@
 1. [x] Channel (Stream) driver model
 1. [-] System call library (implemented by daschewie)
 1. [x] Channel driver for console (raw output and ANSI output)
-1. [x] Channel driver for the serial ports
+1. [ ] Channel driver for the serial ports
 1. [ ] Channel driver for the parallel port
-1. [ ] Channel driver for the MIDI ports
+1. [-] Channel driver for the MIDI ports (skipping for 1.0)
 1. [x] Block driver model
 1. [x] SDC block driver
 1. [x] PATA block driver
 1. [ ] Floppy block driver
 1. [x] FatFS library integration
-1. [ ] Memory management
+1. [x] Memory management
 1. [x] PGX file loader
 1. [x] PGZ file loader
 1. [x] ELF file loader
 1. [x] Command Line Interface
 1. [ ] Mouse driver
+1. [ ] Boot from media support (hard drive, SDC, floppy)
 
 ## CLI Features
 
@@ -34,7 +35,7 @@
     1. [x] CD [path]
     1. [x] PWD
     1. [ ] FORMAT [drive] -- Format a drive... should this be built in?
-    1. [ ] PRINT [expression]
+    1. [-] PRINT [expression]
     1. [x] POKE [address], [value] -- value to an address
     1. [x] PEEK [address] -- value from an address
     1. [x] CALL [address] -- Start running assembly code
