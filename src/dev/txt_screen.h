@@ -214,7 +214,7 @@ extern void txt_set_cursor(short screen, short enable, short rate, char c);
  *
  * @return 0 on success, any other number means the region was invalid
  */
-extern short txt_set_region(short screen, p_rect region);
+extern short txt_get_region(short screen, p_rect region);
 
 /**
  * Set a region to restrict further character display, scrolling, etc.

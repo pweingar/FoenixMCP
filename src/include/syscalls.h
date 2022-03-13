@@ -48,7 +48,6 @@
 #define KFN_CHAN_REGISTER       0x19    /* Register a channel device driver */
 #define KFN_CHAN_OPEN           0x1A    /* Open a channel device */
 #define KFN_CHAN_CLOSE          0x1B    /* Close an open channel (not for files) */
-#define KFN_TEXT_SETSIZES       0x1C    /* Adjusts the screen size based on the current graphics mode */
 
 
 /* Block device system calls */
@@ -94,6 +93,26 @@
 #define KFN_KBD_SCANCODE        0x53    /* Get the next scan code from the keyboard */
 #define KFN_KBD_LAYOUT          0x54    /* Set the translation tables for the keyboard */
 #define KFN_ERR_MESSAGE         0x55    /* Return an error description, given an error number */
+
+/* Text Device Calls */
+
+#define KFN_TEXT_INIT_SCREEN    0x60    /* Reset a screen to its default mode */
+#define KFN_TXT_GET_CAPS        0x61    /* Get the capabilities of a screen */
+#define KFN_TXT_SET_MODE        0x62    /* Set the display mode of a screen */
+#define KFN_TEXT_SETSIZES       0x63    /* Adjusts the screen size based on the current graphics mode */
+#define KFN_TXT_SET_RESOLUTION  0x64    /* Set the base display resolution for a screen */
+#define KFN_TXT_SET_BORDER      0x65    /* Set the size of the border */
+#define KFN_TXT_SET_BORDERCOLOR 0x66    /* Set the border color */
+#define KFN_TXT_SET_FONT        0x67    /* Set the font for the screen's text mode (if applicable) */
+#define KFN_TXT_SET_CURSOR      0x68    /* Set the text-mode cursor look */
+#define KFN_TXT_SET_REGION      0x69    /* Sets the clipping/scrolling region for further text operations */
+#define KFN_TXT_GET_REGION      0x6A    /* Gets the current clipping/scrolling region */
+#define KFN_TXT_SET_COLOR       0x6B    /* Sets the foreground and background text colors */
+#define KFN_TXT_GET_COLOR       0x6C    /* Gets the foreground and background text colors */
+#define KFN_TXT_SET_XY          0x6D    /* Sets the cursor's position */
+#define KFN_TXT_GET_XY          0x6E    /* Gets the cursor's position */
+#define KFN_TXT_SCROLL          0x6F    /* Scroll the current region */
+// #define KFN_TXT_FILL            0x70    /* Fill the current region */
 
 /*
  * Call into the kernel (provided by assembly)
