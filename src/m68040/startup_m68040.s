@@ -24,7 +24,7 @@ PENDING_GRP2 = $FEC00104
             section "VECTORS",code
 
             dc.l ___STACK           ; 00 - Initial stack pointer
-            dc.l coldboot           ; 01 - Initial PC
+            dc.l unpackdata         ; 01 - Initial PC
             dc.l _handle_bus_err    ; 02 - Bus error
             dc.l _handle_addr_err   ; 03 - Address error
             dc.l _handle_inst_err   ; 04 - Illegal instruction
@@ -120,6 +120,26 @@ PENDING_GRP2 = $FEC00104
             dc.l interrupt_x2D      ; 93 - Interrupt 0x2D - DAC1 Playback Done Interrupt (48K)
             dc.l interrupt_x2E      ; 94 - Interrupt 0x2E - Reserved
             dc.l interrupt_x2F      ; 95 - Interrupt 0x2F - DAC0 Playback Done Interrupt (44.1K)
+
+unpackdata  ; Copy data from the binary package into the blocks of memory where
+            ; the kernel and its data should reside
+
+            ; Copy the kernel code and constant data
+
+            move.l #___kernel_lma_start,a0      ; Get source and destination
+            move.l #___kernel_vma_start,a1
+            move.l a0,d0
+            cmp.l a1,d0                         ; If they are equal
+            beq upd2                            ; If they are equal, skip copying
+
+            move.l #___kernel_lma_end,a2        ; Get the end address for the copy
+            move.l a2,d0
+
+upd1        move.l (a0)+,(a1)+                  ; Copy the data from source to destination
+            cmp.l a0,d0
+            bne upd1                            ; Until we have copied the last word
+
+upd2        jmp coldboot                        ; Transfer control to the kernel cold boot process
 
             code
 
