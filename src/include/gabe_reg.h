@@ -30,7 +30,7 @@
 
 #define GABE_DIP_REG        ((volatile unsigned short *)0xFEC00518)
 #define GABE_DIP_BOOT_MASK  0x0003      /* Mask for the boot mode: */
-#define GABE_DIP_USER_MASK  0x0300      /* Mask for the user switches: */
+#define GABE_DIP_USER_MASK  0x0700      /* Mask for the user switches: */
 
 /*
  * 16-bit register controlling the key of the A2560K built-in keyboard

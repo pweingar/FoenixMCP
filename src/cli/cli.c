@@ -257,17 +257,46 @@ void cli_rerepl() {
     }
 }
 
+/**
+ * Parse and attempt to execute a command line
+ *
+ * @param command_line the command line to process
+ * @return the result of running the command line
+ */
+short cli_process_line(short channel, const char * command_line) {
+    char * arg;
+    char * token_save;
+    char * delim = " ";
+    int argc = 0;
+    char * argv[MAX_ARGC];
+
+    for (argc = 0, token_save = command_line; argc < MAX_ARGC; argc++) {
+        arg = strtok_r(command_line, delim, &token_save);
+        if (arg != 0) {
+            argv[argc] = arg;
+        } else {
+            break;
+        }
+    }
+
+    if (argc > 0) {
+        int i;
+        for (i = 0; i < strlen(argv[0]); i++) {
+            argv[0][i] = toupper(argv[0][i]);
+        }
+
+        // Try to execute the command
+        return cli_exec(channel, argv[0], argc, argv);
+    }
+}
+
 //
 // Enter the CLI's read-eval-print loop
 //
 short cli_repl(short channel) {
     char command_line[MAX_COMMAND_SIZE];
     char cwd_buffer[MAX_PATH_LEN];
-    char * arg;
-    char * token_save;
-    char * delim = " ";
-    int argc = 0;
-    char * argv[MAX_ARGC];
+
 
     g_current_channel = channel;
 
@@ -280,27 +309,44 @@ short cli_repl(short channel) {
         sys_chan_readline(channel, command_line, MAX_COMMAND_SIZE);   // Attempt to read line
         sys_chan_write(channel, "\n", 1);
 
-        for (argc = 0, token_save = command_line; argc < MAX_ARGC; argc++) {
-            arg = strtok_r(command_line, delim, &token_save);
-            if (arg != 0) {
-                argv[argc] = arg;
-            } else {
-                break;
-            }
-        }
-
-        if (argc > 0) {
-            int i;
-            for (i = 0; i < strlen(argv[0]); i++) {
-                argv[0][i] = toupper(argv[0][i]);
-            }
-
-            // Try to execute the command
-            cli_exec(channel, argv[0], argc, argv);
-        }
+        cli_process_line(channel, command_line);
     }
 
     return 0;
+}
+
+/**
+ * Execute a batch file at the given path
+ *
+ * @param channel the number of the channel to write any messages to
+ * @param path the path to the configuration file to load
+ * @return 0 on success, any other number is an error
+ */
+extern short cli_exec_batch(short channel, const char * path) {
+    char command_line[MAX_COMMAND_SIZE];
+
+    short fd = sys_fsys_open(path, 0x01);   // Open for reading...
+    if (fd > 0) {
+        // Got a file...
+
+        // Read a line from the file
+        short result = 0;
+
+        do {
+            result = sys_chan_readline(fd, command_line, MAX_COMMAND_SIZE);
+            if (result > 0) {
+                // We got a line, so parse it
+                cli_process_line(channel, command_line)
+            }
+        } while (result > 0);   // Until we don't get a line
+
+        // Close the file
+        sys_fsys_close(fd);
+
+        return 0;
+    } else {
+        return fd;
+    }
 }
 
 long cli_eval_dec(const char * arg) {

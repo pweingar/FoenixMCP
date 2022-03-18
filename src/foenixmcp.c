@@ -51,6 +51,12 @@
 
 const char* VolumeStr[FF_VOLUMES] = { "sd", "fd", "hd" };
 
+const char * MCP_INIT_SDC = "/sd/system/mcp.init";  /**< Path to config file on the SD card */
+const char * MCP_INIT_FDC = "/fd/system/mcp.init";  /**< Path to config file on the floppy drive */
+const char * MCP_INIT_HDC = "/hd/system/mcp.init";  /**< Path to config file on the IDE drive */
+
+short cli_screen = 0;   /**< The default screen to use for the REPL of the CLI */
+
 #if MODEL == MODEL_FOENIX_A2560K
 /*
  * Initialize the SuperIO registers
@@ -309,6 +315,99 @@ void initialize() {
     // }
 }
 
+#define BOOT_DEFAULT    -1  // User chose default, or the time to over-ride has passed
+
+/**
+ * Process the final boot chain.
+ *
+ * @param selection the user's selection from the splash screen for desired boot device
+ */
+void boot_chain(short selection) {
+    unsigned char boot_sector[512];
+    short bootable = 0;
+    short device = -1;
+    unsigned short boot_dip = 0;
+
+    // Get the boot device
+    switch (selection) {
+        case BOOT_DEFAULT:
+            // User chose the default. Look at the DIP switches to determine the boot source
+            boot_dip = *GABE_DIP_REG & GABE_DIP_BOOT_MASK;
+            switch (boot_dip) {
+                case 0x0000:
+                    // Boot from IDE
+                    device = BDEV_HDC;
+                    log(LOG_INFO, "Boot DIP set for IDE");
+                    break;
+
+                case 0x0001:
+                    // Boot from SDC
+                    device = BDEV_SDC;
+                    log(LOG_INFO, "Boot DIP set for SDC");
+                    break;
+
+                case 0x0002:
+                    // Boot from Floppy
+                    device = BDEV_FDC;
+                    log(LOG_INFO, "Boot DIP set for FDC");
+                    break;
+
+                default:
+                    // Boot straight to REPL
+                    log(LOG_INFO, "Boot DIP set for REPL");
+                    device = -1;
+                    break;
+            }
+            break;
+
+        default:
+            device = selection;
+            break;
+    }
+
+    // if (device >= 0) {
+    //     // Try to load the boot sector
+    //     short result = bdev_read(device, 0, boot_sector, 512);
+    //     if (result == 0) {
+    //         // Check to see if it's bootable
+    //
+    //     }
+    // }
+    //
+    // if (bootable) {
+    //     // TODO: If bootable, run it
+    //
+    // } else {
+        // If not bootable...
+        if (device >= 0) {
+            // Execute startup file on boot device (if present)
+            switch (device) {
+                case BDEV_SDC:
+                    if (cli_exec_batch(cli_screen, MCP_INIT_SDC) != 0) {
+                        cli_exec_batch(cli_screen, MCP_INIT_HDC);
+                    }
+                    break;
+
+                case BDEV_FDC:
+                    if (cli_exec_batch(cli_screen, MCP_INIT_FDC) != 0) {
+                        cli_exec_batch(cli_screen, MCP_INIT_HDC);
+                    }
+                    break;
+
+                case BDEV_HDC:
+                    cli_exec_batch(cli_screen, MCP_INIT_HDC);
+                    break;
+
+                default:
+                    break;
+            }
+        }
+
+        // Start up REPL
+        cli_repl(cli_screen);
+    // }
+}
+
 int main(int argc, char * argv[]) {
     const char * color_bars = "\x1b[31m\x0b\x0c\x1b[35m\x0b\x0c\x1b[33m\x0b\x0c\x1b[32m\x0b\x0c\x1b[36m\x0b\x0c";
 
@@ -347,10 +446,12 @@ int main(int argc, char * argv[]) {
     sprintf(welcome, "    %s%s\n   %s %s\n  %s  %s\n %s   %s\n%s    %s\n\n", color_bars, title_1, color_bars, title_2, color_bars, title_3, color_bars, title_4, color_bars, title_5);
     sys_chan_write(0, welcome, strlen(welcome));
 
-    sprintf(welcome, "Foenix/MCP v%02d.%02d-alpha+%04d\n\nType \"HELP\" or \"?\" for command summary.", VER_MAJOR, VER_MINOR, VER_BUILD);
+    sprintf(welcome, "Foenix/MCP v%02d.%02d-alpha+%04d\n\nType \"HELP\" or \"?\" for command summary.\n", VER_MAJOR, VER_MINOR, VER_BUILD);
     sys_chan_write(0, welcome, strlen(welcome));
 
-    cli_repl(0);
+    // Start the boot process
+    // TODO: allow for a user keypress to over-ride the boot device
+    boot_chain(BDEV_SDC);
 
     log(LOG_INFO, "Stopping.");
 

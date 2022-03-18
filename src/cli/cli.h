@@ -44,4 +44,13 @@ extern long cli_eval_number(const char * arg);
  */
 extern short cmd_help(short channel, int argc, const char * argv[]);
 
+/**
+ * Execute a batch file at the given path
+ *
+ * @param channel the number of the channel to write any messages to
+ * @param path the path to the configuration file to load
+ * @return 0 on success, any other number is an error
+ */
+extern short cli_exec_batch(short channel, const char * path);
+
 #endif
