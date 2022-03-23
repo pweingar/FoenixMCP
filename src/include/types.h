@@ -40,6 +40,7 @@ typedef struct s_color4 {
  * Function types
  */
 
+typedef short (*FUNC_V_2_V)();
 typedef short (*FUNC_V_2_S)();
 typedef short (*FUNC_S_2_S)(char *);
 typedef short (*FUNC_BS_2_S)(unsigned char *, short);

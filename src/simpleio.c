@@ -205,3 +205,17 @@ void dump_buffer(short channel, const unsigned char * buffer, short size, short 
     print(channel, ascii_buffer);
     print(channel, "\n");
 }
+
+/**
+ * Convert a string to upper case
+ *
+ * @param src the string to convert
+ * @param dst the buffer in which to copy the converted string
+ */
+void str_upcase(const char * src, char * dst) {
+    int i;
+    for (i = 0; i < strlen(src); i++) {
+        dst[i] = toupper(src[i]);
+    }
+    dst[strlen(src)] = 0;
+}

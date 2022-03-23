@@ -19,11 +19,11 @@
 
 #include "syscalls.h"
 #include "timers.h"
+#include "boot.h"
 #include "dev/block.h"
 #include "dev/channel.h"
 #include "dev/console.h"
 #include "dev/fdc.h"
-// #include "dev/text_screen_iii.h"
 #include "dev/txt_screen.h"
 #include "dev/txt_a2560k_a.h"
 #include "dev/txt_a2560k_b.h"
@@ -40,22 +40,9 @@
 #include "snd/yamaha.h"
 #include "fatfs/ff.h"
 #include "cli/cli.h"
-
-#if MODEL == MODEL_FOENIX_A2560U || MODEL == MODEL_FOENIX_A2560U_PLUS
-#include "rsrc/bitmaps/splash_a2560u.h"
-#elif MODEL == MODEL_FOENIX_A2560K
-#include "rsrc/bitmaps/splash_a2560k.h"
-#endif
-
-#include "rsrc/font/foenix_st_8_8.h"
+#include "rsrc/font/MSX_CP437_8x8.h"
 
 const char* VolumeStr[FF_VOLUMES] = { "sd", "fd", "hd" };
-
-const char * MCP_INIT_SDC = "/sd/system/mcp.init";  /**< Path to config file on the SD card */
-const char * MCP_INIT_FDC = "/fd/system/mcp.init";  /**< Path to config file on the floppy drive */
-const char * MCP_INIT_HDC = "/hd/system/mcp.init";  /**< Path to config file on the IDE drive */
-
-short cli_screen = 0;   /**< The default screen to use for the REPL of the CLI */
 
 #if MODEL == MODEL_FOENIX_A2560K
 /*
@@ -115,64 +102,6 @@ short cli_screen = 0;   /**< The default screen to use for the REPL of the CLI *
     *FAN_CTRL_REG = 0x01;
  }
 #endif
-
-/*
- * Load and display the splash screen
- */
-void load_splashscreen() {
-    long target_ticks;
-    int i;
-    const unsigned char * pixels;
-    volatile unsigned char * vram = VRAM_Bank0;
-
-    /* Turn off the screen */
-#if MODEL == MODEL_FOENIX_A2560K
-    *MasterControlReg_B = VKY3_MCR_VIDEO_DISABLE;
-#else
-    *MasterControlReg_A = VKY3_MCR_VIDEO_DISABLE;
-#endif
-
-    for (i = 0; i < 256; i++) {
-        LUT_0[4*i] = splashscreen_lut[4*i];
-        LUT_0[4*i+1] = splashscreen_lut[4*i+1];
-        LUT_0[4*i+2] = splashscreen_lut[4*i+2];
-        LUT_0[4*i+3] = splashscreen_lut[4*i+3];
-    }
-
-    /* Copy the bitmap to video RAM */
-    for (pixels = splashscreen_pix; *pixels != 0;) {
-        unsigned char count = *pixels++;
-        unsigned char pixel = *pixels++;
-        for (i = 0; i < count; i++) {
-            *vram++ = pixel;
-        }
-    }
-
-    /* Set up the bitmap */
-    *BM0_Addy_Pointer_Reg = 0;
-    *BM0_Control_Reg = 1;
-
-    /* Turn off the border */
-#if MODEL == MODEL_FOENIX_A2560K
-    *BorderControlReg_L_B = 0;
-#else
-    *BorderControlReg_L_A = 0;
-#endif
-
-    /* Set a background color for the bitmap mode */
-#if MODEL == MODEL_FOENIX_A2560K
-    *BackGroundControlReg_B = 0x00202020;
-#else
-    *BackGroundControlReg_A = 0x00202020;
-#endif
-
-    /* Display the splashscreen: 640x480 */
-#if MODEL == MODEL_FOENIX_A2560K
-    *MasterControlReg_B = VKY3_MCR_GRAPH_EN | VKY3_MCR_BITMAP_EN;
-#else
-    *MasterControlReg_A = VKY3_MCR_GRAPH_EN | VKY3_MCR_BITMAP_EN;
-#endif
-}
 
 void print_error(short channel, char * message, short code) {
     print(channel, message);
@@ -252,9 +181,6 @@ void initialize() {
     int_enable_all();
     log(LOG_TRACE, "Interrupts enabled");
 
-    // /* Display the splash screen */
-    //load_splashscreen();
-
     /* Play the SID test bong on the Gideon SID implementation */
     sid_test_internal();
 
@@ -317,97 +243,6 @@ void initialize() {
 
 #define BOOT_DEFAULT    -1  // User chose default, or the time to over-ride has passed
 
-/**
- * Process the final boot chain.
- *
- * @param selection the user's selection from the splash screen for desired boot device
- */
-void boot_chain(short selection) {
-    unsigned char boot_sector[512];
-    short bootable = 0;
-    short device = -1;
-    unsigned short boot_dip = 0;
-
-    // Get the boot device
-    switch (selection) {
-        case BOOT_DEFAULT:
-            // User chose the default. Look at the DIP switches to determine the boot source
-            boot_dip = *GABE_DIP_REG & GABE_DIP_BOOT_MASK;
-            switch (boot_dip) {
-                case 0x0000:
-                    // Boot from IDE
-                    device = BDEV_HDC;
-                    log(LOG_INFO, "Boot DIP set for IDE");
-                    break;
-
-                case 0x0001:
-                    // Boot from SDC
-                    device = BDEV_SDC;
-                    log(LOG_INFO, "Boot DIP set for SDC");
-                    break;
-
-                case 0x0002:
-                    // Boot from Floppy
-                    device = BDEV_FDC;
-                    log(LOG_INFO, "Boot DIP set for FDC");
-                    break;
-
-                default:
-                    // Boot straight to REPL
-                    log(LOG_INFO, "Boot DIP set for REPL");
-                    device = -1;
-                    break;
-            }
-            break;
-
-        default:
-            device = selection;
-            break;
-    }
-
-    // if (device >= 0) {
-    //     // Try to load the boot sector
-    //     short result = bdev_read(device, 0, boot_sector, 512);
-    //     if (result == 0) {
-    //         // Check to see if it's bootable
-    //
-    //     }
-    // }
-    //
-    // if (bootable) {
-    //     // TODO: If bootable, run it
-    //
-    // } else {
-        // If not bootable...
-        if (device >= 0) {
-            // Execute startup file on boot device (if present)
-            switch (device) {
-                case BDEV_SDC:
-                    if (cli_exec_batch(cli_screen, MCP_INIT_SDC) != 0) {
-                        cli_exec_batch(cli_screen, MCP_INIT_HDC);
-                    }
-                    break;
-
-                case BDEV_FDC:
-                    if (cli_exec_batch(cli_screen, MCP_INIT_FDC) != 0) {
-                        cli_exec_batch(cli_screen, MCP_INIT_HDC);
-                    }
-                    break;
-
-                case BDEV_HDC:
-                    cli_exec_batch(cli_screen, MCP_INIT_HDC);
-                    break;
-
-                default:
-                    break;
-            }
-        }
-
-        // Start up REPL
-        cli_repl(cli_screen);
-    // }
-}
-
 int main(int argc, char * argv[]) {
     const char * color_bars = "\x1b[31m\x0b\x0c\x1b[35m\x0b\x0c\x1b[33m\x0b\x0c\x1b[32m\x0b\x0c\x1b[36m\x0b\x0c";
 
@@ -443,6 +278,12 @@ int main(int argc, char * argv[]) {
 
     initialize();
 
+    // Make sure the command path is set to the default before we get started
+    cli_command_set("");
+
+    // Display the splash screen and wait for user input
+    short boot_dev = boot_screen();
+
     sprintf(welcome, "    %s%s\n   %s %s\n  %s  %s\n %s   %s\n%s    %s\n\n", color_bars, title_1, color_bars, title_2, color_bars, title_3, color_bars, title_4, color_bars, title_5);
     sys_chan_write(0, welcome, strlen(welcome));
 
@@ -450,8 +291,7 @@ int main(int argc, char * argv[]) {
     sys_chan_write(0, welcome, strlen(welcome));
 
     // Start the boot process
-    // TODO: allow for a user keypress to over-ride the boot device
-    boot_chain(BDEV_SDC);
+    boot_from_bdev(boot_dev);
 
     log(LOG_INFO, "Stopping.");
 

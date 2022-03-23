@@ -83,4 +83,12 @@ extern unsigned char i_to_bcd(unsigned short n);
  */
 extern void dump_buffer(short channel, const unsigned char * buffer, short size, short labels);
 
+/**
+ * Convert a string to upper case
+ *
+ * @param src the string to convert
+ * @param dst the buffer in which to copy the converted string
+ */
+extern void str_upcase(const char * src, char * dst);
+
 #endif

@@ -781,7 +781,10 @@ short con_install() {
     /* Pre-open the console and EVID channels */
 
     chan_open(CDEV_CONSOLE, 0, 0);
-    // chan_open(CDEV_EVID, 0, 0);
+
+#if MODEL == MODEL_FOENIX_A2560K
+    chan_open(CDEV_EVID, 0, 0);
+#endif
 
     return result;
 }

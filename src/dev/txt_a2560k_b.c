@@ -11,7 +11,7 @@
 #include "dev/txt_screen.h"
 #include "dev/txt_a2560k_b.h"
 
-extern const unsigned char foenix_st_8x8[];
+extern const unsigned char MSX_CP437_8x8_bin[];
 
 /* Default text color lookup table values (AARRGGBB) */
 const unsigned long a2560k_b_lut[VKY3_B_LUT_SIZE] = {
@@ -544,14 +544,14 @@ void txt_a2560k_b_init() {
     txt_a2560k_b_set_color(0x07, 0x04);
 
     /* Set the font */
-    txt_a2560k_b_set_font(8, 8, foenix_st_8x8);             /* Use 8x8 font */
+    txt_a2560k_b_set_font(8, 8, MSX_CP437_8x8_bin);         /* Use 8x8 font */
 
     /* Set the cursor */
     txt_a2560k_b_set_cursor(1, 0, 0xB1);
 
     /* Set the border */
-    txt_a2560k_b_set_border(32, 32);                        /* No border for now */
-    txt_a2560k_b_set_border_color(0x7f, 0x00, 0x7f);
+    txt_a2560k_b_set_border(16, 16);                            /* Set up the border */
+    txt_a2560k_b_set_border_color(0, 0, 0x3f);
 
     /*
      * Enable set_sizes, now that everything is set up initially

@@ -682,3 +682,15 @@ const char * sys_err_message(short err_number) {
 short sys_kbd_layout(const char * tables) {
     return syscall(KFN_KBD_LAYOUT, tables);
 }
+
+/**
+ * Load and execute an executable file
+ *
+ * @param path the path to the executable file
+ * @param argc the number of arguments passed
+ * @param argv the array of string arguments
+ * @return the return result of the program
+ */
+short sys_proc_run(const char * path, int argc, char * argv[]) {
+    return syscall(KFN_RUN, path, argc, argv);
+}
