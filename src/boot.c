@@ -88,7 +88,7 @@ void cli_command_get(char * path) {
  *
  * @return 0 if not bootable, non-zero if bootable
  */
-short is_bootable(unsigned short * sector, short device) {
+short is_bootable(unsigned char * sector, short device) {
     switch(device) {
         case BDEV_FDC:
             // TODO: handled floppy drives
@@ -346,9 +346,16 @@ void boot_from_bdev(short device) {
     }
 
     if (device >= 0) {
+        int i;
+        
+        for (i = 0; i < 512; i++) {
+            // Zero out the buffer
+            BOOT_SECTOR_BUFFER[i] = 0;
+        }
+
         // Try to load the boot sector
         short result = bdev_read(device, 0, BOOT_SECTOR_BUFFER, 512);
-        if (result == 0) {
+        if (result > 0) {
             // Check to see if it's bootable
             bootable = is_bootable(BOOT_SECTOR_BUFFER, device);
         }
@@ -356,7 +363,6 @@ void boot_from_bdev(short device) {
 
     if (bootable) {
         // If bootable, run it
-        print(cli_screen, "Running boot sector!\n");
         boot_sector_run(device);
 
     } else {
@@ -365,21 +371,18 @@ void boot_from_bdev(short device) {
             // Execute startup file on boot device (if present)
             switch (device) {
                 case BDEV_SDC:
-                    print(cli_screen, "Reading configuration from SDC.\n");
                     if (cli_exec_batch(cli_screen, MCP_INIT_SDC) != 0) {
                         cli_exec_batch(cli_screen, MCP_INIT_HDC);
                     }
                     break;
 
                 case BDEV_FDC:
-                    print(cli_screen, "Reading configuration from floppy.\n");
                     if (cli_exec_batch(cli_screen, MCP_INIT_FDC) != 0) {
                         cli_exec_batch(cli_screen, MCP_INIT_HDC);
                     }
                     break;
 
                 case BDEV_HDC:
-                    print(cli_screen, "Reading configuration from PATA.\n");
                     cli_exec_batch(cli_screen, MCP_INIT_HDC);
                     break;
 
@@ -446,15 +449,16 @@ short boot_non_booting(short device) {
 }
 
 const unsigned char boot_from_file_sector[] = {
-    0x60, 0x00, 0x00, 0x06,     //          bra.w boot
-    CPU_M68000, 0x00, 0xf0, 0xe1,     //          dc.b CPU_M68000, 0, 0xf0, 0xe1
-    0x30, 0x3c, 0x00, 0x40,     // boot:    move.w #$40,d0
-    0x20, 0x7a, 0x00, 0x0c,     //          move.l path(pc),a0
-    0x42, 0x82,                 //          clr.l d2
-    0x42, 0x43,                 //          clr.l d3
-    0x4e, 0x4f,                 //          trap #15
-    0x4e, 0x71,                 // bootloop nop
-    0x60, 0xfc                  //          bra bootloop
+    0x60, 0x00, 0x00, 0x06,         //          bra.w boot
+    CPU_M68000, 0x00, 0xf0, 0xe1,   //          dc.b CPU_M68000, 0, 0xf0, 0xe1
+    0x30, 0x3c, 0x00, 0x40,         // boot:    move.w #$40,d0
+    0x43, 0xfa, 0x00, 0x0e,         //          lea (path,pc),a1
+    0x22, 0x09,                     //          move.l a1,d1
+    0x42, 0x82,                     //          clr.l d2
+    0x42, 0x83,                     //          clr.l d3
+    0x4e, 0x4f,                     //          trap #15
+    0x4e, 0x71,                     // bootloop nop
+    0x60, 0xfc                      //          bra bootloop
 };
 
 /**
@@ -468,8 +472,6 @@ short boot_set_file(short device, const char * path) {
     unsigned char * buffer, x;
     short result = 0, i = 0;
 
-    print(0, "Attempting to boot_set_file\n");
-
     buffer = (unsigned char *)malloc(FSYS_SECTOR_SZ);
     if (buffer != 0) {
         // Try to read the current sector
@@ -479,13 +481,11 @@ short boot_set_file(short device, const char * path) {
             int path_len = strlen(path);
 
             // Boot record read... clear it out
-            print(0, "Clearing\n");
             for (i = 0; i < 0x1B0; i++) {
                 buffer[i] = 0;
             }
 
             // Copy the boot code over
-            print(0, "Copying code\n");
             for (i = 0; i < sector_len; i++) {
                 buffer[i] = boot_from_file_sector[i];
             }
@@ -497,11 +497,9 @@ short boot_set_file(short device, const char * path) {
             buffer[path_len + sector_len] = 0;
 
             // Try to write it back
-            print(0, "Writing\n");
             n = sys_bdev_write(device, 0, buffer, FSYS_SECTOR_SZ);
             if (n == FSYS_SECTOR_SZ) {
                 // Success!
-                print(0, "Done\n");
                 result = 0;
             } else {
                 result = DEV_CANNOT_WRITE;
