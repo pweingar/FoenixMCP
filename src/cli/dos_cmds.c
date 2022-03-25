@@ -8,6 +8,7 @@
 #include "simpleio.h"
 #include "cli.h"
 #include "proc.h"
+#include "boot.h"
 #include "cli/dos_cmds.h"
 #include "dev/block.h"
 #include "dev/fsys.h"
@@ -158,7 +159,7 @@ short cmd_copy(short screen, int argc, const char * argv[]) {
     char path[MAX_PATH_LEN];
 
     bool is_directory = false;
-    bool is_append_file = false; 
+    bool is_append_file = false;
 
     TRACE("cmd_copy");
 
@@ -170,7 +171,7 @@ short cmd_copy(short screen, int argc, const char * argv[]) {
             is_directory = dst_info.fattrib & AM_DIR;
         } else if (result == FR_NO_FILE) {
             is_directory = false;
-        } else {            
+        } else {
             goto error;
         }
 
@@ -181,7 +182,7 @@ short cmd_copy(short screen, int argc, const char * argv[]) {
 
             result = f_open(&src_file, src_info.fname, FA_READ);
             if (result != FR_OK) goto error;
-            
+
             if (is_directory) {
                 sprintf(path, "%s/%s", dst_info.fname, src_info.fname);
                 result = f_open(&dst_file, path, FA_WRITE | FA_CREATE_ALWAYS);
@@ -190,7 +191,7 @@ short cmd_copy(short screen, int argc, const char * argv[]) {
             } else {
                 result = f_open(&dst_file, path, FA_WRITE | FA_CREATE_ALWAYS);
             }
-            if (result != FR_OK) goto error;        
+            if (result != FR_OK) goto error;
 
             print(screen, (is_append_file) ? "Appending " : "Copying ");
             print(screen, src_info.fname);
@@ -205,7 +206,7 @@ short cmd_copy(short screen, int argc, const char * argv[]) {
                 result = f_write(&dst_file, buffer, br, &bw);           /* Write it to the destination file */
                 if (bw < br) break; /* error or disk full */
             }
-            
+
             f_close(&src_file);
             f_close(&dst_file);
 
@@ -426,6 +427,87 @@ short cmd_label(short screen, int argc, const char * argv[]) {
         print(screen, "USAGE: LABEL <drive #> <label>\n");
         return -1;
     }
+}
+
+/**
+ * Command to make a device bootable by writing to the MBR or VBR
+ *
+ * MKBOOT <drive #> -r --- removes boot record
+ * MKBOOT <drive #> -b <boot record path> --- installs boot record
+ * MKBOOT <drive #> -s <start file path> --- defines a startup file
+ */
+short cmd_mkboot(short screen, int argc, const char * argv[]) {
+    const char * usage = "USAGE: MKBOOT <drive #> -r\n       MKBOOT <drive #> -b <boot record path>\n       MKBOOT <drive #> -s <start file path>\n";
+    short mode = 0;
+    unsigned char * boot_sector = 0;
+    unsigned char * new_boot_sector = 0;
+    char message[80];
+    short dev = 0;
+    short i = 0;
+    short result = 0;
+
+    // Parse the inputs...
+    if (argc == 3) {
+        // Must be -r
+        if (strcmp("-r", argv[2]) == 0) {
+            mode = 0;
+            dev = cli_eval_number(argv[1]);
+        } else {
+            print(screen, usage);
+            return -1;
+        }
+
+    } else if (argc == 4) {
+        // Can be either -b or -s
+        if (strcmp("-b", argv[2]) == 0) {
+            // -b
+            mode = 1;
+
+        } else if (strcmp("-s", argv[2]) == 0) {
+            // -s
+            mode = 2;
+
+        } else {
+            print(screen, usage);
+            return -1;
+        }
+
+    } else {
+        // Bad arguments...
+        print(screen, usage);
+        return -1;
+    }
+
+    switch (mode) {
+        case 0:
+            // Clear out the boot record
+            result = boot_non_booting(dev);
+            if (result != 0) {
+                sprintf(message, "Could not change boot record: %s\n", err_message(result));
+                print(screen, message);
+            } else {
+                print(screen, "Boot record updated.\n");
+            }
+            break;
+
+        case 2:
+            // Write a boot sector that loads and runs a file
+             result = boot_set_file(dev, argv[3]);
+             if (result != 0) {
+                 sprintf(message, "Could not change boot record: %s\n", err_message(result));
+                 print(screen, message);
+             } else {
+                 print(screen, "Boot record updated.\n");
+             }
+             break;
+
+        default:
+            print(screen, "Unknown MKBOOT operation.\n");
+            result = -1;
+            break;
+    }
+
+    return result;
 }
 
 /*

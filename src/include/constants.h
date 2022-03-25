@@ -10,7 +10,9 @@
  * Miscellaneous definitions
  */
 
-#define MAX_TRIES_BUSY  100000   /* The maximum number of times to check for an operation to complete (general purpose) */
+#define FSYS_SECTOR_SZ  512     /* Size of a sector */
+#define MAX_PATH_LEN    256     /* Maximum length of a file path */
+#define MAX_TRIES_BUSY  100000  /* The maximum number of times to check for an operation to complete (general purpose) */
 
 /*
  * Definitions of special characters

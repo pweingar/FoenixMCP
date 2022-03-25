@@ -4,9 +4,12 @@
  * Routines to support the boot process
  */
 
+#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include "boot.h"
+#include "constants.h"
+#include "errors.h"
 #include "gabe_reg.h"
 #include "log.h"
 #include "simpleio.h"
@@ -23,7 +26,7 @@
 #include "rsrc/bitmaps/splash_a2560k.h"
 #endif
 
-#define SPLASH_WAIT_SEC 15
+#define SPLASH_WAIT_SEC     15      /* How many seconds to wait on the splash screen */
 
 /*
  * Important scan codes
@@ -35,11 +38,14 @@
 #define SC_RETURN   0x1C
 
 /* TODO: move this to constants.h */
-#define MAX_PATH_LEN        256
+
 
 #define BOOT_SECTOR_BUFFER  ((volatile unsigned char *)0x00004000)
-#define BOOT_SECTOR_VBR_OFF 0x060
-#define BOOT_SECTOR_MBR_OFF 0x000
+#define BOOT_CODE_MBR_OFF   0x000                   /* Offset to the code in the MBR */
+#define BOOT_CPUID_MBR_OFF  0x004                   /* Offset to the CPUID in the MBR */
+#define BOOT_SIG_MBR_OFF    0x006                   /* Offset to the boot signature in the MBR */
+
+#define BOOT_SIG            0xF0E1                  /* Foenix/MCP boot signature expected */
 
 const char * MCP_INIT_SDC = "/sd/system/mcp.init";  /**< Path to config file on the SD card */
 const char * MCP_INIT_FDC = "/fd/system/mcp.init";  /**< Path to config file on the floppy drive */
@@ -83,21 +89,32 @@ void cli_command_get(char * path) {
  * @return 0 if not bootable, non-zero if bootable
  */
 short is_bootable(unsigned short * sector, short device) {
-    short bootable = 0;
-
     switch(device) {
         case BDEV_FDC:
-        case BDEV_SDC:
+            // TODO: handled floppy drives
             break;
 
+        case BDEV_SDC:
         case BDEV_HDC:
+            // The SDC and HDC boot off the MBR...
+            // Check for the CPUID and boot signature
+            if ((sector[BOOT_CPUID_MBR_OFF] == CPU_M68000) ||
+                (sector[BOOT_CPUID_MBR_OFF] == CPU_M68040)) {
+                if ((sector[BOOT_SIG_MBR_OFF] == ((BOOT_SIG >> 8) & 0x00FF)) &&
+                    (sector[BOOT_SIG_MBR_OFF+1] == (BOOT_SIG & 0x00FF))) {
+                    // The CPU is supported, and the boot signature is correct
+                    return 1;
+                }
+            }
             break;
 
         default:
+            // Otherwise: we're not bootable
             break;
     }
 
-    return bootable;
+    // If we have reached this point, the sector is not bootable
+    return 0;
 }
 
 /**
@@ -106,17 +123,17 @@ short is_bootable(unsigned short * sector, short device) {
  * @param device the number of the block device for the sector
  */
 void boot_sector_run(short device) {
-    FUNC_V_2_V boot_sector = (FUNC_V_2_V)(BOOT_SECTOR_BUFFER + 0x060);
+    FUNC_V_2_V boot_sector = 0;
 
     switch(device) {
         case BDEV_FDC:
-        case BDEV_SDC:
-            boot_sector = (FUNC_V_2_V)(BOOT_SECTOR_BUFFER + BOOT_SECTOR_VBR_OFF);
-            boot_sector();
+            // TODO: support floppy drives
             break;
 
+        case BDEV_SDC:
         case BDEV_HDC:
-            boot_sector = (FUNC_V_2_V)(BOOT_SECTOR_BUFFER + BOOT_SECTOR_MBR_OFF);
+            // The SDC and HDC both boot off the MBR
+            boot_sector = (FUNC_V_2_V)(BOOT_SECTOR_BUFFER);
             boot_sector();
             break;
 
@@ -328,22 +345,21 @@ void boot_from_bdev(short device) {
             break;
     }
 
-    // if (device >= 0) {
-    //     // Try to load the boot sector
-    //     short result = bdev_read(device, 0, BOOT_SECTOR_BUFFER, 512);
-    //     if (result == 0) {
-    //         // Check to see if it's bootable
-    //         switch (device) {
-    //             bootable = is_bootable(BOOT_SECTOR_BUFFER, device);
-    //         }
-    //     }
-    // }
+    if (device >= 0) {
+        // Try to load the boot sector
+        short result = bdev_read(device, 0, BOOT_SECTOR_BUFFER, 512);
+        if (result == 0) {
+            // Check to see if it's bootable
+            bootable = is_bootable(BOOT_SECTOR_BUFFER, device);
+        }
+    }
 
-    // if (bootable) {
-    //     // If bootable, run it
-    //     boot_sector_run(device);
-    //
-    // } else {
+    if (bootable) {
+        // If bootable, run it
+        print(cli_screen, "Running boot sector!\n");
+        boot_sector_run(device);
+
+    } else {
         // If not bootable...
         if (device >= 0) {
             // Execute startup file on boot device (if present)
@@ -381,5 +397,128 @@ void boot_from_bdev(short device) {
             // No over-ride provided... boot the default
             cli_repl(cli_screen);
         }
-    // }
+    }
+}
+
+/**
+ * Make the indicated drive non booting by erasing the boot information
+ *
+ * @param device the number of the block device to use for booting (-1 to go straight to CLI)
+ * @return 0 on success, any other number is an error
+ */
+short boot_non_booting(short device) {
+    unsigned char * buffer;
+    short result = 0;
+
+    buffer = (unsigned char *)malloc(FSYS_SECTOR_SZ);
+    if (buffer != 0) {
+        // Try to read the current sector
+        short n = sys_bdev_read(device, 0, buffer, FSYS_SECTOR_SZ);
+        if (n == FSYS_SECTOR_SZ) {
+            // Boot record read... clear it out
+            for (int i = 0; i < 0x0DA; i++) {
+                buffer[i] = 0;
+            }
+
+            // Try to write it back
+            n = sys_bdev_write(device, 0, buffer, FSYS_SECTOR_SZ);
+            if (n == FSYS_SECTOR_SZ) {
+                // Success!
+                result = 0;
+            } else {
+                result = DEV_CANNOT_WRITE;
+            }
+
+        } else {
+            result = DEV_CANNOT_READ;
+        }
+
+    } else {
+        result = ERR_OUT_OF_MEMORY;
+    }
+
+    // Clear up the memory we grabbed...
+    if (buffer) {
+        free(buffer);
+    }
+
+    return result;
+}
+
+const unsigned char boot_from_file_sector[] = {
+    0x60, 0x00, 0x00, 0x06,     //          bra.w boot
+    CPU_M68000, 0x00, 0xf0, 0xe1,     //          dc.b CPU_M68000, 0, 0xf0, 0xe1
+    0x30, 0x3c, 0x00, 0x40,     // boot:    move.w #$40,d0
+    0x20, 0x7a, 0x00, 0x0c,     //          move.l path(pc),a0
+    0x42, 0x82,                 //          clr.l d2
+    0x42, 0x43,                 //          clr.l d3
+    0x4e, 0x4f,                 //          trap #15
+    0x4e, 0x71,                 // bootloop nop
+    0x60, 0xfc                  //          bra bootloop
+};
+
+/**
+ * Make the indicated drive booting from a file
+ *
+ * @param device the number of the block device to use for booting (-1 to go straight to CLI)
+ * @param path the path to the file to boot from
+ * @return 0 on success, any other number is an error
+ */
+short boot_set_file(short device, const char * path) {
+    unsigned char * buffer, x;
+    short result = 0, i = 0;
+
+    print(0, "Attempting to boot_set_file\n");
+
+    buffer = (unsigned char *)malloc(FSYS_SECTOR_SZ);
+    if (buffer != 0) {
+        // Try to read the current sector
+        short n = sys_bdev_read(device, 0, buffer, FSYS_SECTOR_SZ);
+        if (n == FSYS_SECTOR_SZ) {
+            int sector_len = sizeof(boot_from_file_sector);
+            int path_len = strlen(path);
+
+            // Boot record read... clear it out
+            print(0, "Clearing\n");
+            for (i = 0; i < 0x1B0; i++) {
+                buffer[i] = 0;
+            }
+
+            // Copy the boot code over
+            print(0, "Copying code\n");
+            for (i = 0; i < sector_len; i++) {
+                buffer[i] = boot_from_file_sector[i];
+            }
+
+            // Insert the path
+            for (i = 0; i < path_len; i++) {
+                buffer[i + sector_len] = path[i];
+            }
+            buffer[path_len + sector_len] = 0;
+
+            // Try to write it back
+            print(0, "Writing\n");
+            n = sys_bdev_write(device, 0, buffer, FSYS_SECTOR_SZ);
+            if (n == FSYS_SECTOR_SZ) {
+                // Success!
+                print(0, "Done\n");
+                result = 0;
+            } else {
+                result = DEV_CANNOT_WRITE;
+            }
+
+        } else {
+            result = DEV_CANNOT_READ;
+        }
+
+    } else {
+        result = ERR_OUT_OF_MEMORY;
+    }
+
+    // Clear up the memory we grabbed...
+    if (buffer) {
+        free(buffer);
+    }
+
+    return result;
 }

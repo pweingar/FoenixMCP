@@ -5,9 +5,9 @@
 #ifndef __FSYS_H
 #define __FSYS_H
 
+#include "constants.h"
 #include "types.h"
 
-#define MAX_PATH_LEN        256
 #define DEFAULT_CHUNK_SIZE  256
 
 /**

@@ -84,4 +84,13 @@ extern short cmd_label(short screen, int argc, const char * argv[]);
  */
 extern short cmd_format(short screen, int argc, const char * argv[]);
 
+/**
+ * Command to make a device bootable by writing to the MBR or VBR
+ *
+ * MKBOOT <drive #> -r --- removes boot record
+ * MKBOOT <drive #> -b <boot record path> --- installs boot record
+ * MKBOOT <drive #> -s <start file path> --- defines a startup file
+ */
+extern short cmd_mkboot(short screen, int argc, const char * argv[]);
+
 #endif

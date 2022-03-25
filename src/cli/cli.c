@@ -70,6 +70,7 @@ const t_cli_command g_cli_commands[] = {
     { "GETTICKS", "GETTICKS : print number of ticks since reset", cmd_get_ticks },
     { "LABEL", "LABEL <drive#> <label> : set the label of a drive", cmd_label },
     { "LOAD", "LOAD <path> : load a file into memory", cmd_load },
+    { "MKBOOT", "MKBOOT <drive #> -r | -b <boot sector path> | -s <start file path> : make a drive bootable", cmd_mkboot },
     { "MKDIR", "MKDIR <path> : create a directory", cmd_mkdir },
     { "PEEK8", "PEEK8 <addr> : print the byte at the address in memory", mem_cmd_peek8 },
     { "PEEK16", "PEEK16 <addr> : print the 16-bit word at the address in memory", mem_cmd_peek16 },
@@ -322,7 +323,7 @@ short cli_repl(short channel) {
  * @param path the path to the configuration file to load
  * @return 0 on success, any other number is an error
  */
-extern short cli_exec_batch(short channel, const char * path) {
+short cli_exec_batch(short channel, const char * path) {
     char command_line[MAX_COMMAND_SIZE];
 
     short fd = sys_fsys_open(path, 0x01);   // Open for reading...
@@ -336,7 +337,7 @@ extern short cli_exec_batch(short channel, const char * path) {
             result = sys_chan_readline(fd, command_line, MAX_COMMAND_SIZE);
             if (result > 0) {
                 // We got a line, so parse it
-                cli_process_line(channel, command_line)
+                cli_process_line(channel, command_line);
             }
         } while (result > 0);   // Until we don't get a line
 
