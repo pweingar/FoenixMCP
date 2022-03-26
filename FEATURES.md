@@ -22,11 +22,14 @@
 1. [x] Command Line Interface
 1. [ ] Mouse driver
 1. [ ] Boot from media support (hard drive, SDC, floppy)
+    1. [X] Boot from SDC
+    1. [X] Boot from hard drive
+    1. [ ] Boot from floppy
 
 ## CLI Features
 
 1. [x] Ability to load a file
-1. [ ] Auto-run/configuration file
+1. [x] Auto-run/configuration file
 1. Built-in commands:
     1. [x] DIR [path]
     1. [x] COPY [path] TO [path]
