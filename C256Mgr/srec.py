@@ -1,5 +1,13 @@
 import re
 
+def tailpad(data):
+    datalen = len(data)
+    pad = datalen % 4
+    if pad > 0:
+        return data.ljust(datalen + pad, '0')
+    else:
+        return data
+
 class SRECFile:
     """Read information from a Motorola SREC file."""
 
@@ -52,7 +60,7 @@ class SRECFile:
             address = int(m2.group(2), 16)
             data = m2.group(3)
             crc = int(m2.group(4), 16)
-            self.handler(address, data)
+            self.handler(address, tailpad(data))
 
         elif code == 2:
             # Unpack a record with a 24-bit address
@@ -61,7 +69,7 @@ class SRECFile:
             address = int(m2.group(2), 16)
             data = m2.group(3)
             crc = int(m2.group(4), 16)
-            self.handler(address, data)
+            self.handler(address, tailpad(data))
 
         elif code == 3:
             # Unpack a record with a 32-bit address
@@ -70,4 +78,4 @@ class SRECFile:
             address = int(m2.group(2), 16)
             data = m2.group(3)
             crc = int(m2.group(4), 16)
-            self.handler(address, data)
+            self.handler(address, tailpad(data))
