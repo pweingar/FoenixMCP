@@ -18,6 +18,21 @@
  */
 extern short kbdmo_init();
 
+/**
+ * Set the color of the A2560K keyboard LED matrix
+ *
+ * @param row the number of the row to set (0 - 5)
+ * @param color the color for the LEDs: ARGB
+ */
+void kbdmo_set_led_matrix_row(unsigned char row, unsigned short color);
+
+/**
+ * Set all the LEDs to the same color
+ *
+ * @param color the color for the LEDs: ARGB
+ */
+void kbdmo_set_led_matrix_fill(unsigned short color);
+
 /*
  * Check to see if a BREAK code has been pressed recently
  * If so, return 1 and reset the internal flag.

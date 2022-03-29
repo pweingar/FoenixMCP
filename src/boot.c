@@ -17,6 +17,7 @@
 #include "sys_general.h"
 #include "vicky_general.h"
 #include "cli/cli.h"
+#include "dev/kbd_mo.h"
 #include "dev/txt_screen.h"
 
 #include "rsrc/font/quadrotextFONT.h"
@@ -26,7 +27,7 @@
 #include "rsrc/bitmaps/splash_a2560k.h"
 #endif
 
-#define SPLASH_WAIT_SEC     15      /* How many seconds to wait on the splash screen */
+#define SPLASH_WAIT_SEC     10      /* How many seconds to wait on the splash screen */
 
 /*
  * Important scan codes
@@ -51,8 +52,30 @@ const char * MCP_INIT_SDC = "/sd/system/mcp.init";  /**< Path to config file on 
 const char * MCP_INIT_FDC = "/fd/system/mcp.init";  /**< Path to config file on the floppy drive */
 const char * MCP_INIT_HDC = "/hd/system/mcp.init";  /**< Path to config file on the IDE drive */
 
+// Colors for the A2560K keyboard LED matrix
+const unsigned short kbd_colors[] = {0x000F, 0x0FF, 0x00F0, 0x0FF0, 0x0F70, 0x0F00};
+
 short cli_screen = 0;                               /**< The default screen to use for the REPL of the CLI */
 char cli_command_path[MAX_PATH_LEN];                /**< Path to the command processor (empty string for built-in) */
+
+/**
+ * On the A2560K, animate the LEDs based on the current time while we're waiting for a key press
+ *
+ * @param max_ticks the value of the jiffy counter when the boot screen will end
+ * @param ticks the current value of the jiffy counter
+ * @param min_ticks the starting value of the jiffy counter
+ */
+void boot_animate_keyboard(unsigned long max_ticks, unsigned long ticks, unsigned long min_ticks) {
+#if MODEL == MODEL_FOENIX_A2560K
+    const int animation_steps = 7;
+    int current_step = (int)(((ticks - min_ticks) * animation_steps) / (max_ticks - min_ticks));
+    int i;
+
+    for (i = 0; i < current_step; i++) {
+        kbdmo_set_led_matrix_row(current_step - i - 1, kbd_colors[5 - i]);
+    }
+#endif
+}
 
 /**
  * Set the path of the command shell
@@ -161,7 +184,9 @@ short boot_screen() {
     short screen = 0;
     char buffer[256];
     char entry[50];
-    long target_jiffies = 0;
+    unsigned long target_jiffies = 0;
+    unsigned long min_jiffies = 0;
+    unsigned long current_jiffies = 0;
     int i = 0;
     const unsigned char * pixels;
     volatile unsigned char * vram = VRAM_Bank0;
@@ -260,9 +285,13 @@ short boot_screen() {
     print(screen, buffer);
 
     /* Wait until the target duration has been reached _or_ the user presses a key */
-    sprintf(buffer, "Booting using the default device.");
-    target_jiffies = sys_time_jiffies() + SPLASH_WAIT_SEC * 60;
-    while (target_jiffies > sys_time_jiffies()) {
+    sprintf(buffer, "Booting from default device...\n");
+    min_jiffies = sys_time_jiffies();
+    target_jiffies = min_jiffies + SPLASH_WAIT_SEC * 60;
+    current_jiffies = sys_time_jiffies();
+    while (target_jiffies > current_jiffies) {
+        boot_animate_keyboard(target_jiffies, current_jiffies, min_jiffies);
+
         short scan_code = sys_kbd_scancode();
         if (scan_code != 0) {
             switch (scan_code) {
@@ -292,10 +321,17 @@ short boot_screen() {
             }
             break;
         }
+
+        current_jiffies = sys_time_jiffies();
     }
 
     txt_init_screen(screen);
     print(screen, buffer);
+
+#if MODEL == MODEL_FOENIX_A2560K
+    // Turn off the keyboard LEDs
+    kbdmo_set_led_matrix_fill(0);
+#endif
 
     return device;
 }
@@ -347,7 +383,7 @@ void boot_from_bdev(short device) {
 
     if (device >= 0) {
         int i;
-        
+
         for (i = 0; i < 512; i++) {
             // Zero out the buffer
             BOOT_SECTOR_BUFFER[i] = 0;

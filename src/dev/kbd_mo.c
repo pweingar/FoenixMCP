@@ -12,10 +12,12 @@
 #include "ring_buffer.h"
 #include "gabe_reg.h"
 
-#define KBD_MO_DATA     ((volatile unsigned int *)0xFEC00040)     /* Data register for the keyboard (scan codes will be here) */
-// #define KBD_MO_STAT     ((volatile unsigned short *)0xFEC00042)     /* Status register for the keyboard */
-#define KBD_MO_EMPTY    0x8000                                      /* Status flag that will be set if the keyboard buffer is empty */
-#define KBD_MO_FULL     0x4000                                      /* Status flag that will be set if the keyboard buffer is full */
+#define KBD_MO_LEDMATRIX    ((volatile unsigned short *)0xFEC01000) /* 6x16 array of 16-bit words: ARGB */
+#define KBD_MO_LED_ROWS     6
+#define KBD_MO_LED_COLUMNS  16
+#define KBD_MO_DATA         ((volatile unsigned int *)0xFEC00040)   /* Data register for the keyboard (scan codes will be here) */
+#define KBD_MO_EMPTY        0x8000                                  /* Status flag that will be set if the keyboard buffer is empty */
+#define KBD_MO_FULL         0x4000                                  /* Status flag that will be set if the keyboard buffer is full */
 
 /*
  * Modifier bit flags
@@ -180,6 +182,31 @@ static char g_us_sc_ctrl_shift[] = {
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00      /* 0x78 - 0x7F */
 };
 
+/**
+ * Set the color of the A2560K keyboard LED matrix
+ *
+ * @param row the number of the row to set (0 - 5)
+ * @param color the color for the LEDs: ARGB
+ */
+void kbdmo_set_led_matrix_row(unsigned char row, unsigned short color) {
+    int column;
+    for (column = 0; column < KBD_MO_LED_COLUMNS; column++) {
+        KBD_MO_LEDMATRIX[row * KBD_MO_LED_COLUMNS + column] = color;
+    }
+}
+
+/**
+ * Set all the LEDs to the same color
+ *
+ * @param color the color for the LEDs: ARGB
+ */
+void kbdmo_set_led_matrix_fill(unsigned short color) {
+    unsigned char row;
+    for (row = 0; row < KBD_MO_LED_ROWS; row++) {
+        kbdmo_set_led_matrix_row(row, color);
+    }
+}
+
 /*
  * Make sure everything is removed from Mo's input buffer
  */
@@ -225,6 +252,9 @@ short kbdmo_init() {
     TRACE("kbdmo_init");
 
     int_disable(INT_KBD_A2560K);
+
+    /* Turn off the LEDs */
+    kbdmo_set_led_matrix_fill(0);
 
     /* Set up the ring buffers */
 

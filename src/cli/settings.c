@@ -497,6 +497,23 @@ short cli_layout_get(short channel, char * value, short size) {
     return 0;
 }
 
+#if MODEL == MODEL_FOENIX_A2560K
+
+unsigned short kbd_mo_color = 0x0000;
+
+short cli_keycolor_set(short channel, const char * value) {
+    kbd_mo_color = (unsigned short)cli_eval_number(value);
+    kbdmo_set_led_matrix_fill(kbd_mo_color);
+    return 0;
+}
+
+short cli_keycolor_get(short channel, char * value, short size)  {
+    sprintf(value, "%04x", kbd_mo_color);
+    return 0;
+}
+
+#endif
+
 /*
  * Initialize the settings tables
  */
@@ -509,6 +526,9 @@ void cli_set_init() {
     // cli_set_register("SOF", "SOF 1|0 -- Enable or disable the Start of Frame interrupt", cli_sof_set, cli_sof_get);
     cli_set_register("FONT", "FONT <path> -- set a font for the display", cli_font_set, cli_font_get);
     cli_set_register("KEYBOARD", "KEYBOARD <path> -- set the keyboard layout", cli_layout_set, cli_layout_get);
+#if MODEL == MODEL_FOENIX_A2560K
+    cli_set_register("KEYCOLOR", "KEYCOLOR 0x0RGB -- set the keyboard color", cli_keycolor_set, cli_keycolor_get);
+#endif
     cli_set_register("TIME", "TIME HH:MM:SS -- set the time in the realtime clock", cli_time_set, cli_time_get);
     cli_set_register("VOLUME", "VOLUME <0 - 255> -- set the master volume", cli_volume_set, cli_volume_get);
 }

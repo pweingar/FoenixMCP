@@ -28,9 +28,9 @@
 #include "uart_reg.h"
 #include "vicky_general.h"
 
-#define LPT_DATA_PORT   ((volatile unsigned char *)0x00C02378)
+#define LPT_DATA_PORT   ((volatile unsigned char *)0xFEC02378)
 
-#define LPT_STAT_PORT   ((volatile unsigned char *)0x00C02379)
+#define LPT_STAT_PORT   ((volatile unsigned char *)0xFEC02379)
 #define LPT_STAT_BUSY   0x80
 #define LPT_STAT_ACK    0x40
 #define LPT_STAT_PO     0x20
@@ -38,7 +38,7 @@
 #define LPT_STAT_ERROR  0x08
 #define LPT_STAT_IRQ    0x04
 
-#define LPT_CTRL_PORT   ((volatile unsigned char *)0x00C0237A)
+#define LPT_CTRL_PORT   ((volatile unsigned char *)0xFEC0237A)
 #define LPT_CTRL_STROBE 0x01
 #define LPT_CTRL_AL     0x02
 #define LPT_CTRL_INIT   0x04
