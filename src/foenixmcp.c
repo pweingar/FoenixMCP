@@ -20,6 +20,7 @@
 #include "syscalls.h"
 #include "timers.h"
 #include "boot.h"
+#include "memory.h"
 #include "dev/block.h"
 #include "dev/channel.h"
 #include "dev/console.h"
@@ -27,7 +28,6 @@
 #include "dev/txt_screen.h"
 #include "dev/txt_a2560k_a.h"
 #include "dev/txt_a2560k_b.h"
-
 #include "dev/pata.h"
 #include "dev/ps2.h"
 #include "dev/rtc.h"
@@ -43,6 +43,8 @@
 #include "rsrc/font/MSX_CP437_8x8.h"
 
 const char* VolumeStr[FF_VOLUMES] = { "sd", "fd", "hd" };
+
+extern unsigned long __memory_start;
 
 #if MODEL == MODEL_FOENIX_A2560K
 /*
@@ -120,6 +122,9 @@ void initialize() {
 
     /* Set the logging level */
     log_setlevel(LOG_FATAL);
+
+    /* Initialize the memory system */
+    mem_init(__memory_start);
 
     // /* Hide the mouse */
     mouse_set_visible(0);

@@ -423,6 +423,10 @@ _call_user:
 
             move.l a2,-(a7)             ; Push the parameters list
             move.l d0,-(a7)             ; Push the parameter count
+
+            move.l a2,a1                ; Move argv to a convenient register
+            move.l d0,d1                ; Move argc to a convenient register
+
             jsr (a0)
 
 _restart_cli:

@@ -912,7 +912,7 @@ short fsys_pgz_loader(short chan, long destination, long * start) {
     short data_idx = 0;         /* Expected offset for the first byte of the data */
     short result = 0;
 
-    TRACE("fsys_pgx_loader");
+    TRACE("fsys_pgz_loader");
 
     /* Allocate the buffer we'll use for reading the file */
     chunk = malloc(DEFAULT_CHUNK_SIZE);

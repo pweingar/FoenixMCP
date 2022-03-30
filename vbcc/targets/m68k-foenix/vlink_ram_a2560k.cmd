@@ -41,4 +41,6 @@ SECTIONS
   ___kernel_vma_start = ADDR(text);
   ___kernel_lma_start = LOADADDR(text);
   ___kernel_lma_end = ___kernel_lma_start + SIZEOF(text);
+
+  ___memory_start = STORE_START;
 }
