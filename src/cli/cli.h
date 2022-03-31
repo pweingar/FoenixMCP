@@ -31,8 +31,9 @@ extern short cli_init();
  *
  * Inputs:
  * channel = the console channel to use for I/O
+ * init_cwd = pointer to the path for the initial current working directory
  */
-extern short cli_repl(short channel);
+extern short cli_repl(short channel, const char * init_cwd);
 
 /*
  * Evaluate an argument to a number

@@ -254,7 +254,7 @@ char * strtok_r(char * source, const char * delimiter, char ** saveptr) {
 
 void cli_rerepl() {
     while (1) {
-        cli_repl(g_current_channel);
+        cli_repl(g_current_channel, 0);
     }
 }
 
@@ -294,12 +294,20 @@ short cli_process_line(short channel, const char * command_line) {
 //
 // Enter the CLI's read-eval-print loop
 //
-short cli_repl(short channel) {
+short cli_repl(short channel, const char * init_cwd) {
     char command_line[MAX_COMMAND_SIZE];
     char cwd_buffer[MAX_PATH_LEN];
 
-
     g_current_channel = channel;
+
+    if (init_cwd != 0) {
+        short result = sys_fsys_set_cwd(init_cwd);
+        if (result) {
+            char message[80];
+            sprintf(message, "Unable to set startup directory: %s\n", err_message(result));
+            print(channel, message);
+        }
+    }
 
     while (1) {
         sys_chan_write(channel, "\n", 1);

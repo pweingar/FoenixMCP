@@ -29,11 +29,6 @@ void init_codec() {
 	*CODEC = 0x1845; 			// R12
 	codec_wait();
 
-    *CODEC = 0x1DFF; 			// R14 - Max ADC gain left
-	codec_wait();
-    *CODEC = 0x1CFF;			// R14 - Max ADC gain left
-	codec_wait();
-
     codec_set_volume(0xff);
 }
 

@@ -342,6 +342,7 @@ short boot_screen() {
  * @param device the number of the block device to use for booting (-1 to go straight to CLI)
  */
 void boot_from_bdev(short device) {
+    char initial_path[10];
     unsigned short boot_dip = 0;        // The setting on the user and boot mode DIP switches
     short bootable = 0;                 // Is the boot sector of the selected device bootable?
 
@@ -355,23 +356,27 @@ void boot_from_bdev(short device) {
                     // Boot from IDE
                     device = BDEV_HDC;
                     log(LOG_INFO, "Boot DIP set for IDE");
+                    strcpy(initial_path, "/hd");
                     break;
 
                 case 0x0001:
                     // Boot from SDC
                     device = BDEV_SDC;
                     log(LOG_INFO, "Boot DIP set for SDC");
+                    strcpy(initial_path, "/sd");
                     break;
 
                 case 0x0002:
                     // Boot from Floppy
                     device = BDEV_FDC;
                     log(LOG_INFO, "Boot DIP set for FDC");
+                    strcpy(initial_path, "/fd");
                     break;
 
                 default:
                     // Boot straight to REPL
                     log(LOG_INFO, "Boot DIP set for REPL");
+                    strcpy(initial_path, "/sd");
                     device = -1;
                     break;
             }
@@ -407,18 +412,21 @@ void boot_from_bdev(short device) {
             // Execute startup file on boot device (if present)
             switch (device) {
                 case BDEV_SDC:
+                    strcpy(initial_path, "/sd");
                     if (cli_exec_batch(cli_screen, MCP_INIT_SDC) != 0) {
                         cli_exec_batch(cli_screen, MCP_INIT_HDC);
                     }
                     break;
 
                 case BDEV_FDC:
+                    strcpy(initial_path, "/fd");
                     if (cli_exec_batch(cli_screen, MCP_INIT_FDC) != 0) {
                         cli_exec_batch(cli_screen, MCP_INIT_HDC);
                     }
                     break;
 
                 case BDEV_HDC:
+                    strcpy(initial_path, "/hd");
                     cli_exec_batch(cli_screen, MCP_INIT_HDC);
                     break;
 
@@ -434,7 +442,7 @@ void boot_from_bdev(short device) {
 
         } else {
             // No over-ride provided... boot the default
-            cli_repl(cli_screen);
+            cli_repl(cli_screen, initial_path);
         }
     }
 }
