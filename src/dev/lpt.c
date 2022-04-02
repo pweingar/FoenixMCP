@@ -29,19 +29,18 @@
 
 #define LPT_INIT_ON     0x08            /* Start the printer initialization process */
 #define LPT_INIT_OFF    0x0C            /* Stop the printer initialization process */
-#define LPT_STROBE_ON   0x0F            /* Strobe the printer */
-#define LPT_STROBE_OFF  0x0E            /* Drop the strobe to the printer */
+#define LPT_STROBE_ON   0x0D            /* Strobe the printer */
+#define LPT_STROBE_OFF  0x0C            /* Drop the strobe to the printer */
 
-short lpt_delay() {
-    int i;
-    short x;
-    for (i = 0, x = 0; i < 10; i++) {
-        x++;
-    }
-    return x;
+/**
+ * Wait a little bit...
+ */
+void lpt_delay() {
+    long target_jiffies = sys_time_jiffies() + 1;
+    while (target_jiffies > sys_time_jiffies()) ;
 }
 
-/*
+/**
  * Install the LPT driver
  */
 short lpt_install() {
@@ -53,43 +52,10 @@ void lpt_initialize() {
 
     /* Set the outputs to start the initialization process */
     *LPT_CTRL_PORT = LPT_INIT_ON;
-
-    /* Wait 50 micro seconds */
     lpt_delay();
 
     /* Set the outputs to stop the initialization process */
     *LPT_CTRL_PORT = LPT_INIT_OFF;
-
-    lpt_delay();
-}
-
-short lpt_wait_busy() {
-    unsigned char stat = 0;
-    do {
-        stat = *LPT_STAT_PORT;
-        if ((stat & LPT_STAT_ERROR) == 0) {
-            // There was an error...
-            DEBUG("LPT: lpt_wait_busy error");
-            return -1;
-        } else if (stat & LPT_STAT_PO) {
-            // Out of paper
-            DEBUG("LPT: lpt_wait_busy out of paper");
-            return -1;
-        }
-    } while ((stat & LPT_STAT_BUSY) == 0);
-
-    return 0;
-}
-
-short lpt_wait_ack() {
-    unsigned char stat = 0;
-    short counter = 0;
-
-    do {
-        stat = *LPT_STAT_PORT;
-    } while ((counter++ < 32000) && ((stat & LPT_STAT_ACK) != 0));
-
-    return 0;
 }
 
 /*
@@ -100,25 +66,25 @@ short lpt_write_b(p_channel chan, unsigned char b) {
     /* TODO: convert it to interrupt driven */
 
     /* Wait until the printer is not busy */
-    if (lpt_wait_busy()) {
-        // If we got an error, return an error
-        DEBUG("LPT: Error writing");
-        return -1;
+    while ((*LPT_STAT_PORT & LPT_STAT_BUSY) == 0) {
+        lpt_delay();
     }
 
-    *LPT_DATA_PORT = b;                 /* Send the byte */
-    *LPT_CTRL_PORT = LPT_STROBE_ON;     /* Strobe the interface */
+    /* Send the byte */
+    if (b == 0x1b) { b = 'E'}
+    *LPT_DATA_PORT = b;
+    sys_chan_write_b(0, b);
 
+    /* Strobe the interface */
+    //unsigned char ctrl = *LPT_CTRL_PORT;
+    *LPT_CTRL_PORT = LPT_STROBE_ON;
     lpt_delay();
+    *LPT_CTRL_PORT = LPT_STROBE_OFF;
 
-    /* Wait for the printer to acknowledge */
-    if (lpt_wait_ack()) {
-        // If we got an error, return an error
-        *LPT_CTRL_PORT = LPT_STROBE_OFF;    /* Drop the strobe */
-        return -1;
+    /* Wait until the printer is not busy */
+    while ((*LPT_STAT_PORT & LPT_STAT_BUSY) == 0) {
+        lpt_delay();
     }
-
-    *LPT_CTRL_PORT = LPT_STROBE_OFF;    /* Drop the strobe */
 
     return 0;                           /* Return success */
 }

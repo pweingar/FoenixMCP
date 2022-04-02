@@ -508,46 +508,73 @@ short cli_test_lpt(short screen, int argc, const char * argv[]) {
 
     sprintf(message, "Test parallel port:\nF1: DATA=00  F2: DATA=FF  F3: STRB=1  F4: STRB=0\n");
     sys_chan_write(screen, message, strlen(message));
-    sprintf(message, "F5: INIT=1  F6: INIT=0  F7: SEL=1  F8: SEL=0\nESC: Quit");
+    sprintf(message, "F5: INIT=1  F6: INIT=0  F7: SEL=1  F8: SEL=0\nESC: Quit\n");
     sys_chan_write(screen, message, strlen(message));
+
+    unsigned char ctrl = 0;
+    *LPT_CTRL_PORT = ctrl;
 
     while (1) {
         scancode = sys_kbd_scancode();
         switch (scancode) {
             case 0x3B:      /* F1 */
+                print(0, "DATA = 0x00\n");
                 *LPT_DATA_PORT = 0;
                 break;
 
             case 0x3C:      /* F2 */
-                *LPT_DATA_PORT = 0xff;
+                print(0, "DATA = 'A'\n");
+                *LPT_DATA_PORT = 'A';
                 break;
 
             case 0x3D:      /* F3 */
-                *LPT_CTRL_PORT = LPT_CTRL_STROBE;
+                ctrl |= LPT_CTRL_STROBE;
+                *LPT_CTRL_PORT = ctrl;
+                sprintf(message, "STROBE = TRUE [%02X]\n", ctrl);
+                print(0, message);
                 break;
 
             case 0x3E:      /* F4 */
-                *LPT_CTRL_PORT = 0;
+                ctrl &= ~LPT_CTRL_STROBE;
+                *LPT_CTRL_PORT = ctrl;
+                sprintf(message, "STROBE = FALSE [%02X]\n", ctrl);
+                print(0, message);
                 break;
 
             case 0x3F:      /* F5 */
-                *LPT_CTRL_PORT = 0;
+                ctrl |= LPT_CTRL_INIT;
+                *LPT_CTRL_PORT = ctrl;
+                sprintf(message, "INIT = TRUE [%02X]\n", ctrl);
+                print(0, message);
                 break;
 
             case 0x40:      /* F6 */
-                *LPT_CTRL_PORT = LPT_CTRL_INIT;
+                ctrl &= ~LPT_CTRL_INIT;
+                *LPT_CTRL_PORT = ctrl;
+                sprintf(message, "INIT = FALSE [%02X]\n", ctrl);
+                print(0, message);
                 break;
 
             case 0x41:      /* F7 */
-                *LPT_CTRL_PORT = LPT_CTRL_SELECT;
+                ctrl |= LPT_CTRL_SELECT;
+                *LPT_CTRL_PORT = ctrl;
+                sprintf(message, "SELECT = TRUE [%02X]\n", ctrl);
+                print(0, message);
                 break;
 
             case 0x42:      /* F8 */
-                *LPT_CTRL_PORT = 0;
+                ctrl &= ~LPT_CTRL_SELECT;
+                *LPT_CTRL_PORT = ctrl;
+                sprintf(message, "SELECT = FALSE [%02X]\n", ctrl);
+                print(0, message);
                 break;
 
-            case 0x1B:      /* ESC */
+            case 0x01:      /* ESC */
                 return 0;
+
+            case 0x02:      /* 1 */
+                *LPT_DATA_PORT = '\r';
+                break;
 
             default:
                 break;
@@ -559,7 +586,7 @@ short cli_test_lpt(short screen, int argc, const char * argv[]) {
 
 short cmd_test_print(short screen, int argc, const char * argv[]) {
 #if MODEL == MODEL_FOENIX_A2560K
-    const char * test_pattern = "0123456789ABCDEFGHIJKLMNOPQRTSUVWZXYZ\r\n";
+    const char * test_pattern = "0123456789ABCDEFGHIJKLMNOPQRTSUVWZXYZ\n\r";
 
     char message[80];
     unsigned short scancode = 0;
@@ -573,8 +600,8 @@ short cmd_test_print(short screen, int argc, const char * argv[]) {
     sys_chan_write(screen, message, strlen(message));
 
     while (scancode != 0x01) {
-        scancode = sys_kbd_scancode();
         lpt_write(0, test_pattern, strlen(test_pattern));
+        scancode = sys_kbd_scancode();
     }
 #endif
     return 0;
