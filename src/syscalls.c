@@ -162,7 +162,7 @@ short sys_chan_readline(short channel, unsigned char * buffer, short size) {
  *  0 on success, a negative value on error
  */
 short sys_chan_write_b(short channel, unsigned char b) {
-    return syscall(KFN_CHAN_WRITE_B, channel);
+    return syscall(KFN_CHAN_WRITE_B, channel, b);
 }
 
 /*

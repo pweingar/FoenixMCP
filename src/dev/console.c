@@ -58,6 +58,7 @@ extern void ansi_cuf(p_channel chan, short arg_count, short args[]);
 extern void ansi_cub(p_channel chan, short arg_count, short args[]);
 extern void ansi_cud(p_channel chan, short arg_count, short args[]);
 extern void ansi_cup(p_channel chan, short arg_count, short args[]);
+extern void ansi_cha(p_channel chan, short arg_count, short args[]);
 extern void ansi_ed(p_channel chan, short arg_count, short args[]);
 extern void ansi_el(p_channel chan, short arg_count, short args[]);
 extern void ansi_ich(p_channel chan, short arg_count, short args[]);
@@ -78,6 +79,7 @@ const t_ansi_seq ansi_sequence[] = {
     { 'B', ansi_cud },
     { 'C', ansi_cuf },
     { 'D', ansi_cub },
+    { 'G', ansi_cha },
     { 'J', ansi_ed },
     { 'K', ansi_el },
     { 'P', ansi_dch },
@@ -296,6 +298,25 @@ void ansi_cup(p_channel chan, short arg_count, short args[]) {
 }
 
 /*
+ * ANSI Handler: cursor horizontal absolute
+ */
+void ansi_cha(p_channel chan, short arg_count, short args[]) {
+    t_point position;
+    short column = 1;
+
+    TRACE("ansi_cha");
+
+    if (arg_count > 0) {
+        column = args[0];
+    }
+
+    if (column == 0) column = 1;
+
+    txt_get_xy(chan->dev, &position);
+    txt_set_xy(chan->dev, column - 1, position.y);
+}
+
+/*
  * ANSI Handler: erase in display
  */
 void ansi_ed(p_channel chan, short arg_count, short args[]) {
@@ -344,7 +365,7 @@ void ansi_ich(p_channel chan, short arg_count, short args[]) {
  * ANSI Handler: delete a character
  */
 void ansi_dch(p_channel chan, short arg_count, short args[]) {
-    unsigned short n = 2;
+    unsigned short n = 1;
 
     TRACE("ansi_dch");
 
@@ -352,7 +373,9 @@ void ansi_dch(p_channel chan, short arg_count, short args[]) {
         n = args[0];
     }
 
-    txt_delete(chan->dev, n);
+    if (n > 0) {
+        txt_delete(chan->dev, n);    
+    }
 }
 
 /*

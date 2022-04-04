@@ -668,9 +668,9 @@ void txt_delete(short screen, short count) {
             count = cursor.x;
         }
 
-        region.origin.x = old_region.origin.x + cursor.x - count;
+        region.origin.x = old_region.origin.x + cursor.x;
         region.origin.y = old_region.origin.y + cursor.y;
-        region.size.width = old_region.size.width - cursor.x + count;
+        region.size.width = old_region.size.width - cursor.x;
         region.size.height = 1;
         txt_set_region(screen, &region);
         txt_scroll(screen, count, 0);
