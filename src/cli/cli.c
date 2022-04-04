@@ -26,6 +26,7 @@
 #include "rtc_reg.h"
 #include "vicky_general.h"
 
+#define MAX_HISTORY_DEPTH   5
 #define MAX_COMMAND_SIZE    128
 #define MAX_ARGC            32
 
@@ -52,6 +53,8 @@ extern short cmd_get_ticks(short channel, int argc, const char * argv[]);
  */
 
 short g_current_channel = 0;
+
+char cli_history[MAX_HISTORY_DEPTH][MAX_COMMAND_SIZE];
 
 const t_cli_command g_cli_commands[] = {
     { "?", "? : print this helpful message", cmd_help },
@@ -483,6 +486,7 @@ short cli_readline(short channel, char * command_line) {
     char buffer[10];
     unsigned short key_code = 0;
     short i = 0, j = 0;
+    short history = 0;
 
     // Make sure key echo is turned off
     sys_chan_ioctrl(channel, 0x04, 0, 0);
@@ -539,7 +543,7 @@ short cli_readline(short channel, char * command_line) {
             // Special editing key
             switch (key_code & 0xF0FF) {
                 case CLI_KEY_LEFT:
-                    // TODO: move cursor to the left
+                    // Move cursor to the left
                     if (key_code & CLI_FLAG_CTRL) {
                         i = 0;
                         print(channel, "\x1b[3G");
@@ -549,11 +553,10 @@ short cli_readline(short channel, char * command_line) {
                             print(channel, "\x1b[D");
                         }
                     }
-
-                    break;;
+                    break;
 
                 case CLI_KEY_RIGHT:
-                    // TODO: move cursor right
+                    // Move cursor right
                     if (key_code & CLI_FLAG_CTRL) {
                         print(channel, "CTRL-RIGHT ");
                     } else {
@@ -565,13 +568,21 @@ short cli_readline(short channel, char * command_line) {
                     break;
 
                 case CLI_KEY_UP:
-                    // TODO: go back one command in history
-                    print(channel, "UP ");
+                    // Go back one command in history
+                    if ((history < MAX_HISTORY_DEPTH) && (cli_history[history][0] != 0)) {
+                        strcpy(command_line, cli_history[history++]);
+                        print(channel, "\x1b[3G\x1b[K");
+                        print(channel, command_line);
+                    }
                     break;
 
                 case CLI_KEY_DOWN:
-                    // TODO: go forward one command in history
-                    print(channel, "DOWN ");
+                    // Go forward one command in history
+                    if (history > 0) {
+                        strcpy(command_line, cli_history[--history]);
+                        print(channel, "\x1b[3G\x1b[K");
+                        print(channel, command_line);
+                    }
                     break;
 
                 case CLI_KEY_DEL:
@@ -640,6 +651,7 @@ short cli_repl(short channel, const char * init_cwd) {
     char command_line[MAX_COMMAND_SIZE];
     char cwd_buffer[MAX_PATH_LEN];
     short result = 0;
+    short i = 0;
 
     g_current_channel = channel;
 
@@ -672,6 +684,12 @@ short cli_repl(short channel, const char * init_cwd) {
                 break;
 
             default:
+                // Otherwise, good command... lets add it to the history
+                for (i = MAX_HISTORY_DEPTH - 1; i > 0; i--) {
+                    // Copy previous commands down
+                    strcpy(cli_history[i], cli_history[i-1]);
+                }
+                strcpy(cli_history[0], command_line);
                 break;
         }
         // sys_chan_readline(channel, command_line, MAX_COMMAND_SIZE);   // Attempt to read line
@@ -826,6 +844,13 @@ long cli_eval_number(const char * arg) {
 //  0 on success, negative number on error
 //
 short cli_init() {
+    short i;
+
+    // Clear out the command history
+    for (i = 0; i < MAX_HISTORY_DEPTH; i++) {
+        cli_history[i][0] = 0;
+    }
+
     cli_set_init();
     return 0;
 }
