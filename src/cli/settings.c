@@ -514,6 +514,32 @@ short cli_keycolor_get(short channel, char * value, short size)  {
 
 #endif
 
+/**
+ * Set the number of the text screen to use for interactions
+ */
+short cli_screen_set(short channel, const char * value) {
+    char message[80];
+    t_sys_info info;
+    short screen = (short)cli_eval_number(value);
+
+    sys_get_info(&info);
+    if (screen < info.screens) {
+        cli_channel_set(screen);
+    } else {
+        sprintf(message, "Screen #%d not present.\n", screen);
+        print(channel, message);
+    }
+    return 0;
+}
+
+/**
+ * Get the number of the text screen to use for interactions
+ */
+short cli_screen_get(short channel, const char * value) {
+    sprintf(value, "%d", cli_channel_get());
+    return 0;
+}
+
 /*
  * Initialize the settings tables
  */
@@ -529,6 +555,7 @@ void cli_set_init() {
 #if MODEL == MODEL_FOENIX_A2560K
     cli_set_register("KEYCOLOR", "KEYCOLOR 0x0RGB -- set the keyboard color", cli_keycolor_set, cli_keycolor_get);
 #endif
+    cli_set_register("SCREEN", "SCREEN <0 - 1> -- set the channel number to use for interactions", cli_screen_set, cli_screen_get);
     cli_set_register("TIME", "TIME HH:MM:SS -- set the time in the realtime clock", cli_time_set, cli_time_get);
     cli_set_register("VOLUME", "VOLUME <0 - 255> -- set the master volume", cli_volume_set, cli_volume_get);
 }

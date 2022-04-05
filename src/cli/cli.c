@@ -76,6 +76,7 @@ extern short cmd_cls(short channel, int argc, const char * argv[]);
 extern short cmd_showint(short channel, int argc, const char * argv[]);
 extern short cmd_getjiffies(short channel, int argc, const char * argv[]);
 extern short cmd_get_ticks(short channel, int argc, const char * argv[]);
+extern short cmd_screen(short channel, int argc, const char * argv[]);
 
 /*
  * Variables
@@ -123,6 +124,24 @@ const t_cli_command g_cli_commands[] = {
     { "TYPE", "TYPE <path> : print the contents of a text file", cmd_type },
     { 0, 0 }
 };
+
+/**
+ * Set the number of the channel to use for interactions
+ *
+ * @param channel the number of the text device to use
+ */
+void cli_channel_set(short channel) {
+    g_current_channel = channel;
+}
+
+/**
+ * Get the number of the channel to use for interactions
+ *
+ * @return channel the number of the text device to use
+ */
+short cli_channel_get() {
+    return g_current_channel;
+}
 
 //
 // List all the commands
@@ -669,27 +688,27 @@ short cli_repl(short channel, const char * init_cwd) {
         if (result) {
             char message[80];
             sprintf(message, "Unable to set startup directory: %s\n", err_message(result));
-            print(channel, message);
+            print(g_current_channel, message);
         }
     }
 
     while (1) {
-        sys_chan_write(channel, "\n", 1);
+        sys_chan_write(g_current_channel, "\n", 1);
         // TODO: write the current directory to the status line
         // if(sys_fsys_get_cwd(cwd_buffer, MAX_PATH_LEN) == 0) {
         //     sys_chan_write(channel, cwd_buffer, strlen(cwd_buffer));
         // }
-        sys_chan_write(channel, "\x10 ", 2);                           // Print our prompt
+        sys_chan_write(g_current_channel, "\x10 ", 2);                           // Print our prompt
 
-        result = cli_readline(channel, command_line);
+        result = cli_readline(g_current_channel, command_line);
         switch (result) {
             case -1:
-                channel = (channel == 0) ? 1 : 0;
+                g_current_channel = (g_current_channel == 0) ? 1 : 0;
                 break;
 
             case -2:
-                print(channel, "\n");
-                cmd_help(channel, 0, 0);
+                print(g_current_channel, "\n");
+                cmd_help(g_current_channel, 0, 0);
                 break;
 
             default:
@@ -703,9 +722,9 @@ short cli_repl(short channel, const char * init_cwd) {
         }
         // sys_chan_readline(channel, command_line, MAX_COMMAND_SIZE);   // Attempt to read line
 
-        sys_chan_write(channel, "\n", 1);
+        sys_chan_write(g_current_channel, "\n", 1);
 
-        cli_process_line(channel, command_line);
+        cli_process_line(g_current_channel, command_line);
     }
 
     return 0;

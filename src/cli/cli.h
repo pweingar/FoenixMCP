@@ -54,4 +54,18 @@ extern short cmd_help(short channel, int argc, const char * argv[]);
  */
 extern short cli_exec_batch(short channel, const char * path);
 
+/**
+ * Set the number of the channel to use for interactions
+ *
+ * @param channel the number of the text device to use
+ */
+extern void cli_channel_set(short channel);
+
+/**
+ * Get the number of the channel to use for interactions
+ *
+ * @return channel the number of the text device to use
+ */
+extern short cli_channel_get();
+
 #endif
