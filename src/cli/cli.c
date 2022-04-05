@@ -26,13 +26,42 @@
 #include "rtc_reg.h"
 #include "vicky_general.h"
 
-#define MAX_HISTORY_DEPTH   5
-#define MAX_COMMAND_SIZE    128
-#define MAX_ARGC            32
+#define MAX_HISTORY_DEPTH   5   /* Maximum number of commands we'll record */
+#define MAX_COMMAND_SIZE    128 /* Maximum number of characters in a command line */
+#define MAX_ARGC            32  /* Maximum number of arguments to a command */
+
+/*
+ * CLI special key code definitions
+ */
+
+#define CLI_FLAG_CTRL   0x0100  /* Flag indicating CTRL is pressed */
+#define CLI_FLAG_SHIFT  0x0200  /* Flag indicating SHIFT is pressed */
+#define CLI_FLAG_ALT    0x0400  /* Flag indicating ALT is pressed */
+#define CLI_FLAG_OS     0x0800  /* Flag indicating OS key is pressed */
+#define CLI_FLAG_FUNC   0x4000  /* Function keys: 0x4001 - 0x400C */
+#define CLI_FLAG_SPEC   0x8000  /* Special keys: */
+#define CLI_KEY_LEFT    0x8001
+#define CLI_KEY_RIGHT   0x8002
+#define CLI_KEY_UP      0x8003
+#define CLI_KEY_DOWN    0x8004
+#define CLI_KEY_DEL     0x8005
+#define CLI_KEY_MONITOR 0x8010  /* A2560K Monitor key */
+#define CLI_KEY_CTX     0x8011  /* A2560K CTX Switch key */
+#define CLI_KEY_HELP    0x8012  /* A2560K Menu/Help key */
 
 //
 // Types
 //
+
+/*
+ * States to interpret ANSI escape codes
+ */
+typedef enum {
+    CLI_ES_BASE = 0,    // Base state
+    CLI_ES_ESC,         // "ESC" seen
+    CLI_ES_CSI,         // "ESC[" has been seen
+    CLI_ES_SEMI         // Semicolon has been seen
+} cli_state;
 
 // Structure to hold a record about a command...
 
@@ -52,10 +81,13 @@ extern short cmd_get_ticks(short channel, int argc, const char * argv[]);
  * Variables
  */
 
+/** The channel to use for interactions */
 short g_current_channel = 0;
 
+/** The history of previous commands issued */
 char cli_history[MAX_HISTORY_DEPTH][MAX_COMMAND_SIZE];
 
+/** The built-in commands supported */
 const t_cli_command g_cli_commands[] = {
     { "?", "? : print this helpful message", cmd_help },
     { "HELP", "HELP : print this helpful message", cmd_help },
@@ -261,35 +293,6 @@ void cli_rerepl() {
     }
 }
 
-/*
- * CLI special key code definitions
- */
-
-#define CLI_FLAG_CTRL   0x0100  /* Flag indicating CTRL is pressed */
-#define CLI_FLAG_SHIFT  0x0200  /* Flag indicating SHIFT is pressed */
-#define CLI_FLAG_ALT    0x0400  /* Flag indicating ALT is pressed */
-#define CLI_FLAG_OS     0x0800  /* Flag indicating OS key is pressed */
-#define CLI_FLAG_FUNC   0x4000  /* Function keys: 0x4001 - 0x400C */
-#define CLI_FLAG_SPEC   0x8000  /* Special keys: */
-#define CLI_KEY_LEFT    0x8001
-#define CLI_KEY_RIGHT   0x8002
-#define CLI_KEY_UP      0x8003
-#define CLI_KEY_DOWN    0x8004
-#define CLI_KEY_DEL     0x8005
-#define CLI_KEY_MONITOR 0x8010  /* A2560K Monitor key */
-#define CLI_KEY_CTX     0x8011  /* A2560K CTX Switch key */
-#define CLI_KEY_HELP    0x8012  /* A2560K Menu/Help key */
-
-/*
- * States to interpret ANSI escape codes
- */
-typedef enum {
-    CLI_ES_BASE = 0,    // Base state
-    CLI_ES_ESC,         // "ESC" seen
-    CLI_ES_CSI,         // "ESC[" has been seen
-    CLI_ES_SEMI         // Semicolon has been seen
-} cli_state;
-
 /**
  * Decode ANSI modifier codes
  *
@@ -297,13 +300,17 @@ typedef enum {
  * @return CLI modifier flags
  */
 short cli_translate_modifiers(short modifiers) {
+    char buffer[10];
     short flags = 0;
 
-    // modifiers -= 1;
-    // if (modifiers & 0x01) flags |= CLI_FLAG_SHIFT;
-    // if (modifiers & 0x02) flags |= CLI_FLAG_ALT;
-    // if (modifiers & 0x04) flags |= CLI_FLAG_CTRL;
-    // if (modifiers & 0x08) flags |= CLI_FLAG_OS;
+    if (modifiers > 0) {
+        modifiers--;
+    }
+
+    if (modifiers & 0x01) flags |= CLI_FLAG_SHIFT;
+    if (modifiers & 0x02) flags |= CLI_FLAG_ALT;
+    if (modifiers & 0x04) flags |= CLI_FLAG_CTRL;
+    if (modifiers & 0x08) flags |= CLI_FLAG_OS;
 
     return flags;
 }
@@ -558,7 +565,9 @@ short cli_readline(short channel, char * command_line) {
                 case CLI_KEY_RIGHT:
                     // Move cursor right
                     if (key_code & CLI_FLAG_CTRL) {
-                        print(channel, "CTRL-RIGHT ");
+                        sprintf(buffer, "\x1b[%dG", strlen(command_line) + 3);
+                        print(channel, buffer);
+                        i = strlen(command_line);
                     } else {
                         if (command_line[i] != 0) {
                             i++;
