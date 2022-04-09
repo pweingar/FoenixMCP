@@ -239,6 +239,7 @@ short cmd_cd(short screen, int argc, const char * argv[]) {
             err_print(screen, "Unable to change directory", result);
             return result;
         } else {
+            cli_flag_cwd();
             print(screen, "Changed to: ");
             print(screen, argv[1]);
             print(screen, "\n");

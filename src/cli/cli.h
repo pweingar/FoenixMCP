@@ -68,4 +68,9 @@ extern void cli_channel_set(short channel);
  */
 extern short cli_channel_get();
 
+/**
+ * Indicate that the current working directory has changed
+ */
+extern void cli_flag_cwd();
+
 #endif

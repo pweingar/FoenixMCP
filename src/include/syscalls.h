@@ -716,4 +716,68 @@ extern short sys_kbd_layout(const char * tables);
  */
 extern short sys_proc_run(const char * path, int argc, char * argv[]);
 
+//
+// Text screen calls
+//
+
+/**
+ * Set the position of the cursor to (x, y) relative to the current region
+ * If the (x, y) coordinate is outside the region, it will be clipped to the region.
+ * If y is greater than the height of the region, the region will scroll until that relative
+ * position would be within view.
+ *
+ * @param screen the number of the text device
+ * @param x the column for the cursor
+ * @param y the row for the cursor
+ */
+extern void sys_txt_set_xy(short screen, short x, short y);
+
+/**
+ * Get the position of the cursor (x, y) relative to the current region
+ *
+ * @param screen the number of the text device
+ * @param position pointer to a t_point record to fill out
+ */
+extern void sys_txt_get_xy(short screen, p_point position);
+
+/**
+ * Get the current region.
+ *
+ * @param screen the number of the text device
+ * @param region pointer to a t_rect describing the rectangular region (using character cells for size and size)
+ *
+ * @return 0 on success, any other number means the region was invalid
+ */
+extern short sys_txt_get_region(short screen, p_rect region);
+
+/**
+ * Set a region to restrict further character display, scrolling, etc.
+ * Note that a region of zero size will reset the region to the full size of the screen.
+ *
+ * @param screen the number of the text device
+ * @param region pointer to a t_rect describing the rectangular region (using character cells for size and size)
+ *
+ * @return 0 on success, any other number means the region was invalid
+ */
+extern short sys_txt_set_region(short screen, p_rect region);
+
+/**
+ * Set the default foreground and background colors for printing
+ *
+ * @param screen the number of the text device
+ * @param foreground the Text LUT index of the new current foreground color (0 - 15)
+ * @param background the Text LUT index of the new current background color (0 - 15)
+ */
+extern void sys_txt_set_color(short screen, unsigned char foreground, unsigned char background);
+
+/*
+ * Get the foreground and background color for printing
+ *
+ * Inputs:
+ * screen = the screen number 0 for channel A, 1 for channel B
+ * foreground = pointer to the foreground color number
+ * background = pointer to the background color number
+ */
+extern void sys_txt_get_color(short screen, unsigned char * foreground, unsigned char * background);
+
 #endif

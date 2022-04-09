@@ -4,6 +4,7 @@
 
 #include <ctype.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "log.h"
@@ -84,6 +85,12 @@ extern short cmd_screen(short channel, int argc, const char * argv[]);
 
 /** The channel to use for interactions */
 short g_current_channel = 0;
+
+/** Flag to indicate that the current working directory has changed */
+short g_cwd_changed = 0;
+
+/** The number of text screens on this machine */
+short g_num_screens = 0;
 
 /** The history of previous commands issued */
 char cli_history[MAX_HISTORY_DEPTH][MAX_COMMAND_SIZE];
@@ -672,6 +679,86 @@ short cli_process_line(short channel, const char * command_line) {
     }
 }
 
+void cli_draw_window(short channel, const char * status, short is_active) {
+    const char * title_header = "Foenix/MCP - ";
+    unsigned char foreground, background;
+    char buffer[128];
+    t_point cursor;
+    t_rect region, old_region, full_region;
+    short i = 0, j;
+
+    // Save the current region and cursor location
+    sys_txt_get_xy(channel, &cursor);
+    sys_txt_get_region(channel, &old_region);
+    sys_txt_get_color(channel, &foreground, &background);
+
+    // Return to the full region and get its dimensions
+    region.origin.x = 0;
+    region.origin.y = 0;
+    region.size.width = 0;
+    region.size.height = 0;
+    sys_txt_set_region(channel, &region);
+    sys_txt_get_region(channel, &full_region);
+
+    // Display the titlebar
+    i = 0;
+    sys_txt_set_xy(channel, 0, 0);
+    if (is_active) {
+        sys_txt_set_color(channel, background, foreground);
+    }
+    for (j = 0; j < strlen(title_header); j++) {
+        buffer[i++] = title_header[j];
+    }
+    for (j = 0; j < strlen(status); j++) {
+        buffer[i++] = status[j];
+    }
+    while (i < full_region.size.width) {
+        if (is_active) {
+            buffer[i++] = ' ';
+        } else {
+            buffer[i++] = 0xB0;
+        }
+    }
+    buffer[i++] = 0;
+    print(channel, buffer);
+
+    // Restore the region and cursor location
+    sys_txt_set_color(channel, foreground, background);
+    sys_txt_set_region(channel, &old_region);
+    sys_txt_set_xy(channel, cursor.x, cursor.y);
+}
+
+/**
+ * Initialize the text screen (set up regions, windows, etc.)
+ */
+void cli_setup_screen(short channel, const char * path, short is_active) {
+    t_rect full_region, command_region;
+
+    // Get the size of the screen
+    full_region.origin.x = 0;
+    full_region.origin.y = 0;
+    full_region.size.width = 0;
+    full_region.size.height = 0;
+    sys_txt_set_region(channel, &full_region);
+    sys_txt_get_region(channel, &full_region);
+
+    // Clear the screen
+    print(channel, "\x1b[2J\x1b[H");
+
+    // Figure out the size of the command box and its region
+    command_region.origin.x = 0;
+    command_region.origin.y = 1;
+    command_region.size.width = full_region.size.width;
+    command_region.size.height = full_region.size.height - 1;
+
+    // Restrict the region to the command panel
+    sys_txt_set_region(channel, &command_region);
+
+    // Draw the window
+    cli_draw_window(channel, path, is_active);
+    print(channel, "\x1b[2J\x1b[1;2H");
+}
+
 //
 // Enter the CLI's read-eval-print loop
 //
@@ -680,7 +767,10 @@ short cli_repl(short channel, const char * init_cwd) {
     char cwd_buffer[MAX_PATH_LEN];
     short result = 0;
     short i = 0;
+    t_point cursor;
+    short old_channel;
 
+    old_channel = channel;
     g_current_channel = channel;
 
     if (init_cwd != 0) {
@@ -692,14 +782,41 @@ short cli_repl(short channel, const char * init_cwd) {
         }
     }
 
-    while (1) {
-        sys_chan_write(g_current_channel, "\n", 1);
-        // TODO: write the current directory to the status line
-        // if(sys_fsys_get_cwd(cwd_buffer, MAX_PATH_LEN) == 0) {
-        //     sys_chan_write(channel, cwd_buffer, strlen(cwd_buffer));
-        // }
-        sys_chan_write(g_current_channel, "\x10 ", 2);                           // Print our prompt
+    // Set up the screen(s)
+    cli_setup_screen(channel, init_cwd, 1);             // Initialize our main main screen
+    if (g_num_screens > 1) {
+        for (i = 0; i < g_num_screens; i++) {             // Set up each screen we aren't using
+            if (i != channel) {
+                cli_setup_screen(i, init_cwd, 0);
+            }
+        }
+    }
 
+    g_cwd_changed = 1;
+    cursor.x = 0;
+    cursor.y = 0;
+
+    while (1) {
+        // Refresh window if the current working directory has changed
+        if (g_cwd_changed || (old_channel != g_current_channel)) {
+            g_cwd_changed = 0;
+
+            // Get and display the new working directory
+            if (sys_fsys_get_cwd(cwd_buffer, MAX_PATH_LEN) == 0) {
+                // char message[80];
+                // sprintf(message, "%d", strlen(cwd_buffer));
+                print(0, "");
+                if (old_channel != g_current_channel) {
+
+                    // If channel has changed, deactivate old channel
+                    cli_draw_window(old_channel, cwd_buffer, 0);
+                    old_channel = g_current_channel;
+                }
+                cli_draw_window(g_current_channel, cwd_buffer, 1);
+            }
+        }
+
+        sys_chan_write(g_current_channel, "\x10 ", 2);                           // Print our prompt
         result = cli_readline(g_current_channel, command_line);
         switch (result) {
             case -1:
@@ -720,11 +837,12 @@ short cli_repl(short channel, const char * init_cwd) {
                 strcpy(cli_history[0], command_line);
                 break;
         }
-        // sys_chan_readline(channel, command_line, MAX_COMMAND_SIZE);   // Attempt to read line
 
-        sys_chan_write(g_current_channel, "\n", 1);
-
+        print(g_current_channel, "\n");
         cli_process_line(g_current_channel, command_line);
+
+        print(g_current_channel, "\n");
+        sys_txt_get_xy(channel, &cursor);
     }
 
     return 0;
@@ -865,6 +983,13 @@ long cli_eval_number(const char * arg) {
     return cli_eval_dec(arg);
 }
 
+/**
+ * Indicate that the current working directory has changed
+ */
+void cli_flag_cwd() {
+    g_cwd_changed = 1;
+}
+
 //
 // Initialize the CLI
 //
@@ -872,12 +997,17 @@ long cli_eval_number(const char * arg) {
 //  0 on success, negative number on error
 //
 short cli_init() {
+    t_sys_info info;
     short i;
 
     // Clear out the command history
     for (i = 0; i < MAX_HISTORY_DEPTH; i++) {
         cli_history[i][0] = 0;
     }
+
+    // Figure out how many screens we have
+    sys_get_info(&info);
+    g_num_screens = info.screens;
 
     cli_set_init();
     return 0;

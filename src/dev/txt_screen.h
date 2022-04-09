@@ -4,6 +4,8 @@
  * Uniform routines to manage the text screens
  */
 
+#include "types.h"
+
 #ifndef __TXT_SCREEN_H
 #define __TXT_SCREEN_H
 
@@ -14,36 +16,6 @@
 #define TXT_MODE_SPRITE 0x0004  /**< The bit to enable sprite graphics mode */
 #define TXT_MODE_TILE   0x0008  /**< The bit to enable tile graphics mode */
 #define TXT_MODE_SLEEP  0x0010  /**< The bit to put the monitor to sleep by disabling sync */
-
-/**
- * @struct s_extent
- *
- * An extent or size of a rectangular area
- */
-typedef struct s_extent {
-    short width;        /**< The width of the region */
-    short height;       /**< The height of the region */
-} t_extent, *p_extent;
-
-/**
- * @struct s_point
- *
- * A point on a plane
- */
-typedef struct s_point {
-    short x;                /**< The column of the point */
-    short y;                /**< The row of the point */
-} t_point, *p_point;
-
-/**
- * @struct s_rect
- *
- * A rectangle on the screen
- */
-typedef struct s_rect {
-    t_point origin;         /**< The upper-left corner of the rectangle */
-    t_extent size;          /**< The size of the rectangle */
-} t_rect, *p_rect;
 
 /**
  * @struct s_txt_capabilities

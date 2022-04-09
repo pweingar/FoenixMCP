@@ -274,20 +274,36 @@ void txt_a2560k_b_set_cursor(short enable, short rate, char c) {
  *
  * @return 0 on success, any other number means the region was invalid
  */
-short txt_a2560k_b_set_region(p_rect region) {
-    if ((region == 0) || (region->size.width == 0) || (region->size.height == 0)) {
-        /* Set the region to the default (full screen) */
-        a2560k_b_region.origin.x = 0;
-        a2560k_b_region.origin.y = 0;
-        a2560k_b_region.size.width = a2560k_b_visible_size.width;
-        a2560k_b_region.size.height = a2560k_b_visible_size.height;
+ short txt_a2560k_b_set_region(p_rect region) {
+     if ((region->size.width == 0) || (region->size.height == 0)) {
+         /* Set the region to the default (full screen) */
+         a2560k_b_region.origin.x = 0;
+         a2560k_b_region.origin.y = 0;
+         a2560k_b_region.size.width = a2560k_b_visible_size.width;
+         a2560k_b_region.size.height = a2560k_b_visible_size.height;
 
-    } else {
-        a2560k_b_region.origin.x = region->origin.x;
-        a2560k_b_region.origin.y = region->origin.y;
-        a2560k_b_region.size.width = region->size.width;
-        a2560k_b_region.size.height = region->size.height;
-    }
+     } else {
+         a2560k_b_region.origin.x = region->origin.x;
+         a2560k_b_region.origin.y = region->origin.y;
+         a2560k_b_region.size.width = region->size.width;
+         a2560k_b_region.size.height = region->size.height;
+     }
+
+     return 0;
+ }
+
+/**
+ * get the current region
+ *
+ * @param region pointer to a t_rect describing the rectangular region (using character cells for size and size)
+ *
+ * @return 0 on success, any other number means the region was invalid
+ */
+short txt_a2560k_b_get_region(p_rect region) {
+    region->origin.x = a2560k_b_region.origin.x;
+    region->origin.y = a2560k_b_region.origin.y;
+    region->size.width = a2560k_b_region.size.width;
+    region->size.height = a2560k_b_region.size.height;
 
     return 0;
 }
@@ -300,6 +316,18 @@ short txt_a2560k_b_set_region(p_rect region) {
  */
 short txt_a2560k_b_set_color(unsigned char foreground, unsigned char background) {
     a2560k_b_color = ((foreground & 0x0f) << 4) | (background & 0x0f);
+    return 0;
+}
+
+/**
+ * Get the default foreground and background colors for printing
+ *
+ * @param pointer to the foreground the Text LUT index of the new current foreground color (0 - 15)
+ * @param pointer to the background the Text LUT index of the new current background color (0 - 15)
+ */
+short txt_a2560k_b_get_color(unsigned char * foreground, unsigned char * background) {
+    *foreground = (a2560k_b_color & 0xf0) >> 4;
+    *background = a2560k_b_color & 0x0f;
     return 0;
 }
 
@@ -595,7 +623,9 @@ short txt_a2560k_b_install() {
     device.set_font = txt_a2560k_b_set_font;
     device.set_cursor = txt_a2560k_b_set_cursor;
     device.set_region = txt_a2560k_b_set_region;
+    device.get_region = txt_a2560k_b_get_region
     device.set_color = txt_a2560k_b_set_color;
+    device.get_color = txt_a2560k_b_get_color;
     device.set_xy = txt_a2560k_b_set_xy;
     device.get_xy = txt_a2560k_b_get_xy;
     device.put = txt_a2560k_b_put;
