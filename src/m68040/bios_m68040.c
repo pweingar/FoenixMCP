@@ -331,6 +331,19 @@ unsigned long syscall_dispatch(int32_t function, int32_t param0, int32_t param1,
             }
             break;
 
+        case 0x70:
+            /* Text calls #2 */
+            switch (function) {
+                case KFN_TXT_SET_CURSOR_VIS:
+                    /* Set the cursor visibility */
+                    txt_set_cursor_visible((short)param0, (short)param1);
+                    break;
+
+                default:
+                    return ERR_GENERAL;
+            }
+            break;
+
         default:
             break;
     }

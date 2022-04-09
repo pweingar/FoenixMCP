@@ -28,6 +28,8 @@
 #define CON_IOCTRL_ECHO_ON  0x03            /* IOCTRL Command: turn on echo of input characters */
 #define CON_IOCTRL_ECHO_OFF 0x04            /* IOCTRL Command: turn off echo of input characters */
 #define CON_IOCTRL_BREAK    0x05            /* IOCTRL Command: return the status of the keyboard BREAK */
+#define CON_IOCTRL_CURS_ON  0x06            /* IOCTRL Command: show the cursor */
+#define CON_IOCTRL_CURS_OFF 0x07            /* IOCTRL Command: hide the cursor */
 
 typedef void (*ansi_handler)(p_channel, short, short[]);
 
@@ -374,7 +376,7 @@ void ansi_dch(p_channel chan, short arg_count, short args[]) {
     }
 
     if (n > 0) {
-        txt_delete(chan->dev, n);    
+        txt_delete(chan->dev, n);
     }
 }
 
@@ -712,6 +714,17 @@ short con_seek(p_channel chan, long position, short base) {
     return 0;
 }
 
+/**
+ * Show or hide the cursor
+ *
+ * @param chan
+ * @param is_visible boolean to indicate if the cursor should be seen (non-zero) or hidden (0)
+ */
+short con_set_cursor_visible(p_channel chan, short is_visible) {
+    txt_set_cursor_visible(chan->dev, is_visible);
+    return 0;
+}
+
 short con_ioctrl(p_channel chan, short command, uint8_t * buffer, short size) {
     p_console_data con_data;
 
@@ -747,6 +760,14 @@ short con_ioctrl(p_channel chan, short command, uint8_t * buffer, short size) {
             /* TODO: flesh this out for the A2560U */
             return 0;
 #endif
+
+        case CON_IOCTRL_CURS_ON:
+            // Show the cursor
+            return con_set_cursor_visible(chan, 1);
+
+        case CON_IOCTRL_CURS_OFF:
+            // Hide the cursor
+            return con_set_cursor_visible(chan, 0);
 
         default:
             break;

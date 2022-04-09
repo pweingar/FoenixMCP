@@ -267,6 +267,19 @@ void txt_a2560k_b_set_cursor(short enable, short rate, char c) {
 }
 
 /**
+ * Set if the cursor is visible or not
+ *
+ * @param enable 0 to hide, any other number to make visible
+ */
+ void txt_a2560k_b_set_cursor_visible(short enable) {
+     if (enable) {
+         *VKY3_B_CCR |= 0x01;
+     } else {
+         *VKY3_B_CCR &= ~0x01;
+     }
+ }
+
+/**
  * Set a region to restrict further character display, scrolling, etc.
  * Note that a null region pointer and a region of zero size will reset the region to the full size of the screen.
  *
@@ -622,6 +635,7 @@ short txt_a2560k_b_install() {
     device.set_border_color = txt_a2560k_b_set_border_color;
     device.set_font = txt_a2560k_b_set_font;
     device.set_cursor = txt_a2560k_b_set_cursor;
+    device.set_cursor_visible = txt_a2560k_b_set_cursor_visible;
     device.set_region = txt_a2560k_b_set_region;
     device.get_region = txt_a2560k_b_get_region
     device.set_color = txt_a2560k_b_set_color;

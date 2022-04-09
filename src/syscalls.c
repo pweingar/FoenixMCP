@@ -770,3 +770,13 @@ short sys_txt_set_color(short screen, unsigned char foreground, unsigned char ba
 void sys_txt_get_color(short screen, unsigned char * foreground, unsigned char * background) {
     syscall(KFN_TXT_GET_COLOR, screen, foreground, background);
 }
+
+/**
+ * Set if the cursor is visible or not
+ *
+ * @param screen the screen number 0 for channel A, 1 for channel B
+ * @param is_visible TRUE if the cursor should be visible, FALSE (0) otherwise
+ */
+void sys_txt_set_cursor_visible(short screen, short is_visible) {
+    syscall(KFN_TXT_SET_CURSOR_VIS, screen, is_visible);
+}

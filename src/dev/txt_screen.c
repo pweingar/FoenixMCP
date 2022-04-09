@@ -38,6 +38,7 @@ void txt_init() {
         txt_device_driver[i].set_border_color = 0;
         txt_device_driver[i].set_font = 0;
         txt_device_driver[i].set_cursor = 0;
+        txt_device_driver[i].set_cursor_visible = 0;
         txt_device_driver[i].get_region = 0;
         txt_device_driver[i].set_region = 0;
         txt_device_driver[i].get_color = 0;
@@ -78,6 +79,7 @@ short txt_register(p_txt_device device) {
         txt_device_driver[i].set_border_color = device->set_border_color;
         txt_device_driver[i].set_font = device->set_font;
         txt_device_driver[i].set_cursor = device->set_cursor;
+        txt_device_driver[i].set_cursor_visible = device->set_cursor_visible;
         txt_device_driver[i].get_region = device->get_region;
         txt_device_driver[i].set_region = device->set_region;
         txt_device_driver[i].get_color = device->get_color;
@@ -268,6 +270,21 @@ void txt_set_cursor(short screen, short enable, short rate, char c) {
 }
 
 /**
+ * Set the appearance of the cursor
+ *
+ * @param screen the number of the text device
+ * @param enable 0 to hide, any other number to make visible
+ */
+void txt_set_cursor_visible(short screen, short enable) {
+    p_txt_device device = txt_get_device(screen);
+    if (device) {
+        if (device->set_cursor_visible) {
+            return device->set_cursor_visible(enable);
+        }
+    }
+}
+
+/**
  * Get the current region.
  *
  * @param screen the number of the text device
@@ -333,7 +350,7 @@ void txt_get_color(short screen, unsigned char * foreground, unsigned char * bac
     p_txt_device device = txt_get_device(screen);
     if (device) {
         if (device->get_color) {
-            return device->get_color(foreground, background);
+            device->get_color(foreground, background);
         }
     }
 }

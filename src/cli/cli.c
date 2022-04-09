@@ -800,6 +800,13 @@ void cli_draw_window(short channel, const char * status, short is_active) {
     sys_txt_set_color(channel, foreground, background);
     sys_txt_set_region(channel, &old_region);
     sys_txt_set_xy(channel, cursor.x, cursor.y);
+
+    // Set cursor visibility based on if the screen is active
+    if (is_active) {
+        sys_chan_ioctrl(channel, 0x06, 0, 0);
+    } else {
+        sys_chan_ioctrl(channel, 0x07, 0, 0);
+    }
 }
 
 /**

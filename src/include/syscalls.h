@@ -113,6 +113,7 @@
 #define KFN_TXT_GET_XY          0x6E    /* Gets the cursor's position */
 #define KFN_TXT_SCROLL          0x6F    /* Scroll the current region */
 // #define KFN_TXT_FILL            0x70    /* Fill the current region */
+#define KFN_TXT_SET_CURSOR_VIS  0x71    /* Set cursor visibility */
 
 /*
  * Call into the kernel (provided by assembly)
@@ -779,5 +780,13 @@ extern void sys_txt_set_color(short screen, unsigned char foreground, unsigned c
  * background = pointer to the background color number
  */
 extern void sys_txt_get_color(short screen, unsigned char * foreground, unsigned char * background);
+
+/**
+ * Set if the cursor is visible or not
+ *
+ * @param screen the screen number 0 for channel A, 1 for channel B
+ * @param is_visible TRUE if the cursor should be visible, FALSE (0) otherwise
+ */
+extern void sys_txt_set_cursor_visible(short screen, short is_visible);
 
 #endif

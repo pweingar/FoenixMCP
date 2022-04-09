@@ -40,6 +40,7 @@ typedef void (*p_set_border)(short width, short height);
 typedef void (*p_set_border_color)(unsigned char red, unsigned char green, unsigned char blue);
 typedef short (*p_set_font)(short width, short height, unsigned char * data);
 typedef void (*p_set_cursor)(short enable, short rate, char c);
+typedef void (*p_set_cursor_visible)(short enable);
 typedef short (*p_set_region)(p_rect region);
 typedef short (*p_set_color)(unsigned char foreground, unsigned char background);
 typedef short (*p_get_color)(unsigned char * foreground, unsigned char * background);
@@ -74,6 +75,7 @@ typedef struct s_txt_device {
     p_get_color get_color;                  /**< Pointer to the device's get_color function */
     p_set_color set_color;                  /**< Pointer to the device's set_color function */
     p_set_cursor set_cursor;                /**< Pointer to the device's set_cursor function */
+    p_set_cursor_visible set_cursor_visible;  /**< Pointer to the device's set_cursor_visible function */
     p_set_xy set_xy;                        /**< Pointer to the device's set_xy function */
     p_get_xy get_xy;                        /**< Pointer to the device's get_xy function */
     p_put put;                              /**< Pointer to the device's put function */
@@ -177,6 +179,14 @@ extern short txt_set_font(short screen, short width, short height, unsigned char
  * @param c the character in the current font to use as a cursor
  */
 extern void txt_set_cursor(short screen, short enable, short rate, char c);
+
+/**
+ * Set the appearance of the cursor
+ *
+ * @param screen the number of the text device
+ * @param enable 0 to hide, any other number to make visible
+ */
+extern void txt_set_cursor_visible(short screen, short enable);
 
 /**
  * Get the current region.
