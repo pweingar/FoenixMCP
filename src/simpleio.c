@@ -31,6 +31,81 @@ void print(short channel, const char * message) {
     sys_chan_write(channel, message, strlen(message));
 }
 
+/**
+ * Print a message to the channel, translating certain characters to box drawing characters
+ *
+ * @param channel the number of the channel to print on
+ * @param message the message to translate and print
+ */
+void print_box(short channel, const char * message) {
+    const char * x;
+    char c;
+    for (x = message; *x; x++) {
+        switch (*x) {
+            case '{':
+                // Upper-left angle
+                c = 0xDA;
+                break;
+
+            case '}':
+                // Upper-right angle
+                c = 0xBF;
+                break;
+
+            case '[':
+                // Lower-left angle
+                c = 0xC0;
+                break;
+
+            case ']':
+                // Lower-right angle
+                c = 0xD9;
+                break;
+
+            case '-':
+                // Horizontal
+                c = 0xC4;
+                break;
+
+            case '|':
+                // Vertical
+                c = 0xB3;
+                break;
+
+            case '!':
+                // T down
+                c = 0xC2;
+                break;
+
+            case '@':
+                // T up
+                c = 0xC1;
+                break;
+
+            case '>':
+                // T right
+                c = 0xC3;
+                break;
+
+            case '<':
+                // T left
+                c = 0xB4;
+                break;
+
+            case '#':
+                // Cross
+                c = 0xC5;
+                break;
+
+            default:
+                c = *x;
+                break;
+        }
+
+        sys_chan_write_b(channel, c);
+    }
+}
+
 const unsigned char hex_digits[] = "0123456789ABCDEF";
 
 /*

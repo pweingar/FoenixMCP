@@ -14,6 +14,14 @@
  */
 extern void print(short channel, const char * message);
 
+/**
+ * Print a message to the channel, translating certain characters to box drawing characters
+ *
+ * @param channel the number of the channel to print on
+ * @param message the message to translate and print
+ */
+extern void print_box(short channel, const char * message);
+
 /*
  * Print a character to a channel
  *

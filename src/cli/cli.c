@@ -26,6 +26,7 @@
 #include "uart_reg.h"
 #include "rtc_reg.h"
 #include "vicky_general.h"
+#include "version.h"
 
 #define MAX_HISTORY_DEPTH   5   /* Maximum number of commands we'll record */
 #define MAX_COMMAND_SIZE    128 /* Maximum number of characters in a command line */
@@ -78,6 +79,7 @@ extern short cmd_showint(short channel, int argc, const char * argv[]);
 extern short cmd_getjiffies(short channel, int argc, const char * argv[]);
 extern short cmd_get_ticks(short channel, int argc, const char * argv[]);
 extern short cmd_screen(short channel, int argc, const char * argv[]);
+extern short cmd_credits(short channel, int argc, const char * argv[]);
 
 /*
  * Variables
@@ -103,6 +105,7 @@ const t_cli_command g_cli_commands[] = {
     { "CD", "CD <path> : sets the current directory", cmd_cd },
     { "CLS", "CLS : clear the screen", cmd_cls },
     { "COPY", "COPY <src path> <dst path> : Copies files to destination", cmd_copy },
+    { "CREDITS", "CREDITS : Print out the credits", cmd_credits },
     { "DASM", "DASM <addr> [<count>] : print a memory disassembly", mem_cmd_dasm },
     { "DEL", "DEL <path> : delete a file or directory", cmd_del },
     { "DIR", "DIR <path> : print directory listing", cmd_dir },
@@ -508,6 +511,73 @@ short cli_getchar(short channel) {
     } while (1);
 }
 
+char line[256];
+
+short cmd_credits(short channel, int argc, const char * argv[]) {
+    const char * color_bars = "\x1b[31m\x0b\x0c\x1b[35m\x0b\x0c\x1b[33m\x0b\x0c\x1b[32m\x0b\x0c\x1b[36m\x0b\x0c";
+
+    #if MODEL == MODEL_FOENIX_A2560U
+    const char * title_1 = "\x1b[37m   A   2222  55555  666   000  U   U";
+    const char * title_2 = "\x1b[37m  A A      2 5     6     0   0 U   U";
+    const char * title_3 = "\x1b[37m AAAAA  222   555  6666  0   0 U   U";
+    const char * title_4 = "\x1b[37m A   A 2         5 6   6 0   0 U   U";
+    const char * title_5 = "\x1b[37m A   A 22222 5555   666   000   UUU";
+    #elif MODEL == MODEL_FOENIX_A2560U_PLUS
+    const char * title_1 = "\x1b[37m   A   2222  55555  666   000  U   U   +";
+    const char * title_2 = "\x1b[37m  A A      2 5     6     0   0 U   U   +";
+    const char * title_3 = "\x1b[37m AAAAA  222   555  6666  0   0 U   U +++++";
+    const char * title_4 = "\x1b[37m A   A 2         5 6   6 0   0 U   U   +";
+    const char * title_5 = "\x1b[37m A   A 22222 5555   666   000   UUU    +";
+    #elif MODEL == MODEL_FOENIX_A2560K
+    const char * title_1 = "\x1b[37m   A   2222  55555  666   000  K   K";
+    const char * title_2 = "\x1b[37m  A A      2 5     6     0   0 K  K";
+    const char * title_3 = "\x1b[37m AAAAA  222   555  6666  0   0 KKK";
+    const char * title_4 = "\x1b[37m A   A 2         5 6   6 0   0 K  K";
+    const char * title_5 = "\x1b[37m A   A 22222 5555   666   000  K   K";
+    #else
+    const char * title_1 = "\x1b[37m FFFFF  OOO  EEEEE N   N IIIII X   X";
+    const char * title_2 = "\x1b[37m F     O   O E     NN  N   I    X X";
+    const char * title_3 = "\x1b[37m FFF   O   O EEE   N N N   I     X";
+    const char * title_4 = "\x1b[37m F     O   O E     N  NN   I    X X";
+    const char * title_5 = "\x1b[37m F      OOO  EEEEE N   N IIIII X   X";
+    #endif
+
+
+    short scan_code = 0;
+
+    sprintf(line, "\x1b[2J\x1b[H");
+    print(channel, line);
+
+    sprintf(line, "    %s%s\n   %s %s\n  %s  %s\n %s   %s\n%s    %s\n\n", color_bars, title_1, color_bars, title_2, color_bars, title_3, color_bars, title_4, color_bars, title_5);
+    print(channel, line);
+
+    sprintf(line, "| Version    | %02d.%02d-alpha+%04d                               |\n", VER_MAJOR, VER_MINOR, VER_BUILD);
+    print_box(channel, "{-------------------------------------------------------------}\n");
+    print_box(channel, "| Foenix/MCP - A simple OS for Foenix Retro Systems computers |\n");
+    print_box(channel, ">------------!------------------------------------------------<\n");
+    print_box(channel, line);
+    print_box(channel, ">------------#------------------------------------------------<\n");
+    print_box(channel, "| License    | BSD-3-Clause                                   |\n");
+    print_box(channel, ">------------#------------------------------------------------<\n");
+    print_box(channel, "| Creators   | Foenix Retro Systems - Stefany Allaire         |\n");
+    print_box(channel, "|            >------------------------------------------------<\n");
+    print_box(channel, "|            | Foenix/MCP - Peter Weingartner                 |\n");
+    print_box(channel, "[------------@------------------------------------------------]\n");
+
+    print(channel, "\n\x1b[1mMake the machine yours!\x1b[0m\n");
+
+    print(channel, "\n\x1b[91m//END-OF-LINE\n\x1b[37m");
+
+    do {
+        scan_code = sys_kbd_scancode();
+    } while (scan_code != 0x01);
+
+    sprintf(line, "\x1b[2J\x1b[H");
+    print(channel, line);
+
+    return 0;
+}
+
 /**
  * Read a line of input from the channel, allowing for editing of the line
  *
@@ -634,7 +704,11 @@ short cli_readline(short channel, char * command_line) {
 
                 case CLI_KEY_HELP:
                     // Request the help screen
-                    return -2;
+                    if (key_code & CLI_FLAG_OS) {
+                        return -3;
+                    } else {
+                        return -2;
+                    }
 
                 default:
                     // Unknown... do nothing
@@ -826,6 +900,12 @@ short cli_repl(short channel, const char * init_cwd) {
             case -2:
                 print(g_current_channel, "\n");
                 cmd_help(g_current_channel, 0, 0);
+                break;
+
+            case -3:
+                // Print the credits
+                print(g_current_channel, "\n");
+                cmd_credits(g_current_channel, 0, 0);
                 break;
 
             default:
