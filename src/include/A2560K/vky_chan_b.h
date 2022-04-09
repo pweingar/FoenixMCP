@@ -48,7 +48,7 @@
 
 /* Text Color LUTs for Channel B */
 #define VKY3_B_LUT_SIZE     16
-#define VKY3_B_TEXT_LUT_FG  ((volatile unsigned char *)0xFECAC400)  /**< Text foreground color look up table for channel B */
-#define VKY3_B_TEXT_LUT_BG  ((volatile unsigned char *)0xFECAC440)  /**< Text background color look up table for channel B */
+#define VKY3_B_TEXT_LUT_FG  ((volatile unsigned long *)0xFECAC400)  /**< Text foreground color look up table for channel B */
+#define VKY3_B_TEXT_LUT_BG  ((volatile unsigned long *)0xFECAC440)  /**< Text background color look up table for channel B */
 
 #endif
