@@ -25,7 +25,7 @@ const unsigned long a2560k_a_lut[VKY3_A_LUT_SIZE] = {
 	0xFF008080, // Mid-Tone Cian
 	0xFF808080, // 50% Grey
 	0xFF555555, // Dark Grey
-    0xFFFF5555, // Bright Red
+    0xFFFF0000, // Bright Red
 	0xFF55FF55, // Bright Green
 	0xFFFFFF55, // Bright Yellow
 	0xFF5555FF, // Bright Blue
