@@ -205,28 +205,25 @@ short cmd_sysinfo(short channel, int argc, const char * argv[]) {
     sys_get_info(&info);
 
     sprintf(buffer, "System information:\nModel: %s", info.model_name);
-    sys_chan_write(channel, buffer, strlen(buffer));
+    print(channel, buffer);
 
     sprintf(buffer, "\nCPU: %s", info.cpu_name);
-    sys_chan_write(channel, buffer, strlen(buffer));
+    print(channel, buffer);
+
+    sprintf(buffer, "\nClock (kHz): %d", info.cpu_clock_khz);
+    print(channel, buffer);
 
     sprintf(buffer, "\nSystem Memory: 0x%lX", info.system_ram_size);
-    sys_chan_write(channel, buffer, strlen(buffer));
-
-    sprintf(buffer, "\nPCB version: %s", (char*)&info.pcb_version);
-    sys_chan_write(channel, buffer, strlen(buffer));
-
-    sprintf(buffer, "\nFPGA Date: %08lX", info.fpga_date);
-    sys_chan_write(channel, buffer, strlen(buffer));
+    print(channel, buffer);
 
     sprintf(buffer, "\nFPGA Model: %08lX", info.fpga_model);
-    sys_chan_write(channel, buffer, strlen(buffer));
+    print(channel, buffer);
 
     sprintf(buffer, "\nFPGA Version: %04X.%04X", info.fpga_version, info.fpga_subver);
-    sys_chan_write(channel, buffer, strlen(buffer));
+    print(channel, buffer);
 
     sprintf(buffer, "\nMCP version: v%02u.%02u.%04u\n", info.mcp_version, info.mcp_rev, info.mcp_build);
-    sys_chan_write(channel, buffer, strlen(buffer));
+    print(channel, buffer);
 
     return 0;
 }

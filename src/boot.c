@@ -277,11 +277,9 @@ short boot_screen() {
     str_upcase(info.cpu_name, entry);
     sprintf(buffer, "         CPU: %s\n", entry);
     print(screen, buffer);
-    sprintf(buffer, "       BOARD: %s\n", info.pcb_version);
+    sprintf(buffer, " CLOCK (KHZ): %d\n", info.cpu_clock_khz);
     print(screen, buffer);
     sprintf(buffer, "      FPGA V: %02d.%02d.%04d\n", info.fpga_model, info.fpga_version, info.fpga_subver);
-    print(screen, buffer);
-    sprintf(buffer, "   FPGA DATE: %06X\n", info.fpga_date);
     print(screen, buffer);
 
     /* Wait until the target duration has been reached _or_ the user presses a key */

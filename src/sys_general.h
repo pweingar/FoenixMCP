@@ -17,17 +17,33 @@
 #define MODEL_FOENIX_A2560U_PLUS    6
 #define MODEL_FOENIX_A2560X         8
 #define MODEL_FOENIX_A2560U         9
-#define MODEL_FOENIX_A2560K         13
+#define MODEL_FOENIX_A2560K         11
 
 /* IDs for the CPUs supported */
 
-#define CPU_WDC65816                0x16  /* CPU code for the Western Design Center 65816 */
-#define CPU_M68000                  0x20  /* CPU code for the Motorola 68000 */
-#define CPU_M68010                  0x21  /* CPU code for the Motorola 68010 */
-#define CPU_M68020                  0x22  /* CPU code for the Motorola 68020 */
-#define CPU_M68030                  0x23  /* CPU code for the Motorola 68030 */
-#define CPU_M68040                  0x24  /* CPU code for the Motorola 68040 */
-#define CPU_I486DX                  0x34  /* CPU code for the Intel 486DX */
+#define CPU_WDC65816                0xFF  /* CPU code for the Western Design Center 65816 */
+#define CPU_M68000                  0x00  /* Motorola 680X0 chips... */
+#define CPU_M68020                  0x01
+#define CPU_M68EC020                0x02
+#define CPU_M68030                  0x03
+#define CPU_M680EC30                0x04
+#define CPU_M68040                  0x05
+#define CPU_M68040V                 0x06
+#define CPU_M680EC40                0x07
+#define CPU_486DX2_50               0x08  /* Intel 486 chips... */
+#define CPU_486DX2_60               0x09
+#define CPU_486DX4                  0x0A
+
+/* Clock speeds */
+
+#define SYSCLK_14MHZ                0x00    /* 14.318 MHz */
+#define SYSCLK_20MHZ                0x01    /* 20 MHz */
+#define SYSCLK_25MHZ                0x02    /* 25 MHz */
+#define SYSCLK_33MHZ                0x03    /* 33 MHz */
+#define SYSCLK_40MHZ                0x04    /* 40 MHz */
+#define SYSCLK_50MHZ                0x05    /* 50 MHz */
+#define SYSCLK_66MHZ                0x06    /* 66 MHz */
+#define SYSCLK_80MHZ                0x07    /* 88 MHz */
 
 /*
  * Structure to describe the hardware
@@ -40,12 +56,10 @@ typedef struct s_sys_info {
     const char * model_name;        /* Human readable name of the model of the computer */
     unsigned short cpu;             /* Code to say which CPU is running */
     const char * cpu_name;          /* Human readable name for the CPU */
-    unsigned long fpga_date;        /* BCD date describing the date of the FPGA built: YYYYMMDD */
-    char pcb_version[4];            /* PCB version (string) */
+    unsigned int cpu_clock_khz;     /* Speed of the CPU clock in KHz */
     unsigned long fpga_model;       /* FPGA model number */
     unsigned short fpga_version;    /* FPGA version */
     unsigned short fpga_subver;     /* FPGA sub-version */
-    unsigned short vicky_rev;       /* Code for the VICKY revision number */
     long system_ram_size;           /* The number of bytes of system RAM on the board */
     bool has_floppy;                /* TRUE if the board has a floppy drive installed */
     bool has_hard_drive;            /* TRUE if the board has a PATA device installed */
