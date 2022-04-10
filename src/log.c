@@ -60,7 +60,8 @@ const char * err_messages[] = {
     "file locked",
     "not enough core",
     "too many open files",
-    "file system invalid parameter"
+    "file system invalid parameter",
+    "not supported"
 };
 
 /*

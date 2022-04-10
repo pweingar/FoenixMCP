@@ -18,6 +18,7 @@
 #include "interrupt.h"
 #include "rtc_reg.h"
 #include "dev/rtc.h"
+#include "dev/txt_screen.h"
 #include "snd/codec.h"
 #include "vicky_general.h"
 
@@ -408,43 +409,92 @@ short cli_time_get(short channel, char * value, short size) {
     return 0;
 }
 
-/*
- * Font setter -- SET FONT <path>
- */
-short cli_font_set(short screen, const char * value) {
-    /* Open the file */
-    short chan = fsys_open(value, 0x01);
-    if (chan > 0) {
-        int i;
-        for (i = 0; i < 8 * 256; i++) {
-            short b = sys_chan_read_b(chan);
-            if (b >= 0) {
-                VICKY_TXT_FONT_A[i] = (unsigned char)b;
+short cli_set_font(short screen, const char * path) {
+    const unsigned long load_address = 0x10000;
+    unsigned long jump_address = 0;
+    char message[80];
+    t_file_info filinfo;
+
+    short result = sys_fsys_stat(path, &filinfo);
+    if (result == 0) {
+        if (filinfo.size == 256 * 8) {
+            // It's a simple 8x8 font
+            result = sys_fsys_load(path, load_address, &jump_address);
+            if (result == 0) {
+                sys_txt_set_font(screen, 8, 8, (unsigned char *)load_address);
+                return 0;
             } else {
-                char message[80];
+                return result;
+            }
 
-                /* Reset the text screen */
-                fsys_close(chan);
+        } else {
+            // It's 8x16.. check to make sure this device can support that
+            p_txt_capabilities txt_caps = sys_txt_get_capabilities(screen);
+            if (txt_caps != 0) {
+                short supports_8x16 = 0;
+                int i;
+                for (i = 0; i < txt_caps->font_size_count; i++) {
+                    p_extent font_size = &(txt_caps->font_sizes[i]);
+                    if ((font_size->width == 8) && (font_size->height == 16)) {
+                        // 8x16 is supported... load the font
+                        result = sys_fsys_load(path, load_address, &jump_address);
+                        if (result == 0) {
+                            sys_txt_set_font(screen, 8, 16, (unsigned char *)load_address);
+                            return 0;
+                        } else {
+                            return result;
+                        }
+                    }
+                }
 
-                sprintf(message, "Unable to read font file: %d\n", b);
-                sys_chan_write(screen, message, strlen(message));
+                // 8x16 is not a supported font size
+                return ERR_NOT_SUPPORTED;
+
+            } else {
                 return -1;
             }
-        }
 
-        fsys_close(chan);
+        }
     } else {
-        print(screen, "Could not load font file.\n");
-        return -1;
+        return result;
     }
 }
 
-/*
- * Font setter -- GET FONT <path>
+/**
+ * Font@0 setter -- SET FONT@0 <path>
+ *
+ * Sets the font for the main screen (channel B)
  */
-short cli_font_get(short channel, char * value, short size) {
-    /* We don't keep the font path */
-    *value = 0;
+short cli_font0_set(short screen, const char * value) {
+    // Load the font into memory
+    short result = cli_set_font(0, value);
+    return result;
+}
+
+/**
+ * Font@0 getter -- GET FONT@0
+ */
+short cli_font0_get(short screen, char * value, short size) {
+    value[0] = 0;
+    return 0;
+}
+
+/**
+ * Font@1 setter -- SET FONT@1 <path>
+ *
+ * Sets the font for the secondary screen (channel A or EVID)
+ */
+short cli_font1_set(short screen, const char * value) {
+    // Load the font into memory
+    short result = cli_set_font(1, value);
+    return result;
+}
+
+/**
+ * Font@0 getter -- GET FONT@0
+ */
+short cli_font1_get(short screen, char * value, short size) {
+    value[0] = 0;
     return 0;
 }
 
@@ -494,6 +544,7 @@ short cli_layout_set(short channel, const char * value) {
  * Get the keyboard layout given a keyboard layout file -- GET LAYOUT
  */
 short cli_layout_get(short channel, char * value, short size) {
+    value[0] = 0;
     return 0;
 }
 
@@ -544,18 +595,32 @@ short cli_screen_get(short channel, const char * value) {
  * Initialize the settings tables
  */
 void cli_set_init() {
+    t_sys_info info;
+
     cli_first_setting = 0;
     cli_last_setting = 0;
 
+    sys_get_info(&info);
+
     cli_set_register("DATE", "DATE yyyy-mm-dd -- set the date in the realtime clock", cli_date_set, cli_date_get);
-    // cli_set_register("RTC", "RTC 1|0 -- Enable or disable the realtime clock interrupt", cli_rtc_set, cli_rtc_get);
-    // cli_set_register("SOF", "SOF 1|0 -- Enable or disable the Start of Frame interrupt", cli_sof_set, cli_sof_get);
-    cli_set_register("FONT", "FONT <path> -- set a font for the display", cli_font_set, cli_font_get);
+
+    if (info.screens == 1) {
+        cli_set_register("FONT", "FONT <path> -- set a font for the display", cli_font0_set, cli_font0_get);
+    } else {
+        cli_set_register("FONT@0", "FONT@0 <path> -- set a font for the display #0", cli_font0_set, cli_font0_get);
+        cli_set_register("FONT@1", "FONT@1 <path> -- set a font for the display #1", cli_font1_set, cli_font1_get);
+    }
+
     cli_set_register("KEYBOARD", "KEYBOARD <path> -- set the keyboard layout", cli_layout_set, cli_layout_get);
-#if MODEL == MODEL_FOENIX_A2560K
-    cli_set_register("KEYCOLOR", "KEYCOLOR 0x0RGB -- set the keyboard color", cli_keycolor_set, cli_keycolor_get);
-#endif
-    cli_set_register("SCREEN", "SCREEN <0 - 1> -- set the channel number to use for interactions", cli_screen_set, cli_screen_get);
+
+    if (info.model == MODEL_FOENIX_A2560K) {
+        cli_set_register("KEYCOLOR", "KEYCOLOR 0x0RGB -- set the keyboard color", cli_keycolor_set, cli_keycolor_get);
+    }
+
+    if (info.screens == 1) {
+        cli_set_register("SCREEN", "SCREEN <0 - 1> -- set the channel number to use for interactions", cli_screen_set, cli_screen_get);
+    }
+
     cli_set_register("TIME", "TIME HH:MM:SS -- set the time in the realtime clock", cli_time_set, cli_time_get);
     cli_set_register("VOLUME", "VOLUME <0 - 255> -- set the master volume", cli_volume_set, cli_volume_get);
 }

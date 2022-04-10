@@ -587,6 +587,19 @@ short sys_fsys_register_loader(const char * extension, p_file_loader loader) {
 }
 
 /**
+ * Check to see if the file is present.
+ * If it is not, return a file not found error.
+ * If it is, populate the file info record
+ *
+ * @param path the path to the file to check
+ * @param file pointer to a file info record to fill in, if the file is found.
+ * @return 0 on success, negative number on error
+ */
+short sys_fsys_stat(const char * path, p_file_info file) {
+    return (short)syscall(KFN_STAT, path, file);
+}
+
+/**
  * Return the top of system RAM... the user program must not use any
  * system memory from this address and above.
  *
@@ -700,6 +713,17 @@ short sys_proc_run(const char * path, int argc, char * argv[]) {
 //
 
 /**
+ * Gets the description of a screen's capabilities
+ *
+ * @param screen the number of the text device
+ *
+ * @return a pointer to the read-only description (0 on error)
+ */
+extern const p_txt_capabilities sys_txt_get_capabilities(short screen) {
+    return (const p_txt_capabilities)syscall(KFN_TXT_GET_CAPS, screen);
+}
+
+/**
  * Set the position of the cursor to (x, y) relative to the current region
  * If the (x, y) coordinate is outside the region, it will be clipped to the region.
  * If y is greater than the height of the region, the region will scroll until that relative
@@ -779,4 +803,17 @@ void sys_txt_get_color(short screen, unsigned char * foreground, unsigned char *
  */
 void sys_txt_set_cursor_visible(short screen, short is_visible) {
     syscall(KFN_TXT_SET_CURSOR_VIS, screen, is_visible);
+}
+
+
+/**
+ * Load a font as the current font for the screen
+ *
+ * @param screen the number of the text device
+ * @param width width of a character in pixels
+ * @param height of a character in pixels
+ * @param data pointer to the raw font data to be loaded
+ */
+short sys_txt_set_font(short screen, short width, short height, unsigned char * data) {
+    return syscall(KFN_TXT_SET_FONT, screen, width, height, data);
 }
