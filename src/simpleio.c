@@ -4,6 +4,7 @@
 
 #include <ctype.h>
 #include <string.h>
+#include <stdio.h>
 #include "syscalls.h"
 #include "simpleio.h"
 #include "dev/txt_screen.h"
@@ -42,6 +43,15 @@ void print_box(short channel, const char * message) {
     char c;
     for (x = message; *x; x++) {
         switch (*x) {
+            case 0x1B:
+                // ESC... print this and the next character
+                sys_chan_write_b(channel, 0x1B);
+                if (*(x+1) == '[') {
+                    sys_chan_write_b(channel, '[');
+                    x++;
+                }
+                break;
+
             case '{':
                 // Upper-left angle
                 c = 0xDA;
@@ -95,6 +105,11 @@ void print_box(short channel, const char * message) {
             case '#':
                 // Cross
                 c = 0xC5;
+                break;
+
+            case '*':
+                // Block
+                c = 0xDB;
                 break;
 
             default:
@@ -293,4 +308,120 @@ void str_upcase(const char * src, char * dst) {
         dst[i] = toupper(src[i]);
     }
     dst[strlen(src)] = 0;
+}
+
+const char * model_banner[] = {
+    // 0 = C256 FMX
+    "   _________   ___________    ________  ____  __",
+    "  / ____/__ \\ / ____/ ___/   / ____/  |/  / |/ /",
+    " / /    __/ //___ \\/ __ \\   / /_  / /|_/ /|   / ",
+    "/ /___ / __/____/ / /_/ /  / __/ / /  / //   |  ",
+    "\\____//____/_____/\\____/  /_/   /_/  /_//_/|_|  ",
+
+    // 1 = C256 U
+    "   _________   ___________    __  __",
+    "  / ____/__ \\ / ____/ ___/   / / / /",
+    " / /    __/ //___ \\/ __ \\   / / / / ",
+    "/ /___ / __/____/ / /_/ /  / /_/ /  ",
+    "\\____//____/_____/\\____/   \\____/   ",
+
+    // 2 = Blank
+    "",
+    "",
+    "",
+    "",
+    "",
+
+    // 3 = Blank
+    "",
+    "",
+    "",
+    "",
+    "",
+
+    // 4 = A2560 GENX
+    "    ___   ___   ___________ ____     _____________   ___  __",
+    "   /   | |__ \\ / ____/ ___// __ \\   / ____/ ____/ | / / |/ /",
+    "  / /| | __/ //___ \\/ __ \\/ / / /  / / __/ __/ /  |/ /|   / ",
+    " / ___ |/ __/____/ / /_/ / /_/ /  / /_/ / /___/ /|  //   |  ",
+    "/_/  |_/____/_____/\\____/\\____/   \\____/_____/_/ |_//_/|_|  ",
+
+    // 5 = C256 U+
+    "   _________   ___________    __  __    ",
+    "  / ____/__ \\ / ____/ ___/   / / / / __ ",
+    " / /    __/ //___ \\/ __ \\   / / / /_/ /_",
+    "/ /___ / __/____/ / /_/ /  / /_/ /_  __/",
+    "\\____//____/_____/\\____/   \\____/ /_/   ",
+
+    // 6 = A2560 U+
+    "    ___   ___   ___________ ____     __  __    ",
+    "   /   | |__ \\ / ____/ ___// __ \\   / / / / __ ",
+    "  / /| | __/ //___ \\/ __ \\/ / / /  / / / /_/ /_",
+    " / ___ |/ __/____/ / /_/ / /_/ /  / /_/ /_  __/",
+    "/_/  |_/____/_____/\\____/\\____/   \\____/ /_/   ",
+
+    // 7 = Blank
+    "",
+    "",
+    "",
+    "",
+    "",
+
+    // 8 = A2560 X
+    "    ___   ___   ___________ ____     _  __",
+    "   /   | |__ \\ / ____/ ___// __ \\   | |/ /",
+    "  / /| | __/ //___ \\/ __ \\/ / / /   |   / ",
+    " / ___ |/ __/____/ / /_/ / /_/ /   /   |  ",
+    "/_/  |_/____/_____/\\____/\\____/   /_/|_|  ",
+
+    // 9 = A2560 U
+    "    ___   ___   ___________ ____     __  __",
+    "   /   | |__ \\ / ____/ ___// __ \\   / / / /",
+    "  / /| | __/ //___ \\/ __ \\/ / / /  / / / / ",
+    " / ___ |/ __/____/ / /_/ / /_/ /  / /_/ /  ",
+    "/_/  |_/____/_____/\\____/\\____/   \\____/   ",
+
+    // 10 = Blank
+    "",
+    "",
+    "",
+    "",
+    "",
+
+    // 11 = A2560 K
+    "    ___   ___   ___________ ____     __ __",
+    "   /   | |__ \\ / ____/ ___// __ \\   / //_/",
+    "  / /| | __/ //___ \\/ __ \\/ / / /  / ,<   ",
+    " / ___ |/ __/____/ / /_/ / /_/ /  / /| |  ",
+    "/_/  |_/____/_____/\\____/\\____/  /_/ |_|  "
+};
+
+/**
+ * Print out the bannerized name of the model, given its ID
+ *
+ * @param channel the number of the channel to print on
+ * @param model_id the number of the particular Foenix model
+ */
+void print_banner(short channel, short model_id) {
+    const char * color_bars = "\x1b[31m\x0b\x0c\x1b[35m\x0b\x0c\x1b[33m\x0b\x0c\x1b[32m\x0b\x0c\x1b[36m\x0b\x0c\x1b[37m";
+    const short lines_per_model = 5;
+    const short max_model_id = 11;
+    char line[80];
+
+    if (model_id <= max_model_id) {
+        short index = model_id * lines_per_model;
+        int i = 0, j = 0;
+
+        for (i = 0; i < lines_per_model; i++) {
+            for (j = lines_per_model - i - 1; j > 0; j--) {
+                sys_chan_write_b(channel, ' ');
+            }
+            print(channel, color_bars);
+            for (j = 0; j < i; j++) {
+                sys_chan_write_b(channel, ' ');
+            }
+            print(channel, model_banner[index+i]);
+            sys_chan_write_b(channel, '\n');
+        }
+    }
 }

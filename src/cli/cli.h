@@ -27,13 +27,24 @@ typedef short (*cli_cmd_handler)(short screen, int argc, const char * argv[]);
 extern short cli_init();
 
 /**
+ * Start the read-eval-print loop
+ *
+ * @param channel the channel to use for interactions
+ * @param init_cwd the initial current working directory
+ */
+extern short cli_start_repl(short channel, const char * init_cwd);
+
+/**
+ * Reactivate the CLI's read-eval-print loop after a command has completed
+ */
+extern void cli_rerepl();
+
+/**
  * Enter the CLI's read-eval-print loop
  *
- * Inputs:
- * channel = the console channel to use for I/O
- * init_cwd = pointer to the path for the initial current working directory
+ * @param channel the channel to use for interactions
  */
-extern short cli_repl(short channel, const char * init_cwd);
+extern short cli_repl(short channel);
 
 /*
  * Evaluate an argument to a number

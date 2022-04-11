@@ -440,7 +440,7 @@ void boot_from_bdev(short device) {
 
         } else {
             // No over-ride provided... boot the default
-            cli_repl(cli_screen, initial_path);
+            cli_start_repl(cli_screen, initial_path);
         }
     }
 }

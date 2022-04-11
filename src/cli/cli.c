@@ -85,6 +85,9 @@ extern short cmd_credits(short channel, int argc, const char * argv[]);
  * Variables
  */
 
+/** The model number of the current machine */
+short g_model_id = 0;
+
 /** The channel to use for interactions */
 short g_current_channel = 0;
 
@@ -313,9 +316,13 @@ char * strtok_r(char * source, const char * delimiter, char ** saveptr) {
     return x;
 }
 
+/**
+ * Reactivate the CLI's read-eval-print loop after a command has completed
+ */
 void cli_rerepl() {
     while (1) {
-        cli_repl(g_current_channel, 0);
+        print(g_current_channel, "\n\n");
+        cli_repl(g_current_channel);
     }
 }
 
@@ -508,45 +515,18 @@ short cli_getchar(short channel) {
     } while (1);
 }
 
-char line[256];
+char line[128];
 
+/**
+ * Print out the credits
+ */
 short cmd_credits(short channel, int argc, const char * argv[]) {
-    const char * color_bars = "\x1b[31m\x0b\x0c\x1b[35m\x0b\x0c\x1b[33m\x0b\x0c\x1b[32m\x0b\x0c\x1b[36m\x0b\x0c";
-
-    #if MODEL == MODEL_FOENIX_A2560U
-    const char * title_1 = "\x1b[37m   A   2222  55555  666   000  U   U";
-    const char * title_2 = "\x1b[37m  A A      2 5     6     0   0 U   U";
-    const char * title_3 = "\x1b[37m AAAAA  222   555  6666  0   0 U   U";
-    const char * title_4 = "\x1b[37m A   A 2         5 6   6 0   0 U   U";
-    const char * title_5 = "\x1b[37m A   A 22222 5555   666   000   UUU";
-    #elif MODEL == MODEL_FOENIX_A2560U_PLUS
-    const char * title_1 = "\x1b[37m   A   2222  55555  666   000  U   U   +";
-    const char * title_2 = "\x1b[37m  A A      2 5     6     0   0 U   U   +";
-    const char * title_3 = "\x1b[37m AAAAA  222   555  6666  0   0 U   U +++++";
-    const char * title_4 = "\x1b[37m A   A 2         5 6   6 0   0 U   U   +";
-    const char * title_5 = "\x1b[37m A   A 22222 5555   666   000   UUU    +";
-    #elif MODEL == MODEL_FOENIX_A2560K
-    const char * title_1 = "\x1b[37m   A   2222  55555  666   000  K   K";
-    const char * title_2 = "\x1b[37m  A A      2 5     6     0   0 K  K";
-    const char * title_3 = "\x1b[37m AAAAA  222   555  6666  0   0 KKK";
-    const char * title_4 = "\x1b[37m A   A 2         5 6   6 0   0 K  K";
-    const char * title_5 = "\x1b[37m A   A 22222 5555   666   000  K   K";
-    #else
-    const char * title_1 = "\x1b[37m FFFFF  OOO  EEEEE N   N IIIII X   X";
-    const char * title_2 = "\x1b[37m F     O   O E     NN  N   I    X X";
-    const char * title_3 = "\x1b[37m FFF   O   O EEE   N N N   I     X";
-    const char * title_4 = "\x1b[37m F     O   O E     N  NN   I    X X";
-    const char * title_5 = "\x1b[37m F      OOO  EEEEE N   N IIIII X   X";
-    #endif
-
-
     short scan_code = 0;
 
-    sprintf(line, "\x1b[2J\x1b[H");
-    print(channel, line);
+    print(channel, "\x1b[2J\x1b[1;2H");
+    print_banner(channel, g_model_id);
 
-    sprintf(line, "    %s%s\n   %s %s\n  %s  %s\n %s   %s\n%s    %s\n\n", color_bars, title_1, color_bars, title_2, color_bars, title_3, color_bars, title_4, color_bars, title_5);
-    print(channel, line);
+    print(channel, "\n");
 
     sprintf(line, "| Version    | %02d.%02d-alpha+%04d                               |\n", VER_MAJOR, VER_MINOR, VER_BUILD);
     print_box(channel, "{-------------------------------------------------------------}\n");
@@ -569,9 +549,7 @@ short cmd_credits(short channel, int argc, const char * argv[]) {
         scan_code = sys_kbd_scancode();
     } while (scan_code != 0x01);
 
-    sprintf(line, "\x1b[2J\x1b[H");
-    print(channel, line);
-
+    print(channel,"\x1b[2J\x1b[H");
     return 0;
 }
 
@@ -835,12 +813,17 @@ void cli_setup_screen(short channel, const char * path, short is_active) {
     // Draw the window
     cli_draw_window(channel, path, is_active);
     print(channel, "\x1b[2J\x1b[1;2H");
+
+    print(channel, "\x1b[2J\x1b[1;2H");
+    print_banner(channel, g_model_id);
+
+    print(channel, "\nType HELP or ? for help.\n");
 }
 
 //
 // Enter the CLI's read-eval-print loop
 //
-short cli_repl(short channel, const char * init_cwd) {
+short cli_repl(short channel) {
     char command_line[MAX_COMMAND_SIZE];
     char cwd_buffer[MAX_PATH_LEN];
     short result = 0;
@@ -849,26 +832,6 @@ short cli_repl(short channel, const char * init_cwd) {
     short old_channel;
 
     old_channel = channel;
-    g_current_channel = channel;
-
-    if (init_cwd != 0) {
-        result = sys_fsys_set_cwd(init_cwd);
-        if (result) {
-            char message[80];
-            sprintf(message, "Unable to set startup directory: %s\n", err_message(result));
-            print(g_current_channel, message);
-        }
-    }
-
-    // Set up the screen(s)
-    cli_setup_screen(channel, init_cwd, 1);             // Initialize our main main screen
-    if (g_num_screens > 1) {
-        for (i = 0; i < g_num_screens; i++) {             // Set up each screen we aren't using
-            if (i != channel) {
-                cli_setup_screen(i, init_cwd, 0);
-            }
-        }
-    }
 
     g_cwd_changed = 1;
     cursor.x = 0;
@@ -930,6 +893,42 @@ short cli_repl(short channel, const char * init_cwd) {
     }
 
     return 0;
+}
+
+/**
+ * Start the read-eval-print loop
+ *
+ * @param channel the channel to use for interactions
+ * @param init_cwd the initial current working directory
+ */
+short cli_start_repl(short channel, const char * init_cwd) {
+    char cwd_buffer[MAX_PATH_LEN];
+    short result = 0;
+    short i = 0;
+    t_point cursor;
+
+    g_current_channel = channel;
+
+    if (init_cwd != 0) {
+        result = sys_fsys_set_cwd(init_cwd);
+        if (result) {
+            char message[80];
+            sprintf(message, "Unable to set startup directory: %s\n", err_message(result));
+            print(g_current_channel, message);
+        }
+    }
+
+    // Set up the screen(s)
+    cli_setup_screen(channel, init_cwd, 1);             // Initialize our main main screen
+    if (g_num_screens > 1) {
+        for (i = 0; i < g_num_screens; i++) {             // Set up each screen we aren't using
+            if (i != channel) {
+                cli_setup_screen(i, init_cwd, 0);
+            }
+        }
+    }
+
+    return cli_repl(channel);
 }
 
 /**
@@ -1091,6 +1090,7 @@ short cli_init() {
 
     // Figure out how many screens we have
     sys_get_info(&info);
+    g_model_id = info.model;
     g_num_screens = info.screens;
 
     cli_set_init();

@@ -99,4 +99,12 @@ extern void dump_buffer(short channel, const unsigned char * buffer, short size,
  */
 extern void str_upcase(const char * src, char * dst);
 
+/**
+ * Print out the bannerized name of the model, given its ID
+ *
+ * @param channel the number of the channel to print on
+ * @param model_id the number of the particular Foenix model
+ */
+extern void print_banner(short channel, short model_id);
+
 #endif
