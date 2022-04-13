@@ -85,20 +85,17 @@ extern short cmd_credits(short channel, int argc, const char * argv[]);
  * Variables
  */
 
-/** The model number of the current machine */
-short g_model_id = 0;
-
 /** The channel to use for interactions */
 short g_current_channel = 0;
 
 /** Flag to indicate that the current working directory has changed */
 short g_cwd_changed = 0;
 
-/** The number of text screens on this machine */
-short g_num_screens = 0;
-
 /** The history of previous commands issued */
 char cli_history[MAX_HISTORY_DEPTH][MAX_COMMAND_SIZE];
+
+/** Record of system information */
+t_sys_info cli_sys_info;
 
 /** The built-in commands supported */
 const t_cli_command g_cli_commands[] = {
@@ -202,30 +199,27 @@ short cmd_cls(short channel, int argc, const char * argv[]) {
  * Display information about the system
  */
 short cmd_sysinfo(short channel, int argc, const char * argv[]) {
-    t_sys_info info;
     char buffer[80];
 
-    sys_get_info(&info);
-
-    sprintf(buffer, "System information:\nModel: %s", info.model_name);
+    sprintf(buffer, "System information:\nModel: %s", cli_sys_info.model_name);
     print(channel, buffer);
 
-    sprintf(buffer, "\nCPU: %s", info.cpu_name);
+    sprintf(buffer, "\nCPU: %s", cli_sys_info.cpu_name);
     print(channel, buffer);
 
-    sprintf(buffer, "\nClock (kHz): %d", info.cpu_clock_khz);
+    sprintf(buffer, "\nClock (kHz): %d", cli_sys_info.cpu_clock_khz);
     print(channel, buffer);
 
-    sprintf(buffer, "\nSystem Memory: 0x%lX", info.system_ram_size);
+    sprintf(buffer, "\nSystem Memory: 0x%lX", cli_sys_info.system_ram_size);
     print(channel, buffer);
 
-    sprintf(buffer, "\nFPGA Model: %08lX", info.fpga_model);
+    sprintf(buffer, "\nFPGA Model: %08lX", cli_sys_info.fpga_model);
     print(channel, buffer);
 
-    sprintf(buffer, "\nFPGA Version: %04X.%04X", info.fpga_version, info.fpga_subver);
+    sprintf(buffer, "\nFPGA Version: %04X.%04X", cli_sys_info.fpga_version, cli_sys_info.fpga_subver);
     print(channel, buffer);
 
-    sprintf(buffer, "\nMCP version: v%02u.%02u.%04u\n", info.mcp_version, info.mcp_rev, info.mcp_build);
+    sprintf(buffer, "\nMCP version: v%02u.%02u.%04u\n", cli_sys_info.mcp_version, cli_sys_info.mcp_rev, cli_sys_info.mcp_build);
     print(channel, buffer);
 
     return 0;
@@ -524,7 +518,7 @@ short cmd_credits(short channel, int argc, const char * argv[]) {
     short scan_code = 0;
 
     print(channel, "\x1b[2J\x1b[1;2H");
-    print_banner(channel, g_model_id);
+    print_banner(channel, cli_sys_info.model);
 
     print(channel, "\n");
 
@@ -789,6 +783,7 @@ void cli_draw_window(short channel, const char * status, short is_active) {
  */
 void cli_setup_screen(short channel, const char * path, short is_active) {
     t_rect full_region, command_region;
+    char message[80];
 
     // Get the size of the screen
     full_region.origin.x = 0;
@@ -815,9 +810,11 @@ void cli_setup_screen(short channel, const char * path, short is_active) {
     print(channel, "\x1b[2J\x1b[1;2H");
 
     print(channel, "\x1b[2J\x1b[1;2H");
-    print_banner(channel, g_model_id);
+    print_banner(channel, cli_sys_info.model);
 
-    print(channel, "\nType HELP or ? for help.\n");
+    sprintf(message, "\nFoenix/MCP v%02d.%02d.%04d\n\n", cli_sys_info.mcp_version, cli_sys_info.mcp_rev, cli_sys_info.mcp_build);
+    print(channel, message);
+    print(channel, "Type HELP or ? for help.\n");
 }
 
 //
@@ -920,8 +917,8 @@ short cli_start_repl(short channel, const char * init_cwd) {
 
     // Set up the screen(s)
     cli_setup_screen(channel, init_cwd, 1);             // Initialize our main main screen
-    if (g_num_screens > 1) {
-        for (i = 0; i < g_num_screens; i++) {             // Set up each screen we aren't using
+    if (cli_sys_info.screens > 1) {
+        for (i = 0; i < cli_sys_info.screens; i++) {             // Set up each screen we aren't using
             if (i != channel) {
                 cli_setup_screen(i, init_cwd, 0);
             }
@@ -1080,7 +1077,6 @@ void cli_flag_cwd() {
 //  0 on success, negative number on error
 //
 short cli_init() {
-    t_sys_info info;
     short i;
 
     // Clear out the command history
@@ -1088,10 +1084,8 @@ short cli_init() {
         cli_history[i][0] = 0;
     }
 
-    // Figure out how many screens we have
-    sys_get_info(&info);
-    g_model_id = info.model;
-    g_num_screens = info.screens;
+    // Get the system information we'll use in several places
+    sys_get_info(&cli_sys_info);
 
     cli_set_init();
     return 0;

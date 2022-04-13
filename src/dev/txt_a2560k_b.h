@@ -6,8 +6,8 @@
 #ifndef __TXT_A2560K_B_H
 #define __TXT_A2560K_B_H
 
-/* Channel B is assigned to screen #1, it will be considered the primary channel */
-#define TXT_SCREEN_A2560K_B 1
+/* Channel B is assigned to screen #0, it will be considered the primary channel */
+#define TXT_SCREEN_A2560K_B 0
 
 /**
  * Initialize and install the driver

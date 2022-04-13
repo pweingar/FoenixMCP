@@ -1,36 +1,49 @@
-FLASHSTART = 0xFFC10000;
-FLASHLEN = 0x00200000;
-RAMSTART = 0x00001000;
-RAMSIZE  = 0x00010000;
-STACKLEN = 0x400;
-VECTORSIZE = 0x400;
-BINFILESTART = 0x00000000;
-PAGESIZE = 0x10000;
+BINFILE_START = 0x00000000;
+FLASH_START = 0xFFC00000;
+VECTOR_START = 0x00000000;
+STORE_START = 0x003D0000;
+KERNEL_START = 0xFFC10000;
+
+STACK_LEN = 0x400;
+VECTOR_LEN = 0x1000;
+STORE_LEN = 0x00030000;
+KERNEL_LEN = 0x00040000;
+FLASH_LEN = 0x00200000;
+PAGE_SIZE = 0x00010000;
 
 MEMORY
 {
-  vectors : org = 0x000000, len = VECTORSIZE
-  ram : org = RAMSTART + VECTORSIZE, len = RAMSIZE - VECTORSIZE
-  flash: org = FLASHSTART, len = FLASHLEN
-  binpage0: org = BINFILESTART, len = PAGESIZE
-  binpages: org = BINFILESTART + PAGESIZE, len = FLASHLEN - PAGESIZE
+  binpage0: org = BINFILE_START, len = VECTOR_LEN
+  binpage1: org = BINFILE_START + VECTOR_LEN, len = PAGE_SIZE - VECTOR_LEN
+  binpages: org = BINFILE_START + PAGE_SIZE, len = FLASH_LEN - PAGE_SIZE
+  vectors : org = VECTOR_START, len = VECTOR_LEN
+  lowram : org = VECTOR_START + VECTOR_LEN, len = PAGE_SIZE - VECTOR_LEN
+  kernel: org = KERNEL_START, len = KERNEL_LEN
+  storage: org = STORE_START, len = STORE_LEN
 }
 
 SECTIONS
 {
   vectors : { *(VECTORS) } >vectors AT>binpage0
-  text : {*(CODE)} >flash AT>binpages
-  .dtors : { *(.dtors) } >ram AT>binpage0
-  .ctors : { *(.ctors) } >ram AT>binpage0
-  rodata : {*(RODATA)} >flash AT>binpages
-  data: {*(DATA)} >ram
-  bss (NOLOAD): {*(BSS)} >ram
+  data ALIGN(0x02) : { *(DATA) } >lowram AT>binpage1
+  bss (NOLOAD) : { *(BSS) } >storage
+  text ALIGN(0x02) : { *(CODE) } >kernel AT>binpages
+  .dtors ALIGN(0x02) : { *(.dtors) } >kernel AT>binpages
+  .ctors ALIGN(0x02) : { *(.ctors) } >kernel AT>binpages
+
 
   ___heap = ADDR(bss) + SIZEOF(bss);
-  ___heapend = RAMSTART + RAMSIZE - STACKLEN;
+  ___heapend = STORE_START + STORE_LEN - STACK_LEN;
 
   ___BSSSTART = ADDR(bss);
   ___BSSSIZE  = SIZEOF(bss);
 
-  ___STACK = RAMSTART + RAMSIZE;
+  ___USER_STACK = 0x00010000;
+  ___STACK = STORE_START + STORE_LEN;
+
+  ___kernel_vma_start = ADDR(text);
+  ___kernel_lma_start = LOADADDR(text);
+  ___kernel_lma_end = ___kernel_lma_start + SIZEOF(text);
+
+  ___memory_start = STORE_START;
 }

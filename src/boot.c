@@ -194,11 +194,8 @@ short boot_screen() {
     char f1[3], f2[3], f3[3];
     char space[10], cr_text[10];
 
-#if MODEL == MODEL_FOENIX_A2560K
-    screen = 1;
-#else
+    // We'll display boot information on the common screen
     screen = 0;
-#endif
 
     /* Turn off the screen */
     txt_set_mode(screen, 0);
@@ -226,7 +223,7 @@ short boot_screen() {
     /* Set a background color for the bitmap mode */
 #if MODEL == MODEL_FOENIX_A2560K
     *BackGroundControlReg_B = 0x00202020;
-    screen = 1;
+    screen = 0;
 #else
     *BackGroundControlReg_A = 0x00202020;
     screen = 0;
@@ -439,6 +436,8 @@ void boot_from_bdev(short device) {
             sys_proc_run(cli_command_path, 0, 0);
 
         } else {
+            print_hex_32(0, (unsigned long)&cli_screen);
+            print(0, "starting CLI\n");
             // No over-ride provided... boot the default
             cli_start_repl(cli_screen, initial_path);
         }

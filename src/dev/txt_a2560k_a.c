@@ -80,7 +80,7 @@ void txt_a2560k_a_set_sizes() {
         a2560k_a_max_size.height = a2560k_a_resolution.height / a2560k_a_font_size.height;
 
         // /* Set the font manager register */
-        // *VKY3_A_FM1 = (a2560k_a_max_size.height & 0xff) << 8 | (a2560k_a_max_size.width * 0xff);
+        *VKY3_A_FM1 = (a2560k_a_max_size.height & 0xff) << 8 | (a2560k_a_max_size.width & 0xff);
 
         /*
          * Calculate the characters that are visible in whole or in part

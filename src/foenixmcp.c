@@ -121,7 +121,7 @@ void initialize() {
     short res;
 
     /* Set the logging level */
-    log_setlevel(LOG_FATAL);
+    log_setlevel(LOG_ERROR);
 
     /* Initialize the memory system */
     mem_init(__memory_start);
