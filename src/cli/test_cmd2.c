@@ -593,13 +593,27 @@ short cmd_test_print(short screen, int argc, const char * argv[]) {
 
     print(screen, "Initializing printer...\n");
 
-    lpt_initialize();
+    short lpt = sys_chan_open(CDEV_LPT, 0, 0);
+    if (lpt > 0) {
+        print(screen, "Sending test patterns to printer (ESC to quit)...\n");
 
-    print(screen, "Sending test patterns to printer (ESC to quit)...\n");
+        while (scancode != 0x01) {
+            short result = sys_chan_write(lpt, test_pattern, strlen(test_pattern));
+            if (result != 0) {
+                sprintf(message, "Unable to print: %s\n", err_message(result));
+                print(screen, message);
+                break;
+            }
+            scancode = sys_kbd_scancode();
+        }
 
-    while (scancode != 0x01) {
-        lpt_write(0, test_pattern, strlen(test_pattern));
-        scancode = sys_kbd_scancode();
+        sys_chan_close(lpt);
+    } else if (lpt == 0) {
+        print(screen, "Unable to print: got a bad channel number.\n");
+
+    } else {
+        sprintf(message, "Unable to print: %s\n", err_message(lpt));
+        print(screen, message);
     }
 #endif
     return 0;

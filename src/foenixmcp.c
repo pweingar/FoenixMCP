@@ -223,6 +223,12 @@ void initialize() {
     } else {
         log(LOG_INFO, "A2560K built-in keyboard initialized.");
     }
+
+    if (res = lpt_install()) {
+        log_num(LOG_ERROR, "FAILED: LPT installation", res);
+    } else {
+        log(LOG_INFO, "LPT installed.");
+    }
 #endif
 
     if (res = cli_init()) {
@@ -236,14 +242,6 @@ void initialize() {
     } else {
         log(LOG_INFO, "File system initialized.");
     }
-
-    // /* Wait until the target duration has been reached _or_ the user presses a key */
-    // while (target_jiffies > sys_time_jiffies()) {
-    //     short scan_code = sys_kbd_scancode();
-    //     if (scan_code != 0) {
-    //         break;
-    //     }
-    // }
 }
 
 #define BOOT_DEFAULT    -1  // User chose default, or the time to over-ride has passed

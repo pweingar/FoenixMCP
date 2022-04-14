@@ -2,9 +2,11 @@
  * Parallel port printer driver
  */
 
+#include "errors.h"
 #include "log.h"
 #include "dev/lpt.h"
 #include "dev/txt_screen.h"
+#include "simpleio.h"
 #include "sys_general.h"
 
 #if MODEL == MODEL_FOENIX_A2560K
@@ -40,7 +42,10 @@ void lpt_delay() {
     while (target_jiffies > sys_time_jiffies()) ;
 }
 
-void lpt_initialize() {
+/**
+ * Initialize the printer... assert the INIT pin to trigger a reset on the printer
+ */
+short lpt_initialize() {
     int i;
 
     /* Set the outputs to start the initialization process */
@@ -49,14 +54,33 @@ void lpt_initialize() {
 
     /* Set the outputs to stop the initialization process */
     *LPT_CTRL_PORT = LPT_CTRL_INIT | LPT_CTRL_SELECT;
+
+    return 0;
 }
 
-/*
+/**
+ * Open a connection to the printer... all we do is assert the SELECT pin
+ */
+short lpt_open(t_channel * chan, const uint8_t * path, short mode) {
+    lpt_initialize();
+
+    *LPT_CTRL_PORT = LPT_CTRL_INIT | LPT_CTRL_SELECT;
+    return 0;
+}
+
+/**
+ * Close the connection to the printer... all we do is deassert the SELECT pin
+ */
+short lpt_close(t_channel * chan) {
+    *LPT_CTRL_PORT = LPT_CTRL_INIT;
+    return 0;
+}
+
+/**
  * Write a character to the parallel port
  */
 short lpt_write_b(p_channel chan, unsigned char b) {
     /* This write routine is polled I/O. */
-    /* TODO: convert it to interrupt driven */
 
     /* Wait until the printer is not busy */
     while ((*LPT_STAT_PORT & LPT_STAT_BUSY) == LPT_STAT_BUSY) {
@@ -65,26 +89,26 @@ short lpt_write_b(p_channel chan, unsigned char b) {
 
     /* Send the byte */
     *LPT_DATA_PORT = b;
+    sys_chan_write_b(0, b);
 
     /* Strobe the interface */
-    //unsigned char ctrl = *LPT_CTRL_PORT;
-    *LPT_CTRL_PORT = LPT_CTRL_INIT | LPT_CTRL_SELECT ;
+    *LPT_CTRL_PORT = LPT_CTRL_INIT | LPT_CTRL_SELECT;
     lpt_delay();
     *LPT_CTRL_PORT = LPT_CTRL_INIT | LPT_CTRL_SELECT | LPT_CTRL_STROBE;
 
-    return 0;                           /* Return success */
+    return 0;
 }
 
 /*
  * Write a buffer of bytes to the parallel port
  */
-short lpt_write(p_channel chan, unsigned char * buffer, short size) {
+short lpt_write(p_channel chan, const uint8_t * buffer, short size) {
     int i;
     short result;
 
     for (i = 0; i < size; i++) {
         result = lpt_write_b(chan, buffer[i]);
-        if (result < 0) {
+        if (result) {
             return result;
         }
     }
@@ -96,7 +120,24 @@ short lpt_write(p_channel chan, unsigned char * buffer, short size) {
  * Install the LPT driver
  */
 short lpt_install() {
-    return 0;
+    t_dev_chan dev;
+
+    dev.name = "LPT";
+    dev.number = CDEV_LPT;
+    dev.init = 0;
+    dev.open = lpt_open;
+    dev.close = lpt_close;
+    dev.read = 0;
+    dev.readline = 0;
+    dev.read_b = 0;
+    dev.write = lpt_write;
+    dev.write_b = lpt_write_b;
+    dev.flush = 0;
+    dev.seek = 0;
+    dev.status = 0;
+    dev.ioctrl = 0;
+
+    return cdev_register(&dev);
 }
 
 #endif

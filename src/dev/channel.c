@@ -8,6 +8,7 @@
 
 #include "dev/channel.h"
 #include "errors.h"
+#include "simpleio.h"
 #include "types.h"
 #include "log.h"
 
@@ -80,8 +81,8 @@ p_channel chan_alloc(short dev) {
 
     TRACE("chan_alloc");
 
-    if ((dev == CDEV_CONSOLE) || (dev == CDEV_EVID)) {
-        /* For CONSOLE and EVID, the channel is always the same number as the device */
+    if ((dev == CDEV_CONSOLE) || (dev == CDEV_EVID) || (dev == CDEV_LPT)) {
+        /* For CONSOLE, EVID, and LPT: the channel is always the same number as the device */
         g_channels[dev].number = dev;
         g_channels[dev].dev = dev;
         return &g_channels[dev];
@@ -210,14 +211,22 @@ short chan_open(short dev, const uint8_t * path, short mode) {
         if (chan == 0) {
             return ERR_OUT_OF_HANDLES;
         }
+        if (chan->dev != dev) {
+            return ERR_BADCHANNEL;
+        }
 
         /* Open the channel */
-        result = cdev->open(chan, path, mode);
-        if (result == 0) {
-            /* Success: return the channel number */
-            return chan->number;
+        if (cdev->open) {
+            result = cdev->open(chan, path, mode);
+            if (result == 0) {
+                /* Success: return the channel number */
+                return chan->number;
+            } else {
+                return result;
+            }
         } else {
-            return result;
+            // There's no actual open routine... just return the channel number
+            return chan->number;
         }
     } else {
         return DEV_ERR_BADDEV;

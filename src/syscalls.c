@@ -248,7 +248,7 @@ short sys_chan_ioctrl(short channel, short command, uint8_t * buffer, short size
  * the number of the channel opened, negative number on error
  */
 short sys_chan_open(short dev, const uint8_t * path, short mode) {
-    return syscall(KFN_CHAN_OPEN, path, mode);
+    return syscall(KFN_CHAN_OPEN, dev, path, mode);
 }
 
 /*
