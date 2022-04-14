@@ -9,9 +9,9 @@
 
 #if MODEL == MODEL_FOENIX_A2560K
 
-#define LPT_DATA_PORT   ((volatile unsigned char *)0x00C02378)
+#define LPT_DATA_PORT   ((volatile unsigned char *)0xFEC02378)
 
-#define LPT_STAT_PORT   ((volatile unsigned char *)0x00C02379)
+#define LPT_STAT_PORT   ((volatile unsigned char *)0xFEC02379)
 #define LPT_STAT_BUSY   0x80
 #define LPT_STAT_ACK    0x40
 #define LPT_STAT_PO     0x20
@@ -19,7 +19,7 @@
 #define LPT_STAT_ERROR  0x08
 #define LPT_STAT_IRQ    0x04
 
-#define LPT_CTRL_PORT   ((volatile unsigned char *)0x00C0237A)
+#define LPT_CTRL_PORT   ((volatile unsigned char *)0xFEC0237A)
 #define LPT_CTRL_STROBE 0x01
 #define LPT_CTRL_AL     0x02
 #define LPT_CTRL_INIT   0x04
@@ -27,7 +27,7 @@
 #define LPT_CTRL_IRQE   0x10
 #define LPT_CTRL_BI     0x20
 
-#define LPT_INIT_ON     0x08            /* Start the printer initialization process */
+#define LPT_INIT_ON     0x04            /* Start the printer initialization process */
 #define LPT_INIT_OFF    0x0C            /* Stop the printer initialization process */
 #define LPT_STROBE_ON   0x0D            /* Strobe the printer */
 #define LPT_STROBE_OFF  0x0C            /* Drop the strobe to the printer */
@@ -40,22 +40,15 @@ void lpt_delay() {
     while (target_jiffies > sys_time_jiffies()) ;
 }
 
-/**
- * Install the LPT driver
- */
-short lpt_install() {
-    return 0;
-}
-
 void lpt_initialize() {
     int i;
 
     /* Set the outputs to start the initialization process */
-    *LPT_CTRL_PORT = LPT_INIT_ON;
+    *LPT_CTRL_PORT = LPT_CTRL_SELECT;
     lpt_delay();
 
     /* Set the outputs to stop the initialization process */
-    *LPT_CTRL_PORT = LPT_INIT_OFF;
+    *LPT_CTRL_PORT = LPT_CTRL_INIT | LPT_CTRL_SELECT;
 }
 
 /*
@@ -66,25 +59,18 @@ short lpt_write_b(p_channel chan, unsigned char b) {
     /* TODO: convert it to interrupt driven */
 
     /* Wait until the printer is not busy */
-    while ((*LPT_STAT_PORT & LPT_STAT_BUSY) == 0) {
+    while ((*LPT_STAT_PORT & LPT_STAT_BUSY) == LPT_STAT_BUSY) {
         lpt_delay();
     }
 
     /* Send the byte */
-    if (b == 0x1b) { b = 'E'}
     *LPT_DATA_PORT = b;
-    sys_chan_write_b(0, b);
 
     /* Strobe the interface */
     //unsigned char ctrl = *LPT_CTRL_PORT;
-    *LPT_CTRL_PORT = LPT_STROBE_ON;
+    *LPT_CTRL_PORT = LPT_CTRL_INIT | LPT_CTRL_SELECT ;
     lpt_delay();
-    *LPT_CTRL_PORT = LPT_STROBE_OFF;
-
-    /* Wait until the printer is not busy */
-    while ((*LPT_STAT_PORT & LPT_STAT_BUSY) == 0) {
-        lpt_delay();
-    }
+    *LPT_CTRL_PORT = LPT_CTRL_INIT | LPT_CTRL_SELECT | LPT_CTRL_STROBE;
 
     return 0;                           /* Return success */
 }
@@ -103,6 +89,13 @@ short lpt_write(p_channel chan, unsigned char * buffer, short size) {
         }
     }
 
+    return 0;
+}
+
+/**
+ * Install the LPT driver
+ */
+short lpt_install() {
     return 0;
 }
 

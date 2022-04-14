@@ -506,7 +506,7 @@ short cli_test_lpt(short screen, int argc, const char * argv[]) {
     char message[80];
     unsigned char scancode;
 
-    sprintf(message, "Test parallel port:\nF1: DATA=00  F2: DATA=FF  F3: STRB=1  F4: STRB=0\n");
+    sprintf(message, "Test parallel port:\nF1: DATA='B'  F2: DATA='A'  F3: STRB=1  F4: STRB=0\n");
     sys_chan_write(screen, message, strlen(message));
     sprintf(message, "F5: INIT=1  F6: INIT=0  F7: SEL=1  F8: SEL=0\nESC: Quit\n");
     sys_chan_write(screen, message, strlen(message));
@@ -518,8 +518,8 @@ short cli_test_lpt(short screen, int argc, const char * argv[]) {
         scancode = sys_kbd_scancode();
         switch (scancode) {
             case 0x3B:      /* F1 */
-                print(0, "DATA = 0x00\n");
-                *LPT_DATA_PORT = 0;
+                print(0, "DATA = 'B'\n");
+                *LPT_DATA_PORT = 'B';
                 break;
 
             case 0x3C:      /* F2 */
@@ -586,18 +586,16 @@ short cli_test_lpt(short screen, int argc, const char * argv[]) {
 
 short cmd_test_print(short screen, int argc, const char * argv[]) {
 #if MODEL == MODEL_FOENIX_A2560K
-    const char * test_pattern = "0123456789ABCDEFGHIJKLMNOPQRTSUVWZXYZ\n\r";
+    const char * test_pattern = "0123456789ABCDEFGHIJKLMNOPQRTSUVWZXYZ\r\n";
 
     char message[80];
     unsigned short scancode = 0;
 
-    sprintf(message, "Initializing printer...\n");
-    sys_chan_write(screen, message, strlen(message));
+    print(screen, "Initializing printer...\n");
 
     lpt_initialize();
 
-    sprintf(message, "Sending test patterns to printer (ESC to quit)...\n");
-    sys_chan_write(screen, message, strlen(message));
+    print(screen, "Sending test patterns to printer (ESC to quit)...\n");
 
     while (scancode != 0x01) {
         lpt_write(0, test_pattern, strlen(test_pattern));
