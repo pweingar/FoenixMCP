@@ -719,8 +719,20 @@ short sys_proc_run(const char * path, int argc, char * argv[]) {
  *
  * @return a pointer to the read-only description (0 on error)
  */
-extern const p_txt_capabilities sys_txt_get_capabilities(short screen) {
+const p_txt_capabilities sys_txt_get_capabilities(short screen) {
     return (const p_txt_capabilities)syscall(KFN_TXT_GET_CAPS, screen);
+}
+
+/**
+ * Set the display mode for the screen
+ *
+ * @param screen the number of the text device
+ * @param mode a bitfield of desired display mode options
+ *
+ * @return 0 on success, any other number means the mode is invalid for the screen
+ */
+short sys_txt_set_mode(short screen, short mode) {
+    return syscall(KFN_TXT_SET_MODE, screen, mode);
 }
 
 /**

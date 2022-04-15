@@ -743,6 +743,16 @@ extern short sys_proc_run(const char * path, int argc, char * argv[]);
 extern const p_txt_capabilities sys_txt_get_capabilities(short screen);
 
 /**
+ * Set the display mode for the screen
+ *
+ * @param screen the number of the text device
+ * @param mode a bitfield of desired display mode options
+ *
+ * @return 0 on success, any other number means the mode is invalid for the screen
+ */
+extern short sys_txt_set_mode(short screen, short mode);
+
+/**
  * Set the position of the cursor to (x, y) relative to the current region
  * If the (x, y) coordinate is outside the region, it will be clipped to the region.
  * If y is greater than the height of the region, the region will scroll until that relative

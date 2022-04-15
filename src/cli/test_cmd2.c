@@ -171,8 +171,11 @@ short cli_test_bitmap(short channel, int argc, const char * argv[]) {
     int i,m,p;
     unsigned char j;
     unsigned short k;
+    short scan_code;
 
-    *MasterControlReg_A = VKY3_MCR_BITMAP_EN | VKY3_MCR_GRAPH_EN;   // Enable bitmap graphics
+    // Switch to bitmap mode
+    sys_txt_set_mode(0, TXT_MODE_BITMAP);
+
     *BM0_Control_Reg = 0x00000001;      // Enable BM0
     *BM0_Addy_Pointer_Reg = 0x00000000; //Pointing to Starting of VRAM Bank A
     // *BorderControlReg_L = 0x00000800;   // Enable
@@ -187,6 +190,13 @@ short cli_test_bitmap(short channel, int argc, const char * argv[]) {
     for (i = 0; i< 640 * 480; i++) {
         VRAM_Bank0[i] = i & 0xff;
     }
+
+    do {
+        scan_code = sys_kbd_scancode();
+    } while (scan_code != 0x01);
+
+    // Go back to text mode
+    sys_txt_set_mode(0, TXT_MODE_TEXT);
 
     return 0;
 }
