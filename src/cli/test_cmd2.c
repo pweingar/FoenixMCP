@@ -20,6 +20,7 @@
 #include "fatfs/ff.h"
 #include "interrupt.h"
 #include "log.h"
+#include "lpt_reg.h"
 #include "dev/ps2.h"
 #include "rtc_reg.h"
 #include "simpleio.h"
@@ -27,29 +28,6 @@
 #include "sys_general.h"
 #include "uart_reg.h"
 #include "vicky_general.h"
-
-#define LPT_DATA_PORT   ((volatile unsigned char *)0xFEC02378)
-
-#define LPT_STAT_PORT   ((volatile unsigned char *)0xFEC02379)
-#define LPT_STAT_BUSY   0x80
-#define LPT_STAT_ACK    0x40
-#define LPT_STAT_PO     0x20
-#define LPT_STAT_SELECT 0x10
-#define LPT_STAT_ERROR  0x08
-#define LPT_STAT_IRQ    0x04
-
-#define LPT_CTRL_PORT   ((volatile unsigned char *)0xFEC0237A)
-#define LPT_CTRL_STROBE 0x01
-#define LPT_CTRL_AL     0x02
-#define LPT_CTRL_INIT   0x04
-#define LPT_CTRL_SELECT 0x08
-#define LPT_CTRL_IRQE   0x10
-#define LPT_CTRL_BI     0x20
-
-#define LPT_INIT_ON     0x08            /* Start the printer initialization process */
-#define LPT_INIT_OFF    0x0C            /* Stop the printer initialization process */
-#define LPT_STROBE_ON   0x0F            /* Strobe the printer */
-#define LPT_STROBE_OFF  0x0E            /* Drop the strobe to the printer */
 
 typedef struct s_cli_test_feature {
     const char * name;
@@ -218,22 +196,26 @@ short cli_test_uart(short channel, int argc, const char * argv[]) {
     char buffer[80];
 
     uart_init(0);
-    uart_setbps(0, UART_115200);
+    uart_setbps(0, UART_9600);
     uart_setlcr(0, LCR_DATABITS_8 | LCR_STOPBIT_1 | LCR_PARITY_NONE);
 
-    sprintf(buffer, "COM1: 115200, no parity, 1 stop bit, 8 data bits\nPress ESC to finish (%d).\n", UART_115200);
+    sprintf(buffer, "COM1: 9600, no parity, 1 stop bit, 8 data bits\nPress ESC to finish (%d).\n", UART_115200);
     sys_chan_write(0, buffer, strlen(buffer));
 
     for (;;) {
-        c = kbd_getc();
+        c = kbdmo_getc()
         if (c != 0) {
-            if (c == 0x1b) {
+            if (c == '~') {
                 return 0;
             }
             uart_put(0, c);
-        } else if (uart_has_bytes(0)) {
+        }
+
+        if (uart_has_bytes(0)) {
             c = uart_get(0);
-            sys_chan_write_b(channel, c);
+            if (c != 0) {
+                sys_chan_write_b(channel, c);
+            }
         }
     }
 
@@ -542,14 +524,14 @@ short cli_test_lpt(short screen, int argc, const char * argv[]) {
                 break;
 
             case 0x3F:      /* F5 */
-                ctrl |= LPT_CTRL_INIT;
+                ctrl |= LPT_CTRL_mINIT;
                 *LPT_CTRL_PORT = ctrl;
                 sprintf(message, "INIT = TRUE [%02X]\n", ctrl);
                 print(0, message);
                 break;
 
             case 0x40:      /* F6 */
-                ctrl &= ~LPT_CTRL_INIT;
+                ctrl &= ~LPT_CTRL_mINIT;
                 *LPT_CTRL_PORT = ctrl;
                 sprintf(message, "INIT = FALSE [%02X]\n", ctrl);
                 print(0, message);
@@ -602,6 +584,9 @@ short cmd_test_print(short screen, int argc, const char * argv[]) {
             if (result != 0) {
                 sprintf(message, "Unable to print: %s\n", err_message(result));
                 print(screen, message);
+
+                sprintf(message, "Printer status: %02X\n", sys_chan_status(lpt));
+                print(screen, message);
                 break;
             }
             scancode = sys_kbd_scancode();
@@ -612,7 +597,7 @@ short cmd_test_print(short screen, int argc, const char * argv[]) {
         print(screen, "Unable to print: got a bad channel number.\n");
 
     } else {
-        sprintf(message, "Unable to print: %s\n", err_message(lpt));
+        sprintf(message, "Could not open channel to printer: %s\n", err_message(lpt));
         print(screen, message);
     }
 #endif
