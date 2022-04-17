@@ -66,18 +66,18 @@ extern short cmd_help(short channel, int argc, const char * argv[]);
 extern short cli_exec_batch(short channel, const char * path);
 
 /**
- * Set the number of the channel to use for interactions
+ * Set the number of the screen to use for interactions
  *
- * @param channel the number of the text device to use
+ * @param screen the number of the text device to use
  */
-extern void cli_channel_set(short channel);
+extern void cli_txt_screen_set(short screen);
 
 /**
- * Get the number of the channel to use for interactions
+ * Get the number of the screen used for interactions
  *
- * @return channel the number of the text device to use
+ * @return the number of the text device to use
  */
-extern short cli_channel_get();
+extern short cli_txt_screen_get();
 
 /**
  * Indicate that the current working directory has changed

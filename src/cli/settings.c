@@ -575,7 +575,7 @@ short cli_screen_set(short channel, const char * value) {
 
     sys_get_info(&info);
     if (screen < info.screens) {
-        cli_channel_set(screen);
+        cli_txt_screen_set(screen);
     } else {
         sprintf(message, "Screen #%d not present.\n", screen);
         print(channel, message);
@@ -587,7 +587,7 @@ short cli_screen_set(short channel, const char * value) {
  * Get the number of the text screen to use for interactions
  */
 short cli_screen_get(short channel, const char * value) {
-    sprintf(value, "%d", cli_channel_get());
+    sprintf(value, "%d", cli_txt_screen_get());
     return 0;
 }
 
@@ -617,7 +617,7 @@ void cli_set_init() {
         cli_set_register("KEYCOLOR", "KEYCOLOR 0x0RGB -- set the keyboard color", cli_keycolor_set, cli_keycolor_get);
     }
 
-    if (info.screens == 1) {
+    if (info.screens > 1) {
         cli_set_register("SCREEN", "SCREEN <0 - 1> -- set the channel number to use for interactions", cli_screen_set, cli_screen_get);
     }
 

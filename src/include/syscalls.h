@@ -49,6 +49,8 @@
 #define KFN_CHAN_REGISTER       0x19    /* Register a channel device driver */
 #define KFN_CHAN_OPEN           0x1A    /* Open a channel device */
 #define KFN_CHAN_CLOSE          0x1B    /* Close an open channel (not for files) */
+#define KFN_CHAN_SWAP           0x1C    /* Swap the channel ID assignment of two channels */
+#define KFN_CHAN_DEVICE         0x1D    /* Get the number of the device associated with the channel */
 
 
 /* Block device system calls */
@@ -343,6 +345,26 @@ extern short sys_chan_open(short dev, const uint8_t * path, short mode);
  * nothing useful
  */
 extern short sys_chan_close(short chan);
+
+/**
+ * Swap the channel ID assignments for two channels
+ *
+ * Before call: channel1 = "Channel A", channel2 = "Channel B"
+ * After call: channel1 = "Channel B", channel2 = "Channel A"
+ *
+ * @param channel1 the ID of one of the channels
+ * @param channel2 the ID of the other channel
+ * @return 0 on success, any other number is an error
+ */
+extern short sys_chan_swap(short channel1, short channel2);
+
+/**
+ * Return the device associated with the channel
+ *
+ * @param channel the ID of the channel to query
+ * @return the ID of the device associated with the channel, negative number for error
+ */
+extern short sys_chan_device(short channel);
 
 /*
  * Compute the size information for the text screen based on the current settings in VICKY

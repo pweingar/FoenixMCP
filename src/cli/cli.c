@@ -88,6 +88,8 @@ extern short cmd_credits(short channel, int argc, const char * argv[]);
 /** The channel to use for interactions */
 short g_current_channel = 0;
 
+short g_channels_swapped = 1;
+
 /** Flag to indicate that the current working directory has changed */
 short g_cwd_changed = 0;
 
@@ -136,21 +138,24 @@ const t_cli_command g_cli_commands[] = {
 };
 
 /**
- * Set the number of the channel to use for interactions
+ * Set the number of the screen to use for interactions
  *
- * @param channel the number of the text device to use
+ * @param screen the number of the text device to use
  */
-void cli_channel_set(short channel) {
-    g_current_channel = channel;
+void cli_txt_screen_set(short screen) {
+    if (sys_chan_device(0) != screen) {
+        sys_chan_swap(0, 1);
+        g_channels_swapped = 1;
+    }
 }
 
 /**
- * Get the number of the channel to use for interactions
+ * Get the number of the screen used for interactions
  *
- * @return channel the number of the text device to use
+ * @return the number of the text device to use
  */
-short cli_channel_get() {
-    return g_current_channel;
+short cli_txt_screen_get() {
+    return sys_chan_device(0);
 }
 
 //
@@ -730,24 +735,26 @@ void cli_draw_window(short channel, const char * status, short is_active) {
     t_rect region, old_region, full_region;
     short i = 0, j;
 
+    short dev = sys_chan_device(channel);
+
     // Save the current region and cursor location
-    sys_txt_get_xy(channel, &cursor);
-    sys_txt_get_region(channel, &old_region);
-    sys_txt_get_color(channel, &foreground, &background);
+    sys_txt_get_xy(dev, &cursor);
+    sys_txt_get_region(dev, &old_region);
+    sys_txt_get_color(dev, &foreground, &background);
 
     // Return to the full region and get its dimensions
     region.origin.x = 0;
     region.origin.y = 0;
     region.size.width = 0;
     region.size.height = 0;
-    sys_txt_set_region(channel, &region);
-    sys_txt_get_region(channel, &full_region);
+    sys_txt_set_region(dev, &region);
+    sys_txt_get_region(dev, &full_region);
 
     // Display the titlebar
     i = 0;
-    sys_txt_set_xy(channel, 0, 0);
-    if (is_active) {
-        sys_txt_set_color(channel, background, foreground);
+    sys_txt_set_xy(dev, 0, 0);
+    if (channel == 0) {
+        sys_txt_set_color(dev, background, foreground);
     }
     for (j = 0; j < strlen(title_header); j++) {
         buffer[i++] = title_header[j];
@@ -766,16 +773,13 @@ void cli_draw_window(short channel, const char * status, short is_active) {
     print(channel, buffer);
 
     // Restore the region and cursor location
-    sys_txt_set_color(channel, foreground, background);
-    sys_txt_set_region(channel, &old_region);
-    sys_txt_set_xy(channel, cursor.x, cursor.y);
+    sys_txt_set_color(dev, foreground, background);
+    sys_txt_set_region(dev, &old_region);
+    sys_txt_set_xy(dev, cursor.x, cursor.y);
 
     // Set cursor visibility based on if the screen is active
-    if (is_active) {
-        sys_chan_ioctrl(channel, 0x06, 0, 0);
-    } else {
-        sys_chan_ioctrl(channel, 0x07, 0, 0);
-    }
+    sys_chan_ioctrl(0, 0x06, 0, 0);
+    sys_chan_ioctrl(1, 0x07, 0, 0);
 }
 
 /**
@@ -785,13 +789,15 @@ void cli_setup_screen(short channel, const char * path, short is_active) {
     t_rect full_region, command_region;
     char message[80];
 
+    short dev = sys_chan_device(channel);
+
     // Get the size of the screen
     full_region.origin.x = 0;
     full_region.origin.y = 0;
     full_region.size.width = 0;
     full_region.size.height = 0;
-    sys_txt_set_region(channel, &full_region);
-    sys_txt_get_region(channel, &full_region);
+    sys_txt_set_region(dev, &full_region);
+    sys_txt_get_region(dev, &full_region);
 
     // Clear the screen
     print(channel, "\x1b[2J\x1b[H");
@@ -803,7 +809,7 @@ void cli_setup_screen(short channel, const char * path, short is_active) {
     command_region.size.height = full_region.size.height - 1;
 
     // Restrict the region to the command panel
-    sys_txt_set_region(channel, &command_region);
+    sys_txt_set_region(dev, &command_region);
 
     // Draw the window
     cli_draw_window(channel, path, is_active);
@@ -829,6 +835,7 @@ short cli_repl(short channel) {
     short old_channel;
 
     old_channel = channel;
+    g_channels_swapped = 1;
 
     g_cwd_changed = 1;
     cursor.x = 0;
@@ -836,7 +843,7 @@ short cli_repl(short channel) {
 
     while (1) {
         // Refresh window if the current working directory has changed
-        if (g_cwd_changed || (old_channel != g_current_channel)) {
+        if (g_cwd_changed || g_channels_swapped) {
             g_cwd_changed = 0;
 
             // Get and display the new working directory
@@ -844,13 +851,13 @@ short cli_repl(short channel) {
                 // char message[80];
                 // sprintf(message, "%d", strlen(cwd_buffer));
                 print(0, "");
-                if (old_channel != g_current_channel) {
-
+                if (g_channels_swapped) {
                     // If channel has changed, deactivate old channel
-                    cli_draw_window(old_channel, cwd_buffer, 0);
+                    cli_draw_window(1, cwd_buffer, 0);
                     old_channel = g_current_channel;
+                    g_channels_swapped = 0;
                 }
-                cli_draw_window(g_current_channel, cwd_buffer, 1);
+                cli_draw_window(0, cwd_buffer, 1);
             }
         }
 
@@ -858,7 +865,9 @@ short cli_repl(short channel) {
         result = cli_readline(g_current_channel, command_line);
         switch (result) {
             case -1:
-                g_current_channel = (g_current_channel == 0) ? 1 : 0;
+                // g_current_channel = (g_current_channel == 0) ? 1 : 0;
+                sys_chan_swap(0, 1);
+                g_channels_swapped = 1;
                 break;
 
             case -2:
@@ -886,7 +895,7 @@ short cli_repl(short channel) {
         cli_process_line(g_current_channel, command_line);
 
         print(g_current_channel, "\n");
-        sys_txt_get_xy(channel, &cursor);
+        sys_txt_get_xy(sys_chan_device(g_current_channel), &cursor);
     }
 
     return 0;

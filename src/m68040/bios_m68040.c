@@ -110,6 +110,12 @@ unsigned long syscall_dispatch(int32_t function, int32_t param0, int32_t param1,
                 case KFN_CHAN_REGISTER:
                     return cdev_register((p_dev_chan)param0);
 
+                case KFN_CHAN_SWAP:
+                    return chan_swap((short)param0, (short)param1);
+
+                case KFN_CHAN_DEVICE:
+                        return chan_device((short)param0);
+
                 default:
                     return ERR_GENERAL;
             }

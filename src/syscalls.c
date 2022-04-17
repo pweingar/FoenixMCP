@@ -264,6 +264,26 @@ short sys_chan_close(short chan) {
     return syscall(KFN_CHAN_CLOSE, chan);
 }
 
+/**
+ * Swap the channel ID assignments for two channels
+ *
+ * Before call: channel1 = "Channel A", channel2 = "Channel B"
+ * After call: channel1 = "Channel B", channel2 = "Channel A"
+ */
+short sys_chan_swap(short channel1, short channel2) {
+    return syscall(KFN_CHAN_SWAP, channel1, channel2);
+}
+
+/**
+ * Return the device associated with the channel
+ *
+ * @param channel the ID of the channel to query
+ * @return the ID of the device associated with the channel, negative number for error
+ */
+short sys_chan_device(short channel) {
+    return syscall(KFN_CHAN_DEVICE, channel);
+}
+
 /*
  * Compute the size information for the text screen based on the current settings in VICKY
  * These settings are needed to correctly position text on the screen.

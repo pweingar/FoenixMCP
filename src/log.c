@@ -123,81 +123,69 @@ void panic(void) {
     txt_clear(0, 2);
 
     txt_set_xy(0, column, row++);
-    sprintf(buffer, "\xDA\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xBF");
-    print(0, buffer);
+    txt_print(0, "\xDA\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xBF");
 
     txt_set_xy(0, column, row++);
-    sprintf(buffer, "\xB3                                          \xB3");
-    print(0, buffer);
+    txt_print(0, "\xB3                                          \xB3");
 
     txt_set_xy(0, column, row++);
-    sprintf(buffer, "\xB3 Oh dear, something has gone wrong...     \xB3");
-    print(0, buffer);
+    txt_print(0, "\xB3 Oh dear, something has gone wrong...     \xB3");
 
     txt_set_xy(0, column, row++);
-    sprintf(buffer, "\xB3                                          \xB3");
-    print(0, buffer);
+    txt_print(0, "\xB3                                          \xB3");
 
     txt_set_xy(0, column, row++);
     switch (panic_number) {
         case 2:
-            sprintf(buffer, "\xB3 Bus Error                                \xB3");
+            txt_print(0, "\xB3 Bus Error                                \xB3");
             address_expected = 1;
             break;
         case 3:
-            sprintf(buffer, "\xB3 Address Error                            \xB3");
+            txt_print(0, "\xB3 Address Error                            \xB3");
             address_expected = 1;
             break;
         case 4:
-            sprintf(buffer, "\xB3 Illegal Instruction Error                \xB3");
+            txt_print(0, "\xB3 Illegal Instruction Error                \xB3");
             break;
         case 5:
-            sprintf(buffer, "\xB3 Division by Zero Error                   \xB3");
+            txt_print(0, "\xB3 Division by Zero Error                   \xB3");
             break;
         case 6:
-            sprintf(buffer, "\xB3 Range Check Exception                    \xB3");
+            txt_print(0, "\xB3 Range Check Exception                    \xB3");
             break;
         case 7:
-            sprintf(buffer, "\xB3 Overflow Exception                       \xB3");
+            txt_print(0, "\xB3 Overflow Exception                       \xB3");
             break;
         case 8:
-            sprintf(buffer, "\xB3 Privilege Exception                      \xB3");
+            txt_print(0, "\xB3 Privilege Exception                      \xB3");
             break;
         case 24:
-            sprintf(buffer, "\xB3 Spurious Interrupt                       \xB3");
+            txt_print(0, "\xB3 Spurious Interrupt                       \xB3");
             break;
 
         default:
-            sprintf(buffer, "\xB3 Unknown Exception                        \xB3");
+            txt_print(0, "\xB3 Unknown Exception                        \xB3");
             break;
     }
-    print(0, buffer);
 
     txt_set_xy(0, column, row++);
-    sprintf(buffer, "\xB3                                          \xB3");
-    print(0, buffer);
+    txt_print(0, "\xB3                                          \xB3");
 
     if (address_expected) {
         txt_set_xy(0, column, row++);
-        print(0, "\xB3 PC: ");
-        print_hex_32(0, panic_pc);
-        print(0, "           Address: ");
-        print_hex_32(0, panic_address);
-        print(0, " \xB3");
+        sprintf(buffer, "\xB3 PC: %08X           Address: %08X \xB3", panic_pc, panic_address);
+        txt_print(0, buffer);
     } else {
         txt_set_xy(0, column, row++);
-        print(0, "\xB3 PC: ");
-        print_hex_32(0, panic_pc);
-        print(0, "                             \xB3");
+        sprintf(buffer, "\xB3 PC: %08X                             \xB3", panic_pc);
+        txt_print(0, buffer);
     }
 
     txt_set_xy(0, column, row++);
-    sprintf(buffer, "\xB3                                          \xB3");
-    print(0, buffer);
+    txt_print(0, "\xB3                                          \xB3");
 
     txt_set_xy(0, column, row++);
-    sprintf(buffer, "\xC0\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xD9");
-    print(0, buffer);
+    txt_print(0, "\xC0\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xD9");
 
     /* Wait forever */
     while (1) ;

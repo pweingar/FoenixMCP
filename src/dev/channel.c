@@ -6,6 +6,8 @@
  * Examples include: console, serial port, an open file, etc.
  */
 
+#include <string.h>
+
 #include "dev/channel.h"
 #include "errors.h"
 #include "simpleio.h"
@@ -473,5 +475,64 @@ short chan_ioctrl(short channel, short command, uint8_t * buffer, short size) {
         return cdev->ioctrl(chan, command, buffer, size);
     } else {
         return res;
+    }
+}
+
+/**
+ * Return the device associated with the channel
+ *
+ * @param channel the ID of the channel to query
+ * @return the ID of the device associated with the channel, negative number for error
+ */
+short chan_device(short channel) {
+    if (channel >= CHAN_MAX) {
+        // If either channel ID is bad...
+        return ERR_BADCHANNEL;
+
+    } else {
+        if (g_channels[channel].number != channel) {
+            // Channel is closed
+            return ERR_BADCHANNEL;
+
+        } else {
+            return g_channels[channel].dev;
+        }
+    }
+}
+
+/**
+ * Swap the channel ID assignments for two channels
+ *
+ * Before call: channel1 = "Channel A", channel2 = "Channel B"
+ * After call: channel1 = "Channel B", channel2 = "Channel A"
+ *
+ * @param channel1 the ID of one of the channels
+ * @param channel2 the ID of the other channel
+ * @return 0 on success, any other number is an error
+ */
+short chan_swap(short channel1, short channel2) {
+    if ((channel1 >= CHAN_MAX) || (channel2 >= CHAN_MAX)) {
+        // If either channel ID is bad...
+        return ERR_BADCHANNEL;
+
+    } else {
+        uint8_t tmp_data[CHAN_DATA_SIZE];
+        p_channel chan1 = 0, chan2 = 0;
+        short i = 0, tmp_dev = 0;
+
+        chan1 = &g_channels[channel1];
+        chan2 = &g_channels[channel2];
+
+        // Swap the devices
+        tmp_dev = chan1->dev;
+        chan1->dev = chan2->dev;
+        chan2->dev = tmp_dev;
+
+        // Swap the data blocks
+        memcpy(tmp_data, chan1->data, CHAN_DATA_SIZE);
+        memcpy(chan1->data, chan2->data, CHAN_DATA_SIZE);
+        memcpy(chan2->data, tmp_data, CHAN_DATA_SIZE);
+
+        return 0;
     }
 }
