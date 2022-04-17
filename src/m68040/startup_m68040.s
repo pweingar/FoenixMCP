@@ -371,6 +371,9 @@ _syscall:
 ; TRAP#15 handler... transfer control to the C dispatcher
 ;
 h_trap_15:
+            cmp.w #$43,d1               ; Is this a sys_proc_elevate call?
+            beq h_trap_elev             ; Yes, just handle it here
+
             move.l d6,-(sp)             ; Push the parameters to the stack for the C call
             move.l d5,-(sp)
             move.l d4,-(sp)
@@ -385,6 +388,9 @@ h_trap_15:
             add.l #28,sp                ; Remove parameters from the stack
 
             rte                         ; Return to the caller
+
+h_trap_elev ori #$2000,(a7)             ; Change the caller's privilege to supervisor
+            rte                         ; And return to it
 
 ;
 ; Jump into a user mode code

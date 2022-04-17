@@ -6,7 +6,7 @@
 #define __VERSION_H
 
 #define VER_MAJOR 0
-#define VER_MINOR 51
-#define VER_BUILD 7
+#define VER_MINOR 52
+#define VER_BUILD 1
 
 #endif
