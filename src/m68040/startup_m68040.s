@@ -389,25 +389,22 @@ h_trap_15:
 ;
 ; Jump into a user mode code
 ;
-; Inputs:
-; a0 = pointer to code to execute
-; a1 = location to set user stack pointer
-;
 _call_user:
+            ; Set up the user stack
+            move.l #$00010000,a0        ; Get the pointer to the process's stack
+            move.l (12,a7),d1           ; Get the number of parameters passed
+            move.l (16,a7),a1           ; Get the pointer to the parameters
+            move.l a1,-(a0)             ; Push the parameters list
+            move.w d1,-(a0)             ; Push the parameter count
+            move.l a0,usp               ; Set the User Stack Pointer
+
+
+            ; Set up the system stack
             move.l (4,a7),a0            ; Get the pointer to the code to start
-            move.l (8,a7),a1            ; Get the pointer to the process's stack
-            move.l (12,a7),d0           ; Get the number of parameters passed
-            move.l (16,a7),a2           ; Get the pointer to the parameters
-            andi #$dfff,sr              ; Drop into user mode
-            movea.l a1,a7               ; Set the stack
-
-            move.l a2,-(a7)             ; Push the parameters list
-            move.l d0,-(a7)             ; Push the parameter count
-
-            move.l a2,a1                ; Move argv to a convenient register
-            move.l d0,d1                ; Move argc to a convenient register
-
-            jsr (a0)
+            move.w #0,-(a7)             ; Push the fake vector offset
+            move.l a0,-(a7)             ; Push it as the starting address
+            move.w #$0000,-(a7)         ; Push the user's initial SR (to switch to user mode)
+            rte                         ; Start the user process
 
 _restart_cli:
             lea ___STACK,sp

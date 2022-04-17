@@ -3005,11 +3005,11 @@ Symbols of text:
   0xffc16c10 _proc_run: global reloc, size 0
   0xffc16c4e l24: local reloc, size 0
   0xffc16c54 l26: local reloc, size 0
-  0xffc16c6e l27: local reloc, size 0
-  0xffc16c8c l28: local reloc, size 0
-  0xffc16c8e l25: local reloc, size 0
-  0xffc16caa l30: local reloc, size 0
-  0xffc16caa l21: local reloc, size 0
+  0xffc16c70 l27: local reloc, size 0
+  0xffc16c8e l28: local reloc, size 0
+  0xffc16c90 l25: local reloc, size 0
+  0xffc16cac l30: local reloc, size 0
+  0xffc16cac l21: local reloc, size 0
   0xffc16cb4 l29: local reloc, size 0
   0xffc16ccc l31: local reloc, size 0
   0xffc16ce4 l23: local reloc, size 0
