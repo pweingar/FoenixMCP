@@ -27,7 +27,7 @@
 #include "rsrc/bitmaps/splash_a2560k.h"
 #endif
 
-#define SPLASH_WAIT_SEC     10      /* How many seconds to wait on the splash screen */
+#define SPLASH_WAIT_SEC     5      /* How many seconds to wait on the splash screen */
 
 /*
  * Important scan codes

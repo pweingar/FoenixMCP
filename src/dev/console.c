@@ -516,6 +516,8 @@ short con_write_b(p_channel chan, uint8_t b) {
     return 0;
 }
 
+unsigned char old_c = 0;
+
 /*
  * Attempt to read from the keyboard.
  */
@@ -533,20 +535,25 @@ short con_read_b(p_channel chan) {
 
         } else {
 
-#if MODEL == MODEL_FOENIX_A2560K
-#ifdef KBD_POLLED
-            //ps2_mouse_get_packet();
-            c = kbdmo_getc_poll();
-#else
-            c = kbdmo_getc();
-#endif
-#else
+// #if MODEL == MODEL_FOENIX_A2560K
+// #ifdef KBD_POLLED
+//             //ps2_mouse_get_packet();
+//             c = kbdmo_getc_poll();
+// #else
+//             c = kbdmo_getc();
+// #endif
+// #else
 #ifdef KBD_POLLED
             c = kbd_getc_poll();
+            if (c == old_c) {
+                c = 0;
+            } else {
+                old_c = c;
+            }
 #else
             c = kbd_getc();
 #endif
-#endif
+// #endif
         }
 
     } while (c == 0);
