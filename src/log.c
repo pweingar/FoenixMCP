@@ -211,8 +211,8 @@ void log_setlevel(short level) {
  */
 void log(short level, char * message) {
     if (level <= log_level) {
-        print(log_channel, message);
-        print_c(log_channel, '\n');
+        txt_print(log_channel, message);
+        txt_print(log_channel, "\n");
     }
 }
 
@@ -226,9 +226,9 @@ void log(short level, char * message) {
  */
 void log2(short level, char * message1, char * message2) {
     if (level <= log_level) {
-        print(log_channel, message1);
-        print(log_channel, message2);
-        print_c(log_channel, '\n');
+        char line[80];
+        sprintf(line, "%s%s\n", message1, message2);
+        txt_print(log_channel, line);
     }
 }
 
@@ -243,10 +243,9 @@ void log2(short level, char * message1, char * message2) {
  */
 void log3(short level, const char * message1, const char * message2, const char * message3) {
     if (level <= log_level) {
-        print(log_channel, message1);
-        print(log_channel, message2);
-        print(log_channel, message3);
-        print_c(log_channel, '\n');
+        char line[80];
+        sprintf(line, "%s%s%s\n", message1, message2, message3);
+        txt_print(log_channel, line);
     }
 }
 
@@ -259,10 +258,11 @@ void log3(short level, const char * message1, const char * message2, const char 
  * n = the number to log
  */
 void log_num(short level, char * message, int n) {
+    char line[80];
+
     if (level <= log_level) {
-        print(log_channel, message);
-        print_hex_32(log_channel, n);
-        print_c(log_channel, '\n');
+        sprintf(line, "%s%08X\n", message, n);
+        print(log_channel, line);
     }
 }
 
@@ -271,6 +271,6 @@ void log_num(short level, char * message, int n) {
  */
 void log_c(short level, char c) {
     if (log_level <= level) {
-        print_c(log_channel, c);
+        txt_put(log_channel, c);
     }
 }

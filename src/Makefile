@@ -4,7 +4,7 @@
 # and where the MCP will run (ram or flash)
 #
 UNIT := a2560k
-MEMORY := flash
+MEMORY := ram
 
 # CPU_WDC65816                0x16  /* CPU code for the Western Design Center 65816 */
 # CPU_M68000                  0x20  /* CPU code for the Motorola 68000 */
