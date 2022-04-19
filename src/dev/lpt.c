@@ -13,6 +13,8 @@
 
 #if MODEL == MODEL_FOENIX_A2560K
 
+#define MAX_LPT_JIFFIES     600
+
 /**
  * Wait a little bit...
  */
@@ -60,26 +62,45 @@ short lpt_close(t_channel * chan) {
  */
 short lpt_write_b(p_channel chan, unsigned char b) {
     /* This write routine is polled I/O. */
+    long target_jiffies = 0;
 
     /* Wait until the printer is not busy */
-    while ((*LPT_STAT_PORT & LPT_STAT_nBUSY) == LPT_STAT_nBUSY) {
+    target_jiffies = sys_time_jiffies() + MAX_LPT_JIFFIES;
+    while ((*LPT_STAT_PORT & LPT_STAT_nBUSY) != LPT_STAT_nBUSY) {
         lpt_delay();
+        if (target_jiffies < sys_time_jiffies()) {
+            return DEV_TIMEOUT;
+        }
     }
 
     /* Send the byte */
     *LPT_DATA_PORT = b;
 
     /* Strobe the interface */
-    *LPT_CTRL_PORT = LPT_CTRL_mINIT | LPT_CTRL_SELECT | LPT_CTRL_STROBE;
-    lpt_delay();
     *LPT_CTRL_PORT = LPT_CTRL_mINIT | LPT_CTRL_SELECT;
+    lpt_delay();
+    *LPT_CTRL_PORT = LPT_CTRL_mINIT | LPT_CTRL_SELECT | LPT_CTRL_STROBE;
 
-    // if ((*LPT_STAT_PORT & (LPT_STAT_nERROR | LPT_STAT_PO | LPT_STAT_nBUSY | LPT_STAT_SELECT)) != LPT_STAT_nERROR | LPT_STAT_nBUSY | LPT_STAT_SELECT) {
-    //     // Online, there's paper, not busy, and not in error
-    //     return ERR_GENERAL;
-    // } else {
-    //     return 0;
-    // }
+    /* Wait until the printer is not busy */
+    target_jiffies = sys_time_jiffies() + MAX_LPT_JIFFIES;
+    while ((*LPT_STAT_PORT & LPT_STAT_nBUSY) != LPT_STAT_nBUSY) {
+        lpt_delay();
+        if (target_jiffies < sys_time_jiffies()) {
+            return DEV_TIMEOUT;
+        }
+    }
+
+    unsigned char status = *LPT_STAT_PORT;
+    if ((status & (LPT_STAT_nERROR | LPT_STAT_PO)) != LPT_STAT_nERROR ) {
+        // Online, there's paper, not busy, and not in error
+        if (status & LPT_STAT_PO) {
+            return DEV_NOMEDIA;
+        } else {
+            return ERR_GENERAL;
+        }
+    } else {
+        return 0;
+    }
 
     return 0;
 }
@@ -111,12 +132,12 @@ short lpt_status(p_channel chan) {
     unsigned char stat = *LPT_STAT_PORT;
 
     // Conver the status bits to be consistent with channels
-    if ((stat & LPT_STAT_nERROR) == 0) result |= LPT_STAT_nERROR;
-    if (stat & LPT_STAT_PO) result |= LPT_STAT_PAPER;
-    if (stat & LPT_STAT_SELECT) result |= LPT_STAT_ONLINE;
+    if ((stat & LPT_STAT_nERROR) == 0) result |= LPT_STATUS_ERROR;
+    if (stat & LPT_STAT_PO) result |= LPT_STATUS_PAPER;
+    if (stat & LPT_STAT_SELECT) result |= LPT_STATUS_ONLINE;
     if ((stat & (LPT_STAT_nERROR | LPT_STAT_PO | LPT_STAT_nBUSY | LPT_STAT_SELECT)) == LPT_STAT_nERROR | LPT_STAT_nBUSY | LPT_STAT_SELECT) {
         // Online, there's paper, not busy, and not in error
-        result |= LPT_STAT_WRITABLE;
+        result |= LPT_STATUS_WRITABLE;
     }
 
     return result;
