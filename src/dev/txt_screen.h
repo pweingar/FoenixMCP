@@ -38,7 +38,7 @@ typedef void (*p_setsizes)();
 typedef short (*p_set_resolution)(short width, short height);
 typedef void (*p_set_border)(short width, short height);
 typedef void (*p_set_border_color)(unsigned char red, unsigned char green, unsigned char blue);
-typedef short (*p_set_font)(short width, short height, unsigned char * data);
+typedef short (*p_set_font)(short width, short height, const unsigned char * data);
 typedef void (*p_set_cursor)(short enable, short rate, char c);
 typedef void (*p_set_cursor_visible)(short enable);
 typedef short (*p_set_region)(p_rect region);
@@ -168,7 +168,7 @@ extern void txt_set_border_color(short screen, unsigned char red, unsigned char 
  * @param height of a character in pixels
  * @param data pointer to the raw font data to be loaded
  */
-extern short txt_set_font(short screen, short width, short height, unsigned char * data);
+extern short txt_set_font(short screen, short width, short height, const unsigned char * data);
 
 /**
  * Set the appearance of the cursor

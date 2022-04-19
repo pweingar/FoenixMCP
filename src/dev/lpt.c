@@ -104,7 +104,7 @@ short lpt_write(p_channel chan, const uint8_t * buffer, short size) {
 /**
  * Return the status of the printer
  */
-short lpt_status() {
+short lpt_status(p_channel chan) {
     short result = 0;
 
     // Get the status

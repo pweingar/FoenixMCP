@@ -25,6 +25,7 @@
 #include "dev/channel.h"
 #include "dev/console.h"
 #include "dev/fdc.h"
+#include "dev/lpt.h"
 #include "dev/txt_screen.h"
 #include "dev/txt_a2560k_a.h"
 #include "dev/txt_a2560k_b.h"

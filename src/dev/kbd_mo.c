@@ -370,7 +370,7 @@ void kbdmo_enqueue_scan(unsigned char scan_code) {
         switch (scan_code & 0x7f) {
             case 0x01:
                 /* ESC key pressed... check to see if it's a press with the Foenix key */
-                if (((g_kbdmo_control.modifiers & KBD_MOD_OS) != 0) && (is_break == 0) {
+                if (((g_kbdmo_control.modifiers & KBD_MOD_OS) != 0) && (is_break == 0)) {
                     /* ESC pressed with Foenix key... flag a BREAK. */
                     g_kbdmo_control.status |= KBD_STAT_BREAK;
                 }

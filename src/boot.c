@@ -41,7 +41,7 @@
 /* TODO: move this to constants.h */
 
 
-#define BOOT_SECTOR_BUFFER  ((volatile unsigned char *)0x00004000)
+#define BOOT_SECTOR_BUFFER  ((unsigned char *)0x00004000)
 #define BOOT_CODE_MBR_OFF   0x000                   /* Offset to the code in the MBR */
 #define BOOT_CPUID_MBR_OFF  0x004                   /* Offset to the CPUID in the MBR */
 #define BOOT_SIG_MBR_OFF    0x006                   /* Offset to the boot signature in the MBR */
@@ -266,7 +266,7 @@ short boot_screen() {
     region.size.height = 20;
     txt_set_region(screen, &region);
 
-    sprintf(buffer, "\x1b[HFOENIX/MCP V: %02d.%02d.%04d\n", info.mcp_version, info.mcp_rev, info.mcp_build);
+    sprintf(buffer, "\x1b[HFOENIX/MCP V: %02u.%04u.%04u\n", info.mcp_version, info.mcp_rev, info.mcp_build);
     print(screen, buffer);
     str_upcase(info.model_name, entry);
     sprintf(buffer, "       MODEL: %s\n", entry);
@@ -274,9 +274,9 @@ short boot_screen() {
     str_upcase(info.cpu_name, entry);
     sprintf(buffer, "         CPU: %s\n", entry);
     print(screen, buffer);
-    sprintf(buffer, " CLOCK (KHZ): %d\n", info.cpu_clock_khz);
+    sprintf(buffer, " CLOCK (KHZ): %u\n", info.cpu_clock_khz);
     print(screen, buffer);
-    sprintf(buffer, "      FPGA V: %02d.%02d.%04d\n", info.fpga_model, info.fpga_version, info.fpga_subver);
+    sprintf(buffer, "      FPGA V: %u.%02u.%04u\n", (unsigned int)info.fpga_model, info.fpga_version, info.fpga_subver);
     print(screen, buffer);
 
     /* Wait until the target duration has been reached _or_ the user presses a key */

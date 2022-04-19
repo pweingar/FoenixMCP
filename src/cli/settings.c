@@ -22,6 +22,10 @@
 #include "snd/codec.h"
 #include "vicky_general.h"
 
+#if MODEL == MODEL_FOENIX_A2560K
+#include "dev/kbd_mo.h"
+#endif
+
 #define MAX_SETTING_NAME    64
 #define MAX_SETTING_HELP    80
 
@@ -586,7 +590,7 @@ short cli_screen_set(short channel, const char * value) {
 /**
  * Get the number of the text screen to use for interactions
  */
-short cli_screen_get(short channel, const char * value) {
+short cli_screen_get(short channel, char * value, short size) {
     sprintf(value, "%d", cli_txt_screen_get());
     return 0;
 }

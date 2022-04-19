@@ -788,7 +788,7 @@ void sys_txt_get_xy(short screen, p_point position) {
  * @return 0 on success, any other number means the region was invalid
  */
 short sys_txt_get_region(short screen, p_rect region) {
-    syscall(KFN_TXT_GET_REGION, screen, region);
+    return syscall(KFN_TXT_GET_REGION, screen, region);
 }
 
 /**
@@ -801,7 +801,7 @@ short sys_txt_get_region(short screen, p_rect region) {
  * @return 0 on success, any other number means the region was invalid
  */
 short sys_txt_set_region(short screen, p_rect region) {
-    syscall(KFN_TXT_SET_REGION, screen, region);
+    return syscall(KFN_TXT_SET_REGION, screen, region);
 }
 
 /**
@@ -811,8 +811,8 @@ short sys_txt_set_region(short screen, p_rect region) {
  * @param foreground the Text LUT index of the new current foreground color (0 - 15)
  * @param background the Text LUT index of the new current background color (0 - 15)
  */
-short sys_txt_set_color(short screen, unsigned char foreground, unsigned char background) {
-    return syscall(KFN_TXT_SET_COLOR, screen, foreground, background);
+void sys_txt_set_color(short screen, unsigned char foreground, unsigned char background) {
+    syscall(KFN_TXT_SET_COLOR, screen, foreground, background);
 }
 
 /*

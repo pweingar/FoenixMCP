@@ -266,6 +266,14 @@ extern short chan_seek(short channel, long position, short base);
 extern short chan_ioctrl(short channel, short command, uint8_t * buffer, short size);
 
 /**
+ * Return the device associated with the channel
+ *
+ * @param channel the ID of the channel to query
+ * @return the ID of the device associated with the channel, negative number for error
+ */
+extern short chan_device(short channel);
+
+/**
  * Swap the channel ID assignments for two channels
  *
  * Before call: channel1 = "Channel A", channel2 = "Channel B"

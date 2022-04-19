@@ -2,6 +2,7 @@
  * Commands to work with the sound devices
  */
 
+#include <stdio.h>
 #include <string.h>
 
 #include "timers.h"
@@ -11,6 +12,7 @@
 #include "snd/psg.h"
 #include "snd/sid.h"
 #include "dev/midi.h"
+#include "simpleio.h"
 #include "syscalls.h"
 
 #include "include/A2560K/YM2151.h"
@@ -66,12 +68,12 @@ short psg_test(short channel, int argc, const char * argv[]) {
 /*
  * Play a sound on the SID
  */
-short sid_test(short channel, int argc, char * argv[]) {
+short sid_test(short channel, int argc, const char * argv[]) {
     short i;
     unsigned char reg;
     unsigned char data;
     long target_time;
-    unsigned char * opm_base = OPM_INT_BASE;
+    volatile unsigned char * opm_base = OPM_INT_BASE;
 
     if (argc >= 2) {
         /* Allow the user to select the external OPM */
@@ -481,12 +483,12 @@ const unsigned char opm_tone_off[] = {
 /*
  * Play a sound on the OPM
  */
-short opm_test(short channel, int argc, char * argv[]) {
+short opm_test(short channel, int argc, const char * argv[]) {
     short i;
     unsigned char reg;
     unsigned char data;
     long target_time;
-    unsigned char * opm_base = OPM_INT_BASE;
+    volatile unsigned char * opm_base = OPM_INT_BASE;
 
     Test_EXT_FM2151();
     //
@@ -605,12 +607,12 @@ const unsigned char opn_tone_off[] = {
 /*
  * Play a sound on the OPN
  */
-short opn_test(short channel, int argc, char * argv[]) {
+short opn_test(short channel, int argc, const char * argv[]) {
     short i;
     unsigned char reg;
     unsigned char data;
     long target_time;
-    unsigned char * opn_base = OPN2_INT_BASE;
+    volatile unsigned char * opn_base = OPN2_INT_BASE;
 
     Test_EXT_FM2612();
     //
@@ -769,8 +771,7 @@ short midi_rx_test(short channel, int argc, const char * argv[]) {
 
     midi_init();
 
-    sprintf(message, "Press '1' to start, and 'ESC' to exit test.\n");
-    sys_chan_write(channel, message, strlen(message));
+    print(channel, "Press '1' to start, and 'ESC' to exit test.\n");
 
     while (sys_kbd_scancode() != 0x02) ;
 

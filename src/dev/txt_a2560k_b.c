@@ -235,7 +235,7 @@ void txt_a2560k_b_set_border_color(unsigned char red, unsigned char green, unsig
  * @param height of a character in pixels
  * @param data pointer to the raw font data to be loaded
  */
-short txt_a2560k_b_set_font(short width, short height, unsigned char * data) {
+short txt_a2560k_b_set_font(short width, short height, const unsigned char * data) {
     if ((width == 8) && (height == 8)) {
         int i;
 
@@ -637,7 +637,7 @@ short txt_a2560k_b_install() {
     device.set_cursor = txt_a2560k_b_set_cursor;
     device.set_cursor_visible = txt_a2560k_b_set_cursor_visible;
     device.set_region = txt_a2560k_b_set_region;
-    device.get_region = txt_a2560k_b_get_region
+    device.get_region = txt_a2560k_b_get_region;
     device.set_color = txt_a2560k_b_set_color;
     device.get_color = txt_a2560k_b_get_color;
     device.set_xy = txt_a2560k_b_set_xy;

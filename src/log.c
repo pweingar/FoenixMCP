@@ -117,7 +117,7 @@ void panic(void) {
     region.origin.y = 0;
     region.size.width = 0;
     region.size.height = 0;
-    txt_set_region(0, &region)
+    txt_set_region(0, &region);
     txt_set_color(0, 15, 1);
     txt_set_cursor(0, 0, 0, 0);
     txt_clear(0, 2);
@@ -173,11 +173,11 @@ void panic(void) {
 
     if (address_expected) {
         txt_set_xy(0, column, row++);
-        sprintf(buffer, "\xB3 PC: %08X           Address: %08X \xB3", panic_pc, panic_address);
+        sprintf(buffer, "\xB3 PC: %08X           Address: %08X \xB3", (unsigned int)panic_pc, (unsigned int)panic_address);
         txt_print(0, buffer);
     } else {
         txt_set_xy(0, column, row++);
-        sprintf(buffer, "\xB3 PC: %08X                             \xB3", panic_pc);
+        sprintf(buffer, "\xB3 PC: %08X                             \xB3", (unsigned int)panic_pc);
         txt_print(0, buffer);
     }
 

@@ -242,7 +242,7 @@ void txt_set_border_color(short screen, unsigned char red, unsigned char green, 
  * @param height of a character in pixels
  * @param data pointer to the raw font data to be loaded
  */
-short txt_set_font(short screen, short width, short height, unsigned char * data) {
+short txt_set_font(short screen, short width, short height, const unsigned char * data) {
     p_txt_device device = txt_get_device(screen);
     if (device) {
         if (device->set_font) {
@@ -264,7 +264,7 @@ void txt_set_cursor(short screen, short enable, short rate, char c) {
     p_txt_device device = txt_get_device(screen);
     if (device) {
         if (device->set_cursor) {
-            return device->set_cursor(enable, rate, c);
+            device->set_cursor(enable, rate, c);
         }
     }
 }
@@ -279,7 +279,7 @@ void txt_set_cursor_visible(short screen, short enable) {
     p_txt_device device = txt_get_device(screen);
     if (device) {
         if (device->set_cursor_visible) {
-            return device->set_cursor_visible(enable);
+            device->set_cursor_visible(enable);
         }
     }
 }

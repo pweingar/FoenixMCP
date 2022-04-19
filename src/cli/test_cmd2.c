@@ -29,6 +29,10 @@
 #include "uart_reg.h"
 #include "vicky_general.h"
 
+#if MODEL == MODEL_FOENIX_A2560K
+#include "dev/kbd_mo.h"
+#endif
+
 typedef struct s_cli_test_feature {
     const char * name;
     const char * help;
@@ -50,7 +54,7 @@ short kbd_break() {
 /*
  * Test the PS/2 keyboard
  */
-int cli_test_ps2(short channel, int argc, char * argv[]) {
+short cli_test_ps2(short channel, int argc, const char * argv[]) {
     char message[80];
     unsigned short scancode = 0;
 
@@ -71,10 +75,10 @@ int cli_test_ps2(short channel, int argc, char * argv[]) {
 /*
  * Test the joystick ports
  */
-int cli_test_joystick(short channel, int argc, char * argv[]) {
+short cli_test_joystick(short channel, int argc, const char * argv[]) {
     char message[80];
-    volatile unsigned int * joystick_port = 0xFEC00500;
-    volatile unsigned int * game_ctrl_port = 0xFEC00504;
+    volatile unsigned int * joystick_port = (volatile unsigned int *)0xFEC00500;
+    volatile unsigned int * game_ctrl_port = (volatile unsigned int *)0xFEC00504;
     unsigned int joy_state = 0, old_joy_state = 0xffffffff;
     unsigned short scancode = 0;
 
@@ -101,13 +105,13 @@ int cli_test_joystick(short channel, int argc, char * argv[]) {
 /*
  * Test SNES gamepads
  */
-int cli_test_gamepad(short channel, int argc, char * argv[]) {
+short cli_test_gamepad(short channel, int argc, const char * argv[]) {
     char message[80];
-    volatile unsigned int * game_ctrl_port = 0xFEC00504;
-    volatile unsigned int * game_0_0_port = 0xFEC00508;
-    volatile unsigned int * game_0_1_port = 0xFEC0050C;
-    volatile unsigned int * game_1_0_port = 0xFEC00510;
-    volatile unsigned int * game_1_1_port = 0xFEC00514;
+    volatile unsigned int * game_ctrl_port = (volatile unsigned int *)0xFEC00504;
+    volatile unsigned int * game_0_0_port = (volatile unsigned int *)0xFEC00508;
+    volatile unsigned int * game_0_1_port = (volatile unsigned int *)0xFEC0050C;
+    volatile unsigned int * game_1_0_port = (volatile unsigned int *)0xFEC00510;
+    volatile unsigned int * game_1_1_port = (volatile unsigned int *)0xFEC00514;
     unsigned int game_ctrl;
     unsigned int game_status;
     unsigned int game_state_0 = 0;
@@ -124,7 +128,7 @@ int cli_test_gamepad(short channel, int argc, char * argv[]) {
         }
     }
 
-    sprintf(message, "Testing SNES gamepad port %d... ESC to quit.\n", port);
+    sprintf(message, "Testing SNES gamepad port %d... ESC to quit.\n", (short)port);
     sys_chan_write(channel, message, strlen(message));
 
     /* Make sure we're in SNES mode */
@@ -213,7 +217,7 @@ short cli_test_uart(short channel, int argc, const char * argv[]) {
     sys_chan_write(0, buffer, strlen(buffer));
 
     for (;;) {
-        c = kbdmo_getc()
+        c = kbdmo_getc();
         if (c != 0) {
             if (c == '~') {
                 return 0;
@@ -338,7 +342,7 @@ short cli_mem_test(short channel, int argc, const char * argv[]) {
 }
 
 #if MODEL == MODEL_FOENIX_A2560K
-int cli_test_recalibrate(short screen, int argc, char * argv[]) {
+short cli_test_recalibrate(short screen, int argc, const char * argv[]) {
     unsigned char buffer[512];
     short i;
     short result;
@@ -360,7 +364,7 @@ int cli_test_recalibrate(short screen, int argc, char * argv[]) {
     return 0;
 }
 
-int cli_test_seek(short screen, int argc, char * argv[]) {
+short cli_test_seek(short screen, int argc, const char * argv[]) {
     unsigned char buffer[512];
     short i;
     unsigned char cylinder;
@@ -370,7 +374,7 @@ int cli_test_seek(short screen, int argc, char * argv[]) {
 
     cylinder = (unsigned char)cli_eval_number(argv[1]);
 
-    sprintf(buffer, "Seeking to %d\n", cylinder);
+    sprintf(buffer, "Seeking to %d\n", (short)cylinder);
     sys_chan_write(screen, buffer, strlen(buffer));
 
     if (fdc_seek(cylinder) == 0) {
@@ -388,7 +392,7 @@ int cli_test_seek(short screen, int argc, char * argv[]) {
 /*
  * Test the FDC interface by reading the MBR
  */
-int cli_test_fdc(short screen, int argc, char * argv[]) {
+short cli_test_fdc(short screen, int argc, const char * argv[]) {
     unsigned char buffer[512];
     short i;
     short scancode;

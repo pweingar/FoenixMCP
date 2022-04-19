@@ -212,7 +212,7 @@ short cmd_sysinfo(short channel, int argc, const char * argv[]) {
     sprintf(buffer, "\nCPU: %s", cli_sys_info.cpu_name);
     print(channel, buffer);
 
-    sprintf(buffer, "\nClock (kHz): %d", cli_sys_info.cpu_clock_khz);
+    sprintf(buffer, "\nClock (kHz): %u", cli_sys_info.cpu_clock_khz);
     print(channel, buffer);
 
     sprintf(buffer, "\nSystem Memory: 0x%lX", cli_sys_info.system_ram_size);
@@ -635,7 +635,7 @@ short cli_readline(short channel, char * command_line) {
                 case CLI_KEY_RIGHT:
                     // Move cursor right
                     if (key_code & CLI_FLAG_CTRL) {
-                        sprintf(buffer, "\x1b[%dG", strlen(command_line) + 3);
+                        sprintf(buffer, "\x1b[%dG", (short)(3 + strlen(command_line)));
                         print(channel, buffer);
                         i = strlen(command_line);
                     } else {
@@ -700,7 +700,7 @@ short cli_readline(short channel, char * command_line) {
  * @param command_line the command line to process
  * @return the result of running the command line
  */
-short cli_process_line(short channel, const char * command_line) {
+short cli_process_line(short channel, char * command_line) {
     char * arg;
     char * token_save;
     char * delim = " ";
@@ -818,7 +818,7 @@ void cli_setup_screen(short channel, const char * path, short is_active) {
     print(channel, "\x1b[2J\x1b[1;2H");
     print_banner(channel, cli_sys_info.model);
 
-    sprintf(message, "\nFoenix/MCP v%02d.%02d.%04d\n\n", cli_sys_info.mcp_version, cli_sys_info.mcp_rev, cli_sys_info.mcp_build);
+    sprintf(message, "\nFoenix/MCP v%02u.%02u.%04u\n\n", (unsigned int)cli_sys_info.mcp_version, (unsigned int)cli_sys_info.mcp_rev, (unsigned int)cli_sys_info.mcp_build);
     print(channel, message);
     print(channel, "Type HELP or ? for help.\n");
 }
