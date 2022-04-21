@@ -86,7 +86,11 @@ c_obj := $(subst .c,.o,$(c_src))
 
 .PHONY: all $(cpu) dev fatfs snd cli
 
+ifeq ($(MEMORY),ram)
 all: foenixmcp.s68 $(cpu) dev snd cli
+else
+all: foenixmcp.bin $(cpu) dev snd cli
+endif
 
 $(cpu):
 	$(MAKE) --directory=$@
@@ -105,6 +109,9 @@ cli:
 
 foenixmcp.s68: $(c_obj) $(cpu) dev fatfs snd cli
 	$(CC) $(CFLAGS) $(DEFINES) -o foenixmcp.s68 $(c_obj) $(cpu_c_obj) $(dev_c_obj) $(fat_c_obj) $(snd_c_obj) $(cli_c_obj)
+
+foenixmcp.bin: $(c_obj) $(cpu) dev fatfs snd cli
+	$(CC) $(CFLAGS) $(DEFINES) -o foenixmcp.bin $(c_obj) $(cpu_c_obj) $(dev_c_obj) $(fat_c_obj) $(snd_c_obj) $(cli_c_obj)
 
 %.o: %.c $(DEPS)
 	$(CC) -S -c -o $@ $< $(CFLAGS) $(DEFINES)

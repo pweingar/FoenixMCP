@@ -677,6 +677,26 @@ extern short sys_fsys_register_loader(const char * extension, p_file_loader load
  */
 extern short sys_fsys_stat(const char * path, p_file_info file);
 
+/**
+ * Memory
+ */
+
+/**
+ * Return the top of system RAM... the user program must not use any
+ * system memory from this address and above.
+ *
+ * @return the address of the first byte of reserved system RAM (one above the last byte the user program can use)
+ */
+extern unsigned long sys_mem_get_ramtop();
+
+/**
+ * Reserve a block of memory at the top of system RAM.
+ *
+ * @param bytes the number of bytes to reserve
+ * @return address of the first byte of the reserved block
+ */
+extern unsigned long sys_mem_reserve(unsigned long bytes);
+
 /*
  * Miscellaneous
  */

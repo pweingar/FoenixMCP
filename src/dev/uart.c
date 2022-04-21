@@ -23,7 +23,7 @@ volatile unsigned char * uart_get_base(short uart) {
  */
 void uart_setbps(short uart, unsigned short bps_code) {
     volatile unsigned char * uart_base = uart_get_base(uart);
-    unsigned char lcr;
+
     if (uart_base) {
         /* Enable divisor latch */
         uart_base[UART_LCR] = uart_base[UART_LCR] | 0x80;
@@ -46,13 +46,13 @@ void uart_setbps(short uart, unsigned short bps_code) {
  */
 void uart_setlcr(short uart, unsigned char lcr_bits) {
     volatile unsigned char * uart_base = uart_get_base(uart);
-    DEBUG("uart_setlcr");
-    //if (uart_base) {
+
+    if (uart_base) {
         uart_base[UART_LCR] = lcr_bits;  /* Set the LCR bits (without the DLL bit) */
         if (uart_base[UART_LCR] != lcr_bits) {
             DEBUG("LCR mismatched!");
         }
-    //}
+    }
 }
 
 /*
@@ -63,7 +63,7 @@ void uart_setlcr(short uart, unsigned char lcr_bits) {
  */
 void uart_init(short uart) {
     volatile unsigned char * uart_base = uart_get_base(uart);
-    DEBUG("uart_init");
+
     if (uart_base) {
         /* Default to 9600 bps */
         uart_setbps(uart, UART_9600);
@@ -87,6 +87,7 @@ void uart_init(short uart) {
  */
 short uart_has_bytes(short uart) {
     volatile unsigned char * uart_base = uart_get_base(uart);
+
     if (uart_base) {
         if (uart_base[UART_LSR] & LSR_DATA_AVAIL) {
             return 1;
@@ -107,6 +108,7 @@ short uart_has_bytes(short uart) {
  */
 void uart_put(short uart, unsigned char b) {
     volatile unsigned char * uart_base = uart_get_base(uart);
+
     if (uart_base) {
         unsigned char status = 0;
 
@@ -131,6 +133,7 @@ void uart_put(short uart, unsigned char b) {
  */
 unsigned char uart_get(short uart) {
     volatile unsigned char * uart_base = uart_get_base(uart);
+
     if (uart_base) {
         unsigned char status = 0;
 

@@ -205,37 +205,67 @@ short cli_test_bitmap(short channel, int argc, const char * argv[]) {
     return 0;
 }
 
+/**
+ * Test for the serial ports
+ *
+ * TEST UART [1 | 2]
+ */
 short cli_test_uart(short channel, int argc, const char * argv[]) {
-    char c;
+    char c, c_out;
+    short scan_code;
     char buffer[80];
+    short port = 1;
+    short uart_index = 0;
+    long uart_address = 0;
 
-    uart_init(0);
-    uart_setbps(0, UART_9600);
-    uart_setlcr(0, LCR_DATABITS_8 | LCR_STOPBIT_1 | LCR_PARITY_NONE);
+    if (argc > 1) {
+        // Get the COM port number
+        port = (short)cli_eval_number(argv[1]);
+        if (port < 1) port = 1;
+        if (port > 2) port = 2;
+    }
 
-    sprintf(buffer, "COM1: 9600, no parity, 1 stop bit, 8 data bits\nPress ESC to finish (%d).\n", UART_115200);
-    sys_chan_write(0, buffer, strlen(buffer));
+    uart_index = port - 1;
+    if (uart_index == 0) {
+        uart_address = UART1_BASE;
+    } else if (uart_index == 1) {
+        uart_address = UART2_BASE;
+    }
 
-    for (;;) {
-        c = kbdmo_getc();
-        if (c != 0) {
-            if (c == '~') {
-                return 0;
-            }
-            uart_put(0, c);
+    sprintf(buffer, "Serial port loopback test of COM%d at 0x%08X...\n", port, uart_address);
+    print(channel, buffer);
+
+    uart_init(uart_index);
+    uart_setbps(uart_index, UART_9600);
+    uart_setlcr(uart_index, LCR_DATABITS_8 | LCR_STOPBIT_1 | LCR_PARITY_NONE);
+    sprintf(buffer, "COM%d: 9600, no parity, 1 stop bit, 8 data bits\nPress ESC to finish.\n", port);
+    print(channel, buffer);
+
+    c_out = ' ';
+    do {
+        uart_put(0, c_out++);
+        if (c_out > '}') {
+            c_out = ' ';
+            uart_put(uart_index, '\r');
+            uart_put(uart_index, '\n');
         }
 
-        if (uart_has_bytes(0)) {
-            c = uart_get(0);
+        if (uart_has_bytes(uart_index)) {
+            c = uart_get(uart_index);
             if (c != 0) {
                 sys_chan_write_b(channel, c);
             }
         }
-    }
+
+        scan_code = sys_kbd_scancode();
+    } while (scan_code != 0x01);
 
     return 0;
 }
 
+/**
+ * Do a simple test of a kernel panic using division by zero
+ */
 short cli_test_panic(short channel, int argc, const char * argv[]) {
     volatile int x = 0;
     return argc / x;
@@ -280,7 +310,7 @@ short cli_test_rtc(short channel, int argc, const char * argv[]) {
 short cli_mem_test(short channel, int argc, const char * argv[]) {
     volatile unsigned char * memory = 0x00000000;
     t_sys_info sys_info;
-    unsigned long mem_start = 0x00050000; /* TODO find out better where the kernel stop */
+    unsigned long mem_start = 0x00010000; /* TODO find out better where the kernel stop */
     unsigned long mem_end;
     char message[80];
     unsigned long i;
@@ -291,52 +321,47 @@ short cli_mem_test(short channel, int argc, const char * argv[]) {
             mem_start = 0x02000000;
             mem_end = 0x06000000;
 
-            sprintf(message, "\x1B[H\x1B[2JTesting MERA memory...");
-            sys_chan_write(channel, message, strlen(message));
+            print(channel, "\x1B[H\x1B[2JTesting MERA memory...");
         }
 #else
-            sprintf(message, "MERA memory is not present on this system.\n");
-            sys_chan_write(channel, message, strlen(message));
+            print(channel, "MERA memory is not present on this system.\n");
             return 0;
 #endif
     } else {
-        sys_get_info(&sys_info);
-        mem_end = sys_info.system_ram_size;
+        mem_end = sys_mem_get_ramtop();
 
-        sprintf(message, "\x1B[H\x1B[2JTesting system memory...");
-        sys_chan_write(channel, message, strlen(message));
+        print(channel, "\x1B[H\x1B[2JTesting system memory...");
     }
 
     for (i = mem_start; i < mem_end; i++) {
         memory[i] = 0x55; /* Every other bit starting with 1 */
         if (memory[i] != 0x55) {
             sprintf(message, "\x1B[1;2H\x1B[KFailed to write 0x55... read %02X at %p\n\n", memory[i], (void*)i);
-            sys_chan_write(channel, message, strlen(message));
+            print(channel, message);
             return ERR_GENERAL;
         }
 
         memory[i] = 0xAA; /* Every other bit starting with 0 */
         if (memory[i] != 0xAA) {
             sprintf(message, "\x1B[1;2H\x1B[KFailed to write 0xAA... read %02X at %p\n\n", memory[i], (void*)i);
-            sys_chan_write(channel, message, strlen(message));
+            print(channel, message);
             return ERR_GENERAL;
         }
 
         memory[i] = 0x00;
         if (memory[i] != 0x00) {
             sprintf(message, "\x1B[1;2H\x1B[KFailed to write 0x00... read %02X at %p\n\nX", memory[i], (void*)i);
-            sys_chan_write(channel, message, strlen(message));
+            print(channel, message);
             return ERR_GENERAL;
         }
 
         if ((i % 1024) == 0) {
             sprintf(message, "\x1B[H\x1B[0KMemory tested: %p", (void*)i);
-            sys_chan_write(channel, message, strlen(message));
+            print(channel, message);
         }
     }
 
-    sprintf(message, "\x1B[H\x1B[2JMemory passed basic tests.\n\n");
-    sys_chan_write(channel, message, strlen(message));
+    print(channel, "\x1B[H\x1B[2JMemory passed basic tests.\n\n");
 
     return 0;
 }
@@ -736,7 +761,7 @@ const t_cli_test_feature cli_test_features[] = {
     {"SEEK", "SEEK <track>: move the floppy drive head to a track", cli_test_seek},
     {"SID", "SID [EXT|INT]: test the SID sound chips", sid_test},
 #endif
-    {"UART","UART: test the serial port",cli_test_uart},
+    {"UART","UART [1|2]: test the serial port",cli_test_uart},
     {"END", "END", 0}
 };
 
