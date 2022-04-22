@@ -56,6 +56,7 @@ short g_current_channel = 0;
 const t_cli_command g_cli_commands[] = {
     { "?", "? : print this helpful message", cmd_help },
     { "HELP", "HELP : print this helpful message", cmd_help },
+    { "CALL", "CALL <address> : starts code", mem_cmd_call },
     { "CD", "CD <path> : sets the current directory", cmd_cd },
     { "CLS", "CLS : clear the screen", cmd_cls },
     { "COPY", "COPY <src path> <dst path> : Copies files to destination", cmd_copy },
