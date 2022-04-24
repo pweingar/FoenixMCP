@@ -626,7 +626,7 @@ short sys_fsys_stat(const char * path, p_file_info file) {
  * @return the address of the first byte of reserved system RAM (one above the last byte the user program can use)
  */
 unsigned long sys_mem_get_ramtop() {
-    return (short)syscall(KFN_MEM_GET_RAMTOP);
+    return (unsigned long)syscall(KFN_MEM_GET_RAMTOP);
 }
 
 /**

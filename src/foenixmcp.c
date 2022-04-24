@@ -125,7 +125,7 @@ void initialize() {
     log_setlevel(LOG_ERROR);
 
     /* Initialize the memory system */
-    mem_init(__memory_start);
+    mem_init(0x3d0000);
 
     // /* Hide the mouse */
     mouse_set_visible(0);

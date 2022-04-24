@@ -310,28 +310,24 @@ short cli_test_rtc(short channel, int argc, const char * argv[]) {
 short cli_mem_test(short channel, int argc, const char * argv[]) {
     volatile unsigned char * memory = 0x00000000;
     t_sys_info sys_info;
-    unsigned long mem_start = 0x00010000; /* TODO find out better where the kernel stop */
-    unsigned long mem_end;
+    unsigned long mem_start = 0x00010000;
+    unsigned long mem_end = mem_get_ramtop();
     char message[80];
     unsigned long i;
 
-    if (argc > 1) {
 #if MODEL == MODEL_FOENIX_A2560K
+    if (argc > 1) {
         if ((strcmp(argv[1], "MERA") == 0) || (strcmp(argv[1], "mera") == 0)) {
             mem_start = 0x02000000;
             mem_end = 0x06000000;
 
             print(channel, "\x1B[H\x1B[2JTesting MERA memory...");
         }
-#else
-            print(channel, "MERA memory is not present on this system.\n");
-            return 0;
-#endif
-    } else {
-        mem_end = sys_mem_get_ramtop();
-
-        print(channel, "\x1B[H\x1B[2JTesting system memory...");
     }
+#endif
+
+    sprintf(message, "\x1B[H\x1B[2JTesting memory from 0x%08X to 0x%08X\n", mem_start, mem_end);
+    print(channel, message);
 
     for (i = mem_start; i < mem_end; i++) {
         memory[i] = 0x55; /* Every other bit starting with 1 */
@@ -356,12 +352,12 @@ short cli_mem_test(short channel, int argc, const char * argv[]) {
         }
 
         if ((i % 1024) == 0) {
-            sprintf(message, "\x1B[H\x1B[0KMemory tested: %p", (void*)i);
+            sprintf(message, "\x1B[1;2H\x1B[0KMemory tested: %p", (void*)i);
             print(channel, message);
         }
     }
 
-    print(channel, "\x1B[H\x1B[2JMemory passed basic tests.\n\n");
+    print(channel, "\x1B[1;3H\x1B[0KMemory passed basic tests.\n\n");
 
     return 0;
 }
