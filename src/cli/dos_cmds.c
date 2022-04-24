@@ -342,19 +342,71 @@ void dir_entry_insert(p_dir_entry * list_pointer, p_dir_entry entry) {
     }
 }
 
+/**
+ * Examine the optional path/pattern argument and separate it into a path and a pattern
+ *
+ * @param arg the string describing the directory and pattern to search
+ * @param path a pointer to a pointer to a string... set to the path portion or 0 if no path
+ * @param pattern a pointer to a pointer to a string... set to the pattern poriton, or 0 if none provided
+ */
+void dir_parse_pattern(char * arg, char ** path, char ** pattern) {
+    *path = 0;
+    *pattern = 0;
+    if ((arg != 0) && (strlen(arg) > 0)) {
+        // And argument was provided... see if there is a pattern
+        if ((strchr(arg, '*') == 0) && (strchr(arg, '?') == 0)) {
+            // No pattern found... return the whole thing as path
+            *path = arg;
+
+        } else {
+            // Found a pattern... do we specify a folder?
+            char * x = strrchr(arg, '/');
+            if (x == 0) {
+                // No... it's all pattern
+                *pattern = arg;
+
+            } else {
+                // Yes... split the string into path and pattern at x
+                *x = 0;
+                *path = arg;
+                *pattern = x + 1;
+            }
+        }
+    }
+}
+
 short cmd_dir(short screen, int argc, const char * argv[]) {
-    short result;
+    short result = 0, dir = -1;
     char buffer[80];
+    char arg[128];
     t_file_info my_file;
     p_dir_entry directories = 0, files = 0, entry = 0, prev = 0;
-    char * path = "";
+    char *path=0, *pattern = 0;
     char label[40];
 
     if (argc > 1) {
-        path = (char*)(argv[1]);
+        strcpy(arg, argv[1]);
+        dir_parse_pattern(arg, &path, &pattern);
     }
 
-    short dir = fsys_opendir(path);
+    if (path == 0) {
+        // Make the path the empty string if it was not provided
+        path = "";
+    }
+
+    print(0, "Path: ");
+    print(0, path);
+    print(0, "\n");
+
+    if (pattern != 0) {
+        // A pattern was provided
+        dir = sys_fsys_findfirst(path, pattern, &my_file);
+
+    } else {
+        // No pattern... just open the path as a directory
+        dir = sys_fsys_opendir(path);
+    }
+
     if (dir >= 0) {
         result = fsys_getlabel(path, label);
         if ((result == 0) && (strlen(label) > 0)) {
@@ -363,9 +415,12 @@ short cmd_dir(short screen, int argc, const char * argv[]) {
         }
 
         while (1) {
-            short result = fsys_readdir(dir, &my_file);
-            if ((result == 0) && (my_file.name[0] != 0)) {
+            if (pattern == 0) {
+                result = sys_fsys_readdir(dir, &my_file);
+                if (result != 0) break;
+            }
 
+            if (my_file.name[0] != 0) {
                 if ((my_file.attributes & AM_HID) == 0) {
                     if (my_file.attributes & AM_DIR) {
                         entry = (p_dir_entry)malloc(sizeof(t_dir_entry));
@@ -390,6 +445,13 @@ short cmd_dir(short screen, int argc, const char * argv[]) {
                 }
             } else {
                 break;
+            }
+
+            if (pattern != 0) {
+                result = fsys_findnext(dir, &my_file);
+                if (result != 0) {
+                    break;
+                }
             }
         }
 

@@ -178,6 +178,7 @@ short fsys_opendir(const char * path) {
     /* Allocate a directory handle */
     for (i = 0; i < MAX_DIRECTORIES; i++) {
         if (g_dir_state[i] == 0) {
+			g_dir_state[i] = 1;
             dir = i;
             break;
         }
@@ -315,13 +316,14 @@ short fsys_stat(const char * path, p_file_info file) {
  */
 short fsys_findfirst(const char * path, const char * pattern, p_file_info file) {
     FILINFO finfo;
-    FRESULT fres;
-    short dir;
-    short i;
+    FRESULT fres = -1;
+    short dir = 0;
+    short i = 0;
 
     /* Allocate a directory handle */
     for (i = 0; i < MAX_DIRECTORIES; i++) {
         if (g_dir_state[i] == 0) {
+			g_dir_state[i] = 1;
             dir = i;
             break;
         }
@@ -331,6 +333,7 @@ short fsys_findfirst(const char * path, const char * pattern, p_file_info file) 
         return ERR_OUT_OF_HANDLES;
 
     } else {
+		fres = f_findfirst(&g_directory[dir], &finfo, path, pattern);
         if (fres != FR_OK) {
             return fatfs_to_foenix(fres);
 
