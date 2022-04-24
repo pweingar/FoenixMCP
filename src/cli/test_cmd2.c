@@ -311,7 +311,7 @@ short cli_mem_test(short channel, int argc, const char * argv[]) {
     volatile unsigned char * memory = 0x00000000;
     t_sys_info sys_info;
     unsigned long mem_start = 0x00010000;
-    unsigned long mem_end = mem_get_ramtop();
+    unsigned long mem_end = sys_mem_get_ramtop();
     char message[80];
     unsigned long i;
 
@@ -326,7 +326,7 @@ short cli_mem_test(short channel, int argc, const char * argv[]) {
     }
 #endif
 
-    sprintf(message, "\x1B[H\x1B[2JTesting memory from 0x%08X to 0x%08X\n", mem_start, mem_end);
+    sprintf(message, "\x1B[H\x1B[2JTesting memory from 0x%08X to 0x%08X\n", (unsigned long)mem_start, (unsigned long)mem_end);
     print(channel, message);
 
     for (i = mem_start; i < mem_end; i++) {

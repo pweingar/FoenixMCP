@@ -1,6 +1,7 @@
 #include <ctype.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "syscalls.h"
@@ -288,10 +289,64 @@ short cmd_rename(short screen, int argc, const char * argv[]) {
     return 0;
 }
 
+/**
+ * Structure to hold file and directory information for sorting
+ */
+typedef struct s_dir_entry {
+    t_file_info info;
+    struct s_dir_entry *next, *prev;
+} t_dir_entry, *p_dir_entry;
+
+/**
+ * Add a directory entry to a list of directory entries using simple insertion sort
+ *
+ * @param list_pointer a pointer to a pointer to a list of directory entries
+ * @param entry a pointer to a directory entry to add
+ */
+void dir_entry_insert(p_dir_entry * list_pointer, p_dir_entry entry) {
+    p_dir_entry list = *list_pointer;
+
+    if (list == 0) {
+        *list_pointer = entry;
+        entry->next = 0;
+        entry->prev = 0;
+
+    } else {
+        p_dir_entry x = list;
+        while (x != 0) {
+            if (strcmp(x->info.name, entry->info.name) >= 0) {
+                if (x->prev == 0) {
+                    *list_pointer = entry;
+                    entry->next = x;
+                    entry->prev = 0;
+                    x->prev = entry;
+                } else {
+                    entry->prev = x->prev;
+                    entry->next = x;
+                    x->prev->next = entry;
+                    x->prev = entry;
+                }
+                return;
+
+            } else {
+                if (x->next == 0) {
+                    x->next = entry;
+                    entry->prev = x;
+                    entry->next = 0;
+                    return;
+                } else {
+                    x = x->next;
+                }
+            }
+        }
+    }
+}
+
 short cmd_dir(short screen, int argc, const char * argv[]) {
     short result;
     char buffer[80];
     t_file_info my_file;
+    p_dir_entry directories = 0, files = 0, entry = 0, prev = 0;
     char * path = "";
     char label[40];
 
@@ -313,18 +368,24 @@ short cmd_dir(short screen, int argc, const char * argv[]) {
 
                 if ((my_file.attributes & AM_HID) == 0) {
                     if (my_file.attributes & AM_DIR) {
-                        sprintf(buffer, "%s/\n", my_file.name);
-                        chan_write(screen, buffer, strlen(buffer));
+                        entry = (p_dir_entry)malloc(sizeof(t_dir_entry));
+                        if (entry) {
+                            memcpy(&entry->info, &my_file, sizeof(t_file_info));
+                            dir_entry_insert(&directories, entry);
+                        } else {
+                            print(screen, "Unable to display directory... out of memory.\n");
+                            return -1;
+                        }
 
                     } else {
-                        if (my_file.size < 1024) {
-                            sprintf(buffer, "%-20.20s %d\n", my_file.name, (int)my_file.size);
-                        } else if (my_file.size < 1024*1024) {
-                            sprintf(buffer, "%-20.20s %d KB\n", my_file.name, (int)my_file.size / 1024);
+                        entry = (p_dir_entry)malloc(sizeof(t_dir_entry));
+                        if (entry) {
+                            memcpy(&entry->info, &my_file, sizeof(t_file_info));
+                            dir_entry_insert(&files, entry);
                         } else {
-                            sprintf(buffer, "%-29.20s %d MB\n", my_file.name, (int)my_file.size / (1024*1024));
+                            print(screen, "Unable to display directory... out of memory.\n");
+                            return -1;
                         }
-                        chan_write(screen, buffer, strlen(buffer));
                     }
                 }
             } else {
@@ -333,6 +394,33 @@ short cmd_dir(short screen, int argc, const char * argv[]) {
         }
 
         fsys_closedir(dir);
+
+        // Print the directories
+        entry = directories;
+        while (entry != 0) {
+            sprintf(buffer, "%s/\n", entry->info.name);
+            print(screen, buffer);
+            prev = entry;
+            entry = entry->next;
+            free(prev);
+        }
+
+        // Print the files
+        entry = files;
+        while (entry != 0) {
+            if (entry->info.size < 1024) {
+                sprintf(buffer, "%-20.20s %d B\n", entry->info.name, (int)entry->info.size);
+            } else if (my_file.size < 1024*1024) {
+                sprintf(buffer, "%-20.20s %d KB\n", entry->info.name, (int)entry->info.size / 1024);
+            } else {
+                sprintf(buffer, "%-29.20s %d MB\n", entry->info.name, (int)entry->info.size / (1024*1024));
+            }
+            print(screen, buffer);
+            prev = entry;
+            entry = entry->next;
+            free(prev);
+        }
+
     } else {
         err_print(screen, "Unable to open directory", dir);
         return dir;
