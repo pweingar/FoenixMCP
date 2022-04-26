@@ -807,26 +807,37 @@ short midi_loop_test(short channel, int argc, const char * argv[]) {
     unsigned short scancode = 0;
     unsigned char output;
 
-    midi_init();
+    short result = midi_init();
+    if (result) {
+        sprintf(message, "Unable to initialize MIDI ports: %s\n", err_message(result));
+        print(channel, message);
+        return 0;
+    }
 
-    sprintf(message, "Plug a MIDI loopback cable between MIDI IN and MIDI OUT.\nThen press '1' to start.\n");
-    sys_chan_write(channel, message, strlen(message));
-
-    sprintf(message, "Press ESC to exit test.\n");
-    sys_chan_write(channel, message, strlen(message));
+    print(channel, "Plug a MIDI loopback cable between MIDI IN and MIDI OUT.\nThen press '1' to start.\n");
+    print(channel, "Press ESC to exit test.\n");
 
     while (sys_kbd_scancode() != 0x02) ;
 
     output = 1;
     while (scancode != 0x01) {
-        sprintf(message, "Sending: ");
-        sys_chan_write(channel, message, strlen(message));
-        midi_put(output);
+        print(channel, "Sending: ");
+        result = midi_put(output);
+        if (result) {
+            sprintf(message, "Unable to write a byte to the MIDI ports: %s\n", err_message(result));
+            print(channel, message);
+            return 0;
+        }
         sprintf(message, "%02X --> ", output);
         sys_chan_write(channel, message, strlen(message));
 
-        unsigned char input = midi_get_poll();
-        sprintf(message, "%02X\n", input);
+        short input = midi_get_poll();
+        if (input < 0) {
+            sprintf(message, "Unable to read a byte to the MIDI ports: %s\n", err_message(input));
+            print(channel, message);
+            return 0;
+        }
+        sprintf(message, "%02X\n", (unsigned char)input);
         sys_chan_write(channel, message, strlen(message));
 
         scancode = sys_kbd_scancode();

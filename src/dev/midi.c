@@ -12,7 +12,7 @@
 #if MODEL == MODEL_FOENIX_A2560K
 
 /** Timeout for waiting on the MIDI interface */
-const long midi_timeout = 10;
+const long midi_timeout = 60;
 
 /**
  * Wait for data to be ready to read...
@@ -40,7 +40,7 @@ short midi_can_read() {
 short midi_can_write() {
     long target = timers_jiffies() + midi_timeout;
     do {
-        if ((*MIDI_STAT & MIDI_STAT_TX_BUSY) == 0) {
+        if ((*MIDI_STAT & MIDI_STAT_TX_BUSY) != 0) {
             // The transmit buffer is empty
             return 1;
         }
@@ -57,13 +57,9 @@ short midi_can_write() {
  * @return 0 on success, any other number is an error
  */
 short midi_command(unsigned char cmd) {
-    if (midi_can_write()) {
-        *MIDI_CMD = cmd;
-        return 0;
-    } else {
-        // We got a timeout
-        return DEV_TIMEOUT;
-    }
+    /* Send the byte */
+    *MIDI_CMD = cmd;
+    return 0;
 }
 
 /**
@@ -75,12 +71,10 @@ short midi_init() {
     unsigned char dummy;
     short result;
 
-    print(0, "midi_init: ");
-
-    // result = midi_command(0xFF);    /* Reset the MIDI port */
-    // if (result != 0) {
-    //     return result;
-    // }
+    result = midi_command(0xFF);    /* Reset the MIDI port */
+    if (result != 0) {
+        return result;
+    }
 
     // /* Wait for the ACK */
     // for (dummy = 0; dummy != 0xFE; ) {
@@ -88,32 +82,24 @@ short midi_init() {
     //         dummy = *MIDI_DATA;
     //     } else {
     //         // There was a timeout
-    //         print(0, "X\n");
     //         return DEV_TIMEOUT;
     //     }
     // }
-
-    print(0, "1");
 
     result = midi_command(0x3F);    /* Switch the MIDI port into UART mode */
     if (result != 0) {
         return result;
     }
 
-    // /* Wait for the ACK */
-    // do {
-    //     if (midi_can_read()) {
-    //         dummy = *MIDI_DATA;
-    //         print_hex_8(0, dummy);
-    //         print(0, "\n");
-    //     } else {
-    //         // There was a timeout
-    //         print(0, "X\n");
-    //         return DEV_TIMEOUT;
-    //     }
-    // } while (dummy != 0xFE);
-
-    print(0, "2\n");
+    /* Wait for the ACK */
+    do {
+        if (midi_can_read()) {
+            dummy = *MIDI_DATA;
+        } else {
+            // There was a timeout
+            return DEV_TIMEOUT;
+        }
+    } while (dummy != 0xFE);
 
     return 0;
 }
@@ -129,10 +115,10 @@ short midi_put(unsigned char b) {
         /* Send the byte */
         *MIDI_DATA = b;
         return 0;
+    } else {
+        // There was a timeout
+        return DEV_TIMEOUT;
     }
-
-    // There was a timeout
-    return DEV_TIMEOUT;
 }
 
 /**
@@ -140,9 +126,9 @@ short midi_put(unsigned char b) {
  *
  * @return the byte read
  */
-char midi_get_poll() {
+short midi_get_poll() {
     if (midi_can_read()) {
-        return *MIDI_DATA;
+        return ((short)*MIDI_DATA & 0x00ff);
     } else {
         // There was a timeout
         return DEV_TIMEOUT;

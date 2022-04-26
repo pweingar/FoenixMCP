@@ -202,13 +202,13 @@ void initialize() {
         log(LOG_INFO, "SDC driver installed.");
     }
 
-// #if MODEL == MODEL_FOENIX_A2560K
-//     if (res = fdc_install()) {
-//         log_num(LOG_ERROR, "FAILED: Floppy drive initialization", res);
-//     } else {
-//         log(LOG_INFO, "Floppy drive initialized.");
-//     }
-// #endif
+#if MODEL == MODEL_FOENIX_A2560K
+    if (res = fdc_install()) {
+        log_num(LOG_ERROR, "FAILED: Floppy drive initialization", res);
+    } else {
+        log(LOG_INFO, "Floppy drive initialized.");
+    }
+#endif
 
     // At this point, we should be able to call into to console to print to the screens
 

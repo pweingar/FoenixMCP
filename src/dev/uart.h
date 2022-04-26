@@ -5,6 +5,13 @@
 #ifndef __UART_H
 #define __UART_H
 
+/**
+ * Returns the address of the first register in the given UART
+ *
+ * @param uart the number of the UART 0 = COM1, 1 = COM2
+ */
+extern volatile unsigned char * uart_get_base(short uart);
+
 /*
  * Set the data transfer speed
  *

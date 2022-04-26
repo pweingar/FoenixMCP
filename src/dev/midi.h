@@ -25,6 +25,6 @@ extern short midi_put(unsigned char b);
  *
  * @return the byte read (-1 on error)
  */
-extern char midi_get_poll();
+extern short midi_get_poll();
 
 #endif

@@ -216,7 +216,7 @@ short cli_test_uart(short channel, int argc, const char * argv[]) {
     char buffer[80];
     short port = 1;
     short uart_index = 0;
-    long uart_address = 0;
+    unsigned long uart_address = 0;
 
     if (argc > 1) {
         // Get the COM port number
@@ -226,11 +226,7 @@ short cli_test_uart(short channel, int argc, const char * argv[]) {
     }
 
     uart_index = port - 1;
-    if (uart_index == 0) {
-        uart_address = UART1_BASE;
-    } else if (uart_index == 1) {
-        uart_address = UART2_BASE;
-    }
+    uart_address = (unsigned long)uart_get_base(uart_index);
 
     sprintf(buffer, "Serial port loopback test of COM%d at 0x%08X...\n", port, uart_address);
     print(channel, buffer);
@@ -431,28 +427,21 @@ short cli_test_fdc(short screen, int argc, const char * argv[]) {
         return result;
     }
 
-    while (1) {
-        for (i = 0; i < 512; i++) {
-            buffer[i] = 0xAA;
-        }
-
-        n = bdev_read(BDEV_FDC, 0, buffer, 512);
-        if (n < 0) {
-            dump_buffer(screen, buffer, 512, 1);
-            err_print(screen, "Unable to read MBR", n);
-            bdev_ioctrl(BDEV_FDC, FDC_CTRL_MOTOR_OFF, 0, 0);
-            return n;
-        }
-
-        dump_buffer(screen, buffer, 512, 1);
-
-        print(screen, "\n\n");
-
-        scancode = sys_kbd_scancode();
-        if (scancode == 0x01) {
-            break;
-        }
+    for (i = 0; i < 512; i++) {
+        buffer[i] = 0xAA;
     }
+
+    n = bdev_read(BDEV_FDC, 0, buffer, 512);
+    if (n < 0) {
+        dump_buffer(screen, buffer, 512, 1);
+        err_print(screen, "Unable to read MBR", n);
+        bdev_ioctrl(BDEV_FDC, FDC_CTRL_MOTOR_OFF, 0, 0);
+        return n;
+    }
+
+    dump_buffer(screen, buffer, 512, 1);
+
+    print(screen, "\n\n");
 
     bdev_ioctrl(BDEV_FDC, FDC_CTRL_MOTOR_OFF, 0, 0);
 }
