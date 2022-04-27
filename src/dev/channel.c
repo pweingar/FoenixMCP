@@ -83,8 +83,8 @@ p_channel chan_alloc(short dev) {
 
     TRACE("chan_alloc");
 
-    if ((dev == CDEV_CONSOLE) || (dev == CDEV_EVID) || (dev == CDEV_LPT)) {
-        /* For CONSOLE, EVID, and LPT: the channel is always the same number as the device */
+    if ((dev >= CDEV_CONSOLE) && (dev < CDEV_FILE)) {
+        /* For most devices (all but files): the channel is always the same number as the device */
         g_channels[dev].number = dev;
         g_channels[dev].dev = dev;
         return &g_channels[dev];

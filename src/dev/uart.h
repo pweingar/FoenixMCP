@@ -68,4 +68,10 @@ extern void uart_put(short uart, unsigned char b);
  * the byte read from the UART
  */
 extern unsigned char uart_get(short uart);
+
+/**
+ * Install the UART driver
+ */
+extern short uart_install();
+
 #endif

@@ -25,6 +25,7 @@
 #include "dev/uart.h"
 #include "uart_reg.h"
 #include "rtc_reg.h"
+#include "utilities.h"
 #include "vicky_general.h"
 #include "version.h"
 
@@ -283,36 +284,6 @@ short cli_exec(short channel, char * command, int argc, const char * argv[]) {
 
     /* No built-in command that matched... try to run a binary file */
     return cmd_run(channel, argc, argv);
-}
-
-char * strtok_r(char * source, const char * delimiter, char ** saveptr) {
-    char * x = *saveptr;
-    char * y;
-
-    /* Skip over leading delimiters */
-    for (x = *saveptr; *x && (*x == delimiter[0]); x++) {
-
-    }
-
-    /* If we reached the end of the string, return NULL */
-    if (*x == 0) {
-        return 0;
-    }
-
-    for (y = x; *y && (*y != delimiter[0]); y++) {
-
-    }
-
-    /* If we reached the end of the string, return x */
-    if (*y == 0) {
-        *saveptr = y;
-        return x;
-    }
-
-    /* Otherwise, make that position in the source string NULL, and return x */
-    *y = 0;
-    *saveptr = y + 1;
-    return x;
 }
 
 /**

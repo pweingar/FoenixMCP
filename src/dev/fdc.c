@@ -204,7 +204,7 @@ void fdc_delay(int jiffies) {
  * ptr = pointer to the byte position to fill
  *
  * Returns:
- * 0 on success, 1 = the controller has dropped out of execution mode, negative number is an error
+ * 0 on success, negative number is an error
  */
 short fdc_in(unsigned char *ptr) {
     unsigned char msr, data;
@@ -213,11 +213,6 @@ short fdc_in(unsigned char *ptr) {
     step = 1;
     for (i = 0; i < fdc_timeout; i += step) {
         msr = *FDC_MSR & (FDC_MSR_DIO | FDC_MSR_RQM);
-
-        if ((msr & FDC_MSR_NONDMA) == 0) {
-            // The controller has left execution mode... go to get the status bytes
-            return 1;
-        }
 
         if (msr == (FDC_MSR_DIO | FDC_MSR_RQM)) {
         	data = *FDC_DATA;
@@ -236,43 +231,6 @@ short fdc_in(unsigned char *ptr) {
     }
 
     log(LOG_ERROR, "fdc_in: timeout");
-    return DEV_TIMEOUT;
-}
-
-/*
- * Get a status/response byte from the floppy drive controller FIFO
- *
- * Inputs:
- * ptr = pointer to the byte position to fill
- *
- * Returns:
- * 0 on success, negative number is an error
- */
-short fdc_stat_in(unsigned char *ptr) {
-    unsigned char msr, data;
-    short step, i;
-
-    step = 1;
-    for (i = 0; i < fdc_timeout; i += step) {
-        msr = *FDC_MSR & (FDC_MSR_DIO | FDC_MSR_RQM);
-
-        if (msr == (FDC_MSR_DIO | FDC_MSR_RQM)) {
-        	data = *FDC_DATA;
-        	if (ptr)
-        		*ptr = data;
-        	return 0;
-    	}
-
-    	if (msr == FDC_MSR_RQM) {
-            log(LOG_ERROR, "fdc_stat_in: ready for output during input");
-            return ERR_GENERAL;
-        }
-
-    	step += step;
-        fdc_delay(step);
-    }
-
-    log(LOG_ERROR, "fdc_stat_in: timeout");
     return DEV_TIMEOUT;
 }
 
@@ -414,7 +372,7 @@ short fdc_sense_interrupt_status(unsigned char *st0, unsigned char *pcn) {
 
     /* Read the status byte */
     *st0 = *FDC_DATA;
-    log_num(LOG_ERROR, "ST0 = ", *st0);
+    log_num(LOG_INFO, "fdc_sense_interrupt_status: ST0=", *st0);
 
     if (fdc_wait_rqm()) {
         /* Timed out waiting to receive data */
@@ -612,8 +570,8 @@ short fdc_reset() {
             return DEV_TIMEOUT;
         }
 
-        log_num(LOG_INFO, "ST0: ", st0);
-        log_num(LOG_INFO, "PCN: ", pcn);
+        log_num(LOG_INFO, "fdc_reset ST0: ", st0);
+        log_num(LOG_INFO, "fdc_reset PCN: ", pcn);
 
         if (st0 == 0xC0) {
             break;
@@ -709,21 +667,12 @@ short fdc_command(p_fdc_trans transaction) {
 
         case FDC_TRANS_READ:
             /* We're reading from the FDC */
-
-            for (i = 0; i < transaction->data_count; i++) {
-                /* Wait for the FDC to be ready */
-
+            for (i = 0; (i < transaction->data_count) && ((*FDC_MSR & FDC_MSR_NONDMA) == FDC_MSR_NONDMA); i++) {
                 if ((result = fdc_in(&transaction->data[i])) < 0) {
                     log(LOG_ERROR, "fdc_command: timeout getting data");
                     return result;
                 }
-                if (result == 0) {
-                    sys_chan_write_b(0, '.');
-                } else {
-                    // We dropped out of execution mode... go get status bytes
-                    log(LOG_ERROR, "Dropped out of execution mode");
-                    break;
-                }
+                sys_chan_write_b(0, '.');
             }
             break;
 
@@ -734,7 +683,7 @@ short fdc_command(p_fdc_trans transaction) {
     /* Result phase: read the result bytes */
 
     for (i = 0; i < transaction->result_count; i++) {
-        if ((result = fdc_stat_in(&transaction->results[i])) < 0) {
+        if ((result = fdc_in(&transaction->results[i])) < 0) {
             log(LOG_ERROR, "fdc_command: timeout getting results");
             return result;
         }
@@ -943,18 +892,13 @@ short fdc_read(long lba, unsigned char * buffer, short size) {
 
     while (trans.retries > 0) {
         result = fdc_command(&trans);                       /* Issue the transaction */
-        if ((result == 0)) { // && ((trans.results[0] & 0xC0) == 0)) {
-            sprintf(message, "fdc_read: success ST0 = %02x ST1 = %02x ST2 = %02x", trans.results[0], trans.results[1], trans.results[2]);
+        if ((result == 0) && ((trans.results[0] & 0xC0) == 0)) {
+            sprintf(message, "fdc_read: success? ST0 = %02x ST1 = %02x ST2 = %02x", trans.results[0], trans.results[1], trans.results[2]);
             log(LOG_ERROR, message);
             return size;
         } else {
-            if (result != 0) {
-                sprintf(message, "fdc_read: retry ST0 = %02x ST1 = %02x ST2 = %02x", trans.results[0], trans.results[1], trans.results[2]);
-                log(LOG_ERROR, message);
-            } else {
-                sprintf(message, "ST0 = %02x ST1 = %02x ST2 = %02x", trans.results[0], trans.results[1], trans.results[2]);
-                log(LOG_ERROR, message);
-            }
+            sprintf(message, "fdc_read: retry ST0 = %02x ST1 = %02x ST2 = %02x", trans.results[0], trans.results[1], trans.results[2]);
+            log(LOG_ERROR, message);
         }
         fdc_init();
         trans.retries--;

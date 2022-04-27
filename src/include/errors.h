@@ -46,5 +46,6 @@
 #define FSYS_ERR_INVALID_PARAMETER      -36 /* (19) Given parameter is invalid */
 
 #define ERR_NOT_SUPPORTED               -37 /* Device does not support the file or operation */
+#define ERR_BAD_ARGUMENT                -38 /* An invalid argument was provided */
 
 #endif

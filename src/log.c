@@ -61,7 +61,8 @@ const char * err_messages[] = {
     "not enough core",
     "too many open files",
     "file system invalid parameter",
-    "not supported"
+    "not supported",
+    "bad argument"
 };
 
 /*
@@ -70,7 +71,7 @@ const char * err_messages[] = {
 const char * err_message(short err_number) {
     short index = 0 - err_number;
 
-    if (index < 38) {
+    if (index < 39) {
         return err_messages[index];
     } else {
         return "unknown error";

@@ -26,19 +26,19 @@
 #include "dev/console.h"
 #include "dev/fdc.h"
 #include "dev/lpt.h"
-#include "dev/txt_screen.h"
-#include "dev/txt_a2560k_a.h"
-#include "dev/txt_a2560k_b.h"
 #include "dev/pata.h"
 #include "dev/ps2.h"
 #include "dev/rtc.h"
 #include "dev/sdc.h"
+#include "dev/txt_screen.h"
+#include "dev/txt_a2560k_a.h"
+#include "dev/txt_a2560k_b.h"
 #include "dev/uart.h"
-#include "vicky_general.h"
 #include "snd/codec.h"
 #include "snd/psg.h"
 #include "snd/sid.h"
 #include "snd/yamaha.h"
+#include "vicky_general.h"
 #include "fatfs/ff.h"
 #include "cli/cli.h"
 #include "rsrc/font/MSX_CP437_8x8.h"
@@ -231,6 +231,12 @@ void initialize() {
         log(LOG_INFO, "LPT installed.");
     }
 #endif
+
+    if (res = uart_install()) {
+        log_num(LOG_ERROR, "FAILED: serial port initialization", res);
+    } else {
+        log(LOG_INFO, "Serial ports initialized.");
+    }
 
     if (res = cli_init()) {
         log_num(LOG_ERROR, "FAILED: CLI initialization", res);

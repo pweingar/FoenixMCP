@@ -214,47 +214,51 @@ short cli_test_uart(short channel, int argc, const char * argv[]) {
     char c, c_out;
     short scan_code;
     char buffer[80];
-    short port = 1;
+    short cdev = CDEV_COM1;
+    short uart = -1;
     short uart_index = 0;
     unsigned long uart_address = 0;
 
     if (argc > 1) {
         // Get the COM port number
-        port = (short)cli_eval_number(argv[1]);
-        if (port < 1) port = 1;
-        if (port > 2) port = 2;
+        short port = (short)cli_eval_number(argv[1]);
+        if (port <= 1) cdev = CDEV_COM1;
+        if (port >= 2) cdev = CDEV_COM2;
     }
 
-    uart_index = port - 1;
+    uart_index = cdev - CDEV_COM1;
     uart_address = (unsigned long)uart_get_base(uart_index);
 
-    sprintf(buffer, "Serial port loopback test of COM%d at 0x%08X...\n", port, uart_address);
+    sprintf(buffer, "Serial port loopback test of COM%d at 0x%08X...\n", cdev - CDEV_COM1 + 1, uart_address);
     print(channel, buffer);
 
-    uart_init(uart_index);
-    uart_setbps(uart_index, UART_9600);
-    uart_setlcr(uart_index, LCR_DATABITS_8 | LCR_STOPBIT_1 | LCR_PARITY_NONE);
-    sprintf(buffer, "COM%d: 9600, no parity, 1 stop bit, 8 data bits\nPress ESC to finish.\n", port);
-    print(channel, buffer);
+    uart = sys_chan_open(cdev, "9600,8,1,NONE", 0);
+    if (uart >= 0) {
+        sprintf(buffer, "COM%d: 9600, no parity, 1 stop bit, 8 data bits\nPress ESC to finish.\n", cdev - CDEV_COM1 + 1);
+        print(channel, buffer);
 
-    c_out = ' ';
-    do {
-        uart_put(0, c_out++);
-        if (c_out > '}') {
-            c_out = ' ';
-            uart_put(uart_index, '\r');
-            uart_put(uart_index, '\n');
-        }
-
-        if (uart_has_bytes(uart_index)) {
-            c = uart_get(uart_index);
-            if (c != 0) {
-                sys_chan_write_b(channel, c);
+        c_out = ' ';
+        do {
+            sys_chan_write_b(uart, c_out++);
+            if (c_out > '}') {
+                c_out = ' ';
+                sys_chan_write_b(uart, '\r');
+                sys_chan_write_b(uart, '\n');
             }
-        }
 
-        scan_code = sys_kbd_scancode();
-    } while (scan_code != 0x01);
+            if (sys_chan_status(uart) & CDEV_STAT_READABLE) {
+                c = sys_chan_read_b(uart);
+                if (c != 0) {
+                    sys_chan_write_b(channel, c);
+                }
+            }
+
+            scan_code = sys_kbd_scancode();
+        } while (scan_code != 0x01);
+    } else {
+        sprintf(buffer, "Unable to open the serial port: %d\n", uart);
+        print(channel, buffer);
+    }
 
     return 0;
 }
