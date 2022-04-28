@@ -278,7 +278,6 @@ short uart_open(p_channel chan, const char * spec, short mode) {
                 break;
 
             default:
-                log_num(LOG_ERROR, "uart_open: Bad BPS: ", i);
                 return ERR_BAD_ARGUMENT;
         }
         uart_setbps(cdev_to_uart(chan->dev), bps_code);

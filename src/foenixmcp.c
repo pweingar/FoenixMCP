@@ -26,6 +26,7 @@
 #include "dev/console.h"
 #include "dev/fdc.h"
 #include "dev/lpt.h"
+#include "dev/midi.h"
 #include "dev/pata.h"
 #include "dev/ps2.h"
 #include "dev/rtc.h"
@@ -230,6 +231,12 @@ void initialize() {
     } else {
         log(LOG_INFO, "LPT installed.");
     }
+
+    if (res = midi_install()) {
+        log_num(LOG_ERROR, "FAILED: MIDI installation", res);
+    } else {
+        log(LOG_INFO, "MIDI installed.");
+    }
 #endif
 
     if (res = uart_install()) {
@@ -237,6 +244,8 @@ void initialize() {
     } else {
         log(LOG_INFO, "Serial ports initialized.");
     }
+
+
 
     if (res = cli_init()) {
         log_num(LOG_ERROR, "FAILED: CLI initialization", res);

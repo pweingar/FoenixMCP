@@ -6,25 +6,8 @@
 #define __MIDI_H
 
 /**
- * Initilialize the MIDI port
- *
- * @return 0 on success, any other number is an error
+ * Install the driver for the MIDI port
  */
-extern short midi_init();
-
-/**
- * Send a byte to the MIDI port
- *
- * @param b the byte to send
- * @return 0 on success, any other number is an error
- */
-extern short midi_put(unsigned char b);
-
-/**
- * Get a byte from the MIDI port
- *
- * @return the byte read (-1 on error)
- */
-extern short midi_get_poll();
+extern short midi_install();
 
 #endif

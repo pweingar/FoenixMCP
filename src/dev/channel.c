@@ -174,7 +174,11 @@ short cdev_init(short dev) {
     if (dev < CDEV_DEVICES_MAX) {
         p_dev_chan cdev = &g_channel_devs[dev];
         if (cdev->number == dev) {
-            return cdev->init();
+            if (cdev->init) {
+                return cdev->init();
+            } else {
+                return 0;
+            }
         } else {
             return DEV_ERR_BADDEV;
         }
@@ -248,7 +252,9 @@ short chan_close(short channel) {
     p_channel chan;
     p_dev_chan cdev;
     if (chan_get_records(channel, &chan, &cdev) == 0) {
-        cdev->close(chan);
+        if (cdev->close) {
+            cdev->close(chan);
+        }
         chan_free(chan);
     }
 
@@ -276,7 +282,12 @@ short chan_read(short channel, uint8_t * buffer, short size) {
     res = chan_get_records(channel, &chan, &cdev);
     if (res == 0) {
         log2(LOG_DEBUG, "chan_read: ", cdev->name);
-        return cdev->read(chan, buffer, size);
+        if (cdev->read) {
+            return cdev->read(chan, buffer, size);
+        } else {
+            return 0;
+        }
+
     } else {
         log_num(LOG_DEBUG, "Couldn't get channel: ", res);
         return res;
@@ -301,7 +312,11 @@ short chan_readline(short channel, uint8_t * buffer, short size) {
 
     res = chan_get_records(channel, &chan, &cdev);
     if (res == 0) {
-        return cdev->readline(chan, buffer, size);
+        if (cdev->readline) {
+            return cdev->readline(chan, buffer, size);
+        } else {
+            return 0;
+        }
     } else {
         return res;
     }
@@ -324,7 +339,11 @@ short chan_read_b(short channel) {
 
     res = chan_get_records(channel, &chan, &cdev);
     if (res == 0) {
-        return cdev->read_b(chan);
+        if (cdev->read_b) {
+            return cdev->read_b(chan);
+        } else {
+            return 0;
+        }
     } else {
         return res;
     }
@@ -350,7 +369,11 @@ short chan_write(short channel, const uint8_t * buffer, short size) {
 
     res = chan_get_records(channel, &chan, &cdev);
     if (res == 0) {
-        return cdev->write(chan, buffer, size);
+        if (cdev->write) {
+            return cdev->write(chan, buffer, size);
+        } else {
+            return 0;
+        }
     } else {
         log_num(LOG_ERROR, "chan_write error: ", res);
         while (1) ;
@@ -377,7 +400,11 @@ short chan_write_b(short channel, uint8_t b) {
 
     res = chan_get_records(channel, &chan, &cdev);
     if (res == 0) {
-        return cdev->write_b(chan, b);
+        if (cdev->write_b) {
+            return cdev->write_b(chan, b);
+        } else {
+            return 0;
+        }
     } else {
         return res;
     }
@@ -400,7 +427,11 @@ short chan_status(short channel) {
 
     res = chan_get_records(channel, &chan, &cdev);
     if (res == 0) {
-        return cdev->status(chan);
+        if (cdev->status) {
+            return cdev->status(chan);
+        } else {
+            return 0;
+        }
     } else {
         return res;
     }
@@ -422,7 +453,11 @@ short chan_flush(short channel) {
 
     res = chan_get_records(channel, &chan, &cdev);
     if (res == 0) {
-        return cdev->flush(chan);
+        if (cdev->flush) {
+            return cdev->flush(chan);
+        } else {
+            return 0;
+        }
     } else {
         return res;
     }
@@ -447,7 +482,11 @@ short chan_seek(short channel, long position, short base) {
 
     res = chan_get_records(channel, &chan, &cdev);
     if (res == 0) {
-        return cdev->seek(chan, position, base);
+        if (cdev->seek) {
+            return cdev->seek(chan, position, base);
+        } else {
+            return 0;
+        }
     } else {
         return res;
     }
@@ -472,7 +511,11 @@ short chan_ioctrl(short channel, short command, uint8_t * buffer, short size) {
 
     res = chan_get_records(channel, &chan, &cdev);
     if (res == 0) {
-        return cdev->ioctrl(chan, command, buffer, size);
+        if (cdev->ioctrl) {
+            return cdev->ioctrl(chan, command, buffer, size);
+        } else {
+            return 0;
+        }
     } else {
         return res;
     }

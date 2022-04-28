@@ -739,22 +739,46 @@ short opl3_test(short channel, int argc, const char * argv[]) {
  */
 short midi_tx_test(short channel, int argc, const char * argv[]) {
 #if MODEL == MODEL_FOENIX_A2560K
-    const char note_on[] = { 0x90, 0x3c, 0xff };
+    const char note_on[] = { 0x90, 0x3c, 0x3f };
     const char note_off[] = { 0x80, 0x3c, 0x00 };
     char message[80];
     unsigned short scancode = 0;
     int i;
 
-    midi_init();
+    print(channel, "Press '1' to start, 'ESC' to quit.\n");
+    while (sys_kbd_scancode() != 0x02) ;
 
-    for (i = 0; i < 3; i++) {
-        midi_put(note_on[i]);
-    }
+    short midi = sys_chan_open(CDEV_MIDI, "", 0);
+    if (midi > 0) {
+        while (sys_kbd_scancode() != 0x01) {
+            long target_jiffies = 0;
 
-    for (i = 0; i < 65535 * 20; i++) ;
+            for (i = 0; i < 3; i++) {
+                sys_chan_write_b(midi, note_on[i]);
+                print_hex_8(channel, note_on[i]);
+                print_c(channel, ' ');
+            }
 
-    for (i = 0; i < 3; i++) {
-        midi_put(note_off[i]);
+            target_jiffies = sys_time_jiffies() + 60;
+            while (target_jiffies > sys_time_jiffies()) ;
+
+            for (i = 0; i < 3; i++) {
+                sys_chan_write_b(midi, note_off[i]);
+                print_hex_8(channel, note_off[i]);
+                print_c(channel, ' ');
+            }
+
+            target_jiffies = sys_time_jiffies() + 60;
+            while (target_jiffies > sys_time_jiffies()) ;
+
+            print_c(channel, '\n');
+        }
+
+        sys_chan_close(midi);
+    } else {
+        sprintf(message, "Couldn't open MIDI port: %s\n", err_message(midi));
+        print(channel, message);
+        return 0;
     }
 #endif
     return 0;
@@ -769,31 +793,43 @@ short midi_rx_test(short channel, int argc, const char * argv[]) {
     unsigned short scancode = 0;
     int i;
 
-    midi_init();
-
     print(channel, "Press '1' to start, and 'ESC' to exit test.\n");
-
     while (sys_kbd_scancode() != 0x02) ;
 
-    i = 0;
-    while (scancode != 0x01) {
-        unsigned char input = midi_get_poll();
-        if ((input != 0xf8) && (input != 0xfe)) {
-            if ((i % 16) == 0) {
-                sprintf(message, "\n%02X", input);
-                sys_chan_write(channel, message, strlen(message));
-            } else {
-                sprintf(message, " %02X", input);
-                sys_chan_write(channel, message, strlen(message));
+    short midi = sys_chan_open(CDEV_MIDI, "", 0);
+    if (midi > 0) {
+
+        i = 0;
+        while (scancode != 0x01) {
+            short input = sys_chan_read_b(midi);
+            if (input < 0) {
+                sprintf(message, "Could not read from MIDI port: %s\n", err_message(input));
+                print(channel, message);
+                return 0;
             }
 
-            i++;
+            if ((input != 0xf8) && (input != 0xfe)) {
+                if ((i % 16) == 0) {
+                    sprintf(message, "\n%02X", input);
+                    sys_chan_write(channel, message, strlen(message));
+                } else {
+                    sprintf(message, " %02X", input);
+                    sys_chan_write(channel, message, strlen(message));
+                }
+
+                i++;
+            }
+
+            scancode = sys_kbd_scancode();
         }
 
-        scancode = sys_kbd_scancode();
+        print_c(channel, '\n');
+        sys_chan_close(midi);
+    } else {
+        sprintf(message, "Couldn't open MIDI port: %s\n", err_message(midi));
+        print(channel, message);
+        return 0;
     }
-
-    sys_chan_write(channel, "\n", 1);
 #endif
     return 0;
 }
@@ -806,49 +842,51 @@ short midi_loop_test(short channel, int argc, const char * argv[]) {
     char message[80];
     unsigned short scancode = 0;
     unsigned char output;
-
-    short result = midi_init();
-    if (result) {
-        sprintf(message, "Unable to initialize MIDI ports: %s\n", err_message(result));
-        print(channel, message);
-        return 0;
-    }
+    short result = 0;
 
     print(channel, "Plug a MIDI loopback cable between MIDI IN and MIDI OUT.\nThen press '1' to start.\n");
     print(channel, "Press ESC to exit test.\n");
 
     while (sys_kbd_scancode() != 0x02) ;
 
-    output = 1;
-    while (scancode != 0x01) {
-        print(channel, "Sending: ");
-        result = midi_put(output);
-        if (result) {
-            sprintf(message, "Unable to write a byte to the MIDI ports: %s\n", err_message(result));
+    short midi = sys_chan_open(CDEV_MIDI, "", 0);
+    if (midi > 0) {
+        output = 1;
+        while (scancode != 0x01) {
+            print(channel, "Sending: ");
+            result = sys_chan_write_b(midi, output);
+            if (result) {
+                sprintf(message, "Unable to write a byte to the MIDI ports: %s\n", err_message(result));
+                print(channel, message);
+                return 0;
+            }
+            sprintf(message, "%02X --> ", output);
             print(channel, message);
-            return 0;
-        }
-        sprintf(message, "%02X --> ", output);
-        sys_chan_write(channel, message, strlen(message));
 
-        short input = midi_get_poll();
-        if (input < 0) {
-            sprintf(message, "Unable to read a byte to the MIDI ports: %s\n", err_message(input));
-            print(channel, message);
-            return 0;
-        }
-        sprintf(message, "%02X\n", (unsigned char)input);
-        sys_chan_write(channel, message, strlen(message));
+            short input = sys_chan_read_b(midi);
+            if (input < 0) {
+                sprintf(message, "Unable to read a byte to the MIDI ports: %s\n", err_message(input));
+                print(channel, message);
+                return 0;
+            }
+            sprintf(message, "%02X\n", (unsigned char)input);
+            sys_chan_write(channel, message, strlen(message));
 
-        scancode = sys_kbd_scancode();
+            scancode = sys_kbd_scancode();
 
-        output++;
-        if (output > 0xfe) {
-            output = 1;
+            output++;
+            if (output > 0xfe) {
+                output = 1;
+            }
         }
+
+        sys_chan_write(channel, "\n", 1);
+        sys_chan_close(midi);
+    } else {
+        sprintf(message, "Couldn't open MIDI port: %s\n", err_message(midi));
+        print(channel, message);
+        return 0;
     }
-
-    sys_chan_write(channel, "\n", 1);
 #endif
     return 0;
 }
