@@ -1,4 +1,4 @@
-asources = startup_m68040.s
+asources = startup_m68040.s fdc_m68040.s
 aobjects = $(subst .s,.o,$(asources))
 csources = bios_m68040.c
 cobjects = $(subst .c,.o,$(csources))

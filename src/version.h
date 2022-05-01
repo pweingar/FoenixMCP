@@ -7,6 +7,6 @@
 
 #define VER_MAJOR 0
 #define VER_MINOR 52
-#define VER_BUILD 37
+#define VER_BUILD 38
 
 #endif

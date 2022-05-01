@@ -849,6 +849,11 @@ short fdc_sense_status() {
     return (short)trans.results[0];
 }
 
+extern short fdc_cmd_asm(__reg("d1") short cmd,
+                         __reg("d2") short argc, __reg("a1") uint8_t * argv,
+                         __reg("a2") uint8_t * buffer,
+                         __reg("d3") short resultc, __reg("a3") uint8_t * results);
+
 /*
  * Read a block from the FDC
  *
@@ -872,7 +877,7 @@ short fdc_read(long lba, unsigned char * buffer, short size) {
 
     fdc_motor_on();
 
-    trans.retries = FDC_DEFAULT_RETRIES;
+    trans.retries = 1; //FDC_DEFAULT_RETRIES;
     trans.command = 0x40 | FDC_CMD_READ_DATA;               /* MFM read command */
     trans.direction = FDC_TRANS_READ;                       /* We're going to read from the drive */
     trans.parameters[0] = (head == 1) ? 0x04 : 0x00;        /* Set head and drive # */
@@ -891,7 +896,10 @@ short fdc_read(long lba, unsigned char * buffer, short size) {
     trans.result_count = 7;                                 /* Expect 7 result bytes */
 
     while (trans.retries > 0) {
-        result = fdc_command(&trans);                       /* Issue the transaction */
+        result = fdc_cmd_asm(trans.command, trans.parameter_count, &trans.parameters, buffer, trans.result_count, &trans.results);
+        log_num(LOG_ERROR, "fdc_cmd_asm: ", result);
+
+        // result = fdc_command(&trans);                       /* Issue the transaction */
         if ((result == 0) && ((trans.results[0] & 0xC0) == 0)) {
             sprintf(message, "fdc_read: success? ST0 = %02x ST1 = %02x ST2 = %02x", trans.results[0], trans.results[1], trans.results[2]);
             log(LOG_ERROR, message);
