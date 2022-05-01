@@ -58,16 +58,15 @@ short cli_test_ps2(short channel, int argc, const char * argv[]) {
     char message[80];
     unsigned short scancode = 0;
 
-    sprintf(message, "Press keys on a PS/2 keyboard... ESC to quit.\n");
+    sprintf(message, "Press keys on a PS/2 keyboard... CTRL-C to quit.\n");
     sys_chan_write(channel, message, strlen(message));
 
-    while (scancode != 0x01) {
-        scancode = kbd_get_scancode();
+    do {
         if (scancode != 0) {
             sprintf(message, "Scan code: %04x\n", scancode);
             sys_chan_write(channel, message, strlen(message));
         }
-    }
+    } while (sys_chan_ioctrl(channel, 0x05, 0, 0) == 0);
 
     return 0;
 }
@@ -88,7 +87,7 @@ short cli_test_joystick(short channel, int argc, const char * argv[]) {
     /* Make sure we're in Atari joystick mode */
     *game_ctrl_port = 0;
 
-    while ((scancode != 0x01) && !kbd_break()){
+    do {
         joy_state = *joystick_port;
         if (joy_state != old_joy_state) {
             old_joy_state = joy_state;
@@ -97,7 +96,7 @@ short cli_test_joystick(short channel, int argc, const char * argv[]) {
         }
 
         scancode = sys_kbd_scancode();
-    }
+    } while (sys_chan_ioctrl(channel, 5, 0, 0) == 0);
 
     return 0;
 }

@@ -58,7 +58,7 @@ extern unsigned short kbdmo_get_scancode();
  * Returns:
  *      the next character to be read from the keyboard (0 if none available)
  */
-extern char kbdmo_getc();
+extern unsigned char kbdmo_getc();
 
 /*
  * Use polling to fetch a key
