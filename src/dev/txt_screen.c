@@ -48,6 +48,7 @@ void txt_init() {
         txt_device_driver[i].put = 0;
         txt_device_driver[i].scroll = 0;
         txt_device_driver[i].fill = 0;
+        txt_device_driver[i].get_sizes = 0;
     }
 }
 
@@ -89,6 +90,7 @@ short txt_register(p_txt_device device) {
         txt_device_driver[i].put = device->put;
         txt_device_driver[i].scroll = device->scroll;
         txt_device_driver[i].fill = device->fill;
+        txt_device_driver[i].get_sizes = device->get_sizes;
 
         return 0;
     } else {
@@ -692,5 +694,21 @@ void txt_delete(short screen, short count) {
         txt_set_region(screen, &region);
         txt_scroll(screen, count, 0);
         txt_set_region(screen, &old_region);
+    }
+}
+
+/**
+ * Get the display resolutions
+ *
+ * @param screen the screen number 0 for channel A, 1 for channel B
+ * @param text_size the size of the screen in visible characters (may be null)
+ * @param pixel_size the size of the screen in pixels (may be null)
+ */
+void txt_get_sizes(short screen, p_extent text_size, p_extent pixel_size) {
+    p_txt_device device = txt_get_device(screen);
+    if (device) {
+        if (device->get_sizes) {
+            device->get_sizes(text_size, pixel_size);
+        }
     }
 }

@@ -343,7 +343,11 @@ unsigned long syscall_dispatch(int32_t function, int32_t param0, int32_t param1,
                 case KFN_TXT_SET_CURSOR_VIS:
                     /* Set the cursor visibility */
                     txt_set_cursor_visible((short)param0, (short)param1);
-                    break;
+                    return 0;
+
+                case KFN_TXT_GET_SIZES:
+                    txt_get_sizes((short)param0, (p_extent)param1, (p_extent)param2);
+                    return 0;
 
                 default:
                     return ERR_GENERAL;

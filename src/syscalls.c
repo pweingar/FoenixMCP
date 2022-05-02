@@ -849,3 +849,14 @@ void sys_txt_set_cursor_visible(short screen, short is_visible) {
 short sys_txt_set_font(short screen, short width, short height, unsigned char * data) {
     return syscall(KFN_TXT_SET_FONT, screen, width, height, data);
 }
+
+/**
+ * Get the display resolutions
+ *
+ * @param screen the screen number 0 for channel A, 1 for channel B
+ * @param text_size the size of the screen in visible characters (may be null)
+ * @param pixel_size the size of the screen in pixels (may be null)
+ */
+void sys_txt_get_sizes(short screen, p_extent text_size, p_extent pixel_size) {
+    syscall(KFN_TXT_GET_SIZES, screen, text_size, pixel_size);
+}

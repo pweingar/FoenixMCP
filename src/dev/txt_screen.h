@@ -49,6 +49,7 @@ typedef void (*p_get_xy)(p_point position);
 typedef void (*p_put)(char c);
 typedef void (*p_scroll)(short horizontal, short vertical);
 typedef void (*p_fill)(char c);
+typedef void (*p_get_sizes)(p_extent text_size, p_extent pixel_size);
 
 /**
  * @struct s_txt_device
@@ -81,6 +82,7 @@ typedef struct s_txt_device {
     p_put put;                              /**< Pointer to the device's put function */
     p_scroll scroll;                        /**< Pointer to the device's scroll function */
     p_fill fill;                            /**< Pointer to the device's fill function */
+    p_get_sizes get_sizes;                  /**< Pointer to the device's get_sizes function */
 } t_txt_device, *p_txt_device;
 
 /**
@@ -339,5 +341,14 @@ extern void txt_insert(short screen, short count);
  * count = the number of characters to delete
  */
 extern void txt_delete(short screen, short count);
+
+/**
+ * Get the display resolutions
+ *
+ * @param screen the screen number 0 for channel A, 1 for channel B
+ * @param text_size the size of the screen in visible characters (may be null)
+ * @param pixel_size the size of the screen in pixels (may be null)
+ */
+extern void txt_get_sizes(short screen, p_extent text_size, p_extent pixel_size);
 
 #endif

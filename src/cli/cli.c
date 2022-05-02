@@ -205,27 +205,32 @@ short cmd_cls(short channel, int argc, const char * argv[]) {
  * Display information about the system
  */
 short cmd_sysinfo(short channel, int argc, const char * argv[]) {
+    t_extent text_size, pixel_size;
     char buffer[80];
 
-    sprintf(buffer, "System information:\nModel: %s", cli_sys_info.model_name);
+    sprintf(buffer, "\nSystem information:\nModel: %s\n", cli_sys_info.model_name);
     print(channel, buffer);
 
-    sprintf(buffer, "\nCPU: %s", cli_sys_info.cpu_name);
+    sprintf(buffer, "CPU: %s\n", cli_sys_info.cpu_name);
     print(channel, buffer);
 
-    sprintf(buffer, "\nClock (kHz): %u", cli_sys_info.cpu_clock_khz);
+    sprintf(buffer, "Clock (kHz): %u\n", cli_sys_info.cpu_clock_khz);
     print(channel, buffer);
 
-    sprintf(buffer, "\nSystem Memory: 0x%lX", cli_sys_info.system_ram_size);
+    sprintf(buffer, "System Memory: 0x%lX\n", cli_sys_info.system_ram_size);
     print(channel, buffer);
 
-    sprintf(buffer, "\nFPGA Model: %08lX", cli_sys_info.fpga_model);
+    sprintf(buffer, "FPGA Model: %08lX\n", cli_sys_info.fpga_model);
     print(channel, buffer);
 
-    sprintf(buffer, "\nFPGA Version: %04X.%04X", cli_sys_info.fpga_version, cli_sys_info.fpga_subver);
+    sprintf(buffer, "FPGA Version: %04X.%04X\n", cli_sys_info.fpga_version, cli_sys_info.fpga_subver);
     print(channel, buffer);
 
-    sprintf(buffer, "\nMCP version: v%02u.%02u.%04u\n", cli_sys_info.mcp_version, cli_sys_info.mcp_rev, cli_sys_info.mcp_build);
+    sprintf(buffer, "MCP version: v%02u.%02u.%04u\n", cli_sys_info.mcp_version, cli_sys_info.mcp_rev, cli_sys_info.mcp_build);
+    print(channel, buffer);
+
+    sys_txt_get_sizes(0, &text_size, &pixel_size);
+    sprintf(buffer, "Screen#0 size: %dx%d characters, %dx%d pixels.\n", text_size.width, text_size.height, pixel_size.width, pixel_size.height);
     print(channel, buffer);
 
     return 0;

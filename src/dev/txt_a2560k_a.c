@@ -98,6 +98,24 @@ void txt_a2560k_a_set_sizes() {
 }
 
 /**
+ * Get the display resolutions
+ *
+ * @param text_size the size of the screen in visible characters (may be null)
+ * @param pixel_size the size of the screen in pixels (may be null)
+ */
+void txt_a2560k_a_get_sizes(p_extent text_size, p_extent pixel_size) {
+    if (text_size) {
+        text_size->width = a2560k_a_visible_size.width;
+        text_size->height = a2560k_a_visible_size.height;
+    }
+
+    if (pixel_size) {
+        pixel_size->width = a2560k_a_resolution.width;
+        pixel_size->height = a2560k_a_resolution.height;
+    }
+}
+
+/**
  * Set the display mode for the screen
  *
  * @param mode a bitfield of desired display mode options
@@ -618,6 +636,7 @@ short txt_a2560k_a_install() {
     device.put = txt_a2560k_a_put;
     device.scroll = txt_a2560k_a_scroll;
     device.fill = txt_a2560k_a_fill;
+    device.get_sizes = txt_a2560k_a_get_sizes;
 
     return txt_register(&device);
 }

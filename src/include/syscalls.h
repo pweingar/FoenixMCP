@@ -118,6 +118,7 @@
 #define KFN_TXT_SCROLL          0x6F    /* Scroll the current region */
 // #define KFN_TXT_FILL            0x70    /* Fill the current region */
 #define KFN_TXT_SET_CURSOR_VIS  0x71    /* Set cursor visibility */
+#define KFN_TXT_GET_SIZES       0x72    /* Get the screen size (visible text cells and total pixel resolution) */
 
 /*
  * Call into the kernel (provided by assembly)
@@ -872,5 +873,14 @@ extern void sys_txt_set_cursor_visible(short screen, short is_visible);
  * @param data pointer to the raw font data to be loaded
  */
 extern short sys_txt_set_font(short screen, short width, short height, unsigned char * data);
+
+/**
+ * Get the display resolutions
+ *
+ * @param screen the screen number 0 for channel A, 1 for channel B
+ * @param text_size the size of the screen in visible characters (may be null)
+ * @param pixel_size the size of the screen in pixels (may be null)
+ */
+extern void sys_txt_get_sizes(short screen, p_extent text_size, p_extent pixel_size);
 
 #endif
