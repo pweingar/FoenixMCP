@@ -12,6 +12,8 @@
 #define VKY3_A_MCR_TEXT     0x00000001  /**< Text mode enable bit */
 #define VKY3_A_MCR_SLEEP    0x00040000  /**< Monitor sleep (synch disable) bit */
 #define VKY3_A_1024x768     0x00000800  /**< Bit to select 1024x768 screen resolution */
+#define VKY3_A_HIRES        0x40000000  /**< Bit to indicate on read if hi-res display is requested on the DIP switches */
+#define VKY3_A_CLK40        0x80000000  /**< Indicate if PLL is 25MHz (0) or 40MHz (1) */
 
 /** Border control register for Channel A */
 #define VKY3_A_BCR          ((volatile unsigned long *)0xFEC40004)

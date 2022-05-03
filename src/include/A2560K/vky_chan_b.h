@@ -19,7 +19,10 @@
 #define VKY3_B_MODE0        0x00000100  /**< Video Mode Bit 0 */
 #define VKY3_B_MODE1        0x00000200  /**< Video Mode Bit 1 */
 #define VKY3_B_DOUBLE       0x00000400  /**< Pixel Double Enable bit */
+#define VKY3_B_HIRES        0x40000000  /**< DIP switch for hires mode */
+#define VKY3_B_PLL          0x00000800  /**< Controls dot clock */
 #define VKY3_B_MCR_SLEEP    0x00040000  /**< Monitor sleep (synch disable) bit */
+#define VKY3_B_CLK40        0x80000000  /**< Indicate if PLL is 25MHz (0) or 40MHz (1) */
 
 /** Border control register for Channel B */
 #define VKY3_B_BCR          ((volatile unsigned long *)0xFEC80004)

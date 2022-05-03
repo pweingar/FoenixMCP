@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include "log.h"
 #include "utilities.h"
+#include "A2560K/vky_chan_a.h"
 #include "A2560K/vky_chan_b.h"
 #include "dev/txt_screen.h"
 #include "dev/txt_a2560k_b.h"
@@ -166,6 +167,25 @@ short txt_a2560k_b_set_mode(short mode) {
 short txt_a2560k_b_set_resolution(short width, short height) {
     int i;
 
+    // If no size specified, set it based on the DIP switch
+    if ((width == 0) || (height == 0)) {
+        if ((*VKY3_B_MCR & VKY3_B_HIRES) == 0) {
+            width = 800;
+            height = 600;
+        } else {
+            width = 640;
+            height = 480;
+        }
+    }
+
+    // Kick the PLL
+    // If VICKY is generating a 40MHz signal, we need to switch the bit to go to 40MHz before
+    // clearing it to go back to 25MHz.
+    if (*VKY3_B_MCR & VKY3_B_CLK40) {
+        *VKY3_B_MCR |= VKY3_B_PLL | VKY3_B_MODE1;
+        *VKY3_B_MCR &= ~(VKY3_B_PLL | VKY3_B_MODE1);
+    }
+
     for (i = 0; i < a2560k_b_caps.resolution_count; i++) {
         if ((a2560k_b_caps.resolutions[i].width == width) && (a2560k_b_caps.resolutions[i].height == height)) {
             msr_shadow_b &= ~(VKY3_B_DOUBLE | VKY3_B_MODE0 | VKY3_B_MODE1);
@@ -180,14 +200,14 @@ short txt_a2560k_b_set_resolution(short width, short height) {
             // Use the height to determine the resolution we should set
             switch (height) {
                 case 400:   // 640x400 or 320x200 (mode = 11)
-                    msr_shadow_b |= VKY3_B_MODE0 | VKY3_B_MODE1;
+                    msr_shadow_b |= VKY3_B_MODE0;
                     break;
 
                 case 480:   // 640x480 or 320x240 (mode = 00)
                     break;
 
-                case 800:   // 800x600 or 400x300 (mode = 01)
-                    msr_shadow_b |= VKY3_B_MODE0;
+                case 600:   // 800x600 or 400x300 (mode = 01)
+                    msr_shadow_b |= VKY3_B_PLL | VKY3_B_MODE1;
                     break;
 
                 default:
@@ -201,6 +221,13 @@ short txt_a2560k_b_set_resolution(short width, short height) {
 
             // Recalculate the size of the screen
             txt_a2560k_b_set_sizes();
+
+            // Kick the PLL
+            if (*VKY3_B_MCR & VKY3_B_PLL) {
+                *VKY3_B_MCR &= ~(VKY3_B_PLL | VKY3_B_MODE0 | VKY3_B_MODE1);
+                *VKY3_B_MCR |= (VKY3_B_PLL | VKY3_B_MODE1);
+            }
+            *VKY3_B_MCR &= ~(VKY3_B_PLL | VKY3_B_MODE0 | VKY3_B_MODE1);
 
             // Update the register
             *VKY3_B_MCR = msr_shadow_b;
@@ -545,6 +572,14 @@ void txt_a2560k_b_init() {
     char buffer[255];
     t_rect region;
     int i;
+
+    // Kick the PLL
+    // If VICKY is generating a 40MHz signal, we need to switch the bit to go to 40MHz before
+    // clearing it to go back to 25MHz.
+    if (*VKY3_B_MCR & VKY3_B_CLK40) {
+        *VKY3_B_MCR |= VKY3_B_PLL | VKY3_B_MODE1;
+        *VKY3_B_MCR &= ~(VKY3_B_PLL | VKY3_B_MODE1);
+    }
 
     a2560k_b_resolution.width = 0;
     a2560k_b_resolution.height = 0;

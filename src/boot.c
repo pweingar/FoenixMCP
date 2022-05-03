@@ -321,6 +321,8 @@ short boot_screen() {
     }
 
     txt_init_screen(screen);
+    txt_set_resolution(0, 0, 0);    // Set the resolution based on the DIP switch
+    txt_set_resolution(1, 0, 0);    // Set the resolution based on the DIP switch
     print(screen, buffer);
 
 #if MODEL == MODEL_FOENIX_A2560K

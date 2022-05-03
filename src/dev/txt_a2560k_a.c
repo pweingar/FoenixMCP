@@ -9,6 +9,7 @@
 #include "log.h"
 #include "utilities.h"
 #include "A2560K/vky_chan_a.h"
+#include "A2560K/vky_chan_b.h"
 #include "dev/txt_screen.h"
 #include "dev/txt_a2560k_a.h"
 
@@ -153,6 +154,26 @@ short txt_a2560k_a_set_mode(short mode) {
  * @return 0 on success, any other number means the resolution is unsupported
  */
 short txt_a2560k_a_set_resolution(short width, short height) {
+
+    // If no size specified, set it based on the DIP switch
+    if ((width == 0) || (height == 0)) {
+        if ((*VKY3_B_MCR & VKY3_B_HIRES) == 0) {
+            width = 1024;
+            height = 768;
+        } else {
+            width = 800;
+            height = 600;
+        }
+    }
+
+    // Kick the PLL
+    // If VICKY is generating a 40MHz signal, we need to switch the bit to go to 40MHz before
+    // clearing it to go back to 25MHz.
+    if (*VKY3_A_MCR & VKY3_A_CLK40) {
+        *VKY3_A_MCR |= VKY3_A_1024x768;
+        *VKY3_A_MCR &= ~(VKY3_A_1024x768);
+    }
+
     /* Turn off resolution bits */
     msr_shadow &= ~(VKY3_A_1024x768);
 
@@ -523,6 +544,14 @@ void txt_a2560k_a_init() {
     char buffer[255];
     t_rect region;
     int i;
+
+    // Kick the PLL
+    // If VICKY is generating a 40MHz signal, we need to switch the bit to go to 40MHz before
+    // clearing it to go back to 25MHz.
+    if (*VKY3_A_MCR & VKY3_A_CLK40) {
+        *VKY3_A_MCR |= VKY3_A_1024x768;
+        *VKY3_A_MCR &= ~(VKY3_A_1024x768);
+    }
 
     a2560k_a_resolution.width = 0;
     a2560k_a_resolution.height = 0;
