@@ -229,8 +229,10 @@ short cmd_sysinfo(short channel, int argc, const char * argv[]) {
     sprintf(buffer, "MCP version: v%02u.%02u.%04u\n", cli_sys_info.mcp_version, cli_sys_info.mcp_rev, cli_sys_info.mcp_build);
     print(channel, buffer);
 
-    sys_txt_get_sizes(0, &text_size, &pixel_size);
-    sprintf(buffer, "Screen#0 size: %dx%d characters, %dx%d pixels.\n", text_size.width, text_size.height, pixel_size.width, pixel_size.height);
+    short screen = sys_chan_device(channel);
+
+    sys_txt_get_sizes(screen, &text_size, &pixel_size);
+    sprintf(buffer, "Screen#%d size: %dx%d characters, %dx%d pixels.\n", screen, text_size.width, text_size.height, pixel_size.width, pixel_size.height);
     print(channel, buffer);
 
     return 0;

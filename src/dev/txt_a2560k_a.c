@@ -154,10 +154,9 @@ short txt_a2560k_a_set_mode(short mode) {
  * @return 0 on success, any other number means the resolution is unsupported
  */
 short txt_a2560k_a_set_resolution(short width, short height) {
-
     // If no size specified, set it based on the DIP switch
     if ((width == 0) || (height == 0)) {
-        if ((*VKY3_B_MCR & VKY3_B_HIRES) == 0) {
+        if ((*VKY3_A_MCR & VKY3_A_HIRES) == 0) {
             width = 1024;
             height = 768;
         } else {
