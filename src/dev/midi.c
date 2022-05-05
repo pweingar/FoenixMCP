@@ -9,7 +9,7 @@
 #include "sys_general.h"
 #include "timers.h"
 
-#if MODEL == MODEL_FOENIX_A2560K
+#if MODEL == MODEL_FOENIX_A2560K || MODEL == MODEL_FOENIX_GENX
 
 /** Timeout for waiting on the MIDI interface */
 const long midi_timeout = 10;

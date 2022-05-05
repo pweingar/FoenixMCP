@@ -12,8 +12,11 @@
 #include "interrupt.h"
 #include "gabe_reg.h"
 
-#if MODEL == MODEL_FOENIX_A2560K
+#if MODEL == MODEL_FOENIX_A2560K || MODEL == MODEL_FOENIX_GENX
 #include "superio.h"
+#endif
+
+#if MODEL == MODEL_FOENIX_A2560K
 #include "dev/kbd_mo.h"
 #endif
 
@@ -46,7 +49,7 @@ const char* VolumeStr[FF_VOLUMES] = { "sd", "fd", "hd" };
 
 extern unsigned long __memory_start;
 
-#if MODEL == MODEL_FOENIX_A2560K
+#if MODEL == MODEL_FOENIX_A2560K || MODEL == MODEL_FOENIX_GENX
 /*
  * Initialize the SuperIO registers
  */
@@ -144,7 +147,7 @@ void initialize() {
     /* Initialize the interrupt system */
     int_init();
 
-#if MODEL == MODEL_FOENIX_A2560K
+#if MODEL == MODEL_FOENIX_A2560K || MODEL == MODEL_FOENIX_GENX
     /* Initialize the SuperIO chip */
     init_superio();
 #endif
@@ -201,7 +204,7 @@ void initialize() {
         log(LOG_INFO, "SDC driver installed.");
     }
 
-// #if MODEL == MODEL_FOENIX_A2560K
+// #if MODEL == MODEL_FOENIX_A2560K || MODEL == MODEL_FOENIX_GENX
 //     if (res = fdc_install()) {
 //         log_num(LOG_ERROR, "FAILED: Floppy drive initialization", res);
 //     } else {
@@ -223,6 +226,9 @@ void initialize() {
     } else {
         log(LOG_INFO, "A2560K built-in keyboard initialized.");
     }
+#endif
+
+#if MODEL == MODEL_FOENIX_A2560K || MODEL == MODEL_FOENIX_GENX
 
     if (res = lpt_install()) {
         log_num(LOG_ERROR, "FAILED: LPT installation", res);

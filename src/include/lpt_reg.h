@@ -8,7 +8,7 @@
 
 #include "sys_general.h"
 
-#if MODEL == MODEL_FOENIX_A2560K
+#if MODEL == MODEL_FOENIX_A2560K || MODEL == MODEL_FOENIX_GENX
 #define LPT_DATA_PORT   ((volatile unsigned char *)0xFEC02378)
 #define LPT_STAT_PORT   ((volatile unsigned char *)0xFEC02379)
 #define LPT_CTRL_PORT   ((volatile unsigned char *)0xFEC0237A)

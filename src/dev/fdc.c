@@ -3,7 +3,7 @@
  */
 
 #include "sys_general.h"
-#if MODEL == MODEL_FOENIX_A2560K
+#if MODEL == MODEL_FOENIX_A2560K || MODEL == MODEL_FOENIX_GENX
 
 #include <stdio.h>
 #include <string.h>

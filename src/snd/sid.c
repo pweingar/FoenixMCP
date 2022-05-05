@@ -23,7 +23,7 @@ volatile unsigned char * sid_get_base(short sid) {
             return SID_INT_L_V1_FREQ_LO;
         case 2:
             return SID_INT_R_V1_FREQ_LO;
-#if MODEL == MODEL_FOENIX_A2560K
+#if MODEL == MODEL_FOENIX_A2560K || MODEL == MODEL_FOENIX_GENX
         case 3:
             return SID_EXT_L_V1_FREQ_LO;
         case 4:

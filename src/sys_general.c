@@ -21,7 +21,7 @@ void sys_get_information(p_sys_info info) {
 
     info->system_ram_size = 0x400000;
 
-#if MODEL == MODEL_FOENIX_A2560K
+#if MODEL == MODEL_FOENIX_A2560K || MODEL == MODEL_FOENIX_GENX
     gabe_id = *GABE_SUBVER_ID;
     clock_speed = (gabe_id & 0xE0) >> 5;
     cpu = (gabe_id & 0xF000) >> 12;
@@ -178,7 +178,7 @@ void sys_get_information(p_sys_info info) {
             break;
 
         case MODEL_FOENIX_GENX:
-            info->model_name = "A2560 GenX";
+            info->model_name = "GenX";
             break;
 
         case MODEL_FOENIX_C256U_PLUS:

@@ -535,14 +535,14 @@ short con_read_b(p_channel chan) {
 
         } else {
 
-// #if MODEL == MODEL_FOENIX_A2560K
-// #ifdef KBD_POLLED
-//             //ps2_mouse_get_packet();
-//             c = kbdmo_getc_poll();
-// #else
-//             c = kbdmo_getc();
-// #endif
-// #else
+#if MODEL == MODEL_FOENIX_A2560K
+#ifdef KBD_POLLED
+            //ps2_mouse_get_packet();
+            c = kbdmo_getc_poll();
+#else
+            c = kbdmo_getc();
+#endif
+#else
 #ifdef KBD_POLLED
             c = kbd_getc_poll();
             if (c == old_c) {
@@ -553,7 +553,7 @@ short con_read_b(p_channel chan) {
 #else
             c = kbd_getc();
 #endif
-// #endif
+#endif
         }
 
     } while (c == 0);
@@ -833,7 +833,7 @@ short con_install() {
 
     chan_open(CDEV_CONSOLE, 0, 0);
 
-#if MODEL == MODEL_FOENIX_A2560K
+#if MODEL == MODEL_FOENIX_A2560K || MODEL == MODEL_FOENIX_GENX
     chan_open(CDEV_EVID, 0, 0);
 #endif
 

@@ -7,7 +7,7 @@
 
 #include "sys_general.h"
 
-#if MODEL == MODEL_FOENIX_A2560K
+#if MODEL == MODEL_FOENIX_A2560K || MODEL == MODEL_FOENIX_GENX
 #include "A2560K/sound_a2560k.h"
 
 #elif MODEL == MODEL_FOENIX_A2560U || MODEL_FOENIX_A2560U_PLUS

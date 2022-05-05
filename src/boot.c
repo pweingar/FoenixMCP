@@ -23,7 +23,8 @@
 #include "rsrc/font/quadrotextFONT.h"
 #if MODEL == MODEL_FOENIX_A2560U || MODEL == MODEL_FOENIX_A2560U_PLUS
 #include "rsrc/bitmaps/splash_a2560u.h"
-#elif MODEL == MODEL_FOENIX_A2560K
+// TODO: Split out a splash screen for the GenX
+#elif MODEL == MODEL_FOENIX_A2560K || MODEL == MODEL_FOENIX_GENX
 #include "rsrc/bitmaps/splash_a2560k.h"
 #endif
 
@@ -221,7 +222,8 @@ short boot_screen() {
     *BM0_Control_Reg = 1;
 
     /* Set a background color for the bitmap mode */
-#if MODEL == MODEL_FOENIX_A2560K
+#if MODEL == MODEL_FOENIX_A2560K || MODEL == MODEL_FOENIX_GENX
+// TODO: split out a different background color for the GenX
     *BackGroundControlReg_B = 0x00202020;
     screen = 0;
 #else

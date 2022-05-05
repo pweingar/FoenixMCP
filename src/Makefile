@@ -3,8 +3,8 @@
 # User may over-ride the UNIT and MEMORY parameters to specify target machine
 # and where the MCP will run (ram or flash)
 #
-UNIT := a2560k
-MEMORY := flash
+UNIT := genx
+MEMORY := ram
 
 # CPU_WDC65816                0x16  /* CPU code for the Western Design Center 65816 */
 # CPU_M68000                  0x20  /* CPU code for the Motorola 68000 */
@@ -32,6 +32,13 @@ export VBCC_CPU = 68040		# VBCC CPU flag
 export MODEL_NUMBER = 11	# A2560K
 export cpu = m68040
 
+else ifeq ($(UNIT),genx)
+exexport CPU_NUMBER = 6		# M68040V
+export VASM_CPU = -m68040	# VASM CPU flag
+export VBCC_CPU = 68040		# VBCC CPU flag
+export MODEL_NUMBER = 4		# GenX
+export cpu = m68040
+
 else ifeq ($(UNIT),a2560u)
 export CPU_NUMBER = 0		# M680SEC00
 export VASM_CPU = -m68000	# VASM CPU flag
@@ -52,7 +59,7 @@ endif
 export AS = vasmm68k_mot
 export ASFLAGS = $(VASM_CPU) -quiet -Fvobj -nowarn=62
 export CC = vc
-export DEFINES = -DCPU=$(CPU_NUMBER) -DMODEL=$(MODEL_NUMBER) -DKBD_POLLED
+export DEFINES = -DCPU=$(CPU_NUMBER) -DMODEL=$(MODEL_NUMBER) # -DKBD_POLLED
 
 ifeq ($(OS),Windows_NT)
 	export CFLAGS = -cpu=$(VBCC_CPU) +$(CFG_FILE) -I. -I$(CURDIR)/include -I$(CURDIR)
@@ -68,7 +75,7 @@ cpu_assembly_obj := $(subst .s,.o,$(cpu_assembly_src))
 cpu_c_obj := $(subst .c,.o,$(cpu_c_src))
 
 dev_base_sources = dev/block.c dev/channel.c dev/console.c dev/fsys.c dev/pata.c dev/ps2.c dev/rtc.c dev/sdc.c dev/txt_screen.c dev/uart.c
-ifeq ($(UNIT),a2560k)
+ifneq (, $(filter $(UNIT),a2560k genx))
 dev_c_src := $(dev_base_sources) dev/fdc.c dev/kbd_mo.c dev/lpt.c dev/midi.c dev/txt_a2560k_a.o dev/txt_a2560k_b.o
 else
 dev_c_src := $(dev_base_sources)

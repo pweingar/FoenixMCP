@@ -16,7 +16,7 @@
  */
 void ym_write(enum e_ym_snd_dev dev, enum e_ym_position position, short port, unsigned char value) {
     switch (dev) {
-#if MODEL == MODEL_FOENIX_A2560K
+#if MODEL == MODEL_FOENIX_A2560K || MODEL == MODEL_FOENIX_GENX
         case SND_OPN2:
             switch (position) {
                 case EXTERNAL:
@@ -63,7 +63,7 @@ void ym_init() {
     short position;
     short port;
 
-#if MODEL == MODEL_FOENIX_A2560K
+#if MODEL == MODEL_FOENIX_A2560K || MODEL == MODEL_FOENIX_GENX
 
     /* OPN */
     for (position = EXTERNAL; position <= INTERNAL; position++) {

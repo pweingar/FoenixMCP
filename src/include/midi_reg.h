@@ -7,7 +7,7 @@
 
 #include "sys_general.h"
 
-#if MODEL == MODEL_FOENIX_A2560K
+#if MODEL == MODEL_FOENIX_A2560K || MODEL == MODEL_FOENIX_GENX
 #define MIDI_DATA   ((volatile unsigned char *)0xFEC02330)
 #define MIDI_STAT   ((volatile unsigned char *)0xFEC02331)
 #define MIDI_CMD    ((volatile unsigned char *)0xFEC02331)

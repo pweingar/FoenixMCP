@@ -213,7 +213,11 @@ short cli_test_uart(short channel, int argc, const char * argv[]) {
     sys_chan_write(0, buffer, strlen(buffer));
 
     for (;;) {
-        c = kbdmo_getc()
+#if MODEL == MODEL_FOENIX_A2560K
+        c = kbdmo_getc();
+#else
+    c = kbd_getc();
+#endif
         if (c != 0) {
             if (c == '~') {
                 return 0;
@@ -282,7 +286,7 @@ short cli_mem_test(short channel, int argc, const char * argv[]) {
     unsigned long i;
 
     if (argc > 1) {
-#if MODEL == MODEL_FOENIX_A2560K
+#if MODEL == MODEL_FOENIX_A2560K || MODEL == MODEL_FOENIX_GENX
         if ((strcmp(argv[1], "MERA") == 0) || (strcmp(argv[1], "mera") == 0)) {
             mem_start = 0x02000000;
             mem_end = 0x06000000;
@@ -337,7 +341,7 @@ short cli_mem_test(short channel, int argc, const char * argv[]) {
     return 0;
 }
 
-#if MODEL == MODEL_FOENIX_A2560K
+#if MODEL == MODEL_FOENIX_A2560K || MODEL == MODEL_FOENIX_GENX
 int cli_test_recalibrate(short screen, int argc, char * argv[]) {
     unsigned char buffer[512];
     short i;
@@ -494,7 +498,7 @@ short cli_test_create(short screen, int argc, const char * argv[]) {
 }
 
 short cli_test_lpt(short screen, int argc, const char * argv[]) {
-#if MODEL == MODEL_FOENIX_A2560K
+#if MODEL == MODEL_FOENIX_A2560K || MODEL == MODEL_FOENIX_GENX
     char message[80];
     unsigned char scancode;
 
@@ -577,7 +581,7 @@ short cli_test_lpt(short screen, int argc, const char * argv[]) {
 }
 
 short cmd_test_print(short screen, int argc, const char * argv[]) {
-#if MODEL == MODEL_FOENIX_A2560K
+#if MODEL == MODEL_FOENIX_A2560K || MODEL == MODEL_FOENIX_GENX
     const char * test_pattern = "0123456789ABCDEFGHIJKLMNOPQRTSUVWZXYZ\r\n";
 
     char message[80];
@@ -710,7 +714,7 @@ const t_cli_test_feature cli_test_features[] = {
     {"BITMAP", "BITMAP: test the bitmap screen", cli_test_bitmap},
     {"CREATE", "CREATE <path>: test creating a file", cli_test_create},
     {"IDE", "IDE: test reading the MBR of the IDE drive", cli_test_ide},
-#if MODEL == MODEL_FOENIX_A2560K
+#if MODEL == MODEL_FOENIX_A2560K || MODEL == MODEL_FOENIX_GENX
     {"FDC", "FDC: test reading the MBR from the floppy drive", cli_test_fdc},
     {"GAMEPAD", "GAMEPAD [0 | 1]: test SNES gamepads", cli_test_gamepad},
     {"JOY", "JOY: test the joystick", cli_test_joystick},
@@ -727,7 +731,7 @@ const t_cli_test_feature cli_test_features[] = {
     {"PS2", "PS2: test the PS/2 keyboard", cli_test_ps2},
     {"PSG", "PSG [EXT|INTL|INTR|INTS]: test the PSG sound chip", psg_test},
     {"PRINT", "PRINT: sent text to the printer", cmd_test_print},
-#if MODEL == MODEL_FOENIX_A2560K
+#if MODEL == MODEL_FOENIX_A2560K || MODEL == MODEL_FOENIX_GENX
     {"RECALIBRATE", "RECALIBRATE: recalibrate the floppy drive", cli_test_recalibrate},
     {"SEEK", "SEEK <track>: move the floppy drive head to a track", cli_test_seek},
     {"SID", "SID [EXT|INT]: test the SID sound chips", sid_test},

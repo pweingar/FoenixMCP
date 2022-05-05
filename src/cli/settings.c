@@ -548,22 +548,24 @@ short cli_layout_get(short channel, char * value, short size) {
     return 0;
 }
 
-#if MODEL == MODEL_FOENIX_A2560K
+
 
 unsigned short kbd_mo_color = 0x0000;
 
 short cli_keycolor_set(short channel, const char * value) {
+#if MODEL == MODEL_FOENIX_A2560K
     kbd_mo_color = (unsigned short)cli_eval_number(value);
     kbdmo_set_led_matrix_fill(kbd_mo_color);
+#endif
     return 0;
 }
 
 short cli_keycolor_get(short channel, char * value, short size)  {
+#if MODEL == MODEL_FOENIX_A2560K
     sprintf(value, "%04x", kbd_mo_color);
+#endif
     return 0;
 }
-
-#endif
 
 /**
  * Set the number of the text screen to use for interactions
