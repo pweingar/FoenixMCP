@@ -4,7 +4,7 @@
 # and where the MCP will run (ram or flash)
 #
 UNIT := a2560k
-MEMORY := flash
+MEMORY := ram
 
 # CPU_WDC65816                0x16  /* CPU code for the Western Design Center 65816 */
 # CPU_M68000                  0x20  /* CPU code for the Motorola 68000 */
@@ -30,6 +30,13 @@ export CPU_NUMBER = 6		# M68040V
 export VASM_CPU = -m68040	# VASM CPU flag
 export VBCC_CPU = 68040		# VBCC CPU flag
 export MODEL_NUMBER = 11	# A2560K
+export cpu = m68040
+
+else ifeq ($(UNIT),genx)
+export CPU_NUMBER = 6		# M68040V
+export VASM_CPU = -m68040	# VASM CPU flag
+export VBCC_CPU = 68040		# VBCC CPU flag
+export MODEL_NUMBER = 4		# GenX
 export cpu = m68040
 
 else ifeq ($(UNIT),a2560u)

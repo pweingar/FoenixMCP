@@ -15,6 +15,7 @@
 #include "timers.h"
 #include "fdc.h"
 #include "fdc_reg.h"
+#include "interrupt.h"
 #include "syscalls.h"
 
 /*
@@ -68,6 +69,7 @@ static short fdc_heads_per_cylinder = 2;    /* How many heads are supported? */
 static short fdc_sectors_per_track = 18;    /* How many sectors per track */
 static short fdc_cylinders = 80;            /* How many cylinders */
 static short fdc_bytes_per_sector = 512;    /* How many bytes are in a sector */
+static short fdc_use_dma = 0;               /* If 0: used polled I/O, if anything else, use DMA */
 
 /*
  * Convert a logical block address to cylinder-head-sector addressing
@@ -82,6 +84,23 @@ void lba_2_chs(unsigned long lba, unsigned char * cylinder, unsigned char * head
     *cylinder = (unsigned char)(lba / (fdc_heads_per_cylinder * fdc_sectors_per_track));
     *head = (unsigned char)((lba / fdc_sectors_per_track) % fdc_heads_per_cylinder);
     *sector = (unsigned char)((lba % fdc_sectors_per_track) + 1);
+}
+
+/**
+ * Set whether to use DMA or polled I/O for exchanging data
+ *
+ * @param dma 0 for polled I/O, anything else for DMA
+ */
+void fdc_set_dma(short dma) {
+    fdc_use_dma = dma;
+}
+
+/**
+ * Flag that the disk has changed
+ */
+void fdc_media_change() {
+    // Indicate that the disk has changed
+    fdc_stat = FDC_STAT_NOINIT;
 }
 
 /*
@@ -434,7 +453,11 @@ short fdc_specify() {
     }
 
     /* Set head load time to maximum, and no DMA */
-    *FDC_DATA = 0x0B;
+    if (fdc_use_dma) {
+        *FDC_DATA = 0x0B;
+    } else {
+        *FDC_DATA = 0x0A;
+    }
 
     return 0;
 }
@@ -480,7 +503,7 @@ short fdc_configure() {
         return DEV_TIMEOUT;
     }
 
-    /* Implied seek, enable FIFO, enable POLL, FIFO threshold = 4 bytes */
+    /* Implied seek, enable FIFO, enable POLL, FIFO threshold = 8 bytes */
     *FDC_DATA = 0x47;
 
     if (fdc_wait_write()) {
@@ -611,6 +634,95 @@ void fdc_log_transaction(p_fdc_trans trans) {
         sprintf(buffer, "Parameter %d: %02X\n", i, trans->parameters[i]);
         sys_chan_write(0, buffer, strlen(buffer));
     }
+}
+
+/*
+ * Issue a command to the floppy drive controller using DMA
+ *
+ * This routine supports transactions with variable number of parameters and results
+ * It can also support commands with an execution phase (read or write) and those
+ * without an exectution phase.
+ *
+ * Inputs:
+ * transaction = a pointer to an s_fdc_trans structure, containing the information
+ *               needed for the transaction
+ *
+ * Returns:
+ * 0 on success, negative number on error
+ */
+short fdc_command_dma(p_fdc_trans transaction) {
+    volatile unsigned char * fdc_dma_buffer = (unsigned char *)0xFEC02400;
+    short abort = 0;
+    short i;
+    short result = 0;
+    unsigned char msr;
+    unsigned long target_jiffies;
+
+    TRACE("fdc_command");
+
+    // fdc_log_transaction(transaction);
+
+    if (fdc_wait_while_busy()) {
+        /* Timed out waiting for the FDC to be free */
+        log(LOG_ERROR, "fdc_command: fdc_wait_while_busy timeout");
+        return DEV_TIMEOUT;
+    }
+
+    result = fdc_out(transaction->command);      /* Send the command byte */
+    if (result < 0) {
+        log(LOG_ERROR, "fdc_command: timeout sending command");
+        return result;
+    }
+
+    for (i = 0; i < transaction->parameter_count; i++) {
+        if ((result = fdc_out(transaction->parameters[i])) < 0) {
+            log(LOG_ERROR, "fdc_command: timeout sending parameters");
+            return result;
+        }
+    }
+
+    /* Check to see if there is an execution phase...
+     * that is, there is data to transfer one way or the other
+     */
+    switch (transaction->direction) {
+        case FDC_TRANS_WRITE:
+            /* We're writing to the FDC */
+            break;
+
+        case FDC_TRANS_READ:
+            /* Wait for DMA to complete */
+            target_jiffies = timers_jiffies() + fdc_timeout;
+            while ((*PENDING_GRP1 & SPIO_FDC_INT16) == 0) {
+                if (timers_jiffies() < target_jiffies) {
+                    return DEV_TIMEOUT;
+                }
+            }
+
+            /* Copy the data from the DMA buffer */
+            for (i = 0; i < 512; i++) {
+                transaction->data[i] = fdc_dma_buffer[i];
+            }
+
+            break;
+
+        default:
+            break;
+    }
+
+    /* Result phase: read the result bytes */
+
+    for (i = 0; i < transaction->result_count; i++) {
+        if ((result = fdc_in(&transaction->results[i])) < 0) {
+            log(LOG_ERROR, "fdc_command: timeout getting results");
+            return result;
+        }
+    }
+
+    /* Wait until the FDC is not busy */
+
+    result = fdc_wait_while_busy();
+
+    return result;
 }
 
 /*
@@ -877,6 +989,16 @@ short fdc_read(long lba, unsigned char * buffer, short size) {
 
     fdc_motor_on();
 
+    /* Check if the disk has changed and recalibrate if it has */
+    // if (*FDC_DIR & 0x80) {
+    //     fdc_stat = FDC_STAT_NOINIT;
+    //     if (fdc_recalibrate()) {
+    //         return DEV_NOMEDIA;
+    //     } else {
+    //         return ERR_MEDIA_CHANGE;
+    //     }
+    // }
+
     trans.retries = 1; //FDC_DEFAULT_RETRIES;
     trans.command = 0x40 | FDC_CMD_READ_DATA;               /* MFM read command */
     trans.direction = FDC_TRANS_READ;                       /* We're going to read from the drive */
@@ -896,16 +1018,22 @@ short fdc_read(long lba, unsigned char * buffer, short size) {
     trans.result_count = 7;                                 /* Expect 7 result bytes */
 
     while (trans.retries > 0) {
-        result = fdc_cmd_asm(trans.command, trans.parameter_count, &trans.parameters, buffer, trans.result_count, &trans.results);
-        log_num(LOG_ERROR, "fdc_cmd_asm: ", result);
+        if (fdc_use_dma) {
+            result = fdc_command_dma(&trans);               /* Issue the transaction */
+            log_num(LOG_ERROR, "fdc_command_dma: ", result);
+        } else {
+            result = fdc_cmd_asm(trans.command, trans.parameter_count, &trans.parameters, buffer, trans.result_count, &trans.results);
+            log_num(LOG_ERROR, "fdc_cmd_asm: ", result);
+        }
 
-        // result = fdc_command(&trans);                       /* Issue the transaction */
-        if ((result == 0) && ((trans.results[0] & 0xC0) == 0)) {
-            sprintf(message, "fdc_read: success? ST0 = %02x ST1 = %02x ST2 = %02x", trans.results[0], trans.results[1], trans.results[2]);
-            log(LOG_ERROR, message);
+        if ((result == 0)) { //} && ((trans.results[0] & 0xC0) == 0)) {
             return size;
         } else {
-            sprintf(message, "fdc_read: retry ST0 = %02x ST1 = %02x ST2 = %02x", trans.results[0], trans.results[1], trans.results[2]);
+            sprintf(message, "fdc_read: retry ST0=%02X ST1=%02X ST2=%02X C=%02X H=%02X R=%02X N=%02X",
+                trans.results[0], trans.results[1], trans.results[2], trans.results[3], trans.results[4], trans.results[5], trans.results[6]);
+            log(LOG_ERROR, message);
+            sprintf(message, "fdc_read: retry EXTRA0=%02X EXTRA1=%02X",
+                trans.results[7], trans.results[8]);
             log(LOG_ERROR, message);
         }
         fdc_init();
@@ -993,18 +1121,15 @@ short fdc_ioctrl(short command, unsigned char * buffer, short size) {
  *  0 on success, any negative number is an error code
  */
 short fdc_init() {
-    unsigned char version;
-
-    // if (fdc_version(&version) < 0) {
-    //     log(LOG_ERROR, "Unable to get FDC version");
-    //     return DEV_TIMEOUT;
-    // }
-    //
-    // log_num(LOG_ERROR, "FDC version: ", version);
-
     if (fdc_reset() < 0) {
         log(LOG_ERROR, "Unable to reset the FDC");
         return DEV_TIMEOUT;
+    }
+
+    // Recalibrate the drive
+    if (fdc_recalibrate()) {
+        log(LOG_ERROR, "Unable to recalibrate the drive");
+        return ERR_GENERAL;
     }
 
     fdc_stat &= ~FDC_STAT_NOINIT;

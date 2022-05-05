@@ -3,6 +3,7 @@
 ;;;
 
                 xdef _fdc_cmd_asm
+                xref _timers_jiffies
 
                 code
 
@@ -52,16 +53,14 @@ FDC_CCR = $FEC023F7     ; Write - Configuration Control Register
 ; @param buffer the buffer to fill with any read data (a2)
 ; @param resultc the count of result bytes expected
 ; @param results the buffer to fill with result bytes (a3)
-_fdc_cmd_asm    link a6,#0                      ; Set up the stack frame
-
-                ; Save our registers
+_fdc_cmd_asm    ; Save our registers
                 ; TODO: save only those affected
                 movem d4-d7/a4-a5,-(a7)
 
                 ; Clear the buffer
 
                 move.w #$0,d0
-clr_buffer      move.b #$55,(a2,d0)
+clr_buffer      move.b #0,(a2,d0)
                 addq.w #1,d0
                 cmp.w #512,d0
                 bne clr_buffer
@@ -69,7 +68,7 @@ clr_buffer      move.b #$55,(a2,d0)
                 ; Clear the results
 
                 move.w #$0,d0
-clr_results     move.b #$AA,(a3,d0)
+clr_results     move.b #0,(a3,d0)
                 addq.w #1,d0
                 cmp.w #10,d0
                 bne clr_results
@@ -102,33 +101,69 @@ snd_arg         move.b (a1,d4),FDC_DATA         ; Send the next argument byte
 
                 ; Receive data bytes
 
+get_data        move.b FDC_MSR,d0
+                btst #5,d0
+                bne result_phase
+
                 move.w #0,d4                    ; Counter = 0
-get_data        ; TODO: should be checking NONDMA here... not sure why that fails here
 
 wait_data       move.b FDC_MSR,d0
                 btst #7,d0                      ; Is RQM = 1
                 beq wait_data                   ; No: wait until it is
 
                 move.b FDC_DATA,(a2,d4)         ; Move the data byte to the data buffer
-                addq.w #1,d4
+
+                move.b FDC_MSR,d0               ; Validate we're still in execution phase
+                btst #5,d0
+                beq result_phase                ; If not, go to result phase
+
+                addq.w #1,d4                    ; Move to the next byte
                 cmp.l #512,d4
-                bne get_data                    ; And check to see if there is more data
+                bne wait_data                   ; Keep looping if we are not done with the buffer
 
                 ; Receive result bytes
 
-result_phase    move.w #0,d4                    ; Counter = 0
-wait_result     move.b FDC_MSR,d0               ; Get the MSR
-                btst #7,d0                      ; Is RQM set?
-                beq wait_result                 ; No: wait until it is
-                and.b #FDC_MSR_DIO|FDC_MSR_CMDBSY,d0
-                cmp.b #FDC_MSR_DIO|FDC_MSR_CMDBSY,d0
-                bne fdc_success                 ; If not BUSY and ready for READ, we're done
+result_phase    ; Start by waiting?
+                jsr _timers_jiffies             ; Wait 5 jiffies? Just adding some delay
+                move.l d0,d4
+                addq.l #2,d4                    ; Put the target jiffy count in D4
 
-                move.b FDC_DATA,(a3)+           ; Move the data byte to the result buffer
+wait_delay      jsr _timers_jiffies             ; Wait until we reach the target time
+                cmp.l d0,d4
+                bgt wait_delay
+
+                move.w #0,d4                    ; Counter = 0
+wait_result     move.b FDC_MSR,d0               ; Get the MSR
+                andi.b #$D0,d0
+
+                cmp.b #FDC_MSR_RQM,d0
+                beq fdc_success                 ; If just RQM, we're done, and the command is done
+
+                cmp.b #$90,d0
+                beq fdc_error_2                 ; If busy and DIO=0, it wants input... something's wrong
+                btst #7,d0                      ; Check RQM
+
+                beq wait_result                 ; If RQM=0, keep waiting
+
+                move.b FDC_DATA,(a3,d4)         ; Move the data byte to the result buffer
                 addq.w #1,d4
                 cmp.w d4,d3                     ; Have we reached the end?
-                beq fdc_success                 ; Yes, quit
-                bra wait_result                 ; And try to fetch another byte
+                bne wait_result                 ; No: keep looping
+
+chk_done        ; Make sure the results are not an error
+
+wait_done       move.b FDC_MSR,d0               ; Get the MSR
+                btst #7,d0                      ; Is RQM set?
+                beq wait_done                   ; No: wait until it is
+
+                addq.b #1,(2,a3)
+
+                btst #4,d0                      ; Check CMDBUSY
+                beq fdc_success                 ; If it's 0, we're done
+                bra wait_done
+
+fdc_error_2     move.l #$fffffffe,d0
+                bra fdc_cmd_exit
 
 fdc_error       move.l #$ffffffff,d0            ; Return -1 for error
                 bra fdc_cmd_exit
@@ -138,5 +173,4 @@ fdc_success     move.l #0,d0                    ; Return 0 for success
                 ; Restore our registers
                 ; TODO: restore what we saved
 fdc_cmd_exit    movem (a7)+,d4-d7/a4-a5
-                unlk a6                         ; Restore our stack frame
                 rts

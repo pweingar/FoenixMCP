@@ -52,6 +52,13 @@ extern short fdc_install();
  */
 extern short fdc_init();
 
+/**
+ * Set whether to use DMA or polled I/O for exchanging data
+ *
+ * @param dma 0 for polled I/O, anything else for DMA
+ */
+extern void fdc_set_dma(short dma);
+
 /*
  * Read a block from the FDC
  *

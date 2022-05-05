@@ -62,7 +62,8 @@ const char * err_messages[] = {
     "too many open files",
     "file system invalid parameter",
     "not supported",
-    "bad argument"
+    "bad argument",
+    "media changed"
 };
 
 /*
@@ -71,7 +72,7 @@ const char * err_messages[] = {
 const char * err_message(short err_number) {
     short index = 0 - err_number;
 
-    if (index < 39) {
+    if (index < 40) {
         return err_messages[index];
     } else {
         return "unknown error";
@@ -89,7 +90,7 @@ const char * err_message(short err_number) {
 void err_print(short channel, const char * message, short err_number) {
     char buffer[80];
 
-    if ((err_number < 0) && (err_number > -38)) {
+    if ((err_number < 0) && (err_number > -40)) {
         sprintf(buffer, "%s: %s\n", message, err_message(err_number));
     } else {
         sprintf(buffer, "%s: #%d\n", message, err_number);

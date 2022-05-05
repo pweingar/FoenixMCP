@@ -47,5 +47,6 @@
 
 #define ERR_NOT_SUPPORTED               -37 /* Device does not support the file or operation */
 #define ERR_BAD_ARGUMENT                -38 /* An invalid argument was provided */
+#define ERR_MEDIA_CHANGE                -39 /* Removable media has changed */
 
 #endif

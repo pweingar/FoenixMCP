@@ -76,7 +76,11 @@ DRESULT disk_read (
 		result = bdev_read(pdrv, sector, buff, 512);
 		if (result < 0) {
 			log_num(LOG_ERROR, "disk_read error: ", result);
-			return RES_PARERR;
+			if (result == ERR_MEDIA_CHANGE) {
+				return RES_NOTRDY;
+			} else {
+				return RES_PARERR;
+			}
 		} else {
 			sector++;
 		}
