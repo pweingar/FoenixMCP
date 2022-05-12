@@ -412,7 +412,7 @@ short cli_test_seek(short screen, int argc, const char * argv[]) {
 /*
  * Test the FDC interface by reading the MBR
  *
- * TEST FDC [DMA]
+ * TEST FDC [<lba> [WRITE <data>]]
  */
 short cli_test_fdc(short screen, int argc, const char * argv[]) {
     unsigned char buffer[512];
@@ -422,12 +422,16 @@ short cli_test_fdc(short screen, int argc, const char * argv[]) {
     short scancode;
     short n = 0;
     short result;
+    short is_write = 0;
+    unsigned char data = 0xAA;
 
     if (argc > 1) {
-        if ((strcmp(argv[1], "DMA") == 0) || ((strcmp(argv[1], "dma") == 0)) {
-            fdc_set_dma(1);
+        lba = (unsigned long)cli_eval_number(argv[1]);
+        if (argc > 2) {
+            print(screen, "Will attempt to write before reading...\n");
+            is_write = 1;
+            data = (unsigned long)cli_eval_number(argv[3]);
         }
-        // lba = (unsigned long)cli_eval_number(argv[1]);
     }
 
     bdev_ioctrl(BDEV_FDC, FDC_CTRL_MOTOR_ON, 0, 0);
@@ -437,6 +441,21 @@ short cli_test_fdc(short screen, int argc, const char * argv[]) {
         sprintf(buffer, "Could not initialize FDC: %s\n", sys_err_message(result));
         sys_chan_write(screen, buffer, strlen(buffer));
         return result;
+    }
+
+    for (i = 0; i < 512; i++) {
+        buffer[i] = data;
+    }
+
+    if (is_write) {
+        n = bdev_write(BDEV_FDC, lba, buffer, 512);
+        if (n < 0) {
+            dump_buffer(screen, buffer, 512, 1);
+            sprintf(message, "Unable to write sector %d: %s\n", lba, err_message(n));
+            print(screen, message);
+            bdev_ioctrl(BDEV_FDC, FDC_CTRL_MOTOR_OFF, 0, 0);
+            return n;
+        }
     }
 
     for (i = 0; i < 512; i++) {

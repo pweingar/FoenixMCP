@@ -7,7 +7,11 @@
 #include "simpleio.h"
 #include "sys_general.h"
 #include "syscalls.h"
+#include "types.h"
 #include "mem_cmds.h"
+
+/* Pointer to a function taking void and returning void */
+typedef void (*p_thunk)();
 
 /*
  * Print out the contents of a block of memory
@@ -37,9 +41,6 @@ short mem_cmd_dump(short channel, int argc, const char * argv[]) {
         return -1;
     }
 }
-
-/* Pointer to a function taking void and returning void */
-typedef void (*p_thunk)();
 
 void test_thunk() {
     log(LOG_ERROR, "CALL is working.");

@@ -55,7 +55,7 @@
 #define RTC_RATE_976us  0x06
 #define RTC_RATE_4ms    0x08
 #define RTC_RATE_15ms   0x0A
-
+#define RTC_RATE_500ms  0x0F
 
 /* Enable bits */
 #define RTC_AIE         0x08

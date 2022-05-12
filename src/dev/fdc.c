@@ -16,6 +16,7 @@
 #include "fdc.h"
 #include "fdc_reg.h"
 #include "interrupt.h"
+#include "rtc_reg.h"
 #include "syscalls.h"
 
 /*
@@ -23,7 +24,7 @@
  */
 
 const long fdc_motor_wait = 18;         /* The number of jiffies to wait for the motor to spin up: 300ms */
-const long fdc_motor_timeout = 120;     /* The number of jiffies to let the motor spin without activity: 2 seconds */
+const long fdc_motor_timeout = 300;     /* The number of jiffies to let the motor spin without activity: 30 seconds */
 const long fdc_seek_timeout = 180;      /* 3s timeout for the head to seek */
 const long fdc_timeout = 120;           /* The number of jiffies to allow for basic wait loops */
 
@@ -70,6 +71,12 @@ static short fdc_sectors_per_track = 18;    /* How many sectors per track */
 static short fdc_cylinders = 80;            /* How many cylinders */
 static short fdc_bytes_per_sector = 512;    /* How many bytes are in a sector */
 static short fdc_use_dma = 0;               /* If 0: used polled I/O, if anything else, use DMA */
+
+/**
+ * Check the current jiffy count and turn off the motor if we've reached the time the motor should be turned off
+ * This time gets reset every time we ask for the motor to be turned on
+ */
+extern void fdc_motor_watchdog();
 
 /*
  * Convert a logical block address to cylinder-head-sector addressing
@@ -226,31 +233,14 @@ void fdc_delay(int jiffies) {
  * 0 on success, negative number is an error
  */
 short fdc_in(unsigned char *ptr) {
-    unsigned char msr, data;
-    short step, i;
-
-    step = 1;
-    for (i = 0; i < fdc_timeout; i += step) {
-        msr = *FDC_MSR & (FDC_MSR_DIO | FDC_MSR_RQM);
-
-        if (msr == (FDC_MSR_DIO | FDC_MSR_RQM)) {
-        	data = *FDC_DATA;
-        	if (ptr)
-        		*ptr = data;
-        	return 0;
-    	}
-
-    	if (msr == FDC_MSR_RQM) {
-            log(LOG_ERROR, "fdc_in: ready for output during input");
-            return ERR_GENERAL;
+    long target_ticks = timers_jiffies() + fdc_timeout;
+    while ((*FDC_MSR & FDC_MSR_RQM) != FDC_MSR_RQM) {
+        if (timers_jiffies() >= target_ticks) {
+            log(LOG_ERROR, "fdc_in: timeout waiting for RQM");
+            return DEV_TIMEOUT;
         }
-
-    	step += step;
-        fdc_delay(step);
     }
-
-    log(LOG_ERROR, "fdc_in: timeout");
-    return DEV_TIMEOUT;
+    *ptr = *FDC_DATA;
 }
 
 /*
@@ -263,29 +253,18 @@ short fdc_in(unsigned char *ptr) {
  * 0 on success, negative number is an error
  */
 short fdc_out(unsigned char x) {
-    unsigned char msr, data;
-    short step, i;
-
-	step = 1;
-	for (i = 0; i < fdc_timeout; i += step) {
-        msr = *FDC_MSR & (FDC_MSR_DIO | FDC_MSR_RQM);
-        if (msr == FDC_MSR_RQM) {
-			*FDC_DATA = x;
-			return 0;
-		}
-
-		if (msr == (FDC_MSR_DIO | FDC_MSR_RQM)) {
-            log(LOG_ERROR, "fdc_out: ready for input in output");
-			return ERR_GENERAL;
+    long target_ticks = timers_jiffies() + fdc_timeout;
+    while ((*FDC_MSR & FDC_MSR_RQM) != FDC_MSR_RQM) {
+        if (timers_jiffies() >= target_ticks) {
+            log(LOG_ERROR, "fdc_out: timeout waiting for RQM");
+            return DEV_TIMEOUT;
         }
-
-		step += step;
-        fdc_delay(step);
-	}
-
-    log(LOG_ERROR, "fdc_out: timeout");
-    return DEV_TIMEOUT;
+    }
+    *FDC_DATA = x;
+    return 0;
 }
+
+
 
 /*
  * Spin up the drive's spindle motor
@@ -312,8 +291,18 @@ short fdc_motor_on() {
         while (wait_time > timers_jiffies()) ;
     // }
 
+    short needs_handler = 0;
+    if (fdc_motor_off_time == 0) {
+        needs_handler = 1;
+    }
+
     /* Set a new target time to shut off the motor */
     fdc_motor_off_time = timers_jiffies() + fdc_motor_timeout;
+
+    if (needs_handler) {
+        // Register the FDC motor watchdog to monitor for motor timeout
+        rtc_register_periodic(RTC_RATE_500ms, fdc_motor_watchdog);
+    }
 
     /* Flag that the motor is on */
     fdc_stat |= FDC_STAT_MOTOR_ON;
@@ -330,7 +319,7 @@ void fdc_motor_off() {
     TRACE("fdc_motor_off");
 
     if ((*FDC_DOR & FDC_DOR_MOT0) == FDC_DOR_MOT0) {
-        /* Motor is not on... turn it on without DMA or RESET */
+        /* Motor is not on... turn it off without DMA or RESET */
         *FDC_DOR = FDC_DOR_NRESET;
 
         if (fdc_wait_rqm()) {
@@ -342,7 +331,24 @@ void fdc_motor_off() {
     /* Flag that the motor is off */
     fdc_stat &= ~FDC_STAT_MOTOR_ON;
 
+    // Reset the motor off time to 0, so we know we need to reinstall the watchdog later
+    fdc_motor_off_time = 0;
+
+    // Remove the FDC motor watchdog
+    rtc_register_periodic(0, 0);
+
     ind_set(IND_FDC, IND_OFF);
+}
+
+/**
+ * Check the current jiffy count and turn off the motor if we've reached the time the motor should be turned off
+ * This time gets reset every time we ask for the motor to be turned on
+ */
+void fdc_motor_watchdog() {
+    unsigned char flags = *RTC_FLAGS;
+    if (timers_jiffies() >= fdc_motor_off_time) {
+        fdc_motor_off();
+    }
 }
 
 /*
@@ -453,11 +459,14 @@ short fdc_specify() {
     }
 
     /* Set head load time to maximum, and no DMA */
+    unsigned char hlt_ndma = 0;
     if (fdc_use_dma) {
-        *FDC_DATA = 0x0B;
+        hlt_ndma = 0x0A;
     } else {
-        *FDC_DATA = 0x0A;
+        hlt_ndma = 0x0B;
     }
+    log_num(LOG_INFO, "FDC specify: ", hlt_ndma);
+    *FDC_DATA = hlt_ndma;
 
     return 0;
 }
@@ -503,8 +512,8 @@ short fdc_configure() {
         return DEV_TIMEOUT;
     }
 
-    /* Implied seek, enable FIFO, enable POLL, FIFO threshold = 8 bytes */
-    *FDC_DATA = 0x47;
+    /* Implied seek, enable FIFO, enable POLL, FIFO threshold = 16 bytes */
+    *FDC_DATA = 0x4F;
 
     if (fdc_wait_write()) {
         /* Timed out waiting for the FDC to be free */
@@ -571,8 +580,17 @@ short fdc_reset() {
     /* Reset the controller */
     *FDC_DOR = 0;
     target_time = timers_jiffies() + 2;
-    while (target_time > timers_jiffies()) ;
-    *FDC_DOR = FDC_DOR_NRESET;
+    while (target_time > timers_jiffies());
+
+    unsigned char dor = 0;
+    if (fdc_use_dma) {
+        dor = FDC_DOR_NRESET | FDC_DOR_DMAEN;
+    } else {
+        dor = FDC_DOR_NRESET;
+    }
+    log_num(LOG_INFO, "FDC DOR: ", dor);
+    *FDC_DOR = dor;
+
 
     /* Default precompensation, data rate for 1.44MB */
     *FDC_DSR = 0x80;
@@ -711,6 +729,8 @@ short fdc_command_dma(p_fdc_trans transaction) {
 
     /* Result phase: read the result bytes */
 
+    fdc_delay(30);
+
     for (i = 0; i < transaction->result_count; i++) {
         if ((result = fdc_in(&transaction->results[i])) < 0) {
             log(LOG_ERROR, "fdc_command: timeout getting results");
@@ -775,16 +795,21 @@ short fdc_command(p_fdc_trans transaction) {
     switch (transaction->direction) {
         case FDC_TRANS_WRITE:
             /* We're writing to the FDC */
+            for (i = 0; (i < transaction->data_count); i++) {
+                if ((result = fdc_out(transaction->data[i])) < 0) {
+                    log(LOG_ERROR, "fdc_command: timeout writing data");
+                    return result;
+                }
+            }
             break;
 
         case FDC_TRANS_READ:
             /* We're reading from the FDC */
-            for (i = 0; (i < transaction->data_count) && ((*FDC_MSR & FDC_MSR_NONDMA) == FDC_MSR_NONDMA); i++) {
+            for (i = 0; (i < transaction->data_count); i++) {
                 if ((result = fdc_in(&transaction->data[i])) < 0) {
                     log(LOG_ERROR, "fdc_command: timeout getting data");
                     return result;
                 }
-                sys_chan_write_b(0, '.');
             }
             break;
 
@@ -793,6 +818,8 @@ short fdc_command(p_fdc_trans transaction) {
     }
 
     /* Result phase: read the result bytes */
+
+    fdc_delay(2);
 
     for (i = 0; i < transaction->result_count; i++) {
         if ((result = fdc_in(&transaction->results[i])) < 0) {
@@ -892,7 +919,7 @@ short fdc_recalibrate() {
         if ((result == 0)) {
             break;
         } else {
-            log_num(LOG_ERROR, "fdc_recalibrate: retry ", result);
+            log_num(LOG_INFO, "fdc_recalibrate: retry ", result);
         }
         fdc_init();
         trans.retries--;
@@ -947,7 +974,7 @@ short fdc_sense_status() {
         if ((result == 0)) {
             break;
         } else {
-            log_num(LOG_ERROR, "fdc_sense_status: retry ", result);
+            log_num(LOG_INFO, "fdc_sense_status: retry ", result);
         }
         fdc_init();
         trans.retries--;
@@ -989,16 +1016,6 @@ short fdc_read(long lba, unsigned char * buffer, short size) {
 
     fdc_motor_on();
 
-    /* Check if the disk has changed and recalibrate if it has */
-    // if (*FDC_DIR & 0x80) {
-    //     fdc_stat = FDC_STAT_NOINIT;
-    //     if (fdc_recalibrate()) {
-    //         return DEV_NOMEDIA;
-    //     } else {
-    //         return ERR_MEDIA_CHANGE;
-    //     }
-    // }
-
     trans.retries = 1; //FDC_DEFAULT_RETRIES;
     trans.command = 0x40 | FDC_CMD_READ_DATA;               /* MFM read command */
     trans.direction = FDC_TRANS_READ;                       /* We're going to read from the drive */
@@ -1020,13 +1037,16 @@ short fdc_read(long lba, unsigned char * buffer, short size) {
     while (trans.retries > 0) {
         if (fdc_use_dma) {
             result = fdc_command_dma(&trans);               /* Issue the transaction */
-            log_num(LOG_ERROR, "fdc_command_dma: ", result);
+            log_num(LOG_INFO, "fdc_command_dma: ", result);
         } else {
-            result = fdc_cmd_asm(trans.command, trans.parameter_count, &trans.parameters, buffer, trans.result_count, &trans.results);
-            log_num(LOG_ERROR, "fdc_cmd_asm: ", result);
+            result = fdc_command(&trans);
+            log_num(LOG_INFO, "fdc_cmd: ", result);
         }
 
         if ((result == 0)) { //} && ((trans.results[0] & 0xC0) == 0)) {
+            sprintf(message, "fdc_read: success? ST0=%02X ST1=%02X ST2=%02X C=%02X H=%02X R=%02X N=%02X",
+                trans.results[0], trans.results[1], trans.results[2], trans.results[3], trans.results[4], trans.results[5], trans.results[6]);
+            log(LOG_ERROR, message);
             return size;
         } else {
             sprintf(message, "fdc_read: retry ST0=%02X ST1=%02X ST2=%02X C=%02X H=%02X R=%02X N=%02X",
@@ -1056,7 +1076,63 @@ short fdc_read(long lba, unsigned char * buffer, short size) {
  *  number of bytes written, any negative number is an error code
  */
 short fdc_write(long lba, const unsigned char * buffer, short size) {
-    return 0;
+    t_fdc_trans trans;
+    unsigned char head, cylinder, sector;
+    short result, i;
+    char message[80];
+
+    TRACE("fdc_read");
+
+    lba_2_chs((unsigned long)lba, &cylinder, &head, &sector);
+
+    fdc_motor_on();
+
+    trans.retries = 1; //FDC_DEFAULT_RETRIES;
+    trans.command = 0x40 | FDC_CMD_WRITE_DATA;              /* MFM read command */
+    trans.direction = FDC_TRANS_WRITE;                      /* We're going to read from the drive */
+    trans.parameters[0] = (head == 1) ? 0x04 : 0x00;        /* Set head and drive # */
+    trans.parameters[1] = cylinder & 0x00ff;
+    trans.parameters[2] = head & 0x0001;
+    trans.parameters[3] = sector & 0x00ff;
+    trans.parameters[4] = 2;
+    trans.parameters[5] = fdc_sectors_per_track;
+    trans.parameters[6] = 0x1B;                             /* GPL = 0x1B */
+    trans.parameters[7] = 0xFF;                             /* DTL = 0xFF */
+    trans.parameter_count = 8;                              /* Sending 8 parameter bytes */
+
+    trans.data = buffer;                                    /* Transfer sector data to buffer */
+    trans.data_count = size;
+
+    trans.result_count = 7;                                 /* Expect 7 result bytes */
+
+    while (trans.retries > 0) {
+        if (fdc_use_dma) {
+            result = fdc_command_dma(&trans);               /* Issue the transaction */
+            log_num(LOG_INFO, "fdc_command_dma: ", result);
+        } else {
+            result = fdc_command(&trans);
+            log_num(LOG_INFO, "fdc_cmd: ", result);
+        }
+
+        if ((result == 0)) { //} && ((trans.results[0] & 0xC0) == 0)) {
+            sprintf(message, "fdc_write: success? ST0=%02X ST1=%02X ST2=%02X C=%02X H=%02X R=%02X N=%02X",
+                trans.results[0], trans.results[1], trans.results[2], trans.results[3], trans.results[4], trans.results[5], trans.results[6]);
+            log(LOG_ERROR, message);
+            return size;
+        } else {
+            sprintf(message, "fdc_write: retry ST0=%02X ST1=%02X ST2=%02X C=%02X H=%02X R=%02X N=%02X",
+                trans.results[0], trans.results[1], trans.results[2], trans.results[3], trans.results[4], trans.results[5], trans.results[6]);
+            log(LOG_ERROR, message);
+            sprintf(message, "fdc_write: retry EXTRA0=%02X EXTRA1=%02X",
+                trans.results[7], trans.results[8]);
+            log(LOG_ERROR, message);
+        }
+        fdc_init();
+        trans.retries--;
+    }
+
+    /* If we got here, we exhausted our retry attempts */
+    return DEV_CANNOT_WRITE;
 }
 
 /*
