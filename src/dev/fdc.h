@@ -20,8 +20,9 @@
 #define FDC_STAT_PROTECTED      0x04        /* FD is write-protected */
 #define FDC_STAT_MOTOR_ON       0x08        /* FDC spindle motor is on */
 
-#define FDC_CTRL_MOTOR_ON       0x0100      /* IOCTRL command to start spinning the motor */
-#define FDC_CTRL_MOTOR_OFF      0x0200      /* IOCTRL command to start spinning the motor */
+#define FDC_CTRL_MOTOR_ON       0x0001      /* IOCTRL command to start spinning the motor */
+#define FDC_CTRL_MOTOR_OFF      0x0002      /* IOCTRL command to start spinning the motor */
+#define FDC_CTRL_CHECK_CHANGE   0x0003      /* IOCTRL command to check to see if the disk has changed */
 
 /*
  * Structure to keep track of the information about a transaction with the floppy drive

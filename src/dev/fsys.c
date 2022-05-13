@@ -12,6 +12,7 @@
 #include <string.h>
 
 #include "dev/channel.h"
+#include "dev/fdc.h"
 #include "errors.h"
 #include "elf.h"
 #include "fsys.h"
@@ -76,6 +77,38 @@ short fatfs_to_foenix(FRESULT r) {
 }
 
 /**
+ * Make sure the status of the drive is up to date for the given path
+ *
+ * @param path
+ */
+void fsys_update_stat(const char * path) {
+	char buffer[20];
+	int i;
+
+	if (path[0] != '/') {
+		// The root was not specified... get it from the current working directory
+		strncpy(buffer, g_current_directory, 20);
+	} else {
+		// The root was specified... work with the data in the path
+		strncpy(buffer, path, 20);
+	}
+
+	// Make sure the path is lower case
+	for (i = 0; i < strlen(buffer); i++) {
+		char c = buffer[i];
+		if ((c >= 'A') && (c <= 'Z')) {
+			buffer[i] = tolower(c);
+		}
+	}
+
+	if (strncmp(buffer, "/fd", 3) == 0) {
+		// If the drive is the floppy drive, force the drive to spin up and check for a disk change
+		// this will update the fdc_status, which will be seen by FatFS and treated appropriately
+		sys_bdev_ioctrl(BDEV_FDC, FDC_CTRL_CHECK_CHANGE, 0, 0);
+	}
+}
+
+/**
  * Attempt to open a file given the path to the file and the mode.
  *
  * Inputs:
@@ -90,6 +123,10 @@ short fsys_open(const char * path, short mode) {
     short i, fd = -1;
 
     TRACE("fsys_open");
+
+	// If the file being opened is on the floppy drive, make sure the FDC status
+	// is updated correctly for disk change by spinning up the motor and checking the DIR register
+	fsys_update_stat(path);
 
     /* Allocate a file handle */
 
@@ -174,6 +211,9 @@ short fsys_opendir(const char * path) {
     short i;
     short dir = -1;
     FRESULT fres;
+
+	// Make sure our status is updated for the drive indicated by the path
+	fsys_update_stat(path);
 
     /* Allocate a directory handle */
     for (i = 0; i < MAX_DIRECTORIES; i++) {
@@ -278,6 +318,10 @@ short fsys_stat(const char * path, p_file_info file) {
 	FRESULT fres;
 	FILINFO finfo;
 
+	// If the file being checked is on the floppy drive, make sure the FDC status
+	// is updated correctly for disk change by spinning up the motor and checking the DIR register
+	fsys_update_stat(path);
+
 	fres = f_stat(path, &finfo);
 	if (fres == FR_OK) {
 		int i;
@@ -319,6 +363,10 @@ short fsys_findfirst(const char * path, const char * pattern, p_file_info file) 
     FRESULT fres = -1;
     short dir = 0;
     short i = 0;
+
+	// If the path being queried is on the floppy drive, make sure the FDC status
+	// is updated correctly for disk change by spinning up the motor and checking the DIR register
+	fsys_update_stat(path);
 
     /* Allocate a directory handle */
     for (i = 0; i < MAX_DIRECTORIES; i++) {
@@ -414,6 +462,10 @@ short fsys_mkdir(const char * path) {
 
     TRACE("fsys_mkdir");
 
+	// If the directory being created is on the floppy drive, make sure the FDC status
+	// is updated correctly for disk change by spinning up the motor and checking the DIR register
+	fsys_update_stat(path);
+
     result = f_mkdir(path);
     if (result == FR_OK) {
         return 0;
@@ -434,6 +486,10 @@ short fsys_mkdir(const char * path) {
  */
 short fsys_delete(const char * path) {
     FRESULT result;
+
+	// If the path being deleted is on the floppy drive, make sure the FDC status
+	// is updated correctly for disk change by spinning up the motor and checking the DIR register
+	fsys_update_stat(path);
 
     result = f_unlink(path);
     if (result == FR_OK) {
@@ -456,6 +512,10 @@ short fsys_delete(const char * path) {
  */
 short fsys_rename(const char * old_path, const char * new_path) {
     FRESULT fres;
+
+	// If the path being renamed is on the floppy drive, make sure the FDC status
+	// is updated correctly for disk change by spinning up the motor and checking the DIR register
+	fsys_update_stat(old_path);
 
     fres = f_rename(old_path, new_path);
     if (fres != 0) {
@@ -758,6 +818,10 @@ short fsys_mount(short bdev) {
 short fsys_getlabel(char * path, char * label) {
     TRACE("fsys_getlabel");
 
+	// If the drive being queried is the floppy drive, make sure the FDC status
+	// is updated correctly for disk change by spinning up the motor and checking the DIR register
+	fsys_update_stat(path);
+
     FRESULT fres = f_getlabel(path, label, 0);
     if (fres != FR_OK) {
         return fatfs_to_foenix(fres);
@@ -776,6 +840,12 @@ short fsys_getlabel(char * path, char * label) {
 short fsys_setlabel(short drive, const char * label) {
     FRESULT fres;
     char buffer[80];
+
+	// If the drive being labeled is on the floppy drive, make sure the FDC status
+	// is updated correctly for disk change by spinning up the motor and checking the DIR register
+	if (drive == BDEV_FDC) {
+		sys_bdev_ioctrl(BDEV_FDC, FDC_CTRL_CHECK_CHANGE, 0, 0);
+	}
 
     sprintf(buffer, "%d:%s", drive, label);
     fres = f_setlabel(buffer);
@@ -1327,7 +1397,7 @@ short fsys_load(const char * path, long destination, long * start) {
         strcat(spath, ".*");
 
         // TODO: Iterate through path, and replace "".
-        fr = f_findfirst(&dj, &fno, "", spath);       /* Start to search for executables */        
+        fr = f_findfirst(&dj, &fno, "", spath);       /* Start to search for executables */
         while (fr == FR_OK && fno.fname[0]) {         /* Repeat while an item is found */
             get_app_ext(fno.fname, extension);
             if (loader_exists(extension)) {

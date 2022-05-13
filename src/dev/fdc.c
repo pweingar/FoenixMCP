@@ -64,7 +64,7 @@ enum fdc_trans_direction {
  * Device variables
  */
 
-static unsigned char fdc_stat = 0;
+short g_fdc_stat = FDC_STAT_NOINIT;
 static long fdc_motor_off_time = 0;         /* The time (in jiffies) when the motor should turn off */
 static short fdc_heads_per_cylinder = 2;    /* How many heads are supported? */
 static short fdc_sectors_per_track = 18;    /* How many sectors per track */
@@ -107,7 +107,23 @@ void fdc_set_dma(short dma) {
  */
 void fdc_media_change() {
     // Indicate that the disk has changed
-    fdc_stat = FDC_STAT_NOINIT;
+    g_fdc_stat = FDC_STAT_NOINIT;
+}
+
+/**
+ * Check to see if the media has changed
+ * If so, recalibrate the drive and flag the change
+ */
+short fdc_media_check_change() {
+    // Check for the a disk change
+    if (*FDC_DIR & 0x80) {
+        // The disk has changed... recalibrate and set that it's changed
+        fdc_recalibrate();
+        fdc_seek(1);
+        g_fdc_stat = FDC_STAT_NOINIT;
+        return 1;
+    }
+    return 0;
 }
 
 /*
@@ -264,8 +280,6 @@ short fdc_out(unsigned char x) {
     return 0;
 }
 
-
-
 /*
  * Spin up the drive's spindle motor
  */
@@ -274,8 +288,8 @@ short fdc_motor_on() {
 
     log_num(LOG_TRACE, "FDC_DOR: ", *FDC_DOR);
 
-    // if ((*FDC_DOR & FDC_DOR_MOT0) != FDC_DOR_MOT0) {
-    //     /* Motor is not on... turn it on without DMA or RESET */
+    if ((*FDC_DOR & FDC_DOR_MOT0) != FDC_DOR_MOT0) {
+        /* Motor is not on... turn it on without DMA or RESET */
         *FDC_DOR = FDC_DOR_MOT0 | FDC_DOR_NRESET;
 
         log_num(LOG_TRACE, "FDC_DOR 2: ", *FDC_DOR);
@@ -289,7 +303,7 @@ short fdc_motor_on() {
         /* Wait a decent time for the motor to spin up */
         long wait_time = timers_jiffies() + fdc_motor_wait;
         while (wait_time > timers_jiffies()) ;
-    // }
+    }
 
     short needs_handler = 0;
     if (fdc_motor_off_time == 0) {
@@ -304,8 +318,8 @@ short fdc_motor_on() {
         rtc_register_periodic(RTC_RATE_500ms, fdc_motor_watchdog);
     }
 
-    /* Flag that the motor is on */
-    fdc_stat |= FDC_STAT_MOTOR_ON;
+    // /* Flag that the motor is on */
+    // g_fdc_stat |= FDC_STAT_MOTOR_ON;
 
     ind_set(IND_FDC, IND_ON);
 
@@ -328,8 +342,8 @@ void fdc_motor_off() {
         }
     }
 
-    /* Flag that the motor is off */
-    fdc_stat &= ~FDC_STAT_MOTOR_ON;
+    // /* Flag that the motor is off */
+    // g_fdc_stat &= ~FDC_STAT_MOTOR_ON;
 
     // Reset the motor off time to 0, so we know we need to reinstall the watchdog later
     fdc_motor_off_time = 0;
@@ -633,6 +647,8 @@ short fdc_reset() {
         return DEV_TIMEOUT;
     }
 
+    g_fdc_stat = 0;
+
     fdc_motor_on();
 
     return 0;
@@ -795,10 +811,13 @@ short fdc_command(p_fdc_trans transaction) {
     switch (transaction->direction) {
         case FDC_TRANS_WRITE:
             /* We're writing to the FDC */
-            for (i = 0; (i < transaction->data_count); i++) {
-                if ((result = fdc_out(transaction->data[i])) < 0) {
-                    log(LOG_ERROR, "fdc_command: timeout writing data");
-                    return result;
+            fdc_wait_rqm();
+            if (*FDC_MSR & FDC_MSR_NONDMA) {
+                for (i = 0; (i < transaction->data_count); i++) {
+                    if ((result = fdc_out(transaction->data[i])) < 0) {
+                        log(LOG_ERROR, "fdc_command: timeout writing data");
+                        return result;
+                    }
                 }
             }
             break;
@@ -1014,7 +1033,9 @@ short fdc_read(long lba, unsigned char * buffer, short size) {
 
     lba_2_chs((unsigned long)lba, &cylinder, &head, &sector);
 
+    // Signal that we need the motor on and check if the media has changed
     fdc_motor_on();
+    fdc_media_check_change();
 
     trans.retries = 1; //FDC_DEFAULT_RETRIES;
     trans.command = 0x40 | FDC_CMD_READ_DATA;               /* MFM read command */
@@ -1024,7 +1045,7 @@ short fdc_read(long lba, unsigned char * buffer, short size) {
     trans.parameters[2] = head & 0x0001;
     trans.parameters[3] = sector & 0x00ff;
     trans.parameters[4] = 2;
-    trans.parameters[5] = fdc_sectors_per_track;
+    trans.parameters[5] = sector & 0x00ff;                  /* End of Track... fdc_sectors_per_track; */
     trans.parameters[6] = 0x1B;                             /* GPL = 0x1B */
     trans.parameters[7] = 0xFF;                             /* DTL = 0xFF */
     trans.parameter_count = 8;                              /* Sending 8 parameter bytes */
@@ -1046,14 +1067,11 @@ short fdc_read(long lba, unsigned char * buffer, short size) {
         if ((result == 0)) { //} && ((trans.results[0] & 0xC0) == 0)) {
             sprintf(message, "fdc_read: success? ST0=%02X ST1=%02X ST2=%02X C=%02X H=%02X R=%02X N=%02X",
                 trans.results[0], trans.results[1], trans.results[2], trans.results[3], trans.results[4], trans.results[5], trans.results[6]);
-            log(LOG_ERROR, message);
+            log(LOG_INFO, message);
             return size;
         } else {
             sprintf(message, "fdc_read: retry ST0=%02X ST1=%02X ST2=%02X C=%02X H=%02X R=%02X N=%02X",
                 trans.results[0], trans.results[1], trans.results[2], trans.results[3], trans.results[4], trans.results[5], trans.results[6]);
-            log(LOG_ERROR, message);
-            sprintf(message, "fdc_read: retry EXTRA0=%02X EXTRA1=%02X",
-                trans.results[7], trans.results[8]);
             log(LOG_ERROR, message);
         }
         fdc_init();
@@ -1085,7 +1103,9 @@ short fdc_write(long lba, const unsigned char * buffer, short size) {
 
     lba_2_chs((unsigned long)lba, &cylinder, &head, &sector);
 
+    // Signal that we need the motor on and check if the media has changed
     fdc_motor_on();
+    fdc_media_check_change();
 
     trans.retries = 1; //FDC_DEFAULT_RETRIES;
     trans.command = 0x40 | FDC_CMD_WRITE_DATA;              /* MFM read command */
@@ -1095,7 +1115,7 @@ short fdc_write(long lba, const unsigned char * buffer, short size) {
     trans.parameters[2] = head & 0x0001;
     trans.parameters[3] = sector & 0x00ff;
     trans.parameters[4] = 2;
-    trans.parameters[5] = fdc_sectors_per_track;
+    trans.parameters[5] = sector & 0x00ff;                  /* End of Track... fdc_sectors_per_track; */
     trans.parameters[6] = 0x1B;                             /* GPL = 0x1B */
     trans.parameters[7] = 0xFF;                             /* DTL = 0xFF */
     trans.parameter_count = 8;                              /* Sending 8 parameter bytes */
@@ -1114,17 +1134,20 @@ short fdc_write(long lba, const unsigned char * buffer, short size) {
             log_num(LOG_INFO, "fdc_cmd: ", result);
         }
 
+        if ((trans.results[1] & 0x02) != 0) {
+            log(LOG_ERROR, "Disk is write protected");
+            g_fdc_stat |= FDC_STAT_PROTECTED;
+            return DEV_WRITEPROT;
+        }
+
         if ((result == 0)) { //} && ((trans.results[0] & 0xC0) == 0)) {
             sprintf(message, "fdc_write: success? ST0=%02X ST1=%02X ST2=%02X C=%02X H=%02X R=%02X N=%02X",
                 trans.results[0], trans.results[1], trans.results[2], trans.results[3], trans.results[4], trans.results[5], trans.results[6]);
-            log(LOG_ERROR, message);
+            log(LOG_INFO, message);
             return size;
         } else {
             sprintf(message, "fdc_write: retry ST0=%02X ST1=%02X ST2=%02X C=%02X H=%02X R=%02X N=%02X",
                 trans.results[0], trans.results[1], trans.results[2], trans.results[3], trans.results[4], trans.results[5], trans.results[6]);
-            log(LOG_ERROR, message);
-            sprintf(message, "fdc_write: retry EXTRA0=%02X EXTRA1=%02X",
-                trans.results[7], trans.results[8]);
             log(LOG_ERROR, message);
         }
         fdc_init();
@@ -1142,7 +1165,7 @@ short fdc_write(long lba, const unsigned char * buffer, short size) {
  *  the status of the device
  */
 short fdc_status() {
-    return fdc_stat;
+    return g_fdc_stat;
 }
 
 /*
@@ -1179,11 +1202,18 @@ short fdc_flush() {
 short fdc_ioctrl(short command, unsigned char * buffer, short size) {
     switch (command) {
         case FDC_CTRL_MOTOR_ON:
+            // Turn on the spindle motor
             return fdc_motor_on();
 
         case FDC_CTRL_MOTOR_OFF:
+            // Turn off the spindle motor
             fdc_motor_off();
             return 0;
+
+        case FDC_CTRL_CHECK_CHANGE:
+            // Check to see if the disk has changed
+            fdc_motor_on();
+            return fdc_media_check_change();
 
         default:
             return 0;
@@ -1208,7 +1238,6 @@ short fdc_init() {
         return ERR_GENERAL;
     }
 
-    fdc_stat &= ~FDC_STAT_NOINIT;
     return 0;
 }
 
@@ -1229,7 +1258,7 @@ short fdc_install() {
     bdev.flush = fdc_flush;
     bdev.ioctrl = fdc_ioctrl;
 
-    fdc_stat = FDC_STAT_PRESENT & FDC_STAT_NOINIT;
+    g_fdc_stat = FDC_STAT_PRESENT & FDC_STAT_NOINIT;
 
     return bdev_register(&bdev);
 }

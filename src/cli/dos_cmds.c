@@ -394,10 +394,6 @@ short cmd_dir(short screen, int argc, const char * argv[]) {
         path = "";
     }
 
-    print(0, "Path: ");
-    print(0, path);
-    print(0, "\n");
-
     if (pattern != 0) {
         // A pattern was provided
         dir = sys_fsys_findfirst(path, pattern, &my_file);

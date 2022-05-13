@@ -20,6 +20,7 @@
 #include "fatfs/ff.h"
 #include "interrupt.h"
 #include "log.h"
+#include "fdc_reg.h"
 #include "lpt_reg.h"
 #include "dev/ps2.h"
 #include "rtc_reg.h"
@@ -412,7 +413,7 @@ short cli_test_seek(short screen, int argc, const char * argv[]) {
 /*
  * Test the FDC interface by reading the MBR
  *
- * TEST FDC [<lba> [WRITE <data>]]
+ * TEST FDC DSKCHG | [<lba> [WRITE <data>]]
  */
 short cli_test_fdc(short screen, int argc, const char * argv[]) {
     unsigned char buffer[512];
@@ -423,57 +424,79 @@ short cli_test_fdc(short screen, int argc, const char * argv[]) {
     short n = 0;
     short result;
     short is_write = 0;
+    short is_change_test = 0;
     unsigned char data = 0xAA;
 
     if (argc > 1) {
-        lba = (unsigned long)cli_eval_number(argv[1]);
-        if (argc > 2) {
-            print(screen, "Will attempt to write before reading...\n");
-            is_write = 1;
-            data = (unsigned long)cli_eval_number(argv[3]);
+        if ((strcmp(argv[1], "DSKCHG") == 0) || (strcmp(argv[1], "dskchg") == 0)) {
+            is_change_test = 1;
+        } else {
+            lba = (unsigned long)cli_eval_number(argv[1]);
+            if (argc > 2) {
+                print(screen, "Will attempt to write before reading...\n");
+                is_write = 1;
+                data = (unsigned long)cli_eval_number(argv[3]);
+            }
         }
     }
 
     bdev_ioctrl(BDEV_FDC, FDC_CTRL_MOTOR_ON, 0, 0);
 
-    result = bdev_init(BDEV_FDC);
-    if (result != 0) {
-        sprintf(buffer, "Could not initialize FDC: %s\n", sys_err_message(result));
-        sys_chan_write(screen, buffer, strlen(buffer));
-        return result;
-    }
+    if (is_change_test) {
+        // long target_jiffies = sys_time_jiffies() + 240;
+        // while (target_jiffies > sys_time_jiffies()) ;
 
-    for (i = 0; i < 512; i++) {
-        buffer[i] = data;
-    }
+        sprintf(message, "FDC_DIR: %02X\n", *FDC_DIR);
+        print(screen, message);
 
-    if (is_write) {
-        n = bdev_write(BDEV_FDC, lba, buffer, 512);
+        print(screen, "Recalibrating... ");
+        fdc_recalibrate();
+        fdc_seek(1);
+        print(screen, "done\n");
+
+        sprintf(message, "FDC_DIR: %02X\n", *FDC_DIR);
+        print(screen, message);
+
+    } else {
+        result = bdev_init(BDEV_FDC);
+        if (result != 0) {
+            sprintf(buffer, "Could not initialize FDC: %s\n", sys_err_message(result));
+            sys_chan_write(screen, buffer, strlen(buffer));
+            return result;
+        }
+
+        for (i = 0; i < 512; i++) {
+            buffer[i] = data;
+        }
+
+        if (is_write) {
+            n = bdev_write(BDEV_FDC, lba, buffer, 512);
+            if (n < 0) {
+                dump_buffer(screen, buffer, 512, 1);
+                sprintf(message, "Unable to write sector %d: %s\n", lba, err_message(n));
+                print(screen, message);
+                bdev_ioctrl(BDEV_FDC, FDC_CTRL_MOTOR_OFF, 0, 0);
+                return n;
+            }
+        }
+
+        for (i = 0; i < 512; i++) {
+            buffer[i] = 0xAA;
+        }
+
+        n = bdev_read(BDEV_FDC, lba, buffer, 512);
         if (n < 0) {
             dump_buffer(screen, buffer, 512, 1);
-            sprintf(message, "Unable to write sector %d: %s\n", lba, err_message(n));
+            sprintf(message, "Unable to read sector %d: %s\n", lba, err_message(n));
             print(screen, message);
             bdev_ioctrl(BDEV_FDC, FDC_CTRL_MOTOR_OFF, 0, 0);
             return n;
         }
-    }
 
-    for (i = 0; i < 512; i++) {
-        buffer[i] = 0xAA;
-    }
-
-    n = bdev_read(BDEV_FDC, lba, buffer, 512);
-    if (n < 0) {
         dump_buffer(screen, buffer, 512, 1);
-        sprintf(message, "Unable to read sector %d: %s\n", lba, err_message(n));
-        print(screen, message);
-        bdev_ioctrl(BDEV_FDC, FDC_CTRL_MOTOR_OFF, 0, 0);
-        return n;
+
+        print(screen, "\n\n");
     }
-
-    dump_buffer(screen, buffer, 512, 1);
-
-    print(screen, "\n\n");
 
     bdev_ioctrl(BDEV_FDC, FDC_CTRL_MOTOR_OFF, 0, 0);
 }
@@ -757,7 +780,7 @@ const t_cli_test_feature cli_test_features[] = {
     {"CREATE", "CREATE <path>: test creating a file", cli_test_create},
     {"IDE", "IDE: test reading the MBR of the IDE drive", cli_test_ide},
 #if MODEL == MODEL_FOENIX_A2560K
-    {"FDC", "FDC: test reading the MBR from the floppy drive", cli_test_fdc},
+    {"FDC", "FDC DSKCHG | [<lba> [WRITE <data>]]: test reading/writing the MBR from the floppy drive", cli_test_fdc},
     {"GAMEPAD", "GAMEPAD [0 | 1]: test SNES gamepads", cli_test_gamepad},
     {"JOY", "JOY: test the joystick", cli_test_joystick},
 #endif
