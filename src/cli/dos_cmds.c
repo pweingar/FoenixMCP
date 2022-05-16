@@ -606,6 +606,8 @@ short cmd_mkboot(short screen, int argc, const char * argv[]) {
 
     } else if (argc == 4) {
         // Can be either -b or -s
+        dev = cli_eval_number(argv[1]);
+        
         if (strcmp("-b", argv[2]) == 0) {
             // -b
             mode = 1;

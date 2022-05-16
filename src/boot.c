@@ -41,12 +41,32 @@
 /* TODO: move this to constants.h */
 
 
-#define BOOT_SECTOR_BUFFER  ((unsigned char *)0x00004000)
-#define BOOT_CODE_MBR_OFF   0x000                   /* Offset to the code in the MBR */
-#define BOOT_CPUID_MBR_OFF  0x004                   /* Offset to the CPUID in the MBR */
-#define BOOT_SIG_MBR_OFF    0x006                   /* Offset to the boot signature in the MBR */
+#define BOOT_SECTOR_BUFFER          ((unsigned char *)0x00004000)
+#define BOOT_CODE_MBR_OFF           0x000   /* Offset to the code in the MBR */
+#define BOOT_CPUID_MBR_OFF          0x004   /* Offset to the CPUID in the MBR */
+#define BOOT_SIG_MBR_OFF            0x006   /* Offset to the boot signature in the MBR */
+#define BOOT_SIG                    0xF0E1  /* Foenix/MCP boot signature expected */
 
-#define BOOT_SIG            0xF0E1                  /* Foenix/MCP boot signature expected */
+#define FDC_VBR_JUMP                0x000   // Intel 80x86 machine language jump... 3 bytes
+#define FDC_VBR_OEMNAME             0x003   // OEM Name... 8 bytes
+#define FDC_VBR_BPB                 0x00B   // BIOS Parameter Block
+#define FDC_VBR_BYTES_PER_SECTOR    0x00B   // Number of bytes per sector... 2 bytes
+#define FDC_VBR_SECTORS_PER_CLUSTER 0x00D   // Number of sectors per cluster... 1 byte
+#define FDC_VBR_RESERVED_SECTORS    0x00E   // Number of reserved sectors... 2 bytes
+#define FDC_VBR_FAT_COUNT           0x010   // Number of file allocation tables... 1 byte
+#define FDC_VBR_MAX_ROOT_ENTRIES    0x011   // Maximum number of root directory entries... 2 bytes
+#define FDC_VBR_SECTORS             0x013   // Number of logical sectors in FAT12/16... 2 bytes
+#define FDC_VBR_MEDIA_TYPE          0x015   // Media type code... 1 byte
+#define FDC_VBR_SECTORS_PER_FAT     0x016   // Number of sectors per file allocation table... 2 bytes
+#define FDC_VBR_SECTORS_PER_TRACK   0x018   // Number of sectors per track... 2 bytes
+#define FDC_VBR_HEADS               0x01A   // Number of heads... 2 bytes
+#define FDC_VBR_HIDDEN_SECTORS      0x01C   // Number of hidden sectors... 2 bytes
+#define FDC_VBR_TOTAL_SECTORS       0x01E   // Total number of sectors... 2 bytes
+#define FDC_VBR_BOOT_CODE           0x060   // Start of boot sector code
+
+#define BOOT_CODE_VBR_OFF   FDC_VBR_BOOT_CODE       /* Offset to the code in the VBR for floppy drives */
+#define BOOT_CPUID_VBR_OFF  BOOT_CODE_VBR_OFF+4     /* Offset to the CPUID in the VBR for floppy drives */
+#define BOOT_SIG_VBR_OFF    BOOT_CODE_VBR_OFF+6     /* Offset to the boot signature in the VBR for floppy drives */
 
 const char * MCP_INIT_SDC = "/sd/system/mcp.init";  /**< Path to config file on the SD card */
 const char * MCP_INIT_FDC = "/fd/system/mcp.init";  /**< Path to config file on the floppy drive */
@@ -114,7 +134,16 @@ void cli_command_get(char * path) {
 short is_bootable(unsigned char * sector, short device) {
     switch(device) {
         case BDEV_FDC:
-            // TODO: handled floppy drives
+            // The SDC and HDC boot off the MBR...
+            // Check for the CPUID and boot signature
+            if ((sector[BOOT_CPUID_VBR_OFF] == CPU_M68000) ||
+                (sector[BOOT_CPUID_VBR_OFF] == CPU_M68040)) {
+                if ((sector[BOOT_SIG_VBR_OFF] == ((BOOT_SIG >> 8) & 0x00FF)) &&
+                    (sector[BOOT_SIG_VBR_OFF+1] == (BOOT_SIG & 0x00FF))) {
+                    // The CPU is supported, and the boot signature is correct
+                    return 1;
+                }
+            }
             break;
 
         case BDEV_SDC:
@@ -150,7 +179,9 @@ void boot_sector_run(short device) {
 
     switch(device) {
         case BDEV_FDC:
-            // TODO: support floppy drives
+            // The FDC boots off the Volume Boot Record (offset 0x060)
+            boot_sector = (FUNC_V_2_V)(BOOT_SECTOR_BUFFER + BOOT_CODE_VBR_OFF);
+            boot_sector();
             break;
 
         case BDEV_SDC:
@@ -446,6 +477,19 @@ void boot_from_bdev(short device) {
     }
 }
 
+const unsigned char boot_from_file_sector[] = {
+    0x60, 0x00, 0x00, 0x06,         //          bra.w boot
+    CPU_M68000, 0x00, 0xf0, 0xe1,   //          dc.b CPU_M68000, 0, 0xf0, 0xe1
+    0x30, 0x3c, 0x00, 0x40,         // boot:    move.w #$40,d0
+    0x43, 0xfa, 0x00, 0x0e,         //          lea (path,pc),a1
+    0x22, 0x09,                     //          move.l a1,d1
+    0x42, 0x82,                     //          clr.l d2
+    0x42, 0x83,                     //          clr.l d3
+    0x4e, 0x4f,                     //          trap #15
+    0x4e, 0x71,                     // bootloop nop
+    0x60, 0xfc                      //          bra bootloop
+};
+
 /**
  * Make the indicated drive non booting by erasing the boot information
  *
@@ -461,9 +505,20 @@ short boot_non_booting(short device) {
         // Try to read the current sector
         short n = sys_bdev_read(device, 0, buffer, FSYS_SECTOR_SZ);
         if (n == FSYS_SECTOR_SZ) {
-            // Boot record read... clear it out
-            for (int i = 0; i < 0x0DA; i++) {
-                buffer[i] = 0;
+            short sector_offset = 0;
+
+            if (device == BDEV_FDC) {
+                // Point to the beginning of the boot code for the FDC (VBR)
+                sector_offset = BOOT_CODE_VBR_OFF;
+
+            } else {
+                // Point to the beginning of the boot code for the SDC/HDD (MBR)
+                sector_offset = BOOT_CODE_MBR_OFF;
+            }
+
+            // Boot record read... clear out the boot code
+            for (int i = 0; i < sizeof(boot_from_file_sector); i++) {
+                buffer[sector_offset + i] = 0;
             }
 
             // Try to write it back
@@ -491,19 +546,6 @@ short boot_non_booting(short device) {
     return result;
 }
 
-const unsigned char boot_from_file_sector[] = {
-    0x60, 0x00, 0x00, 0x06,         //          bra.w boot
-    CPU_M68000, 0x00, 0xf0, 0xe1,   //          dc.b CPU_M68000, 0, 0xf0, 0xe1
-    0x30, 0x3c, 0x00, 0x40,         // boot:    move.w #$40,d0
-    0x43, 0xfa, 0x00, 0x0e,         //          lea (path,pc),a1
-    0x22, 0x09,                     //          move.l a1,d1
-    0x42, 0x82,                     //          clr.l d2
-    0x42, 0x83,                     //          clr.l d3
-    0x4e, 0x4f,                     //          trap #15
-    0x4e, 0x71,                     // bootloop nop
-    0x60, 0xfc                      //          bra bootloop
-};
-
 /**
  * Make the indicated drive booting from a file
  *
@@ -518,26 +560,38 @@ short boot_set_file(short device, const char * path) {
     buffer = (unsigned char *)malloc(FSYS_SECTOR_SZ);
     if (buffer != 0) {
         // Try to read the current sector
+        bdev_init(device);
         short n = sys_bdev_read(device, 0, buffer, FSYS_SECTOR_SZ);
         if (n == FSYS_SECTOR_SZ) {
             int sector_len = sizeof(boot_from_file_sector);
+            int sector_offset = 0;
             int path_len = strlen(path);
 
-            // Boot record read... clear it out
-            for (i = 0; i < 0x1B0; i++) {
-                buffer[i] = 0;
+            if (device == BDEV_FDC) {
+                // Set up the floppy disk boot record
+                sector_offset = BOOT_CODE_VBR_OFF;
+
+                // Write 80x86 code to infinite loop at the start of the boot sector
+                // This will help maintain compatibility with MS-DOS and Windows machines
+                buffer[0] = 0xEB;
+                buffer[1] = 0xFF;
+                buffer[2] = 0x90;
+
+            } else {
+                // Set up the SDC or HDC master boot record
+                sector_offset = BOOT_CODE_MBR_OFF;
             }
 
             // Copy the boot code over
             for (i = 0; i < sector_len; i++) {
-                buffer[i] = boot_from_file_sector[i];
+                buffer[sector_offset + i] = boot_from_file_sector[i];
             }
 
             // Insert the path
             for (i = 0; i < path_len; i++) {
-                buffer[i + sector_len] = path[i];
+                buffer[sector_offset + i + sector_len] = path[i];
             }
-            buffer[path_len + sector_len] = 0;
+            buffer[sector_offset + sector_len + path_len] = 0;
 
             // Try to write it back
             n = sys_bdev_write(device, 0, buffer, FSYS_SECTOR_SZ);
