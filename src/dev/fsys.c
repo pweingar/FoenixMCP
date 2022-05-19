@@ -317,10 +317,33 @@ short fsys_readdir(short dir, p_file_info file) {
 short fsys_stat(const char * path, p_file_info file) {
 	FRESULT fres;
 	FILINFO finfo;
+	char match1[10], match2[10];
+	short i = 0;
 
 	// If the file being checked is on the floppy drive, make sure the FDC status
 	// is updated correctly for disk change by spinning up the motor and checking the DIR register
 	fsys_update_stat(path);
+
+	// FatFS's f_stat function does not handle root directories so bodge this in...
+	// For each drive...
+	for (i = 0; i < 3; i++) {
+		// Compute two legitimate paths to it
+		strcpy(match1, "/");
+		strcat(match1, (char *)VolumeStr[i]);
+		strcpy(match2, match1);
+		strcat(match2, "/");
+
+		// Check to see if the path is the same (barring letter case)
+		if ((strcicmp(path, match1) == 0) || (strcicmp(path, match2) == 0)) {
+			// It's a match... return the record for it
+			file->size = 0;
+			file->date = 0;
+			file->time = 0;
+			file->attributes = FSYS_AM_DIR;
+			strcpy(file->name, (char *)VolumeStr[i]);
+			return 0;
+		}
+	}
 
 	fres = f_stat(path, &finfo);
 	if (fres == FR_OK) {

@@ -15,6 +15,7 @@
 #include "sys_general.h"
 #include "timers.h"
 #include "cli/cli.h"
+#include "cli/dos_copy.h"
 #include "cli/dos_cmds.h"
 #include "cli/mem_cmds.h"
 #include "cli/settings.h"

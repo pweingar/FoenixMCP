@@ -376,7 +376,6 @@ short chan_write(short channel, const uint8_t * buffer, short size) {
         }
     } else {
         log_num(LOG_ERROR, "chan_write error: ", res);
-        while (1) ;
         return res;
     }
 }

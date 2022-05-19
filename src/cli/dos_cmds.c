@@ -145,88 +145,6 @@ short cmd_del(short screen, int argc, const char * argv[]) {
     }
 }
 
-short cmd_copy(short screen, int argc, const char * argv[]) {
-    FRESULT find_result;
-    FRESULT result;
-    DIR dir;         /* Directory object */
-    FILINFO src_info;    /* File information */
-    FILINFO dst_info;
-    FIL src_file;
-    FIL dst_file;
-
-    BYTE buffer[4096];   /* File copy buffer */
-    UINT br, bw;         /* File read/write count */
-
-    char path[MAX_PATH_LEN];
-
-    bool is_directory = false;
-    bool is_append_file = false;
-
-    TRACE("cmd_copy");
-
-    if (argc > 2) {
-        strcpy(path, argv[2]);
-
-        result = f_stat(argv[2], &dst_info);
-        if (result == FR_OK) {
-            is_directory = dst_info.fattrib & AM_DIR;
-        } else if (result == FR_NO_FILE) {
-            is_directory = false;
-        } else {
-            goto error;
-        }
-
-        find_result = f_findfirst(&dir, &src_info, "", argv[1]);
-
-        while (find_result == FR_OK && src_info.fname[0]) {
-            if (strcmp(src_info.fname, path) == 0) goto skip;  // Skip copying file to self.
-
-            result = f_open(&src_file, src_info.fname, FA_READ);
-            if (result != FR_OK) goto error;
-
-            if (is_directory) {
-                sprintf(path, "%s/%s", dst_info.fname, src_info.fname);
-                result = f_open(&dst_file, path, FA_WRITE | FA_CREATE_ALWAYS);
-            } else if (is_append_file) {
-                result = f_open(&dst_file, path, FA_WRITE | FA_OPEN_APPEND);
-            } else {
-                result = f_open(&dst_file, path, FA_WRITE | FA_CREATE_ALWAYS);
-            }
-            if (result != FR_OK) goto error;
-
-            print(screen, (is_append_file) ? "Appending " : "Copying ");
-            print(screen, src_info.fname);
-            print(screen, " to ");
-            print(screen, path);
-            print(screen, "\n");
-
-            /* Copy source to destination */
-            for (;;) {
-                result = f_read(&src_file, buffer, sizeof buffer, &br); /* Read a chunk of data from the source file */
-                if (br == 0) break; /* error or eof */
-                result = f_write(&dst_file, buffer, br, &bw);           /* Write it to the destination file */
-                if (bw < br) break; /* error or disk full */
-            }
-
-            f_close(&src_file);
-            f_close(&dst_file);
-
-skip:
-            find_result = f_findnext(&dir, &src_info);
-            is_append_file = true; // If copying more than one file to a file, then open for append.
-        }
-        f_closedir(&dir);
-        return 0;
-
-error:
-        err_print(screen, "Unable to copy file(s)", result);
-        f_close(&src_file);
-        f_close(&dst_file);
-        return result;
-    }
-}
-
-
 /*
  * Change the directory
  */
@@ -607,7 +525,7 @@ short cmd_mkboot(short screen, int argc, const char * argv[]) {
     } else if (argc == 4) {
         // Can be either -b or -s
         dev = cli_eval_number(argv[1]);
-        
+
         if (strcmp("-b", argv[2]) == 0) {
             // -b
             mode = 1;

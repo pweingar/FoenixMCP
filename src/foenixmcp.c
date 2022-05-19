@@ -123,7 +123,7 @@ void initialize() {
     short res;
 
     /* Set the logging level */
-    log_setlevel(LOG_ERROR);
+    log_setlevel(LOG_FATAL);
 
     /* Initialize the memory system */
     mem_init(0x3d0000);

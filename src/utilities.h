@@ -26,4 +26,13 @@
  */
 extern char * strtok_r(char * source, const char * delimiter, char ** saveptr);
 
+/**
+ * Perform a case-insensitive string comparison
+ *
+ * @param str1 the first string
+ * @param str2 the second string
+ * @return 0 if str1 = str2, -1 if str1 < str2, 1 if str1 > str2
+ */
+extern short strcicmp(char const *str1, char const *str2);
+
 #endif

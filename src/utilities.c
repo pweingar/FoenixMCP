@@ -43,3 +43,19 @@ char * strtok_r(char * source, const char * delimiter, char ** saveptr) {
     *saveptr = y + 1;
     return x;
 }
+
+/**
+ * Perform a case-insensitive string comparison
+ *
+ * @param str1 the first string
+ * @param str2 the second string
+ * @return 0 if str1 = str2, -1 if str1 < str2, 1 if str1 > str2
+ */
+short strcicmp(char const *str1, char const *str2) {
+    for (;; str1++, str2++) {
+        short diff = tolower((unsigned char)*str1) - tolower((unsigned char)*str2);
+        if (diff != 0 || !*str1) {
+            return diff;
+        }
+    }
+}
