@@ -662,6 +662,7 @@ short cli_readline(short channel, char * command_line) {
                     // Go back one command in history
                     if ((history < MAX_HISTORY_DEPTH) && (cli_history[history][0] != 0)) {
                         strcpy(command_line, cli_history[history++]);
+                        i = strlen(command_line);
                         print(channel, "\x1b[3G\x1b[K");
                         print(channel, command_line);
                     }
@@ -671,6 +672,7 @@ short cli_readline(short channel, char * command_line) {
                     // Go forward one command in history
                     if (history > 0) {
                         strcpy(command_line, cli_history[--history]);
+                        i = strlen(command_line);
                         print(channel, "\x1b[3G\x1b[K");
                         print(channel, command_line);
                     }
