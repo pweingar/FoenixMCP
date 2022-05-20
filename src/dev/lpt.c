@@ -46,6 +46,10 @@ short lpt_open(t_channel * chan, const uint8_t * path, short mode) {
     lpt_initialize();
 
     *LPT_CTRL_PORT = LPT_CTRL_mINIT | LPT_CTRL_SELECT;
+
+    // Write a dummy character to kick everything off
+    lpt_write_b(0, "\x00", 0);
+
     return 0;
 }
 
