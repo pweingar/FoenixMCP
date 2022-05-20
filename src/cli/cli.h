@@ -18,6 +18,20 @@ typedef short (*cli_cmd_handler)(short screen, int argc, const char * argv[]);
  * will look for an executable file with that name somewhere in the search path.
  */
 
+ /**
+  * Set the path of the command shell
+  *
+  * @param path the path to the command processor executable (0 or empty string for default)
+  */
+ extern void cli_command_set(const char * path);
+
+ /**
+  * Gets the path of the command shell
+  *
+  * @param path pointer to the buffer to store the path (empty string means default)
+  */
+ extern void cli_command_get(char * path);
+
 /**
  * Initialize the CLI
  *

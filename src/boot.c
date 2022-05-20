@@ -75,9 +75,6 @@ const char * MCP_INIT_HDC = "/hd/system/mcp.init";  /**< Path to config file on 
 // Colors for the A2560K keyboard LED matrix
 const unsigned short kbd_colors[] = {0x000F, 0x0FF, 0x00F0, 0x0FF0, 0x0F70, 0x0F00};
 
-short cli_screen = 0;                               /**< The default screen to use for the REPL of the CLI */
-char cli_command_path[MAX_PATH_LEN];                /**< Path to the command processor (empty string for built-in) */
-
 /**
  * On the A2560K, animate the LEDs based on the current time while we're waiting for a key press
  *
@@ -95,32 +92,6 @@ void boot_animate_keyboard(unsigned long max_ticks, unsigned long ticks, unsigne
         kbdmo_set_led_matrix_row(current_step - i - 1, kbd_colors[5 - i]);
     }
 #endif
-}
-
-/**
- * Set the path of the command shell
- *
- * @param path the path to the command processor executable (0 or empty string for default)
- */
-void cli_command_set(const char * path) {
-    if (path) {
-        // Copy the desired path
-        strncpy(cli_command_path, path, MAX_PATH_LEN);
-
-    } else {
-        // Set to the default CLI
-        cli_command_path[0] = 0;
-    }
-}
-
-/**
- * Gets the path of the command shell
- *
- * @param path pointer to the buffer to store the path (empty string means default)
- */
-void cli_command_get(char * path) {
-    // Copy the desired path
-    strncpy(path, cli_command_path, MAX_PATH_LEN);
 }
 
 /**
@@ -436,6 +407,10 @@ void boot_from_bdev(short device) {
 
     } else {
         // If not bootable...
+
+        // Get the screen for the CLI
+        short cli_screen = cli_txt_screen_get();
+        
         if (device >= 0) {
             // Execute startup file on boot device (if present)
             switch (device) {
@@ -464,16 +439,7 @@ void boot_from_bdev(short device) {
         }
 
         // Start up the command shell
-        if (cli_command_path[0] != 0) {
-            // Over-ride path provided, boot it
-            sys_proc_run(cli_command_path, 0, 0);
-
-        } else {
-            print_hex_32(0, (unsigned long)&cli_screen);
-            print(0, "starting CLI\n");
-            // No over-ride provided... boot the default
-            cli_start_repl(cli_screen, initial_path);
-        }
+        cli_start_repl(cli_screen, initial_path);
     }
 }
 

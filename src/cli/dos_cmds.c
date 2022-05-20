@@ -12,6 +12,7 @@
 #include "boot.h"
 #include "cli/dos_cmds.h"
 #include "dev/block.h"
+#include "dev/console.h"
 #include "dev/fsys.h"
 #include "dev/kbd_mo.h"
 #include "fatfs/ff.h"
@@ -98,12 +99,14 @@ short cmd_diskfill(short screen, int argc, const char * argv[]) {
 short cmd_run(short screen, int argc, const char * argv[]) {
     TRACE("cmd_run");
 
+    sys_chan_ioctrl(screen, CON_IOCTRL_ECHO_ON, 0, 0);
     short result = proc_run(argv[0], argc, argv);
     if (result < 0) {
         err_print(screen, "Unable to execute file", result);
         return -1;
     }
 
+    sys_chan_ioctrl(screen, CON_IOCTRL_ECHO_OFF, 0, 0);
     return result;
 }
 

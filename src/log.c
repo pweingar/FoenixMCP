@@ -25,7 +25,7 @@ unsigned long panic_address;        /* The address that was accessed (for some e
 
 const char * err_messages[] = {
     "OK",
-    "error",
+    "general error",
     "bad device number",
     "operation timed out",
     "device could not be initialized",

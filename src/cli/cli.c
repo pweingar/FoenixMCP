@@ -21,6 +21,7 @@
 #include "cli/settings.h"
 #include "cli/sound_cmds.h"
 #include "cli/test_cmds.h"
+#include "dev/console.h"
 #include "dev/ps2.h"
 #include "dev/rtc.h"
 #include "dev/uart.h"
@@ -87,6 +88,9 @@ extern short cmd_credits(short channel, int argc, const char * argv[]);
  * Variables
  */
 
+short cli_screen = 0;                               /**< The default screen to use for the REPL of the CLI */
+char cli_command_path[MAX_PATH_LEN];                /**< Path to the command processor (empty string for built-in) */
+
 /** The channel to use for interactions */
 short g_current_channel = 0;
 
@@ -138,6 +142,32 @@ const t_cli_command g_cli_commands[] = {
     { "TYPE", "TYPE <path> : print the contents of a text file", cmd_type },
     { 0, 0 }
 };
+
+/**
+ * Set the path of the command shell
+ *
+ * @param path the path to the command processor executable (0 or empty string for default)
+ */
+void cli_command_set(const char * path) {
+    if (path) {
+        // Copy the desired path
+        strncpy(cli_command_path, path, MAX_PATH_LEN);
+
+    } else {
+        // Set to the default CLI
+        cli_command_path[0] = 0;
+    }
+}
+
+/**
+ * Gets the path of the command shell
+ *
+ * @param path pointer to the buffer to store the path (empty string means default)
+ */
+void cli_command_get(char * path) {
+    // Copy the desired path
+    strncpy(path, cli_command_path, MAX_PATH_LEN);
+}
 
 /**
  * Set the number of the screen to use for interactions
@@ -295,13 +325,16 @@ short cli_exec(short channel, char * command, int argc, const char * argv[]) {
 }
 
 /**
- * Reactivate the CLI's read-eval-print loop after a command has completed
+ * Make sure all the console settings are setup so that the console works correctly
  */
-void cli_rerepl() {
-    while (1) {
-        print(g_current_channel, "\n\n");
-        cli_repl(g_current_channel);
-    }
+void cli_ensure_console(short channel) {
+    // Make sure the console is set up correctly for the CLI
+    sys_chan_ioctrl(channel, CON_IOCTRL_ECHO_OFF, 0, 0);
+    sys_chan_ioctrl(channel, CON_IOCTRL_ANSI_ON, 0, 0);
+    sys_chan_ioctrl(channel, CON_IOCTRL_CURS_ON, 0, 0);
+
+    // Make sure the screen has text enabled
+    txt_set_mode(sys_chan_device(channel), TXT_MODE_TEXT);
 }
 
 /**
@@ -894,26 +927,58 @@ short cli_start_repl(short channel, const char * init_cwd) {
 
     g_current_channel = channel;
 
-    if (init_cwd != 0) {
-        result = sys_fsys_set_cwd(init_cwd);
-        if (result) {
-            char message[80];
-            sprintf(message, "Unable to set startup directory: %s\n", err_message(result));
-            print(g_current_channel, message);
-        }
-    }
+    // Make sure we can see text properly on the channel
+    cli_ensure_console(g_current_channel);
 
-    // Set up the screen(s)
-    cli_setup_screen(channel, init_cwd, 1);             // Initialize our main main screen
-    if (cli_sys_info.screens > 1) {
-        for (i = 0; i < cli_sys_info.screens; i++) {             // Set up each screen we aren't using
-            if (i != channel) {
-                cli_setup_screen(i, init_cwd, 0);
+    // Start up the command shell
+    if (cli_command_path[0] != 0) {
+        // Over-ride path provided, boot it
+        sys_proc_run(cli_command_path, 0, 0);
+        return 0;
+
+    } else {
+        if (init_cwd != 0) {
+            result = sys_fsys_set_cwd(init_cwd);
+            if (result) {
+                char message[80];
+                sprintf(message, "Unable to set startup directory: %s\n", err_message(result));
+                print(g_current_channel, message);
             }
         }
-    }
 
-    return cli_repl(channel);
+        // Set up the screen(s)
+        cli_setup_screen(channel, init_cwd, 1);             // Initialize our main main screen
+        if (cli_sys_info.screens > 1) {
+            for (i = 0; i < cli_sys_info.screens; i++) {             // Set up each screen we aren't using
+                if (i != channel) {
+                    cli_setup_screen(i, init_cwd, 0);
+                }
+            }
+        }
+
+        return cli_repl(channel);
+    }
+}
+
+/**
+ * Reactivate the CLI's read-eval-print loop after a command has completed
+ */
+void cli_rerepl() {
+    // Start up the command shell
+    if (cli_command_path[0] != 0) {
+        // Over-ride path provided, boot it
+        sys_proc_run(cli_command_path, 0, 0);
+        return 0;
+
+    } else {
+        while (1) {
+            // Make sure we can see text properly on the channel
+            cli_ensure_console(g_current_channel);
+
+            print(g_current_channel, "\n\n");
+            cli_repl(g_current_channel);
+        }
+    }
 }
 
 /**

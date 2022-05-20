@@ -1437,7 +1437,7 @@ short fsys_load(const char * path, long destination, long * start) {
             fsys_load_ext(spath, extension, destination, start);
         } else {
             log(LOG_ERROR, "Command not found.");
-            return chan;
+            return ERR_NOT_FOUND;
         }
     }
     return 0;
