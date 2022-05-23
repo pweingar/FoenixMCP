@@ -59,3 +59,18 @@ short strcicmp(char const *str1, char const *str2) {
         }
     }
 }
+
+/**
+ * End the string at the first \r or \n
+ *
+ * @param text the string to alter
+ */
+void strtrimnl(char * text) {
+    char * x;
+    for (x = text; *x; x++) {
+        if ((*x == '\r') || (*x == '\n')) {
+            *x = 0;
+            return;
+        }
+    }
+}

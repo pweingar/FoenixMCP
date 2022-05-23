@@ -1306,9 +1306,9 @@ static short fsys_load_ext(const char * path, const char * extension, long desti
     short chan = -1;
     p_file_loader loader = 0;
 
-    TRACE("fsys_load");
+    TRACE("fsys_load_ext");
 
-    log2(LOG_VERBOSE, "fsys_load ext: ", extension);
+    log2(LOG_VERBOSE, "fsys_load_ext ext: ", extension);
 
     if (extension[0] == 0) {
         if (destination != 0) {
@@ -1332,7 +1332,7 @@ static short fsys_load_ext(const char * path, const char * extension, long desti
         }
     }
 
-    TRACE("fsys_load: loader search");
+    TRACE("fsys_load_ext: loader search");
 
     if (loader == 0) {
         if (destination != 0) {
@@ -1491,6 +1491,8 @@ short fsys_register_loader(const char * extension, p_file_loader loader) {
  */
 short fsys_init() {
     int i, j;
+
+	TRACE("fsys_init");
 
 	/* Set the default working directory.
 	 * TODO: set this based on the boot drive.

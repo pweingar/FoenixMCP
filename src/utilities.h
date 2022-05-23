@@ -35,4 +35,11 @@ extern char * strtok_r(char * source, const char * delimiter, char ** saveptr);
  */
 extern short strcicmp(char const *str1, char const *str2);
 
+/**
+ * End the string at the first \r or \n
+ *
+ * @param text the string to alter
+ */
+extern void strtrimnl(char * text);
+
 #endif

@@ -150,8 +150,9 @@ const t_cli_command g_cli_commands[] = {
  */
 void cli_command_set(const char * path) {
     if (path) {
-        // Copy the desired path
+        // Copy the desired path... without any trailing newline
         strncpy(cli_command_path, path, MAX_PATH_LEN);
+        strtrimnl(cli_command_path);
 
     } else {
         // Set to the default CLI
@@ -932,22 +933,30 @@ short cli_start_repl(short channel, const char * init_cwd) {
     // Make sure we can see text properly on the channel
     cli_ensure_console(g_current_channel);
 
+    if (init_cwd != 0) {
+        result = sys_fsys_set_cwd(init_cwd);
+        if (result) {
+            char message[80];
+            sprintf(message, "Unable to set startup directory: %s\n", err_message(result));
+            print(g_current_channel, message);
+        }
+    }
+
     // Start up the command shell
     if (cli_command_path[0] != 0) {
         // Over-ride path provided, boot it
-        sys_proc_run(cli_command_path, 0, 0);
-        return 0;
+        char * argv[1] = { cli_command_path };
 
-    } else {
-        if (init_cwd != 0) {
-            result = sys_fsys_set_cwd(init_cwd);
-            if (result) {
-                char message[80];
-                sprintf(message, "Unable to set startup directory: %s\n", err_message(result));
-                print(g_current_channel, message);
-            }
+        result = sys_proc_run(cli_command_path, 1, argv);
+        if (result) {
+            print(0, "Unable to start ");
+            print(0, cli_command_path);
+            print(0, ": ");
+            print(0, err_message(result));
+            while (1) ;
         }
-
+        return 0;
+    } else {
         // Set up the screen(s)
         cli_setup_screen(channel, init_cwd, 1);             // Initialize our main main screen
         if (cli_sys_info.screens > 1) {
@@ -957,7 +966,7 @@ short cli_start_repl(short channel, const char * init_cwd) {
                 }
             }
         }
-
+        
         return cli_repl(channel);
     }
 }
@@ -968,9 +977,15 @@ short cli_start_repl(short channel, const char * init_cwd) {
 void cli_rerepl() {
     // Start up the command shell
     if (cli_command_path[0] != 0) {
+        char * argv[1] = {cli_command_path};
+
         // Over-ride path provided, boot it
-        sys_proc_run(cli_command_path, 0, 0);
-        return 0;
+        short result = sys_proc_run(cli_command_path, 1, argv);
+        if (result) {
+            print(0, "Unable to start: ");
+            print(0, err_message(result));
+            while (1) ;
+        }
 
     } else {
         while (1) {

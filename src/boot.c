@@ -294,22 +294,22 @@ short boot_screen() {
             switch (scan_code) {
                 case SC_F1:
                     device = BDEV_FDC;
-                    sprintf(buffer, "Booting from floppy drive.");
+                    strcpy(buffer, "Booting from floppy drive.\n");
                     break;
 
                 case SC_F2:
                     device = BDEV_SDC;
-                    sprintf(buffer, "Booting from SD card.");
+                    strcpy(buffer, "Booting from SD card.\n");
                     break;
 
                 case SC_F3:
                     device = BDEV_HDC;
-                    sprintf(buffer, "Booting from hard drive.");
+                    strcpy(buffer, "Booting from hard drive.\n");
                     break;
 
                 case SC_RETURN:
                     device = BOOT_SAFE;
-                    sprintf(buffer, "Booting directly to the command line.");
+                    strcpy(buffer, "Booting directly to the command line.\n");
                     break;
 
                 default:
@@ -410,7 +410,7 @@ void boot_from_bdev(short device) {
 
         // Get the screen for the CLI
         short cli_screen = cli_txt_screen_get();
-        
+
         if (device >= 0) {
             // Execute startup file on boot device (if present)
             switch (device) {

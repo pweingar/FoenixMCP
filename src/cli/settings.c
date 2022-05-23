@@ -595,6 +595,37 @@ short cli_screen_get(short channel, char * value, short size) {
     return 0;
 }
 
+/**
+ * Set the path to the command processor "CLI" for built-in command processor
+ */
+short cli_shell_set(short channel, const char * value) {
+    if (strcicmp(value, "cli") == 0) {
+        cli_command_set();
+    } else {
+        cli_command_set(value);
+    }
+    return 0;
+}
+
+/**
+ * Get the path to the command processor "CLI" for built-in command processor
+ */
+short cli_shell_get(short channel, char * value) {
+    char tmp[255];
+
+    // Get the path...
+    cli_command_get(tmp);
+
+    // If it's empty... return that CLI is the current setting
+    if (strlen(tmp) == 0) {
+        strcpy(value, "cli");
+    } else {
+        strcpy(value, tmp);
+    }
+    return 0;
+}
+
+
 /*
  * Initialize the settings tables
  */
@@ -625,6 +656,6 @@ void cli_set_init() {
         cli_set_register("SCREEN", "SCREEN <0 - 1> -- set the channel number to use for interactions", cli_screen_set, cli_screen_get);
     }
 
+    cli_set_register("SHELL", "SHELL <path> -- set the path for the command processor shell", cli_shell_set, cli_shell_get);
     cli_set_register("TIME", "TIME HH:MM:SS -- set the time in the realtime clock", cli_time_set, cli_time_get);
-    cli_set_register("VOLUME", "VOLUME <0 - 255> -- set the master volume", cli_volume_set, cli_volume_get);
 }
