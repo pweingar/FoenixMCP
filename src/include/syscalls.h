@@ -883,4 +883,23 @@ extern short sys_txt_set_font(short screen, short width, short height, unsigned 
  */
 extern void sys_txt_get_sizes(short screen, p_extent text_size, p_extent pixel_size);
 
+/**
+ * Set the size of the border of the screen (if supported)
+ *
+ * @param screen the number of the text device
+ * @param width the horizontal size of one side of the border (0 - 32 pixels)
+ * @param height the vertical size of one side of the border (0 - 32 pixels)
+ */
+extern void sys_txt_set_border(short screen, short width, short height);
+
+/**
+ * Set the size of the border of the screen (if supported)
+ *
+ * @param screen the number of the text device
+ * @param red the red component of the color (0 - 255)
+ * @param green the green component of the color (0 - 255)
+ * @param blue the blue component of the color (0 - 255)
+ */
+extern void sys_txt_set_border_color(short screen, unsigned char red, unsigned char green, unsigned char blue);
+
 #endif
