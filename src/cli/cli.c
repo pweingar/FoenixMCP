@@ -28,6 +28,7 @@
 #include "uart_reg.h"
 #include "rtc_reg.h"
 #include "utilities.h"
+#include "variables.h"
 #include "vicky_general.h"
 #include "version.h"
 
@@ -89,7 +90,7 @@ extern short cmd_credits(short channel, int argc, const char * argv[]);
  */
 
 short cli_screen = 0;                               /**< The default screen to use for the REPL of the CLI */
-char cli_command_path[MAX_PATH_LEN];                /**< Path to the command processor (empty string for built-in) */
+char cli_command_path[MAX_PATH_LEN];                /**< The path to the command processor */
 
 /** The channel to use for interactions */
 short g_current_channel = 0;
@@ -149,14 +150,31 @@ const t_cli_command g_cli_commands[] = {
  * @param path the path to the command processor executable (0 or empty string for default)
  */
 void cli_command_set(const char * path) {
+    short i = 0;
+    short result = 0;
+
     if (path) {
         // Copy the desired path... without any trailing newline
-        strncpy(cli_command_path, path, MAX_PATH_LEN);
-        strtrimnl(cli_command_path);
+        for (i = 0; i < strlen(path); i++) {
+            char c = path[i];
+            if ((c == CHAR_NL) || (c == CHAR_CR)) {
+                cli_command_path[i] = 0;
+                break;
+            }
+            cli_command_path[i] = c;
+        }
+        result = sys_var_set("SHELL", cli_command_path);
+        if (result) {
+            log(LOG_ERROR, "Unable to set SHELL");
+        }
 
     } else {
         // Set to the default CLI
-        cli_command_path[0] = 0;
+        result = sys_var_set("SHELL", 0);
+        if (result) {
+            log(LOG_ERROR, "Unable to set SHELL");
+        }
+
     }
 }
 
@@ -167,7 +185,12 @@ void cli_command_set(const char * path) {
  */
 void cli_command_get(char * path) {
     // Copy the desired path
-    strncpy(path, cli_command_path, MAX_PATH_LEN);
+    const char * set_path = sys_var_get("SHELL");
+    if (set_path) {
+        strncpy(path, set_path, MAX_PATH_LEN);
+    } else {
+        path[0] = 0;
+    }
 }
 
 /**
@@ -540,18 +563,28 @@ short cmd_credits(short channel, int argc, const char * argv[]) {
 
     print(channel, "\n");
 
-    sprintf(line, "| Version    | %02d.%02d-alpha+%04d                               |\n", VER_MAJOR, VER_MINOR, VER_BUILD);
-    print_box(channel, "{-------------------------------------------------------------}\n");
-    print_box(channel, "| Foenix/MCP - A simple OS for Foenix Retro Systems computers |\n");
-    print_box(channel, ">------------!------------------------------------------------<\n");
+    sprintf(line, "| Version       | %02d.%02d-alpha+%04d                                  |\n", VER_MAJOR, VER_MINOR, VER_BUILD);
+    print_box(channel, "{-------------------------------------------------------------------}\n");
+    print_box(channel, "| Foenix/MCP - A simple OS for Foenix Retro Systems computers       |\n");
+    print_box(channel, ">---------------!---------------------------------------------------<\n");
     print_box(channel, line);
-    print_box(channel, ">------------#------------------------------------------------<\n");
-    print_box(channel, "| License    | BSD-3-Clause                                   |\n");
-    print_box(channel, ">------------#------------------------------------------------<\n");
-    print_box(channel, "| Creators   | Foenix Retro Systems - Stefany Allaire         |\n");
-    print_box(channel, "|            >------------------------------------------------<\n");
-    print_box(channel, "|            | Foenix/MCP - Peter Weingartner                 |\n");
-    print_box(channel, "[------------@------------------------------------------------]\n");
+    print_box(channel, ">---------------#---------------------------------------------------<\n");
+    print_box(channel, "| License       | BSD-3-Clause                                      |\n");
+    print_box(channel, ">---------------#---------------------------------------------------<\n");
+    print_box(channel, "| Creators      | Foenix Retro Systems - Stefany Allaire            |\n");
+    print_box(channel, "|               >---------------------------------------------------<\n");
+    print_box(channel, "|               | Foenix/MCP - Peter Weingartner                    |\n");
+    print_box(channel, ">---------------#---------------------------------------------------<\n");
+    print_box(channel, "| License       | BSD-3-Clause                                      |\n");
+    print_box(channel, ">---------------#---------------------------------------------------<\n");
+    print_box(channel, "| Creators      | Foenix Retro Systems - Stefany Allaire            |\n");
+    print_box(channel, "|               >---------------------------------------------------<\n");
+    print_box(channel, "|               | Foenix/MCP - Peter Weingartner                    |\n");
+    print_box(channel, ">---------------#---------------------------------------------------<\n");
+    print_box(channel, "| Contributors  | H\x86kan Th\x94rngren, Jesus Garcia, Vincent B.         |\n");
+    print_box(channel, ">---------------#---------------------------------------------------<\n");
+    print_box(channel, "| Included Code | FatFS - http://elm-chan.org/fsw/ff/00index_e.html |\n");
+    print_box(channel, "[---------------@---------------------------------------------------]\n");
 
     print(channel, "\n\x1b[1mMake the machine yours!\x1b[0m\n");
 
@@ -943,6 +976,7 @@ short cli_start_repl(short channel, const char * init_cwd) {
     }
 
     // Start up the command shell
+    cli_command_get(cli_command_path);
     if (cli_command_path[0] != 0) {
         // Over-ride path provided, boot it
         char * argv[1] = { cli_command_path };
@@ -966,7 +1000,7 @@ short cli_start_repl(short channel, const char * init_cwd) {
                 }
             }
         }
-        
+
         return cli_repl(channel);
     }
 }
@@ -976,13 +1010,16 @@ short cli_start_repl(short channel, const char * init_cwd) {
  */
 void cli_rerepl() {
     // Start up the command shell
+    cli_command_get(cli_command_path);
     if (cli_command_path[0] != 0) {
         char * argv[1] = {cli_command_path};
 
         // Over-ride path provided, boot it
         short result = sys_proc_run(cli_command_path, 1, argv);
         if (result) {
-            print(0, "Unable to start: ");
+            print(0, "Unable to start ");
+            print(0, cli_command_path);
+            print(0, ": ");
             print(0, err_message(result));
             while (1) ;
         }

@@ -728,6 +728,27 @@ short sys_proc_run(const char * path, int argc, char * argv[]) {
     return syscall(KFN_RUN, path, argc, argv);
 }
 
+/**
+ * Set the value of a variable
+ *
+ * @param name the name of the variable to set
+ * @param value the value the variable should have
+ * @return 0 on success, negative number on error
+ */
+short sys_var_set(const char *name, const char *value) {
+    return syscall(KFN_VAR_SET, name, value);
+}
+
+/**
+ * Get the value of a variable
+ *
+ * @param name the name of the variable to set
+ * @return pointer to the string on success, 0 if not found
+ */
+const char * sys_var_get(const char *name) {
+    return (const char *)syscall(KFN_VAR_GET, name);
+}
+
 //
 // Text system calls
 //

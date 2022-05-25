@@ -88,6 +88,8 @@
 #define KFN_MEM_GET_RAMTOP      0x41    /* Get the upper limit of the top of system RAM */
 #define KFN_MEM_RESERVE         0x42    /* Reserve a block of memory at the top of system RAM */
 #define KFN_ELEVATE             0x43    /* Switch the user process to a full privilege */
+#define KFN_VAR_SET             0x44    /* Set the value of a system variable */
+#define KFN_VAR_GET             0x45    /* Get the value of a system variable */
 
 /* Misc calls */
 
@@ -772,6 +774,23 @@ extern short sys_kbd_layout(const char * tables);
  * @return the return result of the program
  */
 extern short sys_proc_run(const char * path, int argc, char * argv[]);
+
+/**
+ * Set the value of a variable
+ *
+ * @param name the name of the variable to set
+ * @param value the value the variable should have
+ * @return 0 on success, negative number on error
+ */
+extern short sys_var_set(const char *name, const char *value);
+
+/**
+ * Get the value of a variable
+ *
+ * @param name the name of the variable to set
+ * @return pointer to the string on success, 0 if not found
+ */
+extern const char * sys_var_get(const char *name);
 
 //
 // Text screen calls

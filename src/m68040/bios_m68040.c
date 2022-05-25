@@ -16,6 +16,7 @@
 #include "dev/rtc.h"
 #include "dev/txt_screen.h"
 #include "sys_general.h"
+#include "variables.h"
 
 #if MODEL == MODEL_FOENIX_A2560K
 #include "dev/kbd_mo.h"
@@ -215,6 +216,12 @@ unsigned long syscall_dispatch(int32_t function, int32_t param0, int32_t param1,
 
                 case KFN_MEM_RESERVE:
                     return mem_reserve((unsigned long)param0);
+
+                case KFN_VAR_SET:
+                    return var_set((const char *)param0, (const char *)param1);
+
+                case KFN_VAR_GET:
+                    return (unsigned long)var_get((const char *)param0);
 
                 default:
                     return ERR_GENERAL;

@@ -39,6 +39,7 @@
 #include "snd/psg.h"
 #include "snd/sid.h"
 #include "snd/yamaha.h"
+#include "variables.h"
 #include "vicky_general.h"
 #include "fatfs/ff.h"
 #include "cli/cli.h"
@@ -130,6 +131,9 @@ void initialize() {
 
     // /* Hide the mouse */
     mouse_set_visible(0);
+
+    /* Initialize the variable system */
+    var_init();
 
     /* Initialize the text channels */
     txt_init();
