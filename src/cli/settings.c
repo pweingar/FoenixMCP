@@ -20,6 +20,7 @@
 #include "dev/rtc.h"
 #include "dev/txt_screen.h"
 #include "snd/codec.h"
+#include "utilities.h"
 #include "vicky_general.h"
 
 #if MODEL == MODEL_FOENIX_A2560K
@@ -142,8 +143,8 @@ p_setting cli_find_setting(const char * name) {
 short cli_set_value(short channel, const char * name, const char * value) {
     p_setting setting = cli_find_setting(name);
     if (setting == 0) {
-        /* Setting not found... */
-        return ERR_NOT_FOUND;
+        /* Setting not found: set a system variable */
+        return sys_var_set(name, value);
 
     } else {
         /* Attempt to set the value, and return the results */
@@ -165,8 +166,15 @@ short cli_set_value(short channel, const char * name, const char * value) {
 short cli_get_value(short channel, const char * name, char * buffer, short size) {
     p_setting setting = cli_find_setting(name);
     if (setting == 0) {
-        /* Setting not found... */
-        return ERR_NOT_FOUND;
+        /* Setting not found: try to get an environment variable */
+        const char * value = sys_var_get(name);
+        if (value) {
+            strncpy(buffer, value, size);
+            return 0;
+
+        } else {
+            return ERR_NOT_FOUND;
+        }
 
     } else {
         /* Attempt to set the value, and return the results */
@@ -600,7 +608,7 @@ short cli_screen_get(short channel, char * value, short size) {
  */
 short cli_shell_set(short channel, const char * value) {
     if (strcicmp(value, "cli") == 0) {
-        cli_command_set();
+        cli_command_set(0);
     } else {
         cli_command_set(value);
     }
@@ -610,7 +618,7 @@ short cli_shell_set(short channel, const char * value) {
 /**
  * Get the path to the command processor "CLI" for built-in command processor
  */
-short cli_shell_get(short channel, char * value) {
+short cli_shell_get(short channel, char * value, short size) {
     char tmp[255];
 
     // Get the path...
@@ -618,9 +626,9 @@ short cli_shell_get(short channel, char * value) {
 
     // If it's empty... return that CLI is the current setting
     if (strlen(tmp) == 0) {
-        strcpy(value, "cli");
+        strncpy(value, "cli", size);
     } else {
-        strcpy(value, tmp);
+        strncpy(value, tmp, size);
     }
     return 0;
 }
