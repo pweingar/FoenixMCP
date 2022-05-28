@@ -88,8 +88,8 @@
 #define UART_9600               130         /* Code for 9600 bps */
 #define UART_19200              65          /* Code for 19200 bps */
 #define UART_38400              33          /* Code for 28400 bps */
-#define UART_57600              22          /* Code for 57600 bps */
-#define UART_115200             11          /* Code for 115200 bps */
+#define UART_57600              21          /* Code for 57600 bps */
+#define UART_115200             10          /* Code for 115200 bps */
 
 #else
 
