@@ -1,0 +1,49 @@
+assign    CS0                 = ( Internal_Address[31:21] == 11'b0000_0000_000 ) & ( UserData | UserProgram | SuperData | SuperProgram ); //$00 (2M)
+// System RAM
+assign   CS_MERA        = ( Internal_Address[31:24] == 7'b0000_001 )  & ( UserData | UserProgram | SuperData | SuperProgram ); //$02000000 - $05FFFFFF 64Meg
+
+// Video RAM
+assign     CS_VRAM_A          = ( Internal_Address[31:21] == 11'b0000_0000_100 )  & ( UserData  | SuperData ); //$080000 - 09FFFF (2M) (out of 8M)
+assign     CS_VRAM_B          = ( Internal_Address[31:21] == 11'b0000_0000_101 )  & ( UserData  | SuperData ); //$0A0000 - 0BFFFF (2M) (out of 8M)
+
+assign     CS_GABE            = ( Internal_Address[31:17] == 15'b1111_1110_1100_000 ) & ( UserData  | SuperData ); //$FEC0
+assign     CS_BEATRIX         = ( Internal_Address[31:17] == 15'b1111_1110_1100_001 ) & ( UserData  | SuperData ); //$FEC2
+// Vicky Channel A
+assign     CS_VICKY_A         = ( Internal_Address[31:17] == 15'b1111_1110_1100_010 ) & ( UserData  | SuperData ); //$FEC4
+assign     CS_VICKY_MEM_A    = ( Internal_Address[31:17] == 15'b1111_1110_1100_011 ) & ( UserData  | SuperData ); //$FEC6
+//$00C6_8000 - $00C9_FFFF - Reserved
+// Vicky Channel B
+assign     CS_VICKY_B         = ( Internal_Address[31:17] == 15'b1111_1110_1100_100 ) & ( UserData  | SuperData ); //$FEC8
+assign   CS_VICKY_MEM_B = ( Internal_Address[31:17] == 15'b1111_1110_1100_101 ) & ( UserData  | SuperData ); //$FECA
+
+assign     FLASH0    = ( Internal_Address[31:21] == 11'b1111_1111_111 ) & ( SuperData | SuperProgram );    //$FFE0_0000
+VICKY_MASTER_REG[8]     <= 32'h1008_1008;        // FONT Manager - Font Container Size and FONT Size
+        VICKY_MASTER_REG[9]     <= 32'h0000_1E50;        // FONT - Horizontal # of Character, Vertical # FONT Line
+
+        always @ (*)
+        begin
+            case(CPU_A_i[4:2])
+                3'b000: begin CPU_D_o = {16'h0000, J0_BUTTON2_Input, J0_BUTTON1_Input, 1'b0, J0_BUTTON0_Input, J0_RIGHT_i, J0_LEFT_i, J0_DOWN_i, J0_UP_i, J1_BUTTON2_Input, J1_BUTTON1_Input, 1'b0, J1_BUTTON0_Input, J1_RIGHT_i, J1_LEFT_i, J1_DOWN_i, J1_UP_i}; end
+                3'b001: begin CPU_D_o = {16'h0000, SNES_CTRL_REG[15:7], SampleIsDone, SNES_CTRL_REG[5:0] }; end
+                3'b010: begin CPU_D_o = { SNES_PORT0_INPUT1, 4'b0000, SNES_PORT0_INPUT0, 4'b0000 }; end
+                3'b011: begin CPU_D_o = { SNES_PORT0_INPUT3, 4'b0000, SNES_PORT0_INPUT2, 4'b0000 }; end
+                3'b100: begin CPU_D_o = { SNES_PORT1_INPUT1, 4'b0000, SNES_PORT1_INPUT0, 4'b0000 }; end
+                3'b101: begin CPU_D_o = { SNES_PORT1_INPUT3, 4'b0000, SNES_PORT1_INPUT2, 4'b0000 }; end
+                3'b110: begin CPU_D_o = {6'b00_0000, F_SD_WP_i, F_SD_CD_i, 8'b0000_0000, 6'b00_0000, USER_i[1], USER_i[0], 6'b00_0000, BOOT_MODE_i[1], BOOT_MODE_i[0]}; end
+                3'b111: begin CPU_D_o = 32'hAAAA_5555; end
+                default: begin    CPU_D_o = 32'hDEAF_B00B; end
+            endcase
+        end
+
+        assign NES_PORT_0_ENABLE = SNES_CTRL_REG[0];
+        assign NES_PORT_1_ENABLE = SNES_CTRL_REG[1];
+        assign NES_SNES_PORT_0_CHOICE = !SNES_CTRL_REG[2];
+        assign NES_SNES_PORT_1_CHOICE = !SNES_CTRL_REG[3];
+        This is new:
+        assign JOYSTICK0_RLY_o = SNES_CTRL_REG[8];
+        assign JOYSTICK1_RLY_o = SNES_CTRL_REG[9];
+        this control the relay to swap the Button1 and Button2 (I think) to relay the signal to the Analog Input of the Super IO
+        Mimiru Miru — Today at 9:46 PM
+        ahhh ok
+        c256foenix — Today at 9:46 PM
+        SNES_CTRL_REG[7] is start the Transfer 

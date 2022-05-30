@@ -84,6 +84,7 @@ short proc_run(const char * path, int argc, char * argv[]) {
     if (result == 0) {
         if (start != 0) {
             proc_exec(start, k_default_stack, argc, argv);
+            return 0;
         } else {
             log_num(LOG_ERROR, "Couldn't execute file: ", result);
             return ERR_NOT_EXECUTABLE;

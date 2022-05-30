@@ -14,15 +14,14 @@
 #include "dev/console.h"
 #include "dev/ps2.h"
 #include "dev/kbd_mo.h"
-#include "dev/text_screen_iii.h"
+#include "dev/txt_screen.h"
 #include "simpleio.h"
 
 #define ANSI_BUFFER_SIZE    16
 #define MAX_ANSI_ARGS       10
 
 #define CON_CTRL_ANSI       0x80            /* Set to enable ANSI escape processing */
-#define CON_IOCTRL_ANSI_ON  0x01            /* IOCTRL Command: turn on ANSI terminal codes */
-#define CON_IOCTRL_ANSI_OFF 0x02            /* IOCTRL Command: turn off ANSI terminal codes */
+#define CON_CTRL_ECHO       0x40            /* Set to enable echo of input characters */
 
 typedef void (*ansi_handler)(p_channel, short, short[]);
 
@@ -53,6 +52,7 @@ extern void ansi_cuf(p_channel chan, short arg_count, short args[]);
 extern void ansi_cub(p_channel chan, short arg_count, short args[]);
 extern void ansi_cud(p_channel chan, short arg_count, short args[]);
 extern void ansi_cup(p_channel chan, short arg_count, short args[]);
+extern void ansi_cha(p_channel chan, short arg_count, short args[]);
 extern void ansi_ed(p_channel chan, short arg_count, short args[]);
 extern void ansi_el(p_channel chan, short arg_count, short args[]);
 extern void ansi_ich(p_channel chan, short arg_count, short args[]);
@@ -73,6 +73,7 @@ const t_ansi_seq ansi_sequence[] = {
     { 'B', ansi_cud },
     { 'C', ansi_cuf },
     { 'D', ansi_cub },
+    { 'G', ansi_cha },
     { 'J', ansi_ed },
     { 'K', ansi_el },
     { 'P', ansi_dch },
@@ -164,7 +165,7 @@ void ansi_match_pattern(p_channel chan, p_console_data con_data) {
  * Add a character to the ANSI buffer... and process when an escape sequence is found
  */
 void ansi_process_c(p_channel chan, p_console_data con_data, char c) {
-    TRACE("ansi_process_c");
+    // TRACE("ansi_process_c");
 
     if (c == '\x1B') {
         /* Start the escape sequence */
@@ -184,7 +185,7 @@ void ansi_process_c(p_channel chan, p_console_data con_data, char c) {
 
     } else {
         /* Not working on a sequence... so just print it */
-        text_put_raw(chan->dev, c);
+        txt_put(chan->dev, c);
     }
 }
 
@@ -192,7 +193,7 @@ void ansi_process_c(p_channel chan, p_console_data con_data, char c) {
  * ANSI Handler: cursor up
  */
 void ansi_cuu(p_channel chan, short arg_count, short args[]) {
-    unsigned short x, y;
+    t_point position;
     short delta = 1;
 
     TRACE("ansi_cuu");
@@ -203,16 +204,16 @@ void ansi_cuu(p_channel chan, short arg_count, short args[]) {
 
     if (delta == 0) delta = 1;
 
-    text_get_xy(chan->dev, &x, &y);
-    y -= delta;
-    text_set_xy(chan->dev, x, y);
+    txt_get_xy(chan->dev, &position);
+    position.y -= delta;
+    txt_set_xy(chan->dev, position.x, position.y);
 }
 
 /*
  * ANSI Handler: cursor forward
  */
 void ansi_cuf(p_channel chan, short arg_count, short args[]) {
-    unsigned short x, y;
+    t_point position;
     short delta = 1;
 
     TRACE("ansi_cuf");
@@ -223,16 +224,16 @@ void ansi_cuf(p_channel chan, short arg_count, short args[]) {
 
     if (delta == 0) delta = 1;
 
-    text_get_xy(chan->dev, &x, &y);
-    x += delta;
-    text_set_xy(chan->dev, x, y);
+    txt_get_xy(chan->dev, &position);
+    position.x += delta;
+    txt_set_xy(chan->dev, position.x, position.y);
 }
 
 /*
  * ANSI Handler: cursor back
  */
 void ansi_cub(p_channel chan, short arg_count, short args[]) {
-    unsigned short x, y;
+    t_point position;
     short delta = 1;
 
     TRACE("ansi_cub");
@@ -243,16 +244,16 @@ void ansi_cub(p_channel chan, short arg_count, short args[]) {
 
     if (delta == 0) delta = 1;
 
-    text_get_xy(chan->dev, &x, &y);
-    x -= delta;
-    text_set_xy(chan->dev, x, y);
+    txt_get_xy(chan->dev, &position);
+    position.x -= delta;
+    txt_set_xy(chan->dev, position.x, position.y);
 }
 
 /*
  * ANSI Handler: cursor down
  */
 void ansi_cud(p_channel chan, short arg_count, short args[]) {
-    unsigned short x, y;
+    t_point position;
     short delta = 1;
 
     TRACE("ansi_cud");
@@ -263,9 +264,9 @@ void ansi_cud(p_channel chan, short arg_count, short args[]) {
 
     if (delta == 0) delta = 1;
 
-    text_get_xy(chan->dev, &x, &y);
-    y += delta;
-    text_set_xy(chan->dev, x, y);
+    txt_get_xy(chan->dev, &position);
+    position.y += delta;
+    txt_set_xy(chan->dev, position.x, position.y);
 }
 
 /*
@@ -287,7 +288,26 @@ void ansi_cup(p_channel chan, short arg_count, short args[]) {
     if (x == 0) x = 1;
     if (y == 0) y = 1;
 
-    text_set_xy(chan->dev, x - 1, y - 1);
+    txt_set_xy(chan->dev, x - 1, y - 1);
+}
+
+/*
+ * ANSI Handler: cursor horizontal absolute
+ */
+void ansi_cha(p_channel chan, short arg_count, short args[]) {
+    t_point position;
+    short column = 1;
+
+    TRACE("ansi_cha");
+
+    if (arg_count > 0) {
+        column = args[0];
+    }
+
+    if (column == 0) column = 1;
+
+    txt_get_xy(chan->dev, &position);
+    txt_set_xy(chan->dev, column - 1, position.y);
 }
 
 /*
@@ -302,7 +322,7 @@ void ansi_ed(p_channel chan, short arg_count, short args[]) {
         n = args[0];
     }
 
-    text_clear(chan->dev, n);
+    txt_clear(chan->dev, n);
 }
 
 /*
@@ -317,7 +337,7 @@ void ansi_el(p_channel chan, short arg_count, short args[]) {
         n = args[0];
     }
 
-    text_clear_line(chan->dev, n);
+    txt_clear_line(chan->dev, n);
 }
 
 /*
@@ -332,14 +352,14 @@ void ansi_ich(p_channel chan, short arg_count, short args[]) {
         n = args[0];
     }
 
-    text_insert(chan->dev, n);
+    txt_insert(chan->dev, n);
 }
 
 /*
  * ANSI Handler: delete a character
  */
 void ansi_dch(p_channel chan, short arg_count, short args[]) {
-    unsigned short n = 2;
+    unsigned short n = 1;
 
     TRACE("ansi_dch");
 
@@ -347,20 +367,22 @@ void ansi_dch(p_channel chan, short arg_count, short args[]) {
         n = args[0];
     }
 
-    text_delete(chan->dev, n);
+    if (n > 0) {
+        txt_delete(chan->dev, n);
+    }
 }
 
 /*
  * Set Graphics Rendition
  */
 void ansi_sgr(p_channel chan, short argc, short args[]) {
-    short foreground = 0, background = 0;
+    unsigned char foreground = 0, background = 0;
     short i;
 
     TRACE("ansi_sgr");
 
     /* Get the current colors */
-    text_get_color(chan->dev, &foreground, &background);
+    txt_get_color(chan->dev, &foreground, &background);
 
     /* Walk through each argument code... */
     for (i = 0; i < argc; i++) {
@@ -394,7 +416,7 @@ void ansi_sgr(p_channel chan, short argc, short args[]) {
     }
 
     /* Set the colors */
-    text_set_color(chan->dev, foreground, background);
+    txt_set_color(chan->dev, foreground, background);
 }
 
 //
@@ -424,7 +446,7 @@ short con_open(p_channel chan, const uint8_t * path, short mode) {
     /* Initialize the console data for this channel */
 
     con_data = (p_console_data)&(chan->data);
-    con_data->control = CON_CTRL_ANSI;
+    con_data->control = CON_CTRL_ANSI | CON_CTRL_ECHO;
     con_data->ansi_buffer_count = 0;
     for (i = 0; i < ANSI_BUFFER_SIZE; i++) {
         con_data->ansi_buffer[i] = 0;
@@ -447,7 +469,7 @@ static short con_flush(p_channel chan) {
     con_data = (p_console_data)&(chan->data);
     if (con_data->control & CON_CTRL_ANSI) {
         for (i = 0; i < con_data->ansi_buffer_count; i++) {
-            text_put_raw(chan->dev, con_data->ansi_buffer[i]);
+            txt_put(chan->dev, con_data->ansi_buffer[i]);
             con_data->ansi_buffer[i] = 0;
         }
     }
@@ -481,7 +503,7 @@ short con_write_b(p_channel chan, uint8_t b) {
 
     } else {
         /* Not processing ANSI codes... just pass it to the text driver */
-        text_put_raw(chan->dev, (char)b);
+        txt_put(chan->dev, (char)b);
     }
     return 0;
 }
@@ -505,7 +527,7 @@ short con_read_b(p_channel chan) {
 
 #if MODEL == MODEL_FOENIX_A2560K
 #ifdef KBD_POLLED
-            ps2_mouse_get_packet();
+            //ps2_mouse_get_packet();
             c = kbdmo_getc_poll();
 #else
             c = kbdmo_getc();
@@ -521,8 +543,10 @@ short con_read_b(p_channel chan) {
 
     } while (c == 0);
 
-    // Echo the character to the screen
-    con_write_b(chan, c);
+    if ((con_data->control & CON_CTRL_ECHO) != 0) {
+        // Echo the character to the screen
+        con_write_b(chan, c);
+    }
 
     return (short)(c & 0x00ff);
 }
@@ -682,6 +706,17 @@ short con_seek(p_channel chan, long position, short base) {
     return 0;
 }
 
+/**
+ * Show or hide the cursor
+ *
+ * @param chan
+ * @param is_visible boolean to indicate if the cursor should be seen (non-zero) or hidden (0)
+ */
+short con_set_cursor_visible(p_channel chan, short is_visible) {
+    txt_set_cursor_visible(chan->dev, is_visible);
+    return 0;
+}
+
 short con_ioctrl(p_channel chan, short command, uint8_t * buffer, short size) {
     p_console_data con_data;
 
@@ -695,9 +730,36 @@ short con_ioctrl(p_channel chan, short command, uint8_t * buffer, short size) {
             return 0;
 
         case CON_IOCTRL_ANSI_OFF:
-            /* Turn on ANSI interpreting */
+            /* Turn off ANSI interpreting */
             con_data->control &= ~CON_CTRL_ANSI;
             return 0;
+
+        case CON_IOCTRL_ECHO_ON:
+            /* Turn on echo interpreting */
+            con_data->control |= CON_CTRL_ECHO;
+            return 0;
+
+        case CON_IOCTRL_ECHO_OFF:
+            /* Turn off echo */
+            con_data->control &= ~CON_CTRL_ECHO;
+            return 0;
+
+        case CON_IOCTRL_BREAK:
+            /* Return the result of the BREAK key test */
+#if MODEL == MODEL_FOENIX_A2560K
+            return kbdmo_break();
+#else
+            /* TODO: flesh this out for the A2560U */
+            return 0;
+#endif
+
+        case CON_IOCTRL_CURS_ON:
+            // Show the cursor
+            return con_set_cursor_visible(chan, 1);
+
+        case CON_IOCTRL_CURS_OFF:
+            // Hide the cursor
+            return con_set_cursor_visible(chan, 0);
 
         default:
             break;
@@ -755,7 +817,10 @@ short con_install() {
     /* Pre-open the console and EVID channels */
 
     chan_open(CDEV_CONSOLE, 0, 0);
-    // chan_open(CDEV_EVID, 0, 0);
+
+#if MODEL == MODEL_FOENIX_A2560K
+    chan_open(CDEV_EVID, 0, 0);
+#endif
 
     return result;
 }

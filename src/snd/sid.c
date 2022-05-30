@@ -149,87 +149,88 @@ void sid_test_internal() {
 	*SID_INT_R_MODE_VOL = 0;
 }
 
-void sid_text_external() {
+void sid_test_external() {
     unsigned char i;
-    unsigned int j;
+	unsigned int j;
+    long jiffies;
 
-#if MODEL == MODEL_FOENIX_A2560K
+	// Attack = 2, Decay = 9
+	*SID_EXT_L_V1_ATCK_DECY = 0x29;
+	*SID_EXT_L_V2_ATCK_DECY = 0x29;
+	*SID_EXT_L_V3_ATCK_DECY = 0x29;
 
-    // Clear all Channels
-    //	for (i = 0; i<24 ; i++) {
-    //		SID_INT_L_V1_FREQ_LO[i] = 0x00;
-    //		SID_INT_R_V1_FREQ_LO[i] = 0x00;
-    //	}
+	*SID_EXT_R_V1_ATCK_DECY = 0x29;
+	*SID_EXT_R_V2_ATCK_DECY = 0x29;
+	*SID_EXT_R_V3_ATCK_DECY = 0x29;
+	// Sustain = 1, Release = 5
+	*SID_EXT_L_V1_SSTN_RLSE = 0x1F;
+	*SID_EXT_L_V2_SSTN_RLSE = 0x1F;
+	*SID_EXT_L_V3_SSTN_RLSE = 0x1F;
 
-    // Attack = 2, Decay = 9
-    *SID_EXT_L_V1_ATCK_DECY = 0x29;
-    *SID_EXT_L_V2_ATCK_DECY = 0x29;
-    *SID_EXT_L_V3_ATCK_DECY = 0x29;
+	*SID_EXT_R_V1_SSTN_RLSE = 0x1F;
+	*SID_EXT_R_V2_SSTN_RLSE = 0x1F;
+	*SID_EXT_R_V3_SSTN_RLSE = 0x1F;
 
-    *SID_EXT_R_V1_ATCK_DECY = 0x29;
-    *SID_EXT_R_V2_ATCK_DECY = 0x29;
-    *SID_EXT_R_V3_ATCK_DECY = 0x29;
-    // Sustain = 1, Release = 5
-    *SID_EXT_L_V1_SSTN_RLSE = 0x1F;
-    *SID_EXT_L_V2_SSTN_RLSE = 0x1F;
-    *SID_EXT_L_V3_SSTN_RLSE = 0x1F;
+	*SID_EXT_L_MODE_VOL = 0x0F;
+	*SID_EXT_R_MODE_VOL = 0x0F;
 
-    *SID_EXT_R_V1_SSTN_RLSE = 0x1F;
-    *SID_EXT_R_V2_SSTN_RLSE = 0x1F;
-    *SID_EXT_R_V3_SSTN_RLSE = 0x1F;
+	// Set Voice 1 to F-3
+	*SID_EXT_L_V1_FREQ_LO = 96;
+	*SID_EXT_L_V1_FREQ_HI = 22;
+	*SID_EXT_R_V1_FREQ_LO = 96;
+	*SID_EXT_R_V1_FREQ_HI = 22;
 
-    *SID_EXT_L_MODE_VOL = 0x0F;
-    *SID_EXT_R_MODE_VOL = 0x0F;
+	*SID_EXT_L_V1_CTRL = 0x11;
+	*SID_EXT_R_V1_CTRL = 0x11;
 
-    // Set Voice 1 to F-3
-    *SID_EXT_L_V1_FREQ_LO = 96;
-    *SID_EXT_L_V1_FREQ_HI = 22;
-    *SID_EXT_R_V1_FREQ_LO = 96;
-    *SID_EXT_R_V1_FREQ_HI = 22;
+	jiffies = rtc_get_jiffies() + 3;
+    while (jiffies > rtc_get_jiffies());
 
-    *SID_EXT_L_V1_CTRL = 0x11;
-    *SID_EXT_R_V1_CTRL = 0x11;
+	*SID_EXT_L_V2_FREQ_LO = 49;
+	*SID_EXT_L_V2_FREQ_HI = 8;
+	*SID_EXT_R_V2_FREQ_LO = 49;
+	*SID_EXT_R_V2_FREQ_HI = 8;
 
-    for (j=0 ; j<65536; j++);
+	*SID_EXT_L_V2_CTRL = 0x11;
+	*SID_EXT_R_V2_CTRL = 0x11;
 
+    jiffies = rtc_get_jiffies() + 3;
+    while (jiffies > rtc_get_jiffies());
 
-    *SID_EXT_L_V2_FREQ_LO = 49;
-    *SID_EXT_L_V2_FREQ_HI = 8;
-    *SID_EXT_R_V2_FREQ_LO = 49;
-    *SID_EXT_R_V2_FREQ_HI = 8;
+	*SID_EXT_L_V3_FREQ_LO = 135;
+	*SID_EXT_L_V3_FREQ_HI = 33;
+	*SID_EXT_R_V3_FREQ_LO = 135;
+	*SID_EXT_R_V3_FREQ_HI = 33;
 
-    *SID_EXT_L_V2_CTRL = 0x11;
-    *SID_EXT_R_V2_CTRL = 0x11;
+	*SID_EXT_L_V3_CTRL = 0x11;
+	*SID_EXT_R_V3_CTRL = 0x11;
 
-    for (j=0 ; j<65536; j++);
+    jiffies = rtc_get_jiffies() + 25;
+    while (jiffies > rtc_get_jiffies());
 
-    *SID_EXT_L_V3_FREQ_LO = 135;
-    *SID_EXT_L_V3_FREQ_HI = 33;
-    *SID_EXT_R_V3_FREQ_LO = 135;
-    *SID_EXT_R_V3_FREQ_HI = 33;
+	*SID_EXT_L_V1_CTRL = 0x10;
+	*SID_EXT_R_V1_CTRL = 0x10;
 
-    *SID_EXT_L_V3_CTRL = 0x11;
-    *SID_EXT_R_V3_CTRL = 0x11;
+    jiffies = rtc_get_jiffies() + 3;
+    while (jiffies > rtc_get_jiffies());
 
-    for (j=0 ; j<262144; j++);
+	*SID_EXT_L_V2_CTRL = 0x10;
+	*SID_EXT_R_V2_CTRL = 0x10;
 
-    *SID_EXT_L_V1_CTRL = 0x10;
-    *SID_EXT_R_V1_CTRL = 0x10;
-    for (j=0 ; j<8192 ; j++);
-    *SID_EXT_L_V2_CTRL = 0x10;
-    *SID_EXT_R_V2_CTRL = 0x10;
-    for (j=0 ; j<8192 ; j++);
-    *SID_EXT_L_V2_CTRL = 0x10;
-    *SID_EXT_R_V2_CTRL = 0x10;
-    for (j=0 ; j<32768 ; j++);
+    jiffies = rtc_get_jiffies() + 3;
+    while (jiffies > rtc_get_jiffies());
 
-    for (i = 0; i < 16; i++) {
+	*SID_EXT_L_V2_CTRL = 0x10;
+	*SID_EXT_R_V2_CTRL = 0x10;
 
-        for (j=0 ; j<1024 ; j++);
+    jiffies = rtc_get_jiffies() + 10;
+    while (jiffies > rtc_get_jiffies());
 
-        *SID_EXT_L_MODE_VOL = 15 - i;
-        *SID_EXT_R_MODE_VOL = 15 - i;
-    }
+	for (i = 0; i < 16; i++) {
+		*SID_EXT_L_MODE_VOL = 15 - i;
+		*SID_EXT_R_MODE_VOL = 15 - i;
+	}
 
-#endif
+	*SID_EXT_L_MODE_VOL = 0;
+	*SID_EXT_R_MODE_VOL = 0;
 }

@@ -3,7 +3,6 @@
  */
 
 #include "interrupt.h"
-#include "dev/text_screen_iii.h"
 
 #define MAX_HANDLERS 48
 

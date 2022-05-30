@@ -5,6 +5,13 @@
 #ifndef __UART_H
 #define __UART_H
 
+/**
+ * Returns the address of the first register in the given UART
+ *
+ * @param uart the number of the UART 0 = COM1, 1 = COM2
+ */
+extern volatile unsigned char * uart_get_base(short uart);
+
 /*
  * Set the data transfer speed
  *
@@ -61,4 +68,10 @@ extern void uart_put(short uart, unsigned char b);
  * the byte read from the UART
  */
 extern unsigned char uart_get(short uart);
+
+/**
+ * Install the UART driver
+ */
+extern short uart_install();
+
 #endif

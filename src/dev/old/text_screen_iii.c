@@ -4,9 +4,11 @@
 
 #include "constants.h"
 #include "vicky_general.h"
-#include "text_screen_iii.h"
+#include "dev/txt_screen.h"
 #include "simpleio.h"
+#include "sys_general.h"
 #include "rsrc/font/MSX_CP437_8x8.h"
+#include "rsrc/font/BM437_IBM_Model3_Alt4.h"
 
 #define MAX_TEXT_CHANNELS 2
 
@@ -15,6 +17,7 @@
  */
 typedef struct s_text_channel {
     unsigned char current_color;
+    unsigned char * font_ptr;
 
     volatile unsigned long * master_control;
     volatile char * text_cells;
@@ -22,11 +25,14 @@ typedef struct s_text_channel {
     volatile unsigned long * cursor_settings;
     volatile unsigned long * cursor_position;
     volatile unsigned long * border_control;
+    volatile unsigned long * font_size_ctrl;
+    volatile unsigned long * font_count_ctrl;
 
     short columns_max;
     short rows_max;
     short columns_visible;
     short rows_visible;
+    short font_size;            /* 0 = 8x8, 1 = 8x16 */
 
     short x;
     short y;
@@ -80,9 +86,16 @@ const unsigned short bg_color_lut [32] = {
  * Initialize the text screen driver
  */
 int text_init() {
-    short need_hires = 0;
+    short need_hires = 1;
     int i, x;
     p_text_channel chan_a = &text_channel[0];
+    unsigned long border_color = 0;
+
+#if MODEL == MODEL_FOENIX_A2560K
+    border_color = 0x00004000;          /* Dark blue border for the K */
+#elif MODEL == MODEL_FOENIX_A2560U || MODEL == MODEL_FOENIX_A2560U_PLUS
+    border_color = 0x00008080;          /* Dark blue border for the K */
+#endif
 
 #if MODEL == MODEL_FOENIX_A2560K
     p_text_channel chan_b = &text_channel[1];
@@ -108,19 +121,27 @@ int text_init() {
         text_channel[i].y = 0;
     }
 
+#if MODEL == MODEL_FOENIX_A2560K
+    // Init CLUT for the Color Memory
+    for (i = 0; i < 16; i++) {
+        unsigned long fg_color = fg_color_lut[2*i + 1] << 16 | fg_color_lut[2*i];
+        unsigned long bg_color = bg_color_lut[2*i + 1] << 16 | bg_color_lut[2*i];
+        FG_CLUT_A[i] = fg_color;
+        BG_CLUT_A[i] = bg_color;
+        FG_CLUT_B[i] = fg_color;
+        BG_CLUT_B[i] = bg_color;
+    }
+#else
 	// Init CLUT for the Color Memory
 	for (i = 0; i<32; i++) {
 		FG_CLUT_A[i] = fg_color_lut[i];
 		BG_CLUT_A[i] = bg_color_lut[i];
-#if MODEL == MODEL_FOENIX_A2560K
-		FG_CLUT_B[i] = fg_color_lut[i];
-		BG_CLUT_B[i] = bg_color_lut[i];
-#endif
 	}
+#endif
 
     /* Initialize everything... only do a screen if it's present */
 
-    need_hires = ((*VKY3_DIP_REG & VKY3_DIP_HIRES) == 0) ? 1 : 0;
+    // need_hires = ((*VKY3_DIP_REG & VKY3_DIP_HIRES) == 0) ? 1 : 0;
 
     chan_a->master_control = MasterControlReg_A;
     chan_a->text_cells = ScreenText_A;
@@ -129,28 +150,67 @@ int text_init() {
     chan_a->cursor_position = CursorControlReg_H_A;
     chan_a->border_control = BorderControlReg_L_A;
 
+#if MODEL == MODEL_FOENIX_A2560K
+    /* A2560K has support for 8x16 characters and therefore font sizes */
+    chan_a->font_size_ctrl = FONT_Size_Ctrl_A;
+    chan_a->font_count_ctrl = FONT_Count_Ctrl_A;
+    need_hires = 0;
+
+    if (need_hires) {
+        *chan_a->master_control = VKY3_MCRA_1024x768 | VKY3_MCR_TEXT_EN;    /* Set to text only mode: 800x600 */
+    } else {
+        *chan_a->master_control = VKY3_MCR_800x600 | VKY3_MCR_TEXT_EN;      /* Set to text only mode: 800x600 */
+    }
+#else
+    /* All other models do not have this feature */
+    chan_a->font_size_ctrl = 0;
+    chan_a->font_count_ctrl = 0;
+
     if (need_hires) {
         *chan_a->master_control = VKY3_MCR_800x600 | VKY3_MCR_TEXT_EN;      /* Set to text only mode: 800x600 */
     } else {
         *chan_a->master_control = VKY3_MCR_640x480 | VKY3_MCR_TEXT_EN;      /* Set to text only mode: 640x480 */
     }
+#endif
 
-	chan_a->border_control[0] = 0x00102001;	// Enable
-	chan_a->border_control[1] = 0x00000040;	//Dark Blue
+    if (chan_a->font_size_ctrl) {
+        *chan_a->font_size_ctrl = 0x08080808;       /* Font and container are 8x8 */
+        *chan_a->font_count_ctrl = 0x00004B64;      /* 75 rows and 100 columns */
+        chan_a->font_size = 0;                      /* Set 8x16 */
 
-    /* Set the font for channel A */
-
-    for (i = 0; i < 0x800; i++) {
-        unsigned char b = MSX_CP437_8x8_bin[i];
-        VICKY_TXT_FONT_A[i] = b;
+    } else {
+        chan_a->font_size = 0;
     }
 
-    text_set_border(0, 1, 0x20, 0x10, 0x00008080);
+    text_set_border(0, 1, 0x10, 0x10, border_color);
     text_setsizes(0);
     text_set_color(0, 0xf, 4);
     text_set_cursor(0, 0xF3, 0x7F, 1, 1);
     text_set_xy(0, 0, 0);
     text_clear(0, 2);
+
+    /* Set the font for channel A */
+    if (chan_a->font_size == 1) {
+        /* Load the 8x16 font */
+        for (i = 0; i < 0x1000; i++) {
+            unsigned char b = BM437_IBM_Model3_Alt4[i];
+            VICKY_TXT_FONT_A[i] = b;
+        }
+
+        /* Cursor for this font */
+        text_set_cursor(0, 0xF3, 0xB0, 1, 1);
+
+    } else {
+        /* Load the 8x8 font */
+        for (i = 0; i < 0x800; i++) {
+            unsigned char b = MSX_CP437_8x8_bin[i];
+            VICKY_TXT_FONT_A[i] = b;
+        }
+
+        /* Cursor for this font */
+        text_set_border(0, 1, 0x20, 0x10, border_color);
+    }
+
 
 #if MODEL == MODEL_FOENIX_A2560K
 
@@ -160,6 +220,8 @@ int text_init() {
     chan_b->cursor_settings = CursorControlReg_L_B;
     chan_b->cursor_position = CursorControlReg_H_B;
     chan_b->border_control = BorderControlReg_L_B;
+    chan_b->font_size_ctrl = 0;
+    chan_b->font_count_ctrl = 0;
 
     if (need_hires) {
         *chan_b->master_control = VKY3_MCR_800x600 | VKY3_MCR_TEXT_EN;      /* Set to text only mode: 800x600 */
@@ -167,11 +229,9 @@ int text_init() {
         *chan_b->master_control = VKY3_MCR_640x480 | VKY3_MCR_TEXT_EN;      /* Set to text only mode: 640x480 */
     }
 
-    chan_b->border_control[0] = 0x00102000;	// Enable
-	chan_b->border_control[1] = 0x00400000;	//Dark Red
-
+    text_set_border(1, 1, 0x20, 0x10, border_color);
     text_setsizes(1);
-    text_set_color(1, 4, 3);
+    text_set_color(1, 0x0f, 0x04);
     text_clear(1, 2);
     text_set_cursor(1, 0xF3, 0x7F, 1, 1);
     text_set_xy(1, 0, 0);
@@ -333,6 +393,10 @@ void text_setsizes(short screen) {
             chan->rows_max /= 2;
         }
 
+        if (chan->font_size == 1) {
+            chan->rows_max /= 2;
+        }
+
         /* Calculate visible rows and columns assuming no border */
         chan->rows_visible = chan->rows_max;
         chan->columns_visible = chan->columns_max;
@@ -347,6 +411,10 @@ void text_setsizes(short screen) {
 
             if (pixel_double) {
                 columns_reduction /= 2;
+                rows_reduction /= 2;
+            }
+
+            if (chan->font_size == 1) {
                 rows_reduction /= 2;
             }
 
@@ -538,6 +606,30 @@ void text_scroll(short screen) {
         short row, column;
         p_text_channel chan = &text_channel[screen];
 
+#if MODEL == MODEL_FOENIX_A2560K
+        for (row = 0; row < chan->rows_visible - 1; row++) {
+            short offset1 = row * chan->columns_max;
+            short offset2 = (row + 1) * chan->columns_max;
+            volatile unsigned char * text_dest = &chan->text_cells[offset1];
+            volatile unsigned char * color_dest = &chan->color_cells[offset1];
+            volatile unsigned char * text_src = &chan->text_cells[offset2];
+            volatile unsigned char * color_src = &chan->color_cells[offset2];
+
+            for (column = 0; column < chan->columns_max; column++) {
+                *text_dest++ = *text_src++;
+                *color_dest++ = *color_src++;
+            }
+        }
+
+        short offset3 = (chan->rows_visible - 1) * chan->columns_max;
+        volatile unsigned char * text_dest = &chan->text_cells[offset3];
+        volatile unsigned char * color_dest = &chan->color_cells[offset3];
+        uint8_t color = chan->current_color;
+        for (column = 0; column < chan->columns_max; column++) {
+            *text_dest++ = ' ';
+            *color_dest++ = color;
+        }
+#else
         for (row = 0; row < chan->rows_visible - 1; row++) {
             short offset1 = row * chan->columns_max;
             short offset2 = (row + 1) * chan->columns_max;
@@ -560,6 +652,7 @@ void text_scroll(short screen) {
             *text_dest++ = ' ';
             *color_dest++ = color << 8 | color;
         }
+#endif
     }
 }
 
@@ -603,5 +696,23 @@ void text_put_raw(short screen, char c) {
             text_set_xy(screen, chan->x + 1, chan->y);
             break;
         }
+    }
+}
+
+/*
+ * Gets the size of the test screen in rows and columns
+ *
+ * Inputs:
+ * screen = the screen number 0 for channel A, 1 for channel B
+ * columns = pointer to a short in which to store the number of columns
+ * rows = pointer to a short in which to store the number of rows
+ */
+void text_getsize(short screen, short * columns, short * rows) {
+    if (screen < MAX_TEXT_CHANNELS) {
+        short x, y;
+        p_text_channel chan = &text_channel[screen];
+
+        *columns = chan->columns_visible;
+        *rows = chan->rows_visible;
     }
 }

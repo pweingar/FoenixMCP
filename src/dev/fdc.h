@@ -5,8 +5,6 @@
 #ifndef __FDC_H
 #define __FDC_H
 
-#if MODEL == MODEL_FOENIX_A2560K
-
 #include "types.h"
 
 /*
@@ -14,14 +12,33 @@
  */
 
 #define FDC_SECTOR_SIZE         512         /* Size of a block on the FDC */
+#define FDC_MAX_PARAMS          10          /* Maximum number of parameters/result bytes in a transaction */
+#define FDC_DEFAULT_RETRIES     3           /* Default number of times we'll retry a transaction */
 
 #define FDC_STAT_NOINIT         0x01        /* FDC has not been initialized */
 #define FDC_STAT_PRESENT        0x02        /* FD is present */
 #define FDC_STAT_PROTECTED      0x04        /* FD is write-protected */
 #define FDC_STAT_MOTOR_ON       0x08        /* FDC spindle motor is on */
 
-#define FDC_CTRL_MOTOR_ON       0x0100      /* IOCTRL command to start spinning the motor */
-#define FDC_CTRL_MOTOR_OFF      0x0200      /* IOCTRL command to start spinning the motor */
+#define FDC_CTRL_MOTOR_ON       0x0001      /* IOCTRL command to start spinning the motor */
+#define FDC_CTRL_MOTOR_OFF      0x0002      /* IOCTRL command to start spinning the motor */
+#define FDC_CTRL_CHECK_CHANGE   0x0003      /* IOCTRL command to check to see if the disk has changed */
+
+/*
+ * Structure to keep track of the information about a transaction with the floppy drive
+ */
+typedef struct s_fdc_trans {
+    short retries;                              /* The number of retries that may be attempted on the transaction */
+    unsigned char command;                      /* The command code for the transaction */
+    unsigned char parameters[FDC_MAX_PARAMS];   /* The parameters to send as part of the transaction */
+    short parameter_count;                      /* The number of parameters to send as part of the command */
+    unsigned char results[FDC_MAX_PARAMS];      /* The parameters to send as part of the transaction */
+    short result_count;                         /* The number of parameters to send as part of the command */
+    unsigned char *data;                        /* Pointer to the data buffer to read or write to the FDC */
+    short data_count;                           /* Number of data bytes to transfer */
+    short direction;                            /* 0 = no data, 1 = data is written to the FDC, 2 = data is read from the FDC */
+} t_fdc_trans, *p_fdc_trans;
+
 
 /*
  * Install the FDC driver
@@ -35,6 +52,13 @@ extern short fdc_install();
  *  0 on success, any negative number is an error code
  */
 extern short fdc_init();
+
+/**
+ * Set whether to use DMA or polled I/O for exchanging data
+ *
+ * @param dma 0 for polled I/O, anything else for DMA
+ */
+extern void fdc_set_dma(short dma);
 
 /*
  * Read a block from the FDC
@@ -99,6 +123,14 @@ extern short fdc_flush();
  */
 extern short fdc_ioctrl(short command, unsigned char * buffer, short size);
 
-#endif
+/*
+ * Move the read/write head to the indicated cylinder
+ */
+extern short fdc_seek(unsigned char cylinder);
+
+/*
+ * Recalibrate the read/write head
+ */
+extern short fdc_recalibrate();
 
 #endif

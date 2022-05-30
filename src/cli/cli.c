@@ -4,6 +4,7 @@
 
 #include <ctype.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "log.h"
@@ -14,24 +15,59 @@
 #include "sys_general.h"
 #include "timers.h"
 #include "cli/cli.h"
+#include "cli/dos_copy.h"
 #include "cli/dos_cmds.h"
 #include "cli/mem_cmds.h"
 #include "cli/settings.h"
 #include "cli/sound_cmds.h"
 #include "cli/test_cmds.h"
+#include "dev/console.h"
 #include "dev/ps2.h"
 #include "dev/rtc.h"
 #include "dev/uart.h"
 #include "uart_reg.h"
 #include "rtc_reg.h"
+#include "utilities.h"
+#include "variables.h"
 #include "vicky_general.h"
+#include "version.h"
 
-#define MAX_COMMAND_SIZE    128
-#define MAX_ARGC            32
+#define MAX_HISTORY_DEPTH   5   /* Maximum number of commands we'll record */
+#define MAX_COMMAND_SIZE    128 /* Maximum number of characters in a command line */
+#define MAX_ARGC            32  /* Maximum number of arguments to a command */
+
+/*
+ * CLI special key code definitions
+ */
+
+#define CLI_FLAG_CTRL   0x0100  /* Flag indicating CTRL is pressed */
+#define CLI_FLAG_SHIFT  0x0200  /* Flag indicating SHIFT is pressed */
+#define CLI_FLAG_ALT    0x0400  /* Flag indicating ALT is pressed */
+#define CLI_FLAG_OS     0x0800  /* Flag indicating OS key is pressed */
+#define CLI_FLAG_FUNC   0x4000  /* Function keys: 0x4001 - 0x400C */
+#define CLI_FLAG_SPEC   0x8000  /* Special keys: */
+#define CLI_KEY_LEFT    0x8001
+#define CLI_KEY_RIGHT   0x8002
+#define CLI_KEY_UP      0x8003
+#define CLI_KEY_DOWN    0x8004
+#define CLI_KEY_DEL     0x8005
+#define CLI_KEY_MONITOR 0x8010  /* A2560K Monitor key */
+#define CLI_KEY_CTX     0x8011  /* A2560K CTX Switch key */
+#define CLI_KEY_HELP    0x8012  /* A2560K Menu/Help key */
 
 //
 // Types
 //
+
+/*
+ * States to interpret ANSI escape codes
+ */
+typedef enum {
+    CLI_ES_BASE = 0,    // Base state
+    CLI_ES_ESC,         // "ESC" seen
+    CLI_ES_CSI,         // "ESC[" has been seen
+    CLI_ES_SEMI         // Semicolon has been seen
+} cli_state;
 
 // Structure to hold a record about a command...
 
@@ -46,19 +82,39 @@ extern short cmd_cls(short channel, int argc, const char * argv[]);
 extern short cmd_showint(short channel, int argc, const char * argv[]);
 extern short cmd_getjiffies(short channel, int argc, const char * argv[]);
 extern short cmd_get_ticks(short channel, int argc, const char * argv[]);
+extern short cmd_screen(short channel, int argc, const char * argv[]);
+extern short cmd_credits(short channel, int argc, const char * argv[]);
 
 /*
  * Variables
  */
 
+short cli_screen = 0;                               /**< The default screen to use for the REPL of the CLI */
+char cli_command_path[MAX_PATH_LEN];                /**< The path to the command processor */
+
+/** The channel to use for interactions */
 short g_current_channel = 0;
 
+short g_channels_swapped = 1;
+
+/** Flag to indicate that the current working directory has changed */
+short g_cwd_changed = 0;
+
+/** The history of previous commands issued */
+char cli_history[MAX_HISTORY_DEPTH][MAX_COMMAND_SIZE];
+
+/** Record of system information */
+t_sys_info cli_sys_info;
+
+/** The built-in commands supported */
 const t_cli_command g_cli_commands[] = {
     { "?", "? : print this helpful message", cmd_help },
     { "HELP", "HELP : print this helpful message", cmd_help },
+    { "CALL", "CALL <address> : execute code in supervisor mode at <address> ", mem_cmd_call },
     { "CD", "CD <path> : sets the current directory", cmd_cd },
     { "CLS", "CLS : clear the screen", cmd_cls },
     { "COPY", "COPY <src path> <dst path> : Copies files to destination", cmd_copy },
+    { "CREDITS", "CREDITS : Print out the credits", cmd_credits },
     { "DASM", "DASM <addr> [<count>] : print a memory disassembly", mem_cmd_dasm },
     { "DEL", "DEL <path> : delete a file or directory", cmd_del },
     { "DIR", "DIR <path> : print directory listing", cmd_dir },
@@ -69,6 +125,7 @@ const t_cli_command g_cli_commands[] = {
     { "GETTICKS", "GETTICKS : print number of ticks since reset", cmd_get_ticks },
     { "LABEL", "LABEL <drive#> <label> : set the label of a drive", cmd_label },
     { "LOAD", "LOAD <path> : load a file into memory", cmd_load },
+    { "MKBOOT", "MKBOOT <drive #> -r | -b <boot sector path> | -s <start file path> : make a drive bootable", cmd_mkboot },
     { "MKDIR", "MKDIR <path> : create a directory", cmd_mkdir },
     { "PEEK8", "PEEK8 <addr> : print the byte at the address in memory", mem_cmd_peek8 },
     { "PEEK16", "PEEK16 <addr> : print the 16-bit word at the address in memory", mem_cmd_peek16 },
@@ -78,7 +135,6 @@ const t_cli_command g_cli_commands[] = {
     { "POKE32", "POKE32 <addr> <value> : write the 32-bit value to the address in memory", mem_cmd_poke32 },
     { "PWD", "PWD : prints the current directory", cmd_pwd },
     { "REN", "REN <old path> <new path> : rename a file or directory", cmd_rename },
-    { "RUN", "RUN <path> : execute a binary file",  cmd_run },
     { "SET", "SET <name> <value> : set the value of a setting", cli_cmd_set },
     { "GET", "GET <name> : get the value of a setting", cli_cmd_get },
     { "SHOWINT", "SHOWINT : Show information about the interrupt registers", cmd_showint },
@@ -87,6 +143,76 @@ const t_cli_command g_cli_commands[] = {
     { "TYPE", "TYPE <path> : print the contents of a text file", cmd_type },
     { 0, 0 }
 };
+
+/**
+ * Set the path of the command shell
+ *
+ * @param path the path to the command processor executable (0 or empty string for default)
+ */
+void cli_command_set(const char * path) {
+    short i = 0;
+    short result = 0;
+
+    if (path) {
+        // Copy the desired path... without any trailing newline
+        for (i = 0; i < strlen(path); i++) {
+            char c = path[i];
+            if ((c == CHAR_NL) || (c == CHAR_CR)) {
+                cli_command_path[i] = 0;
+                break;
+            }
+            cli_command_path[i] = c;
+        }
+        result = sys_var_set("SHELL", cli_command_path);
+        if (result) {
+            log(LOG_ERROR, "Unable to set SHELL");
+        }
+
+    } else {
+        // Set to the default CLI
+        result = sys_var_set("SHELL", 0);
+        if (result) {
+            log(LOG_ERROR, "Unable to set SHELL");
+        }
+
+    }
+}
+
+/**
+ * Gets the path of the command shell
+ *
+ * @param path pointer to the buffer to store the path (empty string means default)
+ */
+void cli_command_get(char * path) {
+    // Copy the desired path
+    const char * set_path = sys_var_get("SHELL");
+    if (set_path) {
+        strncpy(path, set_path, MAX_PATH_LEN);
+    } else {
+        path[0] = 0;
+    }
+}
+
+/**
+ * Set the number of the screen to use for interactions
+ *
+ * @param screen the number of the text device to use
+ */
+void cli_txt_screen_set(short screen) {
+    if (sys_chan_device(0) != screen) {
+        sys_chan_swap(0, 1);
+        g_channels_swapped = 1;
+    }
+}
+
+/**
+ * Get the number of the screen used for interactions
+ *
+ * @return the number of the text device to use
+ */
+short cli_txt_screen_get() {
+    return sys_chan_device(0);
+}
 
 //
 // List all the commands
@@ -134,34 +260,35 @@ short cmd_cls(short channel, int argc, const char * argv[]) {
  * Display information about the system
  */
 short cmd_sysinfo(short channel, int argc, const char * argv[]) {
-    t_sys_info info;
+    t_extent text_size, pixel_size;
     char buffer[80];
 
-    sys_get_info(&info);
+    sprintf(buffer, "\nSystem information:\nModel: %s\n", cli_sys_info.model_name);
+    print(channel, buffer);
 
-    sprintf(buffer, "System information:\nModel: %s", info.model_name);
-    sys_chan_write(channel, buffer, strlen(buffer));
+    sprintf(buffer, "CPU: %s\n", cli_sys_info.cpu_name);
+    print(channel, buffer);
 
-    sprintf(buffer, "\nCPU: %s", info.cpu_name);
-    sys_chan_write(channel, buffer, strlen(buffer));
+    sprintf(buffer, "Clock (kHz): %u\n", cli_sys_info.cpu_clock_khz);
+    print(channel, buffer);
 
-    sprintf(buffer, "\nSystem Memory: 0x%lX", info.system_ram_size);
-    sys_chan_write(channel, buffer, strlen(buffer));
+    sprintf(buffer, "System Memory: 0x%lX\n", cli_sys_info.system_ram_size);
+    print(channel, buffer);
 
-    sprintf(buffer, "\nPCB version: %s", (char*)&info.pcb_version);
-    sys_chan_write(channel, buffer, strlen(buffer));
+    sprintf(buffer, "FPGA Model: %08lX\n", cli_sys_info.fpga_model);
+    print(channel, buffer);
 
-    sprintf(buffer, "\nFPGA Date: %08lX", info.fpga_date);
-    sys_chan_write(channel, buffer, strlen(buffer));
+    sprintf(buffer, "FPGA Version: %04X.%04X\n", cli_sys_info.fpga_version, cli_sys_info.fpga_subver);
+    print(channel, buffer);
 
-    sprintf(buffer, "\nFPGA Model: %08lX", info.fpga_model);
-    sys_chan_write(channel, buffer, strlen(buffer));
+    sprintf(buffer, "MCP version: v%02u.%02u.%04u\n", cli_sys_info.mcp_version, cli_sys_info.mcp_rev, cli_sys_info.mcp_build);
+    print(channel, buffer);
 
-    sprintf(buffer, "\nFPGA Version: %04X.%04X", info.fpga_version, info.fpga_subver);
-    sys_chan_write(channel, buffer, strlen(buffer));
+    short screen = sys_chan_device(channel);
 
-    sprintf(buffer, "\nMCP version: v%02u.%02u.%04u\n", info.mcp_version, info.mcp_rev, info.mcp_build);
-    sys_chan_write(channel, buffer, strlen(buffer));
+    sys_txt_get_sizes(screen, &text_size, &pixel_size);
+    sprintf(buffer, "Screen#%d size: %dx%d characters, %dx%d pixels.\n", screen, text_size.width, text_size.height, pixel_size.width, pixel_size.height);
+    print(channel, buffer);
 
     return 0;
 }
@@ -221,40 +348,527 @@ short cli_exec(short channel, char * command, int argc, const char * argv[]) {
     return cmd_run(channel, argc, argv);
 }
 
-char * strtok_r(char * source, const char * delimiter, char ** saveptr) {
-    char * x = *saveptr;
-    char * y;
+/**
+ * Make sure all the console settings are setup so that the console works correctly
+ */
+void cli_ensure_console(short channel) {
+    // Make sure the console is set up correctly for the CLI
+    sys_chan_ioctrl(channel, CON_IOCTRL_ECHO_OFF, 0, 0);
+    sys_chan_ioctrl(channel, CON_IOCTRL_ANSI_ON, 0, 0);
+    sys_chan_ioctrl(channel, CON_IOCTRL_CURS_ON, 0, 0);
 
-    /* Skip over leading delimiters */
-    for (x = *saveptr; *x && (*x == delimiter[0]); x++) {
-
-    }
-
-    /* If we reached the end of the string, return NULL */
-    if (*x == 0) {
-        return 0;
-    }
-
-    for (y = x; *y && (*y != delimiter[0]); y++) {
-
-    }
-
-    /* If we reached the end of the string, return x */
-    if (*y == 0) {
-        *saveptr = y;
-        return x;
-    }
-
-    /* Otherwise, make that position in the source string NULL, and return x */
-    *y = 0;
-    *saveptr = y + 1;
-    return x;
+    // Make sure the screen has text enabled
+    txt_set_mode(sys_chan_device(channel), TXT_MODE_TEXT);
 }
 
-void cli_rerepl() {
-    while (1) {
-        cli_repl(g_current_channel);
+/**
+ * Decode ANSI modifier codes
+ *
+ * @param modifiers the ANSI modifier codes from an escape sequence
+ * @return CLI modifier flags
+ */
+short cli_translate_modifiers(short modifiers) {
+    char buffer[10];
+    short flags = 0;
+
+    if (modifiers > 0) {
+        modifiers--;
     }
+
+    if (modifiers & 0x01) flags |= CLI_FLAG_SHIFT;
+    if (modifiers & 0x02) flags |= CLI_FLAG_ALT;
+    if (modifiers & 0x04) flags |= CLI_FLAG_CTRL;
+    if (modifiers & 0x08) flags |= CLI_FLAG_OS;
+
+    return flags;
+}
+
+/**
+ * Translate escape sequences that end in a letter code
+ *
+ * @param modifiers optional parameter
+ * @code the letter code of the key
+ */
+short cli_translate_alpha(short modifiers, char code) {
+    short key_code = 0;
+
+    key_code = cli_translate_modifiers(modifiers);
+
+    switch (code) {
+        case 'A':
+            key_code |= CLI_KEY_UP;
+            break;
+
+        case 'B':
+            key_code |= CLI_KEY_DOWN;
+            break;
+
+        case 'C':
+            key_code |= CLI_KEY_RIGHT;
+            break;
+
+        case 'D':
+            key_code |= CLI_KEY_LEFT;
+            break;
+
+        default:
+            return 0;
+    }
+
+    return key_code;
+}
+
+/**
+ * Translate escape sequences that end in a numeric code
+ *
+ * @param modifiers optional parameter
+ * @code the numeric code of the key
+ */
+short cli_translate_numeric(short modifiers, short code) {
+    short key_code = 0;
+
+    key_code = cli_translate_modifiers(modifiers);
+
+    if ((code >= 11) && (code <= 15)) {
+        // Function keys 1 - 5
+        key_code |= CLI_FLAG_FUNC | (code - 10);
+
+    } else if ((code >= 17) && (code <= 21)) {
+        // Function keys 6 - 10
+        key_code |= CLI_FLAG_FUNC | (code - 11);
+
+    } else if (code == 30) {
+        // MONITOR key
+        key_code |= CLI_KEY_MONITOR;
+
+    } else if (code == 31) {
+        // CTX SWITCH key
+        key_code |= CLI_KEY_CTX;
+
+    } else if (code == 32) {
+        // MENU HELP key
+        key_code |= CLI_KEY_HELP;
+
+    } else if (code == 3) {
+        // DELETE key
+        key_code |= CLI_KEY_DEL;
+
+    } else {
+        // Unknown escape code
+        key_code = 0;
+    }
+
+    return key_code;
+}
+
+/**
+ * Get a character from the console, processing recognized escape sequences
+ *
+ * @param channel the number of the input channel
+ * @return the 16-bit functional character code
+ */
+short cli_getchar(short channel) {
+    char buffer[10];
+    cli_state state = CLI_ES_BASE;      // Current state of the escape sequence
+    short number1 = 0, number2 = 0;     // Two numbers that can be embedded in the sequence
+    char c;                             // The current character read from the console
+
+    do {
+        c = sys_chan_read_b(channel);
+        switch (state) {
+            case CLI_ES_BASE:
+                // We are not processing a sequence...
+                if (c == CHAR_ESC) {
+                    // Escape has been seen
+                    state = CLI_ES_ESC;
+
+                } else {
+                    // It's an ordinary character, so return it
+                    return c;
+                }
+                break;
+
+            case CLI_ES_ESC:
+                // Escape has been seen... check for CSI
+                if (c == '[') {
+                    // ESC [ has been seen...
+                    state = CLI_ES_CSI;
+
+                } else {
+                    // Bad escape sequence...just return the character
+                    state = CLI_ES_BASE;
+                    return c;
+                }
+                break;
+
+            case CLI_ES_CSI:
+                // ESC [ has been seen... next is either a number, a letter, a semi-colon, or a tilda
+                if (isdigit(c)) {
+                    // It's a number... shift it onto number1
+                    number1 = number1 * 10 + (c - '0');
+
+                } else if (isalpha(c)) {
+                    // It's a letter... treat as a code
+                    return cli_translate_alpha(number1, c);
+
+                } else if (c == ';') {
+                    // Got a semicolon, go to that state
+                    state = CLI_ES_SEMI;
+
+                } else if (c == '~') {
+                    // Got a tilda... end of numeric code with no parameters
+                    return cli_translate_numeric(0, number1);
+
+                } else {
+                    // Bad sequence... just return the current character
+                    state = CLI_ES_BASE;
+                    return c;
+                }
+                break;
+
+            case CLI_ES_SEMI:
+                // Semicolon has been seen... next is either a number or a tilda
+                if (isdigit(c)) {
+                    // It's a number... shift it onto number1
+                    number2 = number2 * 10 + (c - '0');
+
+                } else if (c == '~') {
+                    // Got a tilda... end of numeric code with parameters
+                    return cli_translate_numeric(number2, number1);
+
+                } else {
+                    // Bad sequence... just return the current character
+                    state = CLI_ES_BASE;
+                    return c;
+                }
+                break;
+
+            default:
+                state = CLI_ES_BASE;
+                return c;
+        }
+    } while (1);
+}
+
+char line[128];
+
+/**
+ * Print out the credits
+ */
+short cmd_credits(short channel, int argc, const char * argv[]) {
+    short scan_code = 0;
+
+    print(channel, "\x1b[2J\x1b[1;2H");
+    print_banner(channel, cli_sys_info.model);
+
+    print(channel, "\n");
+
+    sprintf(line, "| Version       | %02d.%02d-alpha+%04d                                  |\n", VER_MAJOR, VER_MINOR, VER_BUILD);
+    print_box(channel, "{-------------------------------------------------------------------}\n");
+    print_box(channel, "| Foenix/MCP - A simple OS for Foenix Retro Systems computers       |\n");
+    print_box(channel, ">---------------!---------------------------------------------------<\n");
+    print_box(channel, line);
+    print_box(channel, ">---------------#---------------------------------------------------<\n");
+    print_box(channel, "| License       | BSD-3-Clause                                      |\n");
+    print_box(channel, ">---------------#---------------------------------------------------<\n");
+    print_box(channel, "| Creators      | Foenix Retro Systems - Stefany Allaire            |\n");
+    print_box(channel, "|               >---------------------------------------------------<\n");
+    print_box(channel, "|               | Foenix/MCP - Peter Weingartner                    |\n");
+    print_box(channel, ">---------------#---------------------------------------------------<\n");
+    print_box(channel, "| License       | BSD-3-Clause                                      |\n");
+    print_box(channel, ">---------------#---------------------------------------------------<\n");
+    print_box(channel, "| Creators      | Foenix Retro Systems - Stefany Allaire            |\n");
+    print_box(channel, "|               >---------------------------------------------------<\n");
+    print_box(channel, "|               | Foenix/MCP - Peter Weingartner                    |\n");
+    print_box(channel, ">---------------#---------------------------------------------------<\n");
+    print_box(channel, "| Contributors  | H\x86kan Th\x94rngren, Jesus Garcia, Vincent B.         |\n");
+    print_box(channel, ">---------------#---------------------------------------------------<\n");
+    print_box(channel, "| Included Code | FatFS - http://elm-chan.org/fsw/ff/00index_e.html |\n");
+    print_box(channel, "[---------------@---------------------------------------------------]\n");
+
+    print(channel, "\n\x1b[1mMake the machine yours!\x1b[0m\n");
+
+    print(channel, "\n\x1b[91m//END-OF-LINE\n\x1b[37m");
+
+    do {
+        scan_code = sys_kbd_scancode();
+    } while (scan_code != 0x01);
+
+    print(channel,"\x1b[2J\x1b[H");
+    return 0;
+}
+
+/**
+ * Read a line of input from the channel, allowing for editing of the line
+ *
+ * @param channel the input channel to use
+ * @param command_line a character buffer in which to store the line
+ * @return 0 on success, -1 to swap screens (if applicable), -2 to request command help
+ */
+short cli_readline(short channel, char * command_line) {
+    char buffer[10];
+    unsigned short key_code = 0;
+    short i = 0, j = 0;
+    short history = 0;
+
+    // Make sure key echo is turned off
+    sys_chan_ioctrl(channel, 0x04, 0, 0);
+
+    // Zero out the command line buffer
+    for (i = 0; i < MAX_COMMAND_SIZE; i++) {
+        command_line[i] = 0;
+    }
+
+    i = 0;
+
+    do {
+        key_code = cli_getchar(channel);
+
+        if ((key_code & 0xF000) == 0) {
+            // Ordinary key...
+            char c = (char)(key_code & 0x00ff);
+            if (c < 0x20) {
+                // Control key...
+                if (c == CHAR_CR) {
+                    // Newline... we're done
+                    // TODO: add the line to the command history
+                    return 0;
+
+                } else if (c == CHAR_ESC) {
+                    // ESC pressed... clear whole line
+
+                    // Zero out the command line buffer
+                    for (i = 0; i < MAX_COMMAND_SIZE; i++) {
+                        command_line[i] = 0;
+                    }
+                    i = 0;
+                    print(channel, "\x1b[3G\x1b[K");
+
+                } else if (c == CHAR_BS) {
+                    // Backspace
+                    if (i > 0) {
+                        i--;
+                        print(channel, "\x1b[D");
+                        for (j = i; j < strlen(command_line); j++) {
+                            command_line[j] = command_line[j+1];
+                        }
+                        print(channel, "\x1b[1P");
+                    }
+                }
+
+            } else {
+                // Add key to command line
+                command_line[i++] = c;
+                sys_chan_write_b(channel, c);
+            }
+
+        } else {
+            // Special editing key
+            switch (key_code & 0xF0FF) {
+                case CLI_KEY_LEFT:
+                    // Move cursor to the left
+                    if (key_code & CLI_FLAG_CTRL) {
+                        i = 0;
+                        print(channel, "\x1b[3G");
+                    } else {
+                        if (i > 0) {
+                            i--;
+                            print(channel, "\x1b[D");
+                        }
+                    }
+                    break;
+
+                case CLI_KEY_RIGHT:
+                    // Move cursor right
+                    if (key_code & CLI_FLAG_CTRL) {
+                        sprintf(buffer, "\x1b[%dG", (short)(3 + strlen(command_line)));
+                        print(channel, buffer);
+                        i = strlen(command_line);
+                    } else {
+                        if (command_line[i] != 0) {
+                            i++;
+                            print(channel, "\x1b[C");
+                        }
+                    }
+                    break;
+
+                case CLI_KEY_UP:
+                    // Go back one command in history
+                    if ((history < MAX_HISTORY_DEPTH) && (cli_history[history][0] != 0)) {
+                        strcpy(command_line, cli_history[history++]);
+                        i = strlen(command_line);
+                        print(channel, "\x1b[3G\x1b[K");
+                        print(channel, command_line);
+                    }
+                    break;
+
+                case CLI_KEY_DOWN:
+                    // Go forward one command in history
+                    if (history > 0) {
+                        strcpy(command_line, cli_history[--history]);
+                        i = strlen(command_line);
+                        print(channel, "\x1b[3G\x1b[K");
+                        print(channel, command_line);
+                    }
+                    break;
+
+                case CLI_KEY_DEL:
+                    // Delete the character under the cursor
+                    for (j = i; j < strlen(command_line); j++) {
+                        command_line[j] = command_line[j+1];
+                    }
+                    print(channel, "\x1b[1P");
+                    break;
+
+                case CLI_KEY_CTX:
+                    // Switch the console screens (if applicable)
+                    return -1;
+
+                case CLI_KEY_HELP:
+                    // Request the help screen
+                    if (key_code & CLI_FLAG_OS) {
+                        return -3;
+                    } else {
+                        return -2;
+                    }
+
+                default:
+                    // Unknown... do nothing
+                    break;
+            }
+        }
+    } while (1);
+
+    return 0;
+}
+
+/**
+ * Parse and attempt to execute a command line
+ *
+ * @param command_line the command line to process
+ * @return the result of running the command line
+ */
+short cli_process_line(short channel, char * command_line) {
+    char * arg;
+    char * token_save;
+    char * delim = " ";
+    int argc = 0;
+    char * argv[MAX_ARGC];
+
+    for (argc = 0, token_save = command_line; argc < MAX_ARGC; argc++) {
+        arg = strtok_r(command_line, delim, &token_save);
+        if (arg != 0) {
+            argv[argc] = arg;
+        } else {
+            break;
+        }
+    }
+
+    if (argc > 0) {
+        int i;
+        for (i = 0; i < strlen(argv[0]); i++) {
+            argv[0][i] = toupper(argv[0][i]);
+        }
+
+        // Try to execute the command
+        return cli_exec(channel, argv[0], argc, argv);
+    }
+}
+
+void cli_draw_window(short channel, const char * status, short is_active) {
+    const char * title_header = "Foenix/MCP - ";
+    unsigned char foreground, background;
+    char buffer[128];
+    t_point cursor;
+    t_rect region, old_region, full_region;
+    short i = 0, j;
+
+    short dev = sys_chan_device(channel);
+
+    // Save the current region and cursor location
+    sys_txt_get_xy(dev, &cursor);
+    sys_txt_get_region(dev, &old_region);
+    sys_txt_get_color(dev, &foreground, &background);
+
+    // Return to the full region and get its dimensions
+    region.origin.x = 0;
+    region.origin.y = 0;
+    region.size.width = 0;
+    region.size.height = 0;
+    sys_txt_set_region(dev, &region);
+    sys_txt_get_region(dev, &full_region);
+
+    // Display the titlebar
+    i = 0;
+    sys_txt_set_xy(dev, 0, 0);
+    if (channel == 0) {
+        sys_txt_set_color(dev, background, foreground);
+    }
+    for (j = 0; j < strlen(title_header); j++) {
+        buffer[i++] = title_header[j];
+    }
+    for (j = 0; j < strlen(status); j++) {
+        buffer[i++] = status[j];
+    }
+    while (i < full_region.size.width) {
+        if (is_active) {
+            buffer[i++] = ' ';
+        } else {
+            buffer[i++] = 0xB0;
+        }
+    }
+    buffer[i++] = 0;
+    print(channel, buffer);
+
+    // Restore the region and cursor location
+    sys_txt_set_color(dev, foreground, background);
+    sys_txt_set_region(dev, &old_region);
+    sys_txt_set_xy(dev, cursor.x, cursor.y);
+
+    // Set cursor visibility based on if the screen is active
+    sys_chan_ioctrl(0, 0x06, 0, 0);
+    sys_chan_ioctrl(1, 0x07, 0, 0);
+}
+
+/**
+ * Initialize the text screen (set up regions, windows, etc.)
+ */
+void cli_setup_screen(short channel, const char * path, short is_active) {
+    t_rect full_region, command_region;
+    char message[80];
+
+    short dev = sys_chan_device(channel);
+
+    // Get the size of the screen
+    full_region.origin.x = 0;
+    full_region.origin.y = 0;
+    full_region.size.width = 0;
+    full_region.size.height = 0;
+    sys_txt_set_region(dev, &full_region);
+    sys_txt_get_region(dev, &full_region);
+
+    // Clear the screen
+    print(channel, "\x1b[2J\x1b[H");
+
+    // Figure out the size of the command box and its region
+    command_region.origin.x = 0;
+    command_region.origin.y = 1;
+    command_region.size.width = full_region.size.width;
+    command_region.size.height = full_region.size.height - 1;
+
+    // Restrict the region to the command panel
+    sys_txt_set_region(dev, &command_region);
+
+    // Draw the window
+    cli_draw_window(channel, path, is_active);
+    print(channel, "\x1b[2J\x1b[1;2H");
+
+    print(channel, "\x1b[2J\x1b[1;2H");
+    print_banner(channel, cli_sys_info.model);
+
+    sprintf(message, "\nFoenix/MCP v%02u.%02u.%04u\n\n", (unsigned int)cli_sys_info.mcp_version, (unsigned int)cli_sys_info.mcp_rev, (unsigned int)cli_sys_info.mcp_build);
+    print(channel, message);
+    print(channel, "Type HELP or ? for help.\n");
 }
 
 //
@@ -263,44 +877,196 @@ void cli_rerepl() {
 short cli_repl(short channel) {
     char command_line[MAX_COMMAND_SIZE];
     char cwd_buffer[MAX_PATH_LEN];
-    char * arg;
-    char * token_save;
-    char * delim = " ";
-    int argc = 0;
-    char * argv[MAX_ARGC];
+    short result = 0;
+    short i = 0;
+    t_point cursor;
+    short old_channel;
 
-    g_current_channel = channel;
+    old_channel = channel;
+    g_channels_swapped = 1;
+
+    g_cwd_changed = 1;
+    cursor.x = 0;
+    cursor.y = 0;
 
     while (1) {
-        sys_chan_write(channel, "\n", 1);
-        if(sys_fsys_get_cwd(cwd_buffer, MAX_PATH_LEN) == 0) {
-            sys_chan_write(channel, cwd_buffer, strlen(cwd_buffer));
-        }
-        sys_chan_write(channel, "> ", 2);                           // Print our prompt
-        sys_chan_readline(channel, command_line, MAX_COMMAND_SIZE);   // Attempt to read line
-        sys_chan_write(channel, "\n", 1);
+        // Refresh window if the current working directory has changed
+        if (g_cwd_changed || g_channels_swapped) {
+            g_cwd_changed = 0;
 
-        for (argc = 0, token_save = command_line; argc < MAX_ARGC; argc++) {
-            arg = strtok_r(command_line, delim, &token_save);
-            if (arg != 0) {
-                argv[argc] = arg;
-            } else {
+            // Get and display the new working directory
+            if (sys_fsys_get_cwd(cwd_buffer, MAX_PATH_LEN) == 0) {
+                // char message[80];
+                // sprintf(message, "%d", strlen(cwd_buffer));
+                print(0, "");
+                if (g_channels_swapped) {
+                    // If channel has changed, deactivate old channel
+                    cli_draw_window(1, cwd_buffer, 0);
+                    old_channel = g_current_channel;
+                    g_channels_swapped = 0;
+                }
+                cli_draw_window(0, cwd_buffer, 1);
+            }
+        }
+
+        sys_chan_write(g_current_channel, "\x10 ", 2);                           // Print our prompt
+        result = cli_readline(g_current_channel, command_line);
+        switch (result) {
+            case -1:
+                // g_current_channel = (g_current_channel == 0) ? 1 : 0;
+                sys_chan_swap(0, 1);
+                g_channels_swapped = 1;
                 break;
-            }
+
+            case -2:
+                print(g_current_channel, "\n");
+                cmd_help(g_current_channel, 0, 0);
+                break;
+
+            case -3:
+                // Print the credits
+                print(g_current_channel, "\n");
+                cmd_credits(g_current_channel, 0, 0);
+                break;
+
+            default:
+                // Otherwise, good command... lets add it to the history
+                for (i = MAX_HISTORY_DEPTH - 1; i > 0; i--) {
+                    // Copy previous commands down
+                    strcpy(cli_history[i], cli_history[i-1]);
+                }
+                strcpy(cli_history[0], command_line);
+                break;
         }
 
-        if (argc > 0) {
-            int i;
-            for (i = 0; i < strlen(argv[0]); i++) {
-                argv[0][i] = toupper(argv[0][i]);
-            }
+        print(g_current_channel, "\n");
+        cli_process_line(g_current_channel, command_line);
 
-            // Try to execute the command
-            cli_exec(channel, argv[0], argc, argv);
-        }
+        print(g_current_channel, "\n");
+        sys_txt_get_xy(sys_chan_device(g_current_channel), &cursor);
     }
 
     return 0;
+}
+
+/**
+ * Start the read-eval-print loop
+ *
+ * @param channel the channel to use for interactions
+ * @param init_cwd the initial current working directory
+ */
+short cli_start_repl(short channel, const char * init_cwd) {
+    char cwd_buffer[MAX_PATH_LEN];
+    short result = 0;
+    short i = 0;
+    t_point cursor;
+
+    g_current_channel = channel;
+
+    // Make sure we can see text properly on the channel
+    cli_ensure_console(g_current_channel);
+
+    if (init_cwd != 0) {
+        result = sys_fsys_set_cwd(init_cwd);
+        if (result) {
+            char message[80];
+            sprintf(message, "Unable to set startup directory: %s\n", err_message(result));
+            print(g_current_channel, message);
+        }
+    }
+
+    // Start up the command shell
+    cli_command_get(cli_command_path);
+    if (cli_command_path[0] != 0) {
+        // Over-ride path provided, boot it
+        char * argv[1] = { cli_command_path };
+
+        result = sys_proc_run(cli_command_path, 1, argv);
+        if (result) {
+            print(0, "Unable to start ");
+            print(0, cli_command_path);
+            print(0, ": ");
+            print(0, err_message(result));
+            while (1) ;
+        }
+        return 0;
+    } else {
+        // Set up the screen(s)
+        cli_setup_screen(channel, init_cwd, 1);             // Initialize our main main screen
+        if (cli_sys_info.screens > 1) {
+            for (i = 0; i < cli_sys_info.screens; i++) {             // Set up each screen we aren't using
+                if (i != channel) {
+                    cli_setup_screen(i, init_cwd, 0);
+                }
+            }
+        }
+
+        return cli_repl(channel);
+    }
+}
+
+/**
+ * Reactivate the CLI's read-eval-print loop after a command has completed
+ */
+void cli_rerepl() {
+    // Start up the command shell
+    cli_command_get(cli_command_path);
+    if (cli_command_path[0] != 0) {
+        char * argv[1] = {cli_command_path};
+
+        // Over-ride path provided, boot it
+        short result = sys_proc_run(cli_command_path, 1, argv);
+        if (result) {
+            print(0, "Unable to start ");
+            print(0, cli_command_path);
+            print(0, ": ");
+            print(0, err_message(result));
+            while (1) ;
+        }
+
+    } else {
+        while (1) {
+            // Make sure we can see text properly on the channel
+            cli_ensure_console(g_current_channel);
+
+            print(g_current_channel, "\n\n");
+            cli_repl(g_current_channel);
+        }
+    }
+}
+
+/**
+ * Execute a batch file at the given path
+ *
+ * @param channel the number of the channel to write any messages to
+ * @param path the path to the configuration file to load
+ * @return 0 on success, any other number is an error
+ */
+short cli_exec_batch(short channel, const char * path) {
+    char command_line[MAX_COMMAND_SIZE];
+
+    short fd = sys_fsys_open(path, 0x01);   // Open for reading...
+    if (fd > 0) {
+        // Got a file...
+
+        // Read a line from the file
+        short result = 0;
+
+        do {
+            result = sys_chan_readline(fd, command_line, MAX_COMMAND_SIZE);
+            if (result > 0) {
+                // We got a line, so parse it
+                cli_process_line(channel, command_line);
+            }
+        } while (result > 0);   // Until we don't get a line
+
+        // Close the file
+        sys_fsys_close(fd);
+
+        return 0;
+    } else {
+        return fd;
+    }
 }
 
 long cli_eval_dec(const char * arg) {
@@ -404,6 +1170,13 @@ long cli_eval_number(const char * arg) {
     return cli_eval_dec(arg);
 }
 
+/**
+ * Indicate that the current working directory has changed
+ */
+void cli_flag_cwd() {
+    g_cwd_changed = 1;
+}
+
 //
 // Initialize the CLI
 //
@@ -411,6 +1184,16 @@ long cli_eval_number(const char * arg) {
 //  0 on success, negative number on error
 //
 short cli_init() {
+    short i;
+
+    // Clear out the command history
+    for (i = 0; i < MAX_HISTORY_DEPTH; i++) {
+        cli_history[i][0] = 0;
+    }
+
+    // Get the system information we'll use in several places
+    sys_get_info(&cli_sys_info);
+
     cli_set_init();
     return 0;
 }

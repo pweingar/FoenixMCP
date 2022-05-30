@@ -9,7 +9,6 @@
 
 #include "log.h"
 #include "dev/block.h"
-#include "dev/text_screen_iii.h"
 #include "ff.h"			/* Obtains integer types */
 #include "diskio.h"		/* Declarations of disk functions */
 #include "simpleio.h"
@@ -33,7 +32,8 @@ DSTATUS disk_status (
 
 	TRACE("disk_status");
 
-	return bdev_status(pdrv);
+	stat = bdev_status(pdrv);
+	return stat;
 }
 
 
@@ -77,7 +77,13 @@ DRESULT disk_read (
 		result = bdev_read(pdrv, sector, buff, 512);
 		if (result < 0) {
 			log_num(LOG_ERROR, "disk_read error: ", result);
-			return RES_PARERR;
+			if (result == ERR_MEDIA_CHANGE) {
+				log(LOG_ERROR, "disk changed.");
+				return RES_NOTRDY;
+			} else {
+				log(LOG_ERROR, "gerneral error");
+				return RES_PARERR;
+			}
 		} else {
 			sector++;
 		}

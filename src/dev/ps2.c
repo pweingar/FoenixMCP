@@ -14,7 +14,7 @@
 #include "vicky_general.h"
 #include "dev/ps2.h"
 #include "dev/rtc.h"
-#include "dev/text_screen_iii.h"
+#include "dev/txt_screen.h"
 #include "rsrc/bitmaps/mouse_pointer.h"
 
 #define PS2_TIMEOUT_JF          10          /* Timeout in jiffies: 1/60 second units */
@@ -98,7 +98,7 @@ short g_mouse_state = 0;                /* Mouse packet state machine's state */
  * Mapping of "codepoints" 0x80 - 0x95 (function keys, etc)
  * to ANSI escape codes
  */
-const char * ansi_keys[] = {
+static const char * ansi_keys[] = {
     "1~",      /* HOME */
     "2~",      /* INS */
     "3~",      /* DELETE */
@@ -334,7 +334,7 @@ const char g_us_sc_alt_shift[] = {
 short ps2_wait_out() {
     long target_ticks;
 
-    log(LOG_TRACE, "ps2_wait_out");
+    // log(LOG_TRACE, "ps2_wait_out");
 
     target_ticks = rtc_get_jiffies() + PS2_TIMEOUT_JF;
     while ((*PS2_STATUS & PS2_STAT_OBF) == 0) {
@@ -355,7 +355,7 @@ short ps2_wait_out() {
 short ps2_wait_in() {
     long target_ticks;
 
-    log(LOG_TRACE, "ps2_wait_in");
+    // log(LOG_TRACE, "ps2_wait_in");
 
     target_ticks = rtc_get_jiffies() + PS2_TIMEOUT_JF;
     while ((*PS2_STATUS & PS2_STAT_IBF) != 0) {
@@ -714,7 +714,7 @@ void kbd_handle_irq() {
             default:
                 // TODO: kernel panic?
                 ;
-        }
+            }
         }
     }
 }
@@ -729,7 +729,7 @@ void kbd_handle_irq() {
  * modifiers = the current modifier bit flags (ALT, CTRL, META, etc)
  * c = the character found from the scan code.
  */
-char kbd_to_ansi(unsigned char modifiers, unsigned char c) {
+static char kbd_to_ansi(unsigned char modifiers, unsigned char c) {
     if ((c >= 0x80) && (c <= 0x95)) {
         /* The key is a function key or a special control key */
         const char * sequence;
@@ -855,6 +855,12 @@ char kbd_getc() {
         // If we reach this point, there are no useful scan codes
         return 0;
     }
+}
+
+
+char kbd_getc_poll() {
+    kbd_handle_irq();
+    return kbd_getc();
 }
 
 /*

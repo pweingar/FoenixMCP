@@ -9,7 +9,7 @@
 #include "log.h"
 #include "simpleio.h"
 #include "syscalls.h"
-#include "dev/text_screen_iii.h"
+#include "dev/txt_screen.h"
 
 static short log_channel = 0;
 static short log_level = 999;
@@ -25,7 +25,7 @@ unsigned long panic_address;        /* The address that was accessed (for some e
 
 const char * err_messages[] = {
     "OK",
-    "error",
+    "general error",
     "bad device number",
     "operation timed out",
     "device could not be initialized",
@@ -60,7 +60,10 @@ const char * err_messages[] = {
     "file locked",
     "not enough core",
     "too many open files",
-    "file system invalid parameter"
+    "file system invalid parameter",
+    "not supported",
+    "bad argument",
+    "media changed"
 };
 
 /*
@@ -69,7 +72,7 @@ const char * err_messages[] = {
 const char * err_message(short err_number) {
     short index = 0 - err_number;
 
-    if (index < sizeof(err_messages)) {
+    if (index < 40) {
         return err_messages[index];
     } else {
         return "unknown error";
@@ -87,7 +90,7 @@ const char * err_message(short err_number) {
 void err_print(short channel, const char * message, short err_number) {
     char buffer[80];
 
-    if (err_number < 0) {
+    if ((err_number < 0) && (err_number > -40)) {
         sprintf(buffer, "%s: %s\n", message, err_message(err_number));
     } else {
         sprintf(buffer, "%s: #%d\n", message, err_number);
@@ -101,96 +104,90 @@ void err_print(short channel, const char * message, short err_number) {
  */
 void panic(void) {
     char buffer[80];
-    short column = 18;
-    short row = 10;
+    short column = 2;
+    short row = 2;
     short address_expected = 0;
+    t_rect region;
 
     /* Shut off all interrupts */
     int_disable_all();
 
     /* Re-initialize the text screen */
-    text_init();
-    text_set_border(0, 0, 0, 0, 0);
-    text_set_color(0, 15, 1);
-    text_set_cursor(0, 0, 0, 0, 0);
-    text_clear(0, 2);
+    txt_init_screen(0);
+    txt_set_border(0, 0, 0);
+    region.origin.x = 0;
+    region.origin.y = 0;
+    region.size.width = 0;
+    region.size.height = 0;
+    txt_set_region(0, &region);
+    txt_set_color(0, 15, 1);
+    txt_set_cursor(0, 0, 0, 0);
+    txt_clear(0, 2);
 
-    text_set_xy(0, column, row++);
-    sprintf(buffer, "\xDA\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xBF");
-    print(0, buffer);
+    txt_set_xy(0, column, row++);
+    txt_print(0, "\xDA\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xBF");
 
-    text_set_xy(0, column, row++);
-    sprintf(buffer, "\xB3                                          \xB3");
-    print(0, buffer);
+    txt_set_xy(0, column, row++);
+    txt_print(0, "\xB3                                          \xB3");
 
-    text_set_xy(0, column, row++);
-    sprintf(buffer, "\xB3 Oh dear, something has gone wrong...     \xB3");
-    print(0, buffer);
+    txt_set_xy(0, column, row++);
+    txt_print(0, "\xB3 Oh dear, something has gone wrong...     \xB3");
 
-    text_set_xy(0, column, row++);
-    sprintf(buffer, "\xB3                                          \xB3");
-    print(0, buffer);
+    txt_set_xy(0, column, row++);
+    txt_print(0, "\xB3                                          \xB3");
 
-    text_set_xy(0, column, row++);
+    txt_set_xy(0, column, row++);
     switch (panic_number) {
         case 2:
-            sprintf(buffer, "\xB3 Bus Error                                \xB3");
+            txt_print(0, "\xB3 Bus Error                                \xB3");
             address_expected = 1;
             break;
         case 3:
-            sprintf(buffer, "\xB3 Address Error                            \xB3");
+            txt_print(0, "\xB3 Address Error                            \xB3");
             address_expected = 1;
             break;
         case 4:
-            sprintf(buffer, "\xB3 Illegal Instruction Error                \xB3");
+            txt_print(0, "\xB3 Illegal Instruction Error                \xB3");
             break;
         case 5:
-            sprintf(buffer, "\xB3 Division by Zero Error                   \xB3");
+            txt_print(0, "\xB3 Division by Zero Error                   \xB3");
             break;
         case 6:
-            sprintf(buffer, "\xB3 Range Check Exception                    \xB3");
+            txt_print(0, "\xB3 Range Check Exception                    \xB3");
             break;
         case 7:
-            sprintf(buffer, "\xB3 Overflow Exception                       \xB3");
+            txt_print(0, "\xB3 Overflow Exception                       \xB3");
             break;
         case 8:
-            sprintf(buffer, "\xB3 Privilege Exception                      \xB3");
+            txt_print(0, "\xB3 Privilege Exception                      \xB3");
             break;
         case 24:
-            sprintf(buffer, "\xB3 Spurious Interrupt                       \xB3");
+            txt_print(0, "\xB3 Spurious Interrupt                       \xB3");
             break;
 
         default:
-            sprintf(buffer, "\xB3 Unknown Exception                        \xB3");
+            txt_print(0, "\xB3 Unknown Exception                        \xB3");
             break;
     }
-    print(0, buffer);
 
-    text_set_xy(0, column, row++);
-    sprintf(buffer, "\xB3                                          \xB3");
-    print(0, buffer);
+    txt_set_xy(0, column, row++);
+    txt_print(0, "\xB3                                          \xB3");
 
     if (address_expected) {
-        text_set_xy(0, column, row++);
-        print(0, "\xB3 PC: ");
-        print_hex_32(0, panic_pc);
-        print(0, "           Address: ");
-        print_hex_32(0, panic_address);
-        print(0, " \xB3");
+        txt_set_xy(0, column, row++);
+        sprintf(buffer, "\xB3 PC: %08X           Address: %08X \xB3", (unsigned int)panic_pc, (unsigned int)panic_address);
+        txt_print(0, buffer);
     } else {
-        text_set_xy(0, column, row++);
-        print(0, "\xB3 PC: ");
-        print_hex_32(0, panic_pc);
-        print(0, "                             \xB3");
+        txt_set_xy(0, column, row++);
+        sprintf(buffer, "\xB3 PC: %08X                             \xB3", (unsigned int)panic_pc);
+        txt_print(0, buffer);
     }
 
-    text_set_xy(0, column, row++);
-    sprintf(buffer, "\xB3                                          \xB3");
-    print(0, buffer);
+    txt_set_xy(0, column, row++);
+    txt_print(0, "\xB3                                          \xB3");
 
-    text_set_xy(0, column, row++);
-    sprintf(buffer, "\xC0\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xD9");
-    print(0, buffer);
+    txt_set_xy(0, column, row++);
+    txt_print(0, "\xC0\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xC4\xD9");
 
     /* Wait forever */
     while (1) ;
@@ -216,8 +213,8 @@ void log_setlevel(short level) {
  */
 void log(short level, char * message) {
     if (level <= log_level) {
-        print(log_channel, message);
-        print_c(log_channel, '\n');
+        txt_print(log_channel, message);
+        txt_print(log_channel, "\n");
     }
 }
 
@@ -231,9 +228,9 @@ void log(short level, char * message) {
  */
 void log2(short level, char * message1, char * message2) {
     if (level <= log_level) {
-        print(log_channel, message1);
-        print(log_channel, message2);
-        print_c(log_channel, '\n');
+        char line[80];
+        sprintf(line, "%s%s\n", message1, message2);
+        txt_print(log_channel, line);
     }
 }
 
@@ -248,10 +245,9 @@ void log2(short level, char * message1, char * message2) {
  */
 void log3(short level, const char * message1, const char * message2, const char * message3) {
     if (level <= log_level) {
-        print(log_channel, message1);
-        print(log_channel, message2);
-        print(log_channel, message3);
-        print_c(log_channel, '\n');
+        char line[80];
+        sprintf(line, "%s%s%s\n", message1, message2, message3);
+        txt_print(log_channel, line);
     }
 }
 
@@ -264,10 +260,11 @@ void log3(short level, const char * message1, const char * message2, const char 
  * n = the number to log
  */
 void log_num(short level, char * message, int n) {
+    char line[80];
+
     if (level <= log_level) {
-        print(log_channel, message);
-        print_hex_32(log_channel, n);
-        print_c(log_channel, '\n');
+        sprintf(line, "%s%08X\n", message, n);
+        print(log_channel, line);
     }
 }
 
@@ -276,6 +273,6 @@ void log_num(short level, char * message, int n) {
  */
 void log_c(short level, char c) {
     if (log_level <= level) {
-        print_c(log_channel, c);
+        txt_put(log_channel, c);
     }
 }

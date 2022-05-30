@@ -6,8 +6,11 @@
  * Examples include: console, serial port, an open file, etc.
  */
 
+#include <string.h>
+
 #include "dev/channel.h"
 #include "errors.h"
+#include "simpleio.h"
 #include "types.h"
 #include "log.h"
 
@@ -80,8 +83,8 @@ p_channel chan_alloc(short dev) {
 
     TRACE("chan_alloc");
 
-    if ((dev == CDEV_CONSOLE) || (dev == CDEV_EVID)) {
-        /* For CONSOLE and EVID, the channel is always the same number as the device */
+    if ((dev >= CDEV_CONSOLE) && (dev < CDEV_FILE)) {
+        /* For most devices (all but files): the channel is always the same number as the device */
         g_channels[dev].number = dev;
         g_channels[dev].dev = dev;
         return &g_channels[dev];
@@ -171,7 +174,11 @@ short cdev_init(short dev) {
     if (dev < CDEV_DEVICES_MAX) {
         p_dev_chan cdev = &g_channel_devs[dev];
         if (cdev->number == dev) {
-            return cdev->init();
+            if (cdev->init) {
+                return cdev->init();
+            } else {
+                return 0;
+            }
         } else {
             return DEV_ERR_BADDEV;
         }
@@ -210,14 +217,22 @@ short chan_open(short dev, const uint8_t * path, short mode) {
         if (chan == 0) {
             return ERR_OUT_OF_HANDLES;
         }
+        if (chan->dev != dev) {
+            return ERR_BADCHANNEL;
+        }
 
         /* Open the channel */
-        result = cdev->open(chan, path, mode);
-        if (result == 0) {
-            /* Success: return the channel number */
-            return chan->number;
+        if (cdev->open) {
+            result = cdev->open(chan, path, mode);
+            if (result == 0) {
+                /* Success: return the channel number */
+                return chan->number;
+            } else {
+                return result;
+            }
         } else {
-            return result;
+            // There's no actual open routine... just return the channel number
+            return chan->number;
         }
     } else {
         return DEV_ERR_BADDEV;
@@ -237,7 +252,9 @@ short chan_close(short channel) {
     p_channel chan;
     p_dev_chan cdev;
     if (chan_get_records(channel, &chan, &cdev) == 0) {
-        cdev->close(chan);
+        if (cdev->close) {
+            cdev->close(chan);
+        }
         chan_free(chan);
     }
 
@@ -265,7 +282,12 @@ short chan_read(short channel, uint8_t * buffer, short size) {
     res = chan_get_records(channel, &chan, &cdev);
     if (res == 0) {
         log2(LOG_DEBUG, "chan_read: ", cdev->name);
-        return cdev->read(chan, buffer, size);
+        if (cdev->read) {
+            return cdev->read(chan, buffer, size);
+        } else {
+            return 0;
+        }
+
     } else {
         log_num(LOG_DEBUG, "Couldn't get channel: ", res);
         return res;
@@ -290,7 +312,11 @@ short chan_readline(short channel, uint8_t * buffer, short size) {
 
     res = chan_get_records(channel, &chan, &cdev);
     if (res == 0) {
-        return cdev->readline(chan, buffer, size);
+        if (cdev->readline) {
+            return cdev->readline(chan, buffer, size);
+        } else {
+            return 0;
+        }
     } else {
         return res;
     }
@@ -313,7 +339,11 @@ short chan_read_b(short channel) {
 
     res = chan_get_records(channel, &chan, &cdev);
     if (res == 0) {
-        return cdev->read_b(chan);
+        if (cdev->read_b) {
+            return cdev->read_b(chan);
+        } else {
+            return 0;
+        }
     } else {
         return res;
     }
@@ -335,14 +365,17 @@ short chan_write(short channel, const uint8_t * buffer, short size) {
     p_dev_chan cdev;
     short res;
 
-    log_num(LOG_INFO, "chan_write: ", channel);
+    // log_num(LOG_INFO, "chan_write: ", channel);
 
     res = chan_get_records(channel, &chan, &cdev);
     if (res == 0) {
-        return cdev->write(chan, buffer, size);
+        if (cdev->write) {
+            return cdev->write(chan, buffer, size);
+        } else {
+            return 0;
+        }
     } else {
         log_num(LOG_ERROR, "chan_write error: ", res);
-        while (1) ;
         return res;
     }
 }
@@ -362,11 +395,15 @@ short chan_write_b(short channel, uint8_t b) {
     p_dev_chan cdev;
     short res;
 
-    TRACE("chan_write_b");
+    // TRACE("chan_write_b");
 
     res = chan_get_records(channel, &chan, &cdev);
     if (res == 0) {
-        return cdev->write_b(chan, b);
+        if (cdev->write_b) {
+            return cdev->write_b(chan, b);
+        } else {
+            return 0;
+        }
     } else {
         return res;
     }
@@ -389,7 +426,11 @@ short chan_status(short channel) {
 
     res = chan_get_records(channel, &chan, &cdev);
     if (res == 0) {
-        return cdev->status(chan);
+        if (cdev->status) {
+            return cdev->status(chan);
+        } else {
+            return 0;
+        }
     } else {
         return res;
     }
@@ -411,7 +452,11 @@ short chan_flush(short channel) {
 
     res = chan_get_records(channel, &chan, &cdev);
     if (res == 0) {
-        return cdev->flush(chan);
+        if (cdev->flush) {
+            return cdev->flush(chan);
+        } else {
+            return 0;
+        }
     } else {
         return res;
     }
@@ -436,7 +481,11 @@ short chan_seek(short channel, long position, short base) {
 
     res = chan_get_records(channel, &chan, &cdev);
     if (res == 0) {
-        return cdev->seek(chan, position, base);
+        if (cdev->seek) {
+            return cdev->seek(chan, position, base);
+        } else {
+            return 0;
+        }
     } else {
         return res;
     }
@@ -461,8 +510,71 @@ short chan_ioctrl(short channel, short command, uint8_t * buffer, short size) {
 
     res = chan_get_records(channel, &chan, &cdev);
     if (res == 0) {
-        return cdev->ioctrl(chan, command, buffer, size);
+        if (cdev->ioctrl) {
+            return cdev->ioctrl(chan, command, buffer, size);
+        } else {
+            return 0;
+        }
     } else {
         return res;
+    }
+}
+
+/**
+ * Return the device associated with the channel
+ *
+ * @param channel the ID of the channel to query
+ * @return the ID of the device associated with the channel, negative number for error
+ */
+short chan_device(short channel) {
+    if (channel >= CHAN_MAX) {
+        // If either channel ID is bad...
+        return ERR_BADCHANNEL;
+
+    } else {
+        if (g_channels[channel].number != channel) {
+            // Channel is closed
+            return ERR_BADCHANNEL;
+
+        } else {
+            return g_channels[channel].dev;
+        }
+    }
+}
+
+/**
+ * Swap the channel ID assignments for two channels
+ *
+ * Before call: channel1 = "Channel A", channel2 = "Channel B"
+ * After call: channel1 = "Channel B", channel2 = "Channel A"
+ *
+ * @param channel1 the ID of one of the channels
+ * @param channel2 the ID of the other channel
+ * @return 0 on success, any other number is an error
+ */
+short chan_swap(short channel1, short channel2) {
+    if ((channel1 >= CHAN_MAX) || (channel2 >= CHAN_MAX)) {
+        // If either channel ID is bad...
+        return ERR_BADCHANNEL;
+
+    } else {
+        uint8_t tmp_data[CHAN_DATA_SIZE];
+        p_channel chan1 = 0, chan2 = 0;
+        short i = 0, tmp_dev = 0;
+
+        chan1 = &g_channels[channel1];
+        chan2 = &g_channels[channel2];
+
+        // Swap the devices
+        tmp_dev = chan1->dev;
+        chan1->dev = chan2->dev;
+        chan2->dev = tmp_dev;
+
+        // Swap the data blocks
+        memcpy(tmp_data, chan1->data, CHAN_DATA_SIZE);
+        memcpy(chan1->data, chan2->data, CHAN_DATA_SIZE);
+        memcpy(chan2->data, tmp_data, CHAN_DATA_SIZE);
+
+        return 0;
     }
 }

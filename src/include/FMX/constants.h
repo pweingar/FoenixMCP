@@ -15,7 +15,7 @@
  * Definitions of special characters
  */
 
-#define CHAR_ESC '\x2b'         /* Escape character */
+#define CHAR_ESC '\x1b'         /* Escape character */
 #define CHAR_NL '\r'            /* Newline character */
 #define CHAR_BS '\b'            /* Backspace */
 

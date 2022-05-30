@@ -1,4 +1,11 @@
 
+#
+# User may over-ride the UNIT and MEMORY parameters to specify target machine
+# and where the MCP will run (ram or flash)
+#
+UNIT := a2560k
+MEMORY := flash
+
 # CPU_WDC65816                0x16  /* CPU code for the Western Design Center 65816 */
 # CPU_M68000                  0x20  /* CPU code for the Motorola 68000 */
 # CPU_M68010                  0x21  /* CPU code for the Motorola 68010 */
@@ -6,7 +13,6 @@
 # CPU_M68030                  0x23  /* CPU code for the Motorola 68030 */
 # CPU_M68040                  0x24  /* CPU code for the Motorola 68040 */
 # CPU_I486DX                  0x34  /* CPU code for the Intel 486DX */
-export CPU=32
 
 # MODEL_FOENIX_FMX            0
 # MODEL_FOENIX_C256U          1
@@ -15,31 +21,67 @@ export CPU=32
 # MODEL_FOENIX_A2560U_PLUS    6
 # MODEL_FOENIX_A2560X         8
 # MODEL_FOENIX_A2560U         9
-# MODEL_FOENIX_A2560K         13
-export MODEL=9
+# MODEL_FOENIX_A2560K         11
+
+# Determine target CPU and MODEL based on the UNIT
+
+ifeq ($(UNIT),a2560k)
+export CPU_NUMBER = 6		# M68040V
+export VASM_CPU = -m68040	# VASM CPU flag
+export VBCC_CPU = 68040		# VBCC CPU flag
+export MODEL_NUMBER = 11	# A2560K
+export cpu = m68040
+
+else ifeq ($(UNIT),genx)
+export CPU_NUMBER = 6		# M68040V
+export VASM_CPU = -m68040	# VASM CPU flag
+export VBCC_CPU = 68040		# VBCC CPU flag
+export MODEL_NUMBER = 4		# GenX
+export cpu = m68040
+
+else ifeq ($(UNIT),a2560u)
+export CPU_NUMBER = 0		# M680SEC00
+export VASM_CPU = -m68000	# VASM CPU flag
+export VBCC_CPU = 68000		# VBCC CPU flag
+export MODEL_NUMBER = 9		# A2560U
+export CFG_FILE = $(VBCC)/config/a2560u_ram
+export cpu = m68k
+endif
+
+# Determine the correct configuration file (barring OS)
+
+ifeq ($(MEMORY),ram)
+export CFG_FILE = $(VBCC)/config/$(UNIT)_ram
+else
+export CFG_FILE = $(VBCC)/config/$(UNIT)_flash
+endif
 
 export AS = vasmm68k_mot
-export ASFLAGS = -quiet -Fvobj -nowarn=62
+export ASFLAGS = $(VASM_CPU) -quiet -Fvobj -nowarn=62
 export CC = vc
-export DEFINES = -DCPU=$(CPU) -DMODEL=$(MODEL) # -DKBD_POLLED
+export DEFINES = -DCPU=$(CPU_NUMBER) -DMODEL=$(MODEL_NUMBER) # -DKBD_POLLED
 
 ifeq ($(OS),Windows_NT)
-	#export CFLAGS = +$(VBCC)/config/m68k-foenix -I. -I$(CURDIR)/include -I$(CURDIR)
-	export CFLAGS = +$(VBCC)/config/a2560u_flash -I. -I$(CURDIR)/include -I$(CURDIR)
+	export CFLAGS = -cpu=$(VBCC_CPU) +$(CFG_FILE) -I. -I$(CURDIR)/include -I$(CURDIR)
 	export RM = cmd /C del /Q /F
 else
-	#export CFLAGS = +$(VBCC)/config/m68k-foenix-linux -I. -I$(CURDIR)/include -I$(CURDIR)
-	export CFLAGS = +$(VBCC)/config/a2560u_flash-linux -I. -I$(CURDIR)/include -I$(CURDIR)
+	export CFLAGS = -cpu=$(VBCC_CPU) +$(CFG_FILE)_linux -I. -I$(CURDIR)/include -I$(CURDIR)
 	export RM = rm -f
 endif
 
-cpu = m68k
 cpu_assembly_src := $(wildcard $(cpu)/*.s)
 cpu_c_src := $(wildcard $(cpu)/*.c)
 cpu_assembly_obj := $(subst .s,.o,$(cpu_assembly_src))
 cpu_c_obj := $(subst .c,.o,$(cpu_c_src))
-dev_c_src := $(wildcard dev/*.c)
+
+dev_base_sources = dev/block.c dev/channel.c dev/console.c dev/fsys.c dev/pata.c dev/ps2.c dev/rtc.c dev/sdc.c dev/txt_screen.c dev/uart.c
+ifeq ($(UNIT),a2560k)
+dev_c_src := $(dev_base_sources) dev/fdc.c dev/kbd_mo.c dev/lpt.c dev/midi.c dev/txt_a2560k_a.o dev/txt_a2560k_b.o m68040/fdc_m68040.o
+else
+dev_c_src := $(dev_base_sources)
+endif
 dev_c_obj := $(subst .c,.o,$(dev_c_src))
+
 snd_c_src := $(wildcard snd/*.c)
 snd_c_obj := $(subst .c,.o,$(snd_c_src))
 fat_c_src := $(wildcard fatfs/*.c)
@@ -51,7 +93,11 @@ c_obj := $(subst .c,.o,$(c_src))
 
 .PHONY: all $(cpu) dev fatfs snd cli
 
+ifeq ($(MEMORY),ram)
 all: foenixmcp.s68 $(cpu) dev snd cli
+else
+all: foenixmcp.bin $(cpu) dev snd cli
+endif
 
 $(cpu):
 	$(MAKE) --directory=$@
@@ -70,6 +116,9 @@ cli:
 
 foenixmcp.s68: $(c_obj) $(cpu) dev fatfs snd cli
 	$(CC) $(CFLAGS) $(DEFINES) -o foenixmcp.s68 $(c_obj) $(cpu_c_obj) $(dev_c_obj) $(fat_c_obj) $(snd_c_obj) $(cli_c_obj)
+
+foenixmcp.bin: $(c_obj) $(cpu) dev fatfs snd cli
+	$(CC) $(CFLAGS) $(DEFINES) -o foenixmcp.bin $(c_obj) $(cpu_c_obj) $(dev_c_obj) $(fat_c_obj) $(snd_c_obj) $(cli_c_obj)
 
 %.o: %.c $(DEPS)
 	$(CC) -S -c -o $@ $< $(CFLAGS) $(DEFINES)

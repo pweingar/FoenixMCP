@@ -12,6 +12,7 @@
 #include <string.h>
 
 #include "dev/channel.h"
+#include "dev/fdc.h"
 #include "errors.h"
 #include "elf.h"
 #include "fsys.h"
@@ -76,6 +77,38 @@ short fatfs_to_foenix(FRESULT r) {
 }
 
 /**
+ * Make sure the status of the drive is up to date for the given path
+ *
+ * @param path
+ */
+void fsys_update_stat(const char * path) {
+	char buffer[20];
+	int i;
+
+	if (path[0] != '/') {
+		// The root was not specified... get it from the current working directory
+		strncpy(buffer, g_current_directory, 20);
+	} else {
+		// The root was specified... work with the data in the path
+		strncpy(buffer, path, 20);
+	}
+
+	// Make sure the path is lower case
+	for (i = 0; i < strlen(buffer); i++) {
+		char c = buffer[i];
+		if ((c >= 'A') && (c <= 'Z')) {
+			buffer[i] = tolower(c);
+		}
+	}
+
+	if (strncmp(buffer, "/fd", 3) == 0) {
+		// If the drive is the floppy drive, force the drive to spin up and check for a disk change
+		// this will update the fdc_status, which will be seen by FatFS and treated appropriately
+		sys_bdev_ioctrl(BDEV_FDC, FDC_CTRL_CHECK_CHANGE, 0, 0);
+	}
+}
+
+/**
  * Attempt to open a file given the path to the file and the mode.
  *
  * Inputs:
@@ -90,6 +123,10 @@ short fsys_open(const char * path, short mode) {
     short i, fd = -1;
 
     TRACE("fsys_open");
+
+	// If the file being opened is on the floppy drive, make sure the FDC status
+	// is updated correctly for disk change by spinning up the motor and checking the DIR register
+	fsys_update_stat(path);
 
     /* Allocate a file handle */
 
@@ -175,9 +212,13 @@ short fsys_opendir(const char * path) {
     short dir = -1;
     FRESULT fres;
 
+	// Make sure our status is updated for the drive indicated by the path
+	fsys_update_stat(path);
+
     /* Allocate a directory handle */
     for (i = 0; i < MAX_DIRECTORIES; i++) {
         if (g_dir_state[i] == 0) {
+			g_dir_state[i] = 1;
             dir = i;
             break;
         }
@@ -265,6 +306,71 @@ short fsys_readdir(short dir, p_file_info file) {
 }
 
 /**
+ * Check to see if the file is present.
+ * If it is not, return a file not found error.
+ * If it is, populate the file info record
+ *
+ * Inputs:
+ * path = the path to the file to check
+ * file = pointer to a file info record to fill in, if the file is found.
+ */
+short fsys_stat(const char * path, p_file_info file) {
+	FRESULT fres;
+	FILINFO finfo;
+	char match1[10], match2[10];
+	short i = 0;
+
+	// If the file being checked is on the floppy drive, make sure the FDC status
+	// is updated correctly for disk change by spinning up the motor and checking the DIR register
+	fsys_update_stat(path);
+
+	// FatFS's f_stat function does not handle root directories so bodge this in...
+	// For each drive...
+	for (i = 0; i < 3; i++) {
+		// Compute two legitimate paths to it
+		strcpy(match1, "/");
+		strcat(match1, (char *)VolumeStr[i]);
+		strcpy(match2, match1);
+		strcat(match2, "/");
+
+		// Check to see if the path is the same (barring letter case)
+		if ((strcicmp(path, match1) == 0) || (strcicmp(path, match2) == 0)) {
+			// It's a match... return the record for it
+			file->size = 0;
+			file->date = 0;
+			file->time = 0;
+			file->attributes = FSYS_AM_DIR;
+			strcpy(file->name, (char *)VolumeStr[i]);
+			return 0;
+		}
+	}
+
+	fres = f_stat(path, &finfo);
+	if (fres == FR_OK) {
+		int i;
+
+		/* Copy file information into the kernel table */
+		file->size = finfo.fsize;
+		file->date = finfo.fdate;
+		file->time = finfo.ftime;
+		file->attributes = finfo.fattrib;
+
+		for (i = 0; i < MAX_PATH_LEN; i++) {
+			file->name[i] = finfo.fname[i];
+			if (file->name[i] == 0) {
+				break;
+			}
+		}
+
+		return 0;
+
+	} else {
+		/* There was an error... return it to the caller */
+		return fatfs_to_foenix(fres);
+	}
+}
+
+/**
  * Open a directory given the path and search for the first file matching the pattern.
  *
  * Inputs:
@@ -277,13 +383,18 @@ short fsys_readdir(short dir, p_file_info file) {
  */
 short fsys_findfirst(const char * path, const char * pattern, p_file_info file) {
     FILINFO finfo;
-    FRESULT fres;
-    short dir;
-    short i;
+    FRESULT fres = -1;
+    short dir = 0;
+    short i = 0;
+
+	// If the path being queried is on the floppy drive, make sure the FDC status
+	// is updated correctly for disk change by spinning up the motor and checking the DIR register
+	fsys_update_stat(path);
 
     /* Allocate a directory handle */
     for (i = 0; i < MAX_DIRECTORIES; i++) {
         if (g_dir_state[i] == 0) {
+			g_dir_state[i] = 1;
             dir = i;
             break;
         }
@@ -293,6 +404,7 @@ short fsys_findfirst(const char * path, const char * pattern, p_file_info file) 
         return ERR_OUT_OF_HANDLES;
 
     } else {
+		fres = f_findfirst(&g_directory[dir], &finfo, path, pattern);
         if (fres != FR_OK) {
             return fatfs_to_foenix(fres);
 
@@ -373,6 +485,10 @@ short fsys_mkdir(const char * path) {
 
     TRACE("fsys_mkdir");
 
+	// If the directory being created is on the floppy drive, make sure the FDC status
+	// is updated correctly for disk change by spinning up the motor and checking the DIR register
+	fsys_update_stat(path);
+
     result = f_mkdir(path);
     if (result == FR_OK) {
         return 0;
@@ -393,6 +509,10 @@ short fsys_mkdir(const char * path) {
  */
 short fsys_delete(const char * path) {
     FRESULT result;
+
+	// If the path being deleted is on the floppy drive, make sure the FDC status
+	// is updated correctly for disk change by spinning up the motor and checking the DIR register
+	fsys_update_stat(path);
 
     result = f_unlink(path);
     if (result == FR_OK) {
@@ -415,6 +535,10 @@ short fsys_delete(const char * path) {
  */
 short fsys_rename(const char * old_path, const char * new_path) {
     FRESULT fres;
+
+	// If the path being renamed is on the floppy drive, make sure the FDC status
+	// is updated correctly for disk change by spinning up the motor and checking the DIR register
+	fsys_update_stat(old_path);
 
     fres = f_rename(old_path, new_path);
     if (fres != 0) {
@@ -719,6 +843,10 @@ short fsys_mount(short bdev) {
 short fsys_getlabel(char * path, char * label) {
     TRACE("fsys_getlabel");
 
+	// If the drive being queried is the floppy drive, make sure the FDC status
+	// is updated correctly for disk change by spinning up the motor and checking the DIR register
+	fsys_update_stat(path);
+
     FRESULT fres = f_getlabel(path, label, 0);
     if (fres != FR_OK) {
         return fatfs_to_foenix(fres);
@@ -737,6 +865,12 @@ short fsys_getlabel(char * path, char * label) {
 short fsys_setlabel(short drive, const char * label) {
     FRESULT fres;
     char buffer[80];
+
+	// If the drive being labeled is on the floppy drive, make sure the FDC status
+	// is updated correctly for disk change by spinning up the motor and checking the DIR register
+	if (drive == BDEV_FDC) {
+		sys_bdev_ioctrl(BDEV_FDC, FDC_CTRL_CHECK_CHANGE, 0, 0);
+	}
 
     sprintf(buffer, "%d:%s", drive, label);
     fres = f_setlabel(buffer);
@@ -876,7 +1010,7 @@ short fsys_pgz_loader(short chan, long destination, long * start) {
     short data_idx = 0;         /* Expected offset for the first byte of the data */
     short result = 0;
 
-    TRACE("fsys_pgx_loader");
+    TRACE("fsys_pgz_loader");
 
     /* Allocate the buffer we'll use for reading the file */
     chunk = malloc(DEFAULT_CHUNK_SIZE);
@@ -1138,52 +1272,45 @@ short fsys_pgx_loader(short chan, long destination, long * start) {
     return result;
 }
 
-/*
- * Load a file into memory at the designated destination address.
- *
- * If destination = 0, the file must be in a recognized binary format
- * that specifies its own loading address.
- *
- * Inputs:
- * path = the path to the file to load
- * destination = the destination address (0 for use file's address)
- * start = pointer to the long variable to fill with the starting address
- *         (0 if not an executable, any other number if file is executable
- *         with a known starting address)
- *
- * Returns:
- * 0 on success, negative number on error
- */
-short fsys_load(const char * path, long destination, long * start) {
+static bool loader_exists(const char * extension) {
     int i;
-    char extension[MAX_EXT];
-    short chan = -1;
-    p_file_loader loader = 0;
-
-    TRACE("fsys_load");
-
-    /* Clear out the extension */
-    for (i = 0; i <= MAX_EXT; i++) {
-        extension[i] = 0;
-    }
-
-    if (destination == 0) {
-        /* Find the extension */
-        char * point = strrchr(path, '.');
-        if (point != 0) {
-            point++;
-            for (i = 0; i < MAX_EXT; i++) {
-                char c = *point++;
-                if (c) {
-                    extension[i] = toupper(c);
-                } else {
-                    break;
-                }
+    for (i = 0; i < MAX_LOADERS; i++) {
+        if (g_file_loader[i].status) {
+            if (strcmp(g_file_loader[i].extension, extension) == 0) {
+                return 1;
             }
         }
     }
+    return 0;
+}
 
-    log2(LOG_VERBOSE, "fsys_load ext: ", extension);
+static int get_app_ext(const char * path, char * extension) {
+    char * point = strrchr(path, '.');
+    extension[0] = 0;
+    if (point != 0) {
+        point++;
+        for (int i = 0; i < MAX_EXT; i++) {
+            char c = *point++;
+            if (c) {
+                extension[i] = toupper(c);
+            } else {
+                extension[i] = 0;
+                return 1;
+            }
+        }
+    } else {
+        return 0;
+    }
+}
+
+static short fsys_load_ext(const char * path, const char * extension, long destination, long * start) {
+    int i;
+    short chan = -1;
+    p_file_loader loader = 0;
+
+    TRACE("fsys_load_ext");
+
+    log2(LOG_VERBOSE, "fsys_load_ext ext: ", extension);
 
     if (extension[0] == 0) {
         if (destination != 0) {
@@ -1207,7 +1334,7 @@ short fsys_load(const char * path, long destination, long * start) {
         }
     }
 
-    TRACE("fsys_load: loader search");
+    TRACE("fsys_load_ext: loader search");
 
     if (loader == 0) {
         if (destination != 0) {
@@ -1245,6 +1372,77 @@ short fsys_load(const char * path, long destination, long * start) {
         log_num(LOG_ERROR, "Could not open file: ", chan);
         return chan;
     }
+}
+
+
+/*
+ * Load a file into memory at the designated destination address.
+ *
+ * If destination = 0, the file must be in a recognized binary format
+ * that specifies its own loading address.
+ *
+ * Inputs:
+ * path = the path to the file to load
+ * destination = the destination address (0 for use file's address)
+ * start = pointer to the long variable to fill with the starting address
+ *         (0 if not an executable, any other number if file is executable
+ *         with a known starting address)
+ *
+ * Returns:
+ * 0 on success, negative number on error
+ */
+short fsys_load(const char * path, long destination, long * start) {
+    int i;
+    char extension[MAX_EXT];
+    char spath[MAX_PATH_LEN];
+    short chan = -1;
+    p_file_loader loader = 0;
+    int found_extension = 0;
+    int found_loader = 0;
+
+    FRESULT fr;     /* Return value */
+    DIR dj;         /* Directory object */
+    FILINFO fno;    /* File information */
+
+    TRACE("fsys_load");
+
+    /* Clear out the extension */
+    for (i = 0; i <= MAX_EXT; i++) {
+        extension[i] = 0;
+    }
+
+    found_extension = get_app_ext(path, extension);
+
+    if (found_extension || destination != 0) {
+        // extension provided, pass to loader
+        fsys_load_ext(path, extension, destination, start);
+    } else {
+        // extension not provided, search for a matching file.
+        strcpy(spath, path);
+        strcat(spath, ".*");
+
+        // TODO: Iterate through path, and replace "".
+        fr = f_findfirst(&dj, &fno, "", spath);       /* Start to search for executables */
+        while (fr == FR_OK && fno.fname[0]) {         /* Repeat while an item is found */
+            get_app_ext(fno.fname, extension);
+            if (loader_exists(extension)) {
+                strcpy(spath, fno.fname);
+                found_loader = 1;
+                break;
+            }
+            fr = f_findnext(&dj, &fno);               /* Search for next item */
+        }
+        f_closedir(&dj);
+
+        if(found_loader) {
+            // Found path with valid loader
+            fsys_load_ext(spath, extension, destination, start);
+        } else {
+            log(LOG_ERROR, "Command not found.");
+            return ERR_NOT_FOUND;
+        }
+    }
+    return 0;
 }
 
 /*
@@ -1295,6 +1493,8 @@ short fsys_register_loader(const char * extension, p_file_loader loader) {
  */
 short fsys_init() {
     int i, j;
+
+	TRACE("fsys_init");
 
 	/* Set the default working directory.
 	 * TODO: set this based on the boot drive.

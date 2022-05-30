@@ -18,6 +18,32 @@
  */
 extern short kbdmo_init();
 
+/**
+ * Set the color of the A2560K keyboard LED matrix
+ *
+ * @param row the number of the row to set (0 - 5)
+ * @param color the color for the LEDs: ARGB
+ */
+void kbdmo_set_led_matrix_row(unsigned char row, unsigned short color);
+
+/**
+ * Set all the LEDs to the same color
+ *
+ * @param color the color for the LEDs: ARGB
+ */
+void kbdmo_set_led_matrix_fill(unsigned short color);
+
+/*
+ * Check to see if a BREAK code has been pressed recently
+ * If so, return 1 and reset the internal flag.
+ *
+ * BREAK will be F-ESC on the A2560K
+ *
+ * Returns:
+ * 1 if a BREAK has been pressed since the last check
+ */
+extern short kbdmo_break();
+
 /*
  * Try to retrieve the next scancode from the keyboard.
  *
@@ -32,7 +58,7 @@ extern unsigned short kbdmo_get_scancode();
  * Returns:
  *      the next character to be read from the keyboard (0 if none available)
  */
-extern char kbdmo_getc();
+extern unsigned char kbdmo_getc();
 
 /*
  * Use polling to fetch a key
@@ -77,6 +103,29 @@ extern void kbdmo_set_sdc_led(short colors);
  * colors = color specification, three bits: 0x_____RGB
  */
 extern void kbdmo_set_hdc_led(short colors);
+
+/*
+ * Set the keyboard translation tables
+ *
+ * The translation tables provided to the keyboard consist of eight
+ * consecutive tables of 128 characters each. Each table maps from
+ * the MAKE scan code of a key to its appropriate 8-bit character code.
+ *
+ * The tables included must include, in order:
+ * - UNMODIFIED: Used when no modifier keys are pressed or active
+ * - SHIFT: Used when the SHIFT modifier is pressed
+ * - CTRL: Used when the CTRL modifier is pressed
+ * - CTRL-SHIFT: Used when both CTRL and SHIFT are pressed
+ * - CAPSLOCK: Used when CAPSLOCK is down but SHIFT is not pressed
+ * - CAPSLOCK-SHIFT: Used when CAPSLOCK is down and SHIFT is pressed
+ * - ALT: Used when only ALT is presse
+ * - ALT-SHIFT: Used when ALT is pressed and either CAPSLOCK is down
+ *   or SHIFT is pressed (but not both)
+ *
+ * Inputs:
+ * tables = pointer to the keyboard translation tables
+ */
+extern short kbdmo_layout(const char * tables);
 
 #endif
 

@@ -19,6 +19,7 @@ void rtc_handle_int() {
     unsigned char flags;
 
     /* Periodic interrupt: increment the ticks counter */
+    flags = *RTC_FLAGS;
     rtc_ticks++;
 }
 
@@ -45,13 +46,14 @@ void rtc_init() {
 
     // /* Set the periodic interrupt to 15 millisecs */
     // *RTC_RATES = RTC_RATE_15ms;
-
+    //
     // int_register(INT_RTC, rtc_handle_int);
-
-    /* Enable the periodic interrupt */
+    //
+    // /* Enable the periodic interrupt */
     // flags = *RTC_FLAGS;
     // *RTC_ENABLES = RTC_PIE;
-
+    // rtc_ticks = 0;
+    //
     // int_enable(INT_RTC);
 }
 
@@ -67,6 +69,29 @@ void rtc_enable_ticks() {
     *RTC_ENABLES = RTC_PIE;
 
     int_enable(INT_RTC);
+}
+
+/**
+ * Register a function to be called periodically
+ *
+ * @param rate the rate at which the function should be called using the bq4802LY periodic rate values (0 to disable)
+ * @param handler a pointer to a function from void to void to be called
+ * @return 0 on success, any other number is an error
+ */
+short rtc_register_periodic(short rate, FUNC_V_2_V handler) {
+    if (rate == 0) {
+        int_disable(INT_RTC);
+        *RTC_RATES = 0;
+        *RTC_ENABLES &= ~RTC_PIE;
+        
+    } else {
+        int_register(INT_RTC, handler);
+        *RTC_RATES = rate;
+        unsigned char flags = *RTC_FLAGS;
+        *RTC_ENABLES = RTC_PIE;
+        int_enable(INT_RTC);
+    }
+
 }
 
 /*

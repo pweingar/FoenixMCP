@@ -1,6 +1,8 @@
 csources = $(wildcard *.c)
 cobjects = $(subst .c,.o,$(csources))
 
+cobjects = $(subst .c,.o,$(csources))
+
 .PHONY: all
 all: $(cobjects)
 
@@ -10,4 +12,4 @@ all: $(cobjects)
 .PHONY: clean
 
 clean:
-	$(RM) $(aobjects) $(cobjects) *.asm
+	$(RM) *.o *.asm

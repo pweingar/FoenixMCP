@@ -45,4 +45,8 @@
 #define FSYS_ERR_TOO_MANY_OPEN_FILES    -35 /* (18) Number of open files > FF_FS_LOCK */
 #define FSYS_ERR_INVALID_PARAMETER      -36 /* (19) Given parameter is invalid */
 
+#define ERR_NOT_SUPPORTED               -37 /* Device does not support the file or operation */
+#define ERR_BAD_ARGUMENT                -38 /* An invalid argument was provided */
+#define ERR_MEDIA_CHANGE                -39 /* Removable media has changed */
+
 #endif

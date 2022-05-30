@@ -16,6 +16,7 @@
 #include "dev/block.h"
 #include "dev/fsys.h"
 #include "dev/rtc.h"
+#include "dev/txt_screen.h"
 
 /*
  * Syscall function numbers
@@ -48,7 +49,8 @@
 #define KFN_CHAN_REGISTER       0x19    /* Register a channel device driver */
 #define KFN_CHAN_OPEN           0x1A    /* Open a channel device */
 #define KFN_CHAN_CLOSE          0x1B    /* Close an open channel (not for files) */
-#define KFN_TEXT_SETSIZES       0x1C    /* Adjusts the screen size based on the current graphics mode */
+#define KFN_CHAN_SWAP           0x1C    /* Swap the channel ID assignment of two channels */
+#define KFN_CHAN_DEVICE         0x1D    /* Get the number of the device associated with the channel */
 
 
 /* Block device system calls */
@@ -59,6 +61,7 @@
 #define KFN_BDEV_STATUS         0x23    /* Get the status of a block device */
 #define KFN_BDEV_IOCTRL         0x24    /* Send a command to a block device (device dependent functionality) */
 #define KFN_BDEV_REGISTER       0x25    /* Register a block device driver */
+#define KFN_STAT                0x2F    /* Check for file existance and return file information */
 
 /* File/Directory system calls */
 
@@ -82,6 +85,11 @@
 /* Process and memory calls */
 
 #define KFN_RUN                 0x40    /* Load an execute a binary file */
+#define KFN_MEM_GET_RAMTOP      0x41    /* Get the upper limit of the top of system RAM */
+#define KFN_MEM_RESERVE         0x42    /* Reserve a block of memory at the top of system RAM */
+#define KFN_ELEVATE             0x43    /* Switch the user process to a full privilege */
+#define KFN_VAR_SET             0x44    /* Set the value of a system variable */
+#define KFN_VAR_GET             0x45    /* Get the value of a system variable */
 
 /* Misc calls */
 
@@ -91,6 +99,28 @@
 #define KFN_KBD_SCANCODE        0x53    /* Get the next scan code from the keyboard */
 #define KFN_KBD_LAYOUT          0x54    /* Set the translation tables for the keyboard */
 #define KFN_ERR_MESSAGE         0x55    /* Return an error description, given an error number */
+
+/* Text Device Calls */
+
+#define KFN_TEXT_INIT_SCREEN    0x60    /* Reset a screen to its default mode */
+#define KFN_TXT_GET_CAPS        0x61    /* Get the capabilities of a screen */
+#define KFN_TXT_SET_MODE        0x62    /* Set the display mode of a screen */
+#define KFN_TEXT_SETSIZES       0x63    /* Adjusts the screen size based on the current graphics mode */
+#define KFN_TXT_SET_RESOLUTION  0x64    /* Set the base display resolution for a screen */
+#define KFN_TXT_SET_BORDER      0x65    /* Set the size of the border */
+#define KFN_TXT_SET_BORDERCOLOR 0x66    /* Set the border color */
+#define KFN_TXT_SET_FONT        0x67    /* Set the font for the screen's text mode (if applicable) */
+#define KFN_TXT_SET_CURSOR      0x68    /* Set the text-mode cursor look */
+#define KFN_TXT_SET_REGION      0x69    /* Sets the clipping/scrolling region for further text operations */
+#define KFN_TXT_GET_REGION      0x6A    /* Gets the current clipping/scrolling region */
+#define KFN_TXT_SET_COLOR       0x6B    /* Sets the foreground and background text colors */
+#define KFN_TXT_GET_COLOR       0x6C    /* Gets the foreground and background text colors */
+#define KFN_TXT_SET_XY          0x6D    /* Sets the cursor's position */
+#define KFN_TXT_GET_XY          0x6E    /* Gets the cursor's position */
+#define KFN_TXT_SCROLL          0x6F    /* Scroll the current region */
+// #define KFN_TXT_FILL            0x70    /* Fill the current region */
+#define KFN_TXT_SET_CURSOR_VIS  0x71    /* Set cursor visibility */
+#define KFN_TXT_GET_SIZES       0x72    /* Get the screen size (visible text cells and total pixel resolution) */
 
 /*
  * Call into the kernel (provided by assembly)
@@ -320,6 +350,26 @@ extern short sys_chan_open(short dev, const uint8_t * path, short mode);
  */
 extern short sys_chan_close(short chan);
 
+/**
+ * Swap the channel ID assignments for two channels
+ *
+ * Before call: channel1 = "Channel A", channel2 = "Channel B"
+ * After call: channel1 = "Channel B", channel2 = "Channel A"
+ *
+ * @param channel1 the ID of one of the channels
+ * @param channel2 the ID of the other channel
+ * @return 0 on success, any other number is an error
+ */
+extern short sys_chan_swap(short channel1, short channel2);
+
+/**
+ * Return the device associated with the channel
+ *
+ * @param channel the ID of the channel to query
+ * @return the ID of the device associated with the channel, negative number for error
+ */
+extern short sys_chan_device(short channel);
+
 /*
  * Compute the size information for the text screen based on the current settings in VICKY
  * These settings are needed to correctly position text on the screen.
@@ -327,7 +377,7 @@ extern short sys_chan_close(short chan);
  * Inputs:
  * screen = the screen number 0 for channel A, 1 for channel B
  */
-extern void text_setsizes(short chan);
+extern void sys_text_setsizes(short chan);
 
 /***
  *** Block device system calls
@@ -619,6 +669,37 @@ extern short sys_fsys_load(const char * path, long destination, long * start);
  */
 extern short sys_fsys_register_loader(const char * extension, p_file_loader loader);
 
+/**
+ * Check to see if the file is present.
+ * If it is not, return a file not found error.
+ * If it is, populate the file info record
+ *
+ * @param path the path to the file to check
+ * @param file pointer to a file info record to fill in, if the file is found.
+ * @return 0 on success, negative number on error
+ */
+extern short sys_fsys_stat(const char * path, p_file_info file);
+
+/**
+ * Memory
+ */
+
+/**
+ * Return the top of system RAM... the user program must not use any
+ * system memory from this address and above.
+ *
+ * @return the address of the first byte of reserved system RAM (one above the last byte the user program can use)
+ */
+extern unsigned long sys_mem_get_ramtop();
+
+/**
+ * Reserve a block of memory at the top of system RAM.
+ *
+ * @param bytes the number of bytes to reserve
+ * @return address of the first byte of the reserved block
+ */
+extern unsigned long sys_mem_reserve(unsigned long bytes);
+
 /*
  * Miscellaneous
  */
@@ -683,5 +764,161 @@ extern const char * sys_err_message(short err_number);
  * tables = pointer to the keyboard translation tables
  */
 extern short sys_kbd_layout(const char * tables);
+
+/**
+ * Load and execute an executable file
+ *
+ * @param path the path to the executable file
+ * @param argc the number of arguments passed
+ * @param argv the array of string arguments
+ * @return the return result of the program
+ */
+extern short sys_proc_run(const char * path, int argc, char * argv[]);
+
+/**
+ * Set the value of a variable
+ *
+ * @param name the name of the variable to set
+ * @param value the value the variable should have
+ * @return 0 on success, negative number on error
+ */
+extern short sys_var_set(const char *name, const char *value);
+
+/**
+ * Get the value of a variable
+ *
+ * @param name the name of the variable to set
+ * @return pointer to the string on success, 0 if not found
+ */
+extern const char * sys_var_get(const char *name);
+
+//
+// Text screen calls
+//
+
+/**
+ * Gets the description of a screen's capabilities
+ *
+ * @param screen the number of the text device
+ *
+ * @return a pointer to the read-only description (0 on error)
+ */
+extern const p_txt_capabilities sys_txt_get_capabilities(short screen);
+
+/**
+ * Set the display mode for the screen
+ *
+ * @param screen the number of the text device
+ * @param mode a bitfield of desired display mode options
+ *
+ * @return 0 on success, any other number means the mode is invalid for the screen
+ */
+extern short sys_txt_set_mode(short screen, short mode);
+
+/**
+ * Set the position of the cursor to (x, y) relative to the current region
+ * If the (x, y) coordinate is outside the region, it will be clipped to the region.
+ * If y is greater than the height of the region, the region will scroll until that relative
+ * position would be within view.
+ *
+ * @param screen the number of the text device
+ * @param x the column for the cursor
+ * @param y the row for the cursor
+ */
+extern void sys_txt_set_xy(short screen, short x, short y);
+
+/**
+ * Get the position of the cursor (x, y) relative to the current region
+ *
+ * @param screen the number of the text device
+ * @param position pointer to a t_point record to fill out
+ */
+extern void sys_txt_get_xy(short screen, p_point position);
+
+/**
+ * Get the current region.
+ *
+ * @param screen the number of the text device
+ * @param region pointer to a t_rect describing the rectangular region (using character cells for size and size)
+ *
+ * @return 0 on success, any other number means the region was invalid
+ */
+extern short sys_txt_get_region(short screen, p_rect region);
+
+/**
+ * Set a region to restrict further character display, scrolling, etc.
+ * Note that a region of zero size will reset the region to the full size of the screen.
+ *
+ * @param screen the number of the text device
+ * @param region pointer to a t_rect describing the rectangular region (using character cells for size and size)
+ *
+ * @return 0 on success, any other number means the region was invalid
+ */
+extern short sys_txt_set_region(short screen, p_rect region);
+
+/**
+ * Set the default foreground and background colors for printing
+ *
+ * @param screen the number of the text device
+ * @param foreground the Text LUT index of the new current foreground color (0 - 15)
+ * @param background the Text LUT index of the new current background color (0 - 15)
+ */
+extern void sys_txt_set_color(short screen, unsigned char foreground, unsigned char background);
+
+/*
+ * Get the foreground and background color for printing
+ *
+ * Inputs:
+ * screen = the screen number 0 for channel A, 1 for channel B
+ * foreground = pointer to the foreground color number
+ * background = pointer to the background color number
+ */
+extern void sys_txt_get_color(short screen, unsigned char * foreground, unsigned char * background);
+
+/**
+ * Set if the cursor is visible or not
+ *
+ * @param screen the screen number 0 for channel A, 1 for channel B
+ * @param is_visible TRUE if the cursor should be visible, FALSE (0) otherwise
+ */
+extern void sys_txt_set_cursor_visible(short screen, short is_visible);
+
+/**
+ * Load a font as the current font for the screen
+ *
+ * @param screen the number of the text device
+ * @param width width of a character in pixels
+ * @param height of a character in pixels
+ * @param data pointer to the raw font data to be loaded
+ */
+extern short sys_txt_set_font(short screen, short width, short height, unsigned char * data);
+
+/**
+ * Get the display resolutions
+ *
+ * @param screen the screen number 0 for channel A, 1 for channel B
+ * @param text_size the size of the screen in visible characters (may be null)
+ * @param pixel_size the size of the screen in pixels (may be null)
+ */
+extern void sys_txt_get_sizes(short screen, p_extent text_size, p_extent pixel_size);
+
+/**
+ * Set the size of the border of the screen (if supported)
+ *
+ * @param screen the number of the text device
+ * @param width the horizontal size of one side of the border (0 - 32 pixels)
+ * @param height the vertical size of one side of the border (0 - 32 pixels)
+ */
+extern void sys_txt_set_border(short screen, short width, short height);
+
+/**
+ * Set the size of the border of the screen (if supported)
+ *
+ * @param screen the number of the text device
+ * @param red the red component of the color (0 - 255)
+ * @param green the green component of the color (0 - 255)
+ * @param blue the blue component of the color (0 - 255)
+ */
+extern void sys_txt_set_border_color(short screen, unsigned char red, unsigned char green, unsigned char blue);
 
 #endif

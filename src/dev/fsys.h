@@ -5,9 +5,9 @@
 #ifndef __FSYS_H
 #define __FSYS_H
 
+#include "constants.h"
 #include "types.h"
 
-#define MAX_PATH_LEN        256
 #define DEFAULT_CHUNK_SIZE  256
 
 /**
@@ -124,6 +124,17 @@ extern short fsys_findfirst(const char * path, const char * pattern, p_file_info
  * 0 on success, error if negative
  */
 extern short fsys_findnext(short dir, p_file_info file);
+
+/**
+ * Check to see if the file is present.
+ * If it is not, return a file not found error.
+ * If it is, populate the file info record
+ *
+ * Inputs:
+ * path = the path to the file to check
+ * file = pointer to a file info record to fill in, if the file is found.
+ */
+extern short fsys_stat(const char * path, p_file_info file);
 
 /*
  * Get the label for the drive holding the path

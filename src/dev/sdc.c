@@ -7,11 +7,11 @@
 #include "errors.h"
 #include "gabe_reg.h"
 #include "indicators.h"
+#include "interrupt.h"
 #include "dev/block.h"
 #include "sdc_reg.h"
 #include "dev/rtc.h"
 #include "dev/sdc.h"
-#include "dev/text_screen_iii.h"
 
 //
 // Constants
@@ -21,6 +21,14 @@
 
 unsigned char g_sdc_status = SDC_STAT_NOINIT;
 unsigned char g_sdc_error = 0;
+
+/*
+ * Handle insertion of an SD card
+ */
+void sdc_handler() {
+    /* Very simple... just flag it as uninitialized */
+    g_sdc_status = SDC_STAT_NOINIT;
+}
 
 //
 // Attempt to reset the SD controller
@@ -40,16 +48,14 @@ void sdc_reset() {
 // Return true if there is an SD card in the slot
 //
 short sdc_detected() {
-    return 1;
-    // return (*SDCARD_STAT & SDC_DETECTED) != SDC_DETECTED;
+    return (*GABE_SDC_REG & GABE_SDC_PRESENT) != GABE_SDC_PRESENT;
 }
 
 //
 // Return true if there is an SD card is protected
 //
 short sdc_protected() {
-    return 0;
-    // return (*SDCARD_STAT & SDC_WRITEPROT) != SDC_WRITEPROT;
+    return (*GABE_SDC_REG & GABE_SDC_WPROT) == GABE_SDC_WPROT;
 }
 
 //
@@ -405,6 +411,10 @@ short sdc_install() {
     t_dev_block dev;                    // bdev_register copies the data, so we'll allocate this on the stack
 
     TRACE("sdc_install");
+
+    /* Install an interrupt handler to catch insertion of a card */
+    int_register(INT_SDC_INS, sdc_handler);
+    int_enable(INT_SDC_INS);
 
     sdc_reset();
 

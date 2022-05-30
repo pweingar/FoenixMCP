@@ -44,6 +44,8 @@ extern unsigned short kbd_get_scancode();
  */
 extern char kbd_getc();
 
+extern char kbd_getc_poll();
+
 /*
  * Set the keyboard translation tables
  *

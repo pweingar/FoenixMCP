@@ -8,6 +8,7 @@
 #include "types.h"
 #include "syscalls.h"
 #include "interrupt.h"
+#include "memory.h"
 #include "proc.h"
 #include "dev/channel.h"
 #include "dev/block.h"
@@ -108,10 +109,6 @@ unsigned long syscall_dispatch(int32_t function, int32_t param0, int32_t param1,
                 case KFN_CHAN_REGISTER:
                     return cdev_register((p_dev_chan)param0);
 
-                case KFN_TEXT_SETSIZES:
-                    text_setsizes((short)param0);
-                    return 0;
-
                 default:
                     return ERR_GENERAL;
             }
@@ -137,6 +134,9 @@ unsigned long syscall_dispatch(int32_t function, int32_t param0, int32_t param1,
 
                 case KFN_BDEV_REGISTER:
                     return bdev_register((p_dev_block)param0);
+
+                case KFN_STAT:
+                    return fsys_stat((const char *)param0, (p_file_info)param1);
 
                 default:
                     return ERR_GENERAL;
@@ -201,8 +201,13 @@ unsigned long syscall_dispatch(int32_t function, int32_t param0, int32_t param1,
             /* Process and Memory functions */
             switch (function) {
                 case KFN_RUN:
-                    return proc_run((char *)param0, (int)param1, (char **)param2);
-                    break;
+                    return proc_run((char *)param0, (int)param1, (char *)param2);
+
+                case KFN_MEM_GET_RAMTOP:
+                    return mem_get_ramtop();
+
+                case KFN_MEM_RESERVE:
+                    return mem_reserve((unsigned long)param0);
 
                 default:
                     return ERR_GENERAL;
@@ -224,25 +229,97 @@ unsigned long syscall_dispatch(int32_t function, int32_t param0, int32_t param1,
                     return 0;
 
                 case KFN_KBD_SCANCODE:
-#if MODEL == MODEL_FOENIX_A2560K
-                    return kbdmo_get_scancode();
-#else
                     return kbd_get_scancode();
-#endif
 
                 case KFN_ERR_MESSAGE:
                     return (unsigned long)err_message((short)param0);
 
                 case KFN_KBD_LAYOUT:
-#if MODEL == MODEL_FOENIX_A2560K
-                    return kbdmo_layout((const char *)param0);
-#else
                     return kbd_layout((const char *)param0);
-#endif
 
                 default:
                     return ERR_GENERAL;
             }
+
+        case 0x60:
+            /* Text mode operations */
+            switch (function) {
+                case KFN_TEXT_INIT_SCREEN:
+                    /* Reset a screen to its default mode */
+                    txt_init_screen((short)param0);
+                    return 0;
+
+                case KFN_TXT_GET_CAPS:
+                    /* Get the capabilities of a screen */
+                    return (unsigned long)txt_get_capabilities((short)param0);
+
+                case KFN_TXT_SET_MODE:
+                    /* Set the display mode of a screen */
+                    return txt_set_mode((short)param0, (short)param1);
+
+                case KFN_TEXT_SETSIZES:
+                    /* Adjusts the screen size based on the current graphics mode */
+                    return txt_setsizes((short)param0);
+
+                case KFN_TXT_SET_RESOLUTION:
+                    /* Set the base display resolution for a screen */
+                    return txt_set_resolution((short)param0, (short)param1, (short)param2);
+
+                case KFN_TXT_SET_BORDER:
+                    /* Set the size of the border */
+                    txt_set_border((short)param0, (short)param1, (short)param2);
+                    return 0;
+
+                case KFN_TXT_SET_BORDERCOLOR:
+                    /* Set the border color */
+                    txt_set_border_color((short)param0, (unsigned char)param1, (unsigned char)param2, (unsigned char)param3);
+                    return 0;
+
+                case KFN_TXT_SET_FONT:
+                    /* Set the font for the screen's text mode (if applicable) */
+                    return txt_set_font((short)param0, (short)param1, (short)param2, (unsigned char *)param3);
+
+                case KFN_TXT_SET_CURSOR:
+                    /* Set the text-mode cursor look */
+                    txt_set_cursor((short)param0, (short)param1, (short)param2, (char)param3);
+                    return 0;
+
+                case KFN_TXT_SET_REGION:
+                    /* Sets the clipping/scrolling region for further text operations */
+                    return txt_set_region((short)param0, (p_rect)param1);
+
+                case KFN_TXT_GET_REGION:
+                    /* Gets the current clipping/scrolling region */
+                    return txt_get_region((short)param0, (p_rect)param1);
+
+                case KFN_TXT_SET_COLOR:
+                    /* Sets the foreground and background text colors */
+                    return txt_set_color((short)param0, (unsigned char)param1, (unsigned char)param2);
+
+                case KFN_TXT_GET_COLOR:
+                    /* Gets the foreground and background text colors */
+                    txt_get_color((short)param0, (unsigned char *)param1, (unsigned char *)param2);
+                    return 0;
+
+                case KFN_TXT_SET_XY:
+                    /* Sets the cursor's position */
+                    txt_set_xy((short)param0, (short)param1, (short)param2);
+                    return 0;
+
+                case KFN_TXT_GET_XY:
+                    /* Gets the cursor's position */
+                    txt_get_xy((short)param0, (p_point)param1);
+                    return 0;
+
+                case KFN_TXT_SCROLL:
+                    /* Scroll the current region */
+                    txt_scroll((short)param0, (short)param1, (short)param2);
+                    return 0;
+
+                default:
+                    return ERR_GENERAL;
+            }
+            break;
 
         default:
             break;

@@ -26,11 +26,6 @@ extern short cmd_mkdir(short screen, int argc, const char * argv[]);
 extern short cmd_del(short screen, int argc, const char * argv[]);
 
 /*
- * Copies file(s) to destination
- */
-extern short cmd_copy(short screen, int argc, const char * argv[]);
-
-/*
  * Set the current working directory
  */
 extern short cmd_cd(short screen, int argc, const char * argv[]);
@@ -83,5 +78,14 @@ extern short cmd_label(short screen, int argc, const char * argv[]);
  * FORMAT <drive #>
  */
 extern short cmd_format(short screen, int argc, const char * argv[]);
+
+/**
+ * Command to make a device bootable by writing to the MBR or VBR
+ *
+ * MKBOOT <drive #> -r --- removes boot record
+ * MKBOOT <drive #> -b <boot record path> --- installs boot record
+ * MKBOOT <drive #> -s <start file path> --- defines a startup file
+ */
+extern short cmd_mkboot(short screen, int argc, const char * argv[]);
 
 #endif

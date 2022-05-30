@@ -20,7 +20,7 @@ void init_codec() {
 	codec_wait();
 	*CODEC = 0x2301; 			// R17
 	codec_wait();
-	*CODEC = 0x2C07;			// R22
+	*CODEC = 0x2C07;			// R22 - Enable all output sources
 	codec_wait();
 	*CODEC = 0x1402; 			// R10
 	codec_wait();

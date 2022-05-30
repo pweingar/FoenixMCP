@@ -7,7 +7,11 @@
 #include "simpleio.h"
 #include "sys_general.h"
 #include "syscalls.h"
+#include "types.h"
 #include "mem_cmds.h"
+
+/* Pointer to a function taking void and returning void */
+typedef void (*p_thunk)();
 
 /*
  * Print out the contents of a block of memory
@@ -36,6 +40,27 @@ short mem_cmd_dump(short channel, int argc, const char * argv[]) {
         log(LOG_ERROR, "USAGE: DUMP <address> <count>");
         return -1;
     }
+}
+
+void test_thunk() {
+    log(LOG_ERROR, "CALL is working.");
+}
+
+/*
+ * Command to start execution in supervisor mode at a location in memory:
+ *
+ * CALL <address>
+ */
+short mem_cmd_call(short channel, int argc, const char * argv[]) {
+    p_thunk thunk = 0;
+    TRACE ("mem_cmd_call");
+
+    thunk = (p_thunk)cli_eval_number(argv[1]);
+    if (thunk) {
+        thunk();
+    }
+
+    return 0;
 }
 
 short mem_cmd_dasm(short channel, int argc, const char * argv[]) {

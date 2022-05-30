@@ -1,6 +1,7 @@
 #include <ctype.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "syscalls.h"
@@ -8,8 +9,10 @@
 #include "simpleio.h"
 #include "cli.h"
 #include "proc.h"
+#include "boot.h"
 #include "cli/dos_cmds.h"
 #include "dev/block.h"
+#include "dev/console.h"
 #include "dev/fsys.h"
 #include "dev/kbd_mo.h"
 #include "fatfs/ff.h"
@@ -96,12 +99,14 @@ short cmd_diskfill(short screen, int argc, const char * argv[]) {
 short cmd_run(short screen, int argc, const char * argv[]) {
     TRACE("cmd_run");
 
+    sys_chan_ioctrl(screen, CON_IOCTRL_ECHO_ON, 0, 0);
     short result = proc_run(argv[0], argc, argv);
     if (result < 0) {
         err_print(screen, "Unable to execute file", result);
         return -1;
     }
 
+    sys_chan_ioctrl(screen, CON_IOCTRL_ECHO_OFF, 0, 0);
     return result;
 }
 
@@ -143,88 +148,6 @@ short cmd_del(short screen, int argc, const char * argv[]) {
     }
 }
 
-short cmd_copy(short screen, int argc, const char * argv[]) {
-    FRESULT find_result;
-    FRESULT result;
-    DIR dir;         /* Directory object */
-    FILINFO src_info;    /* File information */
-    FILINFO dst_info;
-    FIL src_file;
-    FIL dst_file;
-
-    BYTE buffer[4096];   /* File copy buffer */
-    UINT br, bw;         /* File read/write count */
-
-    char path[MAX_PATH_LEN];
-
-    bool is_directory = false;
-    bool is_append_file = false; 
-
-    TRACE("cmd_copy");
-
-    if (argc > 2) {
-        strcpy(path, argv[2]);
-
-        result = f_stat(argv[2], &dst_info);
-        if (result == FR_OK) {
-            is_directory = dst_info.fattrib & AM_DIR;
-        } else if (result == FR_NO_FILE) {
-            is_directory = false;
-        } else {            
-            goto error;
-        }
-
-        find_result = f_findfirst(&dir, &src_info, "", argv[1]);
-
-        while (find_result == FR_OK && src_info.fname[0]) {
-            if (strcmp(src_info.fname, path) == 0) goto skip;  // Skip copying file to self.
-
-            result = f_open(&src_file, src_info.fname, FA_READ);
-            if (result != FR_OK) goto error;
-            
-            if (is_directory) {
-                sprintf(path, "%s/%s", dst_info.fname, src_info.fname);
-                result = f_open(&dst_file, path, FA_WRITE | FA_CREATE_ALWAYS);
-            } else if (is_append_file) {
-                result = f_open(&dst_file, path, FA_WRITE | FA_OPEN_APPEND);
-            } else {
-                result = f_open(&dst_file, path, FA_WRITE | FA_CREATE_ALWAYS);
-            }
-            if (result != FR_OK) goto error;        
-
-            print(screen, (is_append_file) ? "Appending " : "Copying ");
-            print(screen, src_info.fname);
-            print(screen, " to ");
-            print(screen, path);
-            print(screen, "\n");
-
-            /* Copy source to destination */
-            for (;;) {
-                result = f_read(&src_file, buffer, sizeof buffer, &br); /* Read a chunk of data from the source file */
-                if (br == 0) break; /* error or eof */
-                result = f_write(&dst_file, buffer, br, &bw);           /* Write it to the destination file */
-                if (bw < br) break; /* error or disk full */
-            }
-            
-            f_close(&src_file);
-            f_close(&dst_file);
-
-skip:
-            find_result = f_findnext(&dir, &src_info);
-            is_append_file = true; // If copying more than one file to a file, then open for append.
-        }
-        f_closedir(&dir);
-        return 0;
-
-error:
-        err_print(screen, "Unable to copy file(s)", result);
-        f_close(&src_file);
-        f_close(&dst_file);
-        return result;
-    }
-}
-
-
 /*
  * Change the directory
  */
@@ -238,6 +161,7 @@ short cmd_cd(short screen, int argc, const char * argv[]) {
             err_print(screen, "Unable to change directory", result);
             return result;
         } else {
+            cli_flag_cwd();
             print(screen, "Changed to: ");
             print(screen, argv[1]);
             print(screen, "\n");
@@ -286,18 +210,120 @@ short cmd_rename(short screen, int argc, const char * argv[]) {
     return 0;
 }
 
+/**
+ * Structure to hold file and directory information for sorting
+ */
+typedef struct s_dir_entry {
+    t_file_info info;
+    struct s_dir_entry *next, *prev;
+} t_dir_entry, *p_dir_entry;
+
+/**
+ * Add a directory entry to a list of directory entries using simple insertion sort
+ *
+ * @param list_pointer a pointer to a pointer to a list of directory entries
+ * @param entry a pointer to a directory entry to add
+ */
+void dir_entry_insert(p_dir_entry * list_pointer, p_dir_entry entry) {
+    p_dir_entry list = *list_pointer;
+
+    if (list == 0) {
+        *list_pointer = entry;
+        entry->next = 0;
+        entry->prev = 0;
+
+    } else {
+        p_dir_entry x = list;
+        while (x != 0) {
+            if (strcmp(x->info.name, entry->info.name) >= 0) {
+                if (x->prev == 0) {
+                    *list_pointer = entry;
+                    entry->next = x;
+                    entry->prev = 0;
+                    x->prev = entry;
+                } else {
+                    entry->prev = x->prev;
+                    entry->next = x;
+                    x->prev->next = entry;
+                    x->prev = entry;
+                }
+                return;
+
+            } else {
+                if (x->next == 0) {
+                    x->next = entry;
+                    entry->prev = x;
+                    entry->next = 0;
+                    return;
+                } else {
+                    x = x->next;
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Examine the optional path/pattern argument and separate it into a path and a pattern
+ *
+ * @param arg the string describing the directory and pattern to search
+ * @param path a pointer to a pointer to a string... set to the path portion or 0 if no path
+ * @param pattern a pointer to a pointer to a string... set to the pattern poriton, or 0 if none provided
+ */
+void dir_parse_pattern(char * arg, char ** path, char ** pattern) {
+    *path = 0;
+    *pattern = 0;
+    if ((arg != 0) && (strlen(arg) > 0)) {
+        // And argument was provided... see if there is a pattern
+        if ((strchr(arg, '*') == 0) && (strchr(arg, '?') == 0)) {
+            // No pattern found... return the whole thing as path
+            *path = arg;
+
+        } else {
+            // Found a pattern... do we specify a folder?
+            char * x = strrchr(arg, '/');
+            if (x == 0) {
+                // No... it's all pattern
+                *pattern = arg;
+
+            } else {
+                // Yes... split the string into path and pattern at x
+                *x = 0;
+                *path = arg;
+                *pattern = x + 1;
+            }
+        }
+    }
+}
+
 short cmd_dir(short screen, int argc, const char * argv[]) {
-    short result;
+    short result = 0, dir = -1;
     char buffer[80];
+    char arg[128];
     t_file_info my_file;
-    char * path = "";
+    p_dir_entry directories = 0, files = 0, entry = 0, prev = 0;
+    char *path=0, *pattern = 0;
     char label[40];
 
     if (argc > 1) {
-        path = (char*)(argv[1]);
+        strcpy(arg, argv[1]);
+        dir_parse_pattern(arg, &path, &pattern);
     }
 
-    short dir = fsys_opendir(path);
+    if (path == 0) {
+        // Make the path the empty string if it was not provided
+        path = "";
+    }
+
+    if (pattern != 0) {
+        // A pattern was provided
+        dir = sys_fsys_findfirst(path, pattern, &my_file);
+
+    } else {
+        // No pattern... just open the path as a directory
+        dir = sys_fsys_opendir(path);
+    }
+
     if (dir >= 0) {
         result = fsys_getlabel(path, label);
         if ((result == 0) && (strlen(label) > 0)) {
@@ -306,31 +332,74 @@ short cmd_dir(short screen, int argc, const char * argv[]) {
         }
 
         while (1) {
-            short result = fsys_readdir(dir, &my_file);
-            if ((result == 0) && (my_file.name[0] != 0)) {
+            if (pattern == 0) {
+                result = sys_fsys_readdir(dir, &my_file);
+                if (result != 0) break;
+            }
 
+            if (my_file.name[0] != 0) {
                 if ((my_file.attributes & AM_HID) == 0) {
                     if (my_file.attributes & AM_DIR) {
-                        sprintf(buffer, "%s/\n", my_file.name);
-                        chan_write(screen, buffer, strlen(buffer));
+                        entry = (p_dir_entry)malloc(sizeof(t_dir_entry));
+                        if (entry) {
+                            memcpy(&entry->info, &my_file, sizeof(t_file_info));
+                            dir_entry_insert(&directories, entry);
+                        } else {
+                            print(screen, "Unable to display directory... out of memory.\n");
+                            return -1;
+                        }
 
                     } else {
-                        if (my_file.size < 1024) {
-                            sprintf(buffer, "%-20.20s %d\n", my_file.name, (int)my_file.size);
-                        } else if (my_file.size < 1024*1024) {
-                            sprintf(buffer, "%-20.20s %d KB\n", my_file.name, (int)my_file.size / 1024);
+                        entry = (p_dir_entry)malloc(sizeof(t_dir_entry));
+                        if (entry) {
+                            memcpy(&entry->info, &my_file, sizeof(t_file_info));
+                            dir_entry_insert(&files, entry);
                         } else {
-                            sprintf(buffer, "%-29.20s %d MB\n", my_file.name, (int)my_file.size / (1024*1024));
+                            print(screen, "Unable to display directory... out of memory.\n");
+                            return -1;
                         }
-                        chan_write(screen, buffer, strlen(buffer));
                     }
                 }
             } else {
                 break;
             }
+
+            if (pattern != 0) {
+                result = fsys_findnext(dir, &my_file);
+                if (result != 0) {
+                    break;
+                }
+            }
         }
 
         fsys_closedir(dir);
+
+        // Print the directories
+        entry = directories;
+        while (entry != 0) {
+            sprintf(buffer, "%s/\n", entry->info.name);
+            print(screen, buffer);
+            prev = entry;
+            entry = entry->next;
+            free(prev);
+        }
+
+        // Print the files
+        entry = files;
+        while (entry != 0) {
+            if (entry->info.size < 1024) {
+                sprintf(buffer, "%-20.20s %d B\n", entry->info.name, (int)entry->info.size);
+            } else if (my_file.size < 1024*1024) {
+                sprintf(buffer, "%-20.20s %d KB\n", entry->info.name, (int)entry->info.size / 1024);
+            } else {
+                sprintf(buffer, "%-29.20s %d MB\n", entry->info.name, (int)entry->info.size / (1024*1024));
+            }
+            print(screen, buffer);
+            prev = entry;
+            entry = entry->next;
+            free(prev);
+        }
+
     } else {
         err_print(screen, "Unable to open directory", dir);
         return dir;
@@ -426,6 +495,89 @@ short cmd_label(short screen, int argc, const char * argv[]) {
         print(screen, "USAGE: LABEL <drive #> <label>\n");
         return -1;
     }
+}
+
+/**
+ * Command to make a device bootable by writing to the MBR or VBR
+ *
+ * MKBOOT <drive #> -r --- removes boot record
+ * MKBOOT <drive #> -b <boot record path> --- installs boot record
+ * MKBOOT <drive #> -s <start file path> --- defines a startup file
+ */
+short cmd_mkboot(short screen, int argc, const char * argv[]) {
+    const char * usage = "USAGE: MKBOOT <drive #> -r\n       MKBOOT <drive #> -b <boot record path>\n       MKBOOT <drive #> -s <start file path>\n";
+    short mode = 0;
+    unsigned char * boot_sector = 0;
+    unsigned char * new_boot_sector = 0;
+    char message[80];
+    short dev = 0;
+    short i = 0;
+    short result = 0;
+
+    // Parse the inputs...
+    if (argc == 3) {
+        // Must be -r
+        if (strcmp("-r", argv[2]) == 0) {
+            mode = 0;
+            dev = cli_eval_number(argv[1]);
+        } else {
+            print(screen, usage);
+            return -1;
+        }
+
+    } else if (argc == 4) {
+        // Can be either -b or -s
+        dev = cli_eval_number(argv[1]);
+
+        if (strcmp("-b", argv[2]) == 0) {
+            // -b
+            mode = 1;
+
+        } else if (strcmp("-s", argv[2]) == 0) {
+            // -s
+            mode = 2;
+
+        } else {
+            print(screen, usage);
+            return -1;
+        }
+
+    } else {
+        // Bad arguments...
+        print(screen, usage);
+        return -1;
+    }
+
+    switch (mode) {
+        case 0:
+            // Clear out the boot record
+            result = boot_non_booting(dev);
+            if (result != 0) {
+                sprintf(message, "Could not change boot record: %s\n", err_message(result));
+                print(screen, message);
+            } else {
+                print(screen, "Boot record updated.\n");
+            }
+            break;
+
+        case 2:
+            // Write a boot sector that loads and runs a file
+             result = boot_set_file(dev, argv[3]);
+             if (result != 0) {
+                 sprintf(message, "Could not change boot record: %s\n", err_message(result));
+                 print(screen, message);
+             } else {
+                 print(screen, "Boot record updated.\n");
+             }
+             break;
+
+        default:
+            print(screen, "Unknown MKBOOT operation.\n");
+            result = -1;
+            break;
+    }
+
+    return result;
 }
 
 /*
