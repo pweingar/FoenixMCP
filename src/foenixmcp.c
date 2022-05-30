@@ -15,6 +15,10 @@
 #if MODEL == MODEL_FOENIX_A2560K
 #include "superio.h"
 #include "dev/kbd_mo.h"
+#include "dev/txt_a2560k_a.h"
+#include "dev/txt_a2560k_b.h"
+#elif MODEL == MODEL_FOENIX_A2560U || MODEL == MODEL_FOENIX_A2560U_PLUS
+#include "dev/txt_a2560u.h"
 #endif
 
 #include "syscalls.h"
@@ -32,8 +36,7 @@
 #include "dev/rtc.h"
 #include "dev/sdc.h"
 #include "dev/txt_screen.h"
-#include "dev/txt_a2560k_a.h"
-#include "dev/txt_a2560k_b.h"
+
 #include "dev/uart.h"
 #include "snd/codec.h"
 #include "snd/psg.h"
@@ -137,9 +140,13 @@ void initialize() {
 
     /* Initialize the text channels */
     txt_init();
+#if MODEL == MODEL_FOENIX_A2560K    
     txt_a2560k_a_install();
     txt_a2560k_b_install();
     txt_init_screen(1);
+#elif MODEL == MODEL_FOENIX_A2560U || MODEL == MODEL_FOENIX_A2560U_PLUS
+    txt_a2560u_install();
+#endif
     txt_init_screen(0);
     log(LOG_INFO, "Text system initialized");
 

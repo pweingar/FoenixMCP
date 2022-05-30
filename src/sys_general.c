@@ -33,7 +33,11 @@ void sys_get_information(p_sys_info info) {
     info->has_ethernet = 1;
     info->screens = 2;
 
-    // Get the FPGA number and version/sub-version
+    // Get the FPGA information
+    info->fpga_date = /* YYYYMMDD */
+        ((((*GABE_FIRMWARE_DATE) & GABE_FIRMWARE_DATE_YEAR_MASK) + 2000) << 16) |
+        ((*GABE_FIRMWARE_DATE) & GABE_FIRMWARE_DATE_MONTH_MASK) |
+        (((*GABE_FIRMWARE_DATE) & GABE_FIRMWARE_DATE_DAY_MASK) >> 16 );
     info->fpga_model = (*GABE_CHIP_VERSION & GABE_CHIP_N_MASK) >> 16;
     info->fpga_version = *GABE_CHIP_VERSION & GABE_CHIP_V_MASK;
     info->fpga_subver = (gabe_id & GABE_CHIP_SV_MASK) >> 16;

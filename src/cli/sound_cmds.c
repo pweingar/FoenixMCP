@@ -75,6 +75,7 @@ short sid_test(short channel, int argc, const char * argv[]) {
     long target_time;
     volatile unsigned char * opm_base = OPM_INT_BASE;
 
+#if MODEL == MODEL_FOENIX_A2560K
     if (argc >= 2) {
         /* Allow the user to select the external OPM */
         if ((strcmp(argv[1], "ext") == 0) || (strcmp(argv[1], "EXT") == 0)) {
@@ -83,6 +84,9 @@ short sid_test(short channel, int argc, const char * argv[]) {
             sid_test_internal();
         }
     }
+#else
+    sid_test_internal();
+#endif
 
     return 0;
 }

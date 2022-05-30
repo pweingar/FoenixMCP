@@ -3,8 +3,8 @@
 # User may over-ride the UNIT and MEMORY parameters to specify target machine
 # and where the MCP will run (ram or flash)
 #
-UNIT := a2560k
-MEMORY := flash
+UNIT := a2560u
+MEMORY := ram
 
 # CPU_WDC65816                0x16  /* CPU code for the Western Design Center 65816 */
 # CPU_M68000                  0x20  /* CPU code for the Motorola 68000 */
@@ -77,8 +77,8 @@ cpu_c_obj := $(subst .c,.o,$(cpu_c_src))
 dev_base_sources = dev/block.c dev/channel.c dev/console.c dev/fsys.c dev/pata.c dev/ps2.c dev/rtc.c dev/sdc.c dev/txt_screen.c dev/uart.c
 ifeq ($(UNIT),a2560k)
 dev_c_src := $(dev_base_sources) dev/fdc.c dev/kbd_mo.c dev/lpt.c dev/midi.c dev/txt_a2560k_a.o dev/txt_a2560k_b.o m68040/fdc_m68040.o
-else
-dev_c_src := $(dev_base_sources)
+else ifeq ($(UNIT),a2560u)
+dev_c_src := $(dev_base_sources) dev/txt_a2560u.o
 endif
 dev_c_obj := $(subst .c,.o,$(dev_c_src))
 

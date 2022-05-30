@@ -57,6 +57,7 @@ typedef struct s_sys_info {
     unsigned short cpu;             /* Code to say which CPU is running */
     const char * cpu_name;          /* Human readable name for the CPU */
     unsigned int cpu_clock_khz;     /* Speed of the CPU clock in KHz */
+    unsigned long fpga_date;        /* YYYYMMDD */
     unsigned long fpga_model;       /* FPGA model number */
     unsigned short fpga_version;    /* FPGA version */
     unsigned short fpga_subver;     /* FPGA sub-version */

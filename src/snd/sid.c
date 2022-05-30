@@ -149,6 +149,7 @@ void sid_test_internal() {
 	*SID_INT_R_MODE_VOL = 0;
 }
 
+#if MODEL == MODEL_FOENIX_A2560K
 void sid_test_external() {
     unsigned char i;
 	unsigned int j;
@@ -234,3 +235,4 @@ void sid_test_external() {
 	*SID_EXT_L_MODE_VOL = 0;
 	*SID_EXT_R_MODE_VOL = 0;
 }
+#endif /* MODEL == MODEL_FOENIX_A2560K */

@@ -28,6 +28,11 @@
 #define GABE_CHIP_V_MASK    0x0000FFFF
 #define GABE_CHIP_N_MASK    0xFFFF0000
 
+#define GABE_FIRMWARE_DATE  ((volatile unsigned int *)0xFEC00014)    // xxDDMMYY
+#define GABE_FIRMWARE_DATE_YEAR_MASK  0x000000FF
+#define GABE_FIRMWARE_DATE_MONTH_MASK 0x0000FF00
+#define GABE_FIRMWARE_DATE_DAY_MASK   0x00FF0000
+
 #define GABE_DIP_REG        ((volatile unsigned int *)0xFEC00518)
 #define GABE_DIP_BOOT_MASK  0x00000003  /* Mask for the boot mode: */
 #define GABE_DIP_USER_MASK  0x00000700  /* Mask for the user switches: */

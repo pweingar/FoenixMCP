@@ -656,9 +656,9 @@ void cli_set_init() {
 
     cli_set_register("KEYBOARD", "KEYBOARD <path> -- set the keyboard layout", cli_layout_set, cli_layout_get);
 
-    if (info.model == MODEL_FOENIX_A2560K) {
-        cli_set_register("KEYCOLOR", "KEYCOLOR 0x0RGB -- set the keyboard color", cli_keycolor_set, cli_keycolor_get);
-    }
+#if MODEL == MODEL_FOENIX_A2560K
+    cli_set_register("KEYCOLOR", "KEYCOLOR 0x0RGB -- set the keyboard color", cli_keycolor_set, cli_keycolor_get);
+#endif
 
     if (info.screens > 1) {
         cli_set_register("SCREEN", "SCREEN <0 - 1> -- set the channel number to use for interactions", cli_screen_set, cli_screen_get);

@@ -5,6 +5,10 @@
 #ifndef __VICKYIII_General_H
 #define __VICKYIII_General_H
 
+#define VKY3_LUT_SIZE     16
+#define VKY3_TEXT_LUT_FG  ((volatile unsigned long *)0x00B6C400)  /**< Text foreground color look up table */
+#define VKY3_TEXT_LUT_BG  ((volatile unsigned long *)0x00B6C440)  /**< Text background color look up table */
+
 /*
  * Screen Channel A
  */
@@ -20,6 +24,7 @@
 #define VKY3_MCR_1024x768           0x00000200
 #define VKY3_MCR_640x400            0x00000300
 #define VKY3_MCR_DOUBLE_EN          0x00000400  /* Doubling Pixel */
+#define VKY3_MCR_RES_MASK (VKY3_MCR_800x600|VKY3_MCR_1024x768|VKY3_MCR_DOUBLE_EN) /* Bits used to set the resolution */
 #define VKY3_MCR_GAMMA_EN           0x00010000  /* GAMMA Enable */
 #define VKY3_MCR_MANUAL_GAMMA_EN    0x00020000  /* Enable Manual GAMMA Enable */
 #define VKY3_MCR_BLANK_EN           0x00040000  /* Turn OFF sync (to monitor in sleep mode) */
@@ -31,16 +36,16 @@
 #define VKY3_DIP_HIRES              0x4000      /* DIP switch for high resolution mode */
 #define VKY3_PLL_ACTIVE_CLK         0x8000      /* Active Clock --- 0: 25.175Mhz, 1: 40Mhz */
 
-#define BorderControlReg_L_A	    ((volatile unsigned long *)0x00B40004)
+#define BorderControlReg            ((volatile unsigned long *)0x00B40004)
 #define VKY3_BRDR_EN                0x00000001  /* Border Enable */
 #define VKY3_X_SCROLL_MASK          0x00000070  /* X Scroll */
 #define VKY3_X_SIZE_MASK            0x00003f00  /* X Size */
 #define VKY3_Y_SIZE_MASK            0x003f0000  /* Y Size */
 
-#define BorderControlReg_H_A 	    ((volatile unsigned long *)0x00B40008)
+#define BorderColorReg      	    ((volatile unsigned long *)0x00B40008)
 #define BackGroundControlReg_A	    ((volatile unsigned long *)0x00B4000C)
-#define CursorControlReg_L_A	    ((volatile unsigned long *)0x00B40010)
-#define CursorControlReg_H_A	    ((volatile unsigned long *)0x00B40014)
+#define CursorControlReg    	    ((volatile unsigned long *)0x00B40010)
+#define CursorPositionReg   	    ((volatile unsigned long *)0x00B40014)
 
 #define LineInterrupt0_A		    ((volatile unsigned short *)0x00B40018)
 #define LineInterrupt1_A		    ((volatile unsigned short *)0x00B4001A)

@@ -23,9 +23,11 @@ extern void sid_init_all();
  */
 extern void sid_test_internal();
 
+#if MODEL == MODEL_FOENIX_A2560K
 /*
  * Test the external SID implementation
  */
 extern void sid_test_external();
+#endif
 
 #endif
