@@ -12,8 +12,6 @@
 #include "dev/txt_screen.h"
 #include "dev/txt_a2560u.h"
 
-//#if MODEL == MODEL_FOENIX_A2560U || MODEL == MODEL_FOENIX_A2560U_PLUS
-
 extern const unsigned char MSX_CP437_8x8_bin[];
 
 /* Default text color lookup table values (AARRGGBB) */
@@ -563,8 +561,8 @@ static void txt_a2560u_init() {
     /* Specify the screen number. We have only one so... */
     a2560u_caps.number = TXT_SCREEN_A2560U;
 
-    /* This screen can be text or can be put to sleep */
-    a2560u_caps.supported_modes = TXT_MODE_TEXT | TXT_MODE_SLEEP;
+    /* This screen can be text, bitmap or can be put to sleep */
+    a2560u_caps.supported_modes = TXT_MODE_TEXT | TXT_MODE_SPRITE | TXT_MODE_BITMAP | TXT_MODE_TILE | TXT_MODE_SLEEP;
 
     /* Supported resolutions */
     a2560u_caps.resolution_count = sizeof(a2560u_resolutions) / sizeof(t_extent);
@@ -584,7 +582,7 @@ static void txt_a2560u_init() {
     txt_a2560u_set_mode(TXT_MODE_TEXT);
 
     /* Set the resolution */
-    txt_a2560u_set_resolution(800, 600);                      /* Default resolution is 800x600 */
+    txt_a2560u_set_resolution(0, 0);                          /* Default resolution depends on HIRES dip switch */
 
     /* Set the default color: light grey on blue */
     txt_a2560u_set_color(0x07, 0x04);
@@ -654,5 +652,3 @@ short txt_a2560u_install() {
 
     return txt_register(&device);
 }
-
-//#endif /* MODEL == MODEL_FOENIX_A2560U || MODEL == MODEL_FOENIX_A2560U_PLUS */
