@@ -119,28 +119,22 @@ PENDING_GRP2 = $00B00104
 
             code
 
-coldboot:   lea ___STACK,sp
+coldboot:   move.w #$2700,SR        ; Supervisor mode, disable all interrupts
+            lea ___STACK,sp
             bsr _int_disable_all
 
-            ; Clear BSS segment
-            lea	   ___BSSSTART,a0
+            lea	___BSSSTART,a0
             move.l #___BSSSIZE,d0
-            beq.s  callmain
-
-            move.l #0,d1
-
+            beq	callmain
+            
+            moveq.l #0,d1
 clrloop:    ; We don't use clr.l because it's a read-modify-write operation
             ; that is not yet supported by the FPGA's bus logic for now.
             ; So we use a move instead.
             ; clr.l  (a0)+
             move.l d1,(a0)+
             subq.l #4,d0
-            bne.s  clrloop
-
-            ; Set TRAP #15 vector handler
-            lea h_trap_15,a0        ; Address of the handler
-            move.l #(13+32)<<2,a1   ; TRAP#15 vector address
-            move.l a0,(a1)          ; Set the vector
+            bpl.s  clrloop
 
 callmain:   jsr ___main             ; call __main to transfer to the C code
 
@@ -375,6 +369,9 @@ _syscall:
 ; TRAP#15 handler... transfer control to the C dispatcher
 ;
 h_trap_15:
+            cmpi.w #$43,d1              ; Is this a sys_proc_elevate call?
+            beq.s  h_trap_elev          ; Yes, just handle it here
+
             move.l d6,-(sp)             ; Push the parameters to the stack for the C call
             move.l d5,-(sp)
             move.l d4,-(sp)
@@ -387,8 +384,10 @@ h_trap_15:
                                         ; Note: the C routine depends upon the register push order
 
             add.l #28,sp                ; Remove parameters from the stack
-
             rte                         ; Return to the caller
+
+h_trap_elev ori #$2000,(a7)             ; Change the caller's privilege to supervisor
+            rte                         ; And return to it
 
 ;
 ; Jump into a user mode code
@@ -398,16 +397,21 @@ h_trap_15:
 ; a1 = location to set user stack pointer
 ;
 _call_user:
-            move.l (4,a7),a0            ; Get the pointer to the code to start
-            move.l (8,a7),a1            ; Get the pointer to the process's stack
-            move.l (12,a7),d0           ; Get the number of parameters passed
-            move.l (16,a7),a2           ; Get the pointer to the parameters
-            ; andi #$dfff,sr              ; Drop into user mode
-            movea.l a1,a7               ; Set the stack
+            ; Set up the user stack
+            move.l #$00010000,a0        ; Get the pointer to the process's stack
+            move.l (12,a7),d1           ; Get the number of parameters passed
+            move.l (16,a7),a1           ; Get the pointer to the parameters
+            move.l a1,-(a0)             ; Push the parameters list
+            move.w d1,-(a0)             ; Push the parameter count
+            move.l a0,usp               ; Set the User Stack Pointer
 
-            move.l a2,-(a7)             ; Push the parameters list
-            move.l d0,-(a7)             ; Push the parameter count
-            jsr (a0)
+
+            ; Set up the system stack
+            move.l (4,a7),a0            ; Get the pointer to the code to start
+            move.w #0,-(a7)             ; Push the fake vector offset
+            move.l a0,-(a7)             ; Push it as the starting address
+            move.w #$0000,-(a7)         ; Push the user's initial SR (to switch to user mode)
+            rte                         ; Start the user process
 
 _restart_cli:
             lea ___STACK,sp
