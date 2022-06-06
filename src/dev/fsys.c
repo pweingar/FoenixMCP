@@ -1434,6 +1434,11 @@ short fsys_load(const char * path, long destination, long * start) {
         }
         f_closedir(&dj);
 
+        if (fr != FR_OK && fr != FR_NO_FILE) {
+            log_num(LOG_ERROR, "File system error: ", fr);
+            return FSYS_ERR_DISK_ERR;
+        }
+
         if(found_loader) {
             // Found path with valid loader
             fsys_load_ext(spath, extension, destination, start);
