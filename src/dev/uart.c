@@ -85,8 +85,15 @@ void uart_init(short uart) {
         /* Set: no parity, 1 stop bit, 8 data bits */
         uart_setlcr(uart,  LCR_PARITY_NONE | LCR_STOPBIT_1 | LCR_DATABITS_8);
 
+#if MODEL == MODEL_FOENIX_A2560U || MODEL == MODEL_FOENIX_A2560U_PLUS
+        /* The A2560U has a 16750 rather than 16550
+        uart_base[UART_FCR] = 39;
+        uart_base[UART_IER] = 0;
+        uart_base[UART_MCR] = 3;
+#else
         /* Enable FIFO, set for 56 byte trigger level */
         uart_base[UART_FCR] = 0xC1;
+#endif
     }
 }
 
