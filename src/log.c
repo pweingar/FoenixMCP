@@ -9,14 +9,51 @@
 #include "log.h"
 #include "simpleio.h"
 #include "syscalls.h"
+
+#include "dev/uart.h"
 #include "dev/txt_screen.h"
 
-static short log_channel = 0;
-static short log_level = 999;
 
-void log_init() {
-    log_channel = 0;
-    log_level = 999;
+#if MODEL == MODEL_FOENIX_A2560U || MODEL == MODEL_FOENIX_A2560U_PLUS
+#include "A2560U/gabe_a2560u.h"
+#elif MODEL == MODEL_FOENIX_A2560K
+#include "A2560K/gabe_a2560k.h"
+#endif
+
+/* Channel to which the logging output should go.
+ * Positive: screen number
+ * -1: UART. 
+ */
+static short log_channel = LOG_CHANNEL;
+static short log_level;
+
+static void (*do_log)(const char* message);
+static void log_to_uart(const char* message);
+static void log_to_screen(const char* message);
+
+#define UART_COM1 0
+
+/* Can use the buzzer as sound clues */
+void buzzer_on(void) {
+    *(GABE_CTRL_REG) = BUZZER_CONTROL;
+}
+
+
+void buzzer_off(void) {
+    *(GABE_CTRL_REG) &= ~BUZZER_CONTROL;    
+}
+
+
+void log_init(void) {
+    log_setlevel(DEFAULT_LOG_LEVEL);
+
+    if (log_channel == LOG_CHANNEL_UART0) {
+        uart_init(UART_COM1);
+        do_log = log_to_uart;
+        log(LOG_INFO,"FOENIX DEBUG OUTPUT");
+    }
+    else
+        do_log = log_to_screen;
 }
 
 unsigned short panic_number;        /* The number of the kernel panic */
@@ -204,6 +241,20 @@ void log_setlevel(short level) {
     log_level = level;
 }
 
+
+static void log_to_uart(const char *message) {
+    char *c = (char*)message;
+    while (*c)
+        uart_put(UART_COM1, *c++);
+    uart_put(UART_COM1,'\r');
+    uart_put(UART_COM1,'\n');
+}
+
+static void log_to_screen(const char *message) {
+    txt_print(log_channel, message);
+    txt_print(log_channel, "\n");
+}
+
 /*
  * Log a message to the console
  *
@@ -212,10 +263,10 @@ void log_setlevel(short level) {
  * message = the message to log
  */
 void log(short level, char * message) {
-    if (level <= log_level) {
-        txt_print(log_channel, message);
-        txt_print(log_channel, "\n");
-    }
+    if (level > log_level)
+        return;
+
+    (*do_log)(message);
 }
 
 /*
@@ -230,7 +281,7 @@ void log2(short level, char * message1, char * message2) {
     if (level <= log_level) {
         char line[80];
         sprintf(line, "%s%s\n", message1, message2);
-        txt_print(log_channel, line);
+        log(level, line);
     }
 }
 
@@ -247,7 +298,7 @@ void log3(short level, const char * message1, const char * message2, const char 
     if (level <= log_level) {
         char line[80];
         sprintf(line, "%s%s%s\n", message1, message2, message3);
-        txt_print(log_channel, line);
+        log(level, line);
     }
 }
 
@@ -263,8 +314,8 @@ void log_num(short level, char * message, int n) {
     char line[80];
 
     if (level <= log_level) {
-        sprintf(line, "%s%08X\n", message, n);
-        print(log_channel, line);
+        sprintf(line, "%s%08X", message, n);
+        log(level, line);
     }
 }
 
@@ -272,7 +323,8 @@ void log_num(short level, char * message, int n) {
  * Send a single character to the debugging channel
  */
 void log_c(short level, char c) {
-    if (log_level <= level) {
-        txt_put(log_channel, c);
-    }
+    char line[2];
+    line[0] = c;
+    line[1] = '\0';
+    log(level, line);
 }

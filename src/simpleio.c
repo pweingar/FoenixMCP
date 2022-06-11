@@ -5,6 +5,7 @@
 #include <ctype.h>
 #include <string.h>
 #include <stdio.h>
+#include "log.h"
 #include "syscalls.h"
 #include "simpleio.h"
 #include "dev/txt_screen.h"
@@ -29,7 +30,10 @@ void print_c(short channel, char c) {
  * message = the ASCII-Z string to print
  */
 void print(short channel, const char * message) {
-    sys_chan_write(channel, message, strlen(message));
+    short ret;
+    ret = sys_chan_write(channel, message, strlen(message));
+    if (ret < 0)
+        log_num(LOG_ERROR, "Error while printing: ", ret);
 }
 
 /**

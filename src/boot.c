@@ -23,6 +23,7 @@
 #include "rsrc/font/quadrotextFONT.h"
 #if MODEL == MODEL_FOENIX_A2560U || MODEL == MODEL_FOENIX_A2560U_PLUS
 #include "rsrc/bitmaps/splash_a2560u.h"
+#include "dev/txt_a2560u.h"
 #elif MODEL == MODEL_FOENIX_A2560K
 #include "rsrc/bitmaps/splash_a2560k.h"
 #endif
@@ -183,7 +184,7 @@ void make_key_name(const char * original, char * buffer) {
 short boot_screen() {
     t_rect region;
     short device = BOOT_DEFAULT;
-    short screen = 0;
+    short screen;
     char buffer[256];
     char entry[50];
     unsigned long target_jiffies = 0;
@@ -255,7 +256,11 @@ short boot_screen() {
     make_key_name("SPACE", space);
     make_key_name("RETURN", cr_text);
 
-    sprintf(buffer, "BOOT: %s=FLOPPY, %s=SD CARD, %s=HARD DRIVE, %s=DEFAULT, %s=SAFE", f1, f2, f3, space, cr_text);
+#if MODEL == MODEL_FOENIX_A2560K
+    sprintf(buffer, "BOOT: %%s=SD CARD, %s=HARD DRIVE, s=FLOPPY, %s=DEFAULT, %s=SAFE", f1, f2, f3, space, cr_text);
+#else
+    sprintf(buffer, "BOOT: %s=SD CARD, %s=HARD DRIVE, %s=DEFAULT, %s=SAFE", f1, f2, space, cr_text);
+#endif
     txt_set_xy(screen, (80 - strlen(buffer)) / 2, 58);
     sys_chan_write(screen, buffer, strlen(buffer));
 
@@ -285,46 +290,59 @@ short boot_screen() {
     sprintf(buffer, "Booting from default device...\n");
     min_jiffies = sys_time_jiffies();
     target_jiffies = min_jiffies + SPLASH_WAIT_SEC * 60;
-    current_jiffies = sys_time_jiffies();
-    while (target_jiffies > current_jiffies) {
+
+    while (target_jiffies > (current_jiffies = sys_time_jiffies())) {
         boot_animate_keyboard(target_jiffies, current_jiffies, min_jiffies);
 
-        short scan_code = sys_kbd_scancode();
-        if (scan_code != 0) {
-            switch (scan_code) {
-                case SC_F1:
-                    device = BDEV_FDC;
-                    strcpy(buffer, "Booting from floppy drive.\n");
-                    break;
+        unsigned short scan_code = sys_kbd_scancode();
+        if (scan_code == 0)
+            continue;
 
-                case SC_F2:
-                    device = BDEV_SDC;
-                    strcpy(buffer, "Booting from SD card.\n");
-                    break;
+        switch (scan_code) {
+            case SC_F1:
+                device = BDEV_SDC;
+                strcpy(buffer, "Booting from SD card.\n");
+                break;
 
-                case SC_F3:
-                    device = BDEV_HDC;
-                    strcpy(buffer, "Booting from hard drive.\n");
-                    break;
+            case SC_F2:
+                device = BDEV_HDC;
+                strcpy(buffer, "Booting from hard drive.\n");
+                break;
 
-                case SC_RETURN:
-                    device = BOOT_SAFE;
-                    strcpy(buffer, "Booting directly to the command line.\n");
-                    break;
+#if MODEL == MODEL_FOENIX_A2560K
+            case SC_F3:
+                device = BDEV_FDC;
+                strcpy(buffer, "Booting from floppy drive.\n");
+                break;
+#endif
 
-                default:
-                    device = BOOT_DEFAULT;
-                    break;
-            }
-            break;
+            case SC_RETURN:
+                device = BOOT_SAFE;
+                strcpy(buffer, "Booting directly to the command line.\n");
+                break;
+
+            default:
+                device = BOOT_DEFAULT;
+                break;
         }
-
-        current_jiffies = sys_time_jiffies();
+        break;
     }
+    
+    /* Initialise all screens */
+    log_num(LOG_DEBUG,"boot_screen: initialize Screen", screen);
 
-    txt_init_screen(screen);
-    txt_set_resolution(0, 0, 0);    // Set the resolution based on the DIP switch
+    txt_init_screen(screen); /* This is the one used for the boot message */
+
+    /* No need to txt_set_resolution(screen, 0, 0) because during screen_init, the defaults are applied */
+
+#if MODEL == MODEL_FOENIX_A2560K
     txt_set_resolution(1, 0, 0);    // Set the resolution based on the DIP switch
+#endif
+    DEBUG("boot_screen: Screen(s) initialized");
+{
+    t_rect region;
+    txt_get_region(screen, &region);
+}
     print(screen, buffer);
 
 #if MODEL == MODEL_FOENIX_A2560K
@@ -365,12 +383,14 @@ void boot_from_bdev(short device) {
                     strcpy(initial_path, "/sd");
                     break;
 
+#if MODEL == MODEL_FOENIX_A2560K
                 case 0x0002:
                     // Boot from Floppy
                     device = BDEV_FDC;
                     log(LOG_INFO, "Boot DIP set for FDC");
                     strcpy(initial_path, "/fd");
                     break;
+#endif
 
                 default:
                     // Boot straight to REPL

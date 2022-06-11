@@ -55,6 +55,10 @@
 #define CLI_KEY_CTX     0x8011  /* A2560K CTX Switch key */
 #define CLI_KEY_HELP    0x8012  /* A2560K Menu/Help key */
 
+// DEBUG: if I uncomment this then I get a crash
+//#define sys_txt_get_region txt_get_region
+//#define sys_txt_set_region txt_set_region
+
 //
 // Types
 //
@@ -211,7 +215,7 @@ void cli_txt_screen_set(short screen) {
  * @return the number of the text device to use
  */
 short cli_txt_screen_get() {
-    return sys_chan_device(0);
+    return sys_chan_device(CDEV_CONSOLE); // FIXME that seems to always return rather than e.g. TXT_SCREEN_A2560U
 }
 
 //
@@ -327,7 +331,6 @@ short cmd_showint(short channel, int argc, const char * argv[]) {
 //  parameters = the string of parameters to be passed to the command
 //
 short cli_exec(short channel, char * command, int argc, const char * argv[]) {
-    const char * cmd_not_found = "Command not found.\n";
     p_cli_command commands = (p_cli_command)g_cli_commands;
 
     log3(LOG_INFO, "cli_exec: '", argv[0], "'");
@@ -784,9 +787,14 @@ void cli_draw_window(short channel, const char * status, short is_active) {
     short i = 0, j;
 
     short dev = sys_chan_device(channel);
+    if (dev == ERR_BADCHANNEL) {
+        log_num(LOG_ERROR, "cli_draw_window on bad channel ", dev);
+        return;
+    }
 
     // Save the current region and cursor location
     sys_txt_get_xy(dev, &cursor);
+    DEBUG("Backup current region");
     sys_txt_get_region(dev, &old_region);
     sys_txt_get_color(dev, &foreground, &background);
 
@@ -795,6 +803,7 @@ void cli_draw_window(short channel, const char * status, short is_active) {
     region.origin.y = 0;
     region.size.width = 0;
     region.size.height = 0;
+    DEBUG("Get full screen dimensions");
     sys_txt_set_region(dev, &region);
     sys_txt_get_region(dev, &full_region);
 
@@ -822,12 +831,14 @@ void cli_draw_window(short channel, const char * status, short is_active) {
 
     // Restore the region and cursor location
     sys_txt_set_color(dev, foreground, background);
+    DEBUG("Restore region and cursor location");
     sys_txt_set_region(dev, &old_region);
     sys_txt_set_xy(dev, cursor.x, cursor.y);
 
     // Set cursor visibility based on if the screen is active
-    sys_chan_ioctrl(0, 0x06, 0, 0);
-    sys_chan_ioctrl(1, 0x07, 0, 0);
+    for (i = 0; i < cli_sys_info.screens; i++) {
+        sys_chan_ioctrl(i, i == channel ? CON_IOCTRL_CURS_ON : CON_IOCTRL_CURS_OFF, 0, 0);
+    }
 }
 
 /**
@@ -837,6 +848,12 @@ void cli_setup_screen(short channel, const char * path, short is_active) {
     t_rect full_region, command_region;
     char message[80];
 
+    {
+        char buf[60];
+        sprintf(buf, "cli_setup_screen for channel %d", channel);
+        DEBUG(buf);
+    }
+
     short dev = sys_chan_device(channel);
 
     // Get the size of the screen
@@ -844,12 +861,20 @@ void cli_setup_screen(short channel, const char * path, short is_active) {
     full_region.origin.y = 0;
     full_region.size.width = 0;
     full_region.size.height = 0;
-    sys_txt_set_region(dev, &full_region);
-    sys_txt_get_region(dev, &full_region);
 
+    {
+        char buf[60];
+        sprintf(buf, "cli_setup_screen: get screen size, dev=%d, region=%p", dev, &full_region);
+        DEBUG(buf);
+    }
+
+    sys_txt_set_region(dev, &full_region);
+DEBUG("1");
+    sys_txt_get_region(dev, &full_region);
+DEBUG("2");
     // Clear the screen
     print(channel, "\x1b[2J\x1b[H");
-
+DEBUG("3");
     // Figure out the size of the command box and its region
     command_region.origin.x = 0;
     command_region.origin.y = 1;
@@ -857,13 +882,13 @@ void cli_setup_screen(short channel, const char * path, short is_active) {
     command_region.size.height = full_region.size.height - 1;
 
     // Restrict the region to the command panel
+    DEBUG("Restrict the region to the command panel");
     sys_txt_set_region(dev, &command_region);
 
     // Draw the window
     cli_draw_window(channel, path, is_active);
     print(channel, "\x1b[2J\x1b[1;2H");
 
-    print(channel, "\x1b[2J\x1b[1;2H");
     print_banner(channel, cli_sys_info.model);
 
     sprintf(message, "\nFoenix/MCP v%02u.%02u.%04u\n\n", (unsigned int)cli_sys_info.mcp_version, (unsigned int)cli_sys_info.mcp_rev, (unsigned int)cli_sys_info.mcp_build);
@@ -898,14 +923,14 @@ short cli_repl(short channel) {
             if (sys_fsys_get_cwd(cwd_buffer, MAX_PATH_LEN) == 0) {
                 // char message[80];
                 // sprintf(message, "%d", strlen(cwd_buffer));
-                print(0, "");
+                print(CDEV_CONSOLE, "");
                 if (g_channels_swapped) {
                     // If channel has changed, deactivate old channel
-                    cli_draw_window(1, cwd_buffer, 0);
+                    cli_draw_window(CDEV_EVID, cwd_buffer, 0);
                     old_channel = g_current_channel;
                     g_channels_swapped = 0;
                 }
-                cli_draw_window(0, cwd_buffer, 1);
+                cli_draw_window(CDEV_CONSOLE, cwd_buffer, 1);
             }
         }
 

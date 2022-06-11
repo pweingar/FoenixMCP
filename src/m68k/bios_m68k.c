@@ -306,11 +306,21 @@ unsigned long syscall_dispatch(int32_t function, int32_t param0, int32_t param1,
                     return 0;
 
                 case KFN_TXT_SET_REGION:
+                    {
+                        char buf[60];
+                        sprintf(buf, "KFN_TXT_SET_REGION: %d %p", (short)param0, (p_rect)param1);
+                        DEBUG(buf);
+                    }                 
                     /* Sets the clipping/scrolling region for further text operations */
                     return txt_set_region((short)param0, (p_rect)param1);
 
                 case KFN_TXT_GET_REGION:
                     /* Gets the current clipping/scrolling region */
+                    {
+                        char buf[60];
+                        sprintf(buf, "KFN_TXT_GET_REGION: %d %p", (short)param0, (p_rect)param1);
+                        DEBUG(buf);
+                    }                    
                     return txt_get_region((short)param0, (p_rect)param1);
 
                 case KFN_TXT_SET_COLOR:

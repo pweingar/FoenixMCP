@@ -126,8 +126,8 @@ void initialize() {
     int i;
     short res;
 
-    /* Set the logging level */
-    log_setlevel(LOG_FATAL);
+    /* Setup logging early */
+    log_init();
 
     /* Initialize the memory system */
     mem_init(0x3d0000);
@@ -143,11 +143,13 @@ void initialize() {
 #if MODEL == MODEL_FOENIX_A2560K    
     txt_a2560k_a_install();
     txt_a2560k_b_install();
-    txt_init_screen(1);
+    txt_init_screen(TXT_SCREEN_A2560K_A);
+    txt_init_screen(TXT_SCREEN_A2560K_B);
 #elif MODEL == MODEL_FOENIX_A2560U || MODEL == MODEL_FOENIX_A2560U_PLUS
     txt_a2560u_install();
+    txt_init_screen(TXT_SCREEN_A2560U);
 #endif
-    txt_init_screen(0);
+
     log(LOG_INFO, "Text system initialized");
 
     /* Initialize the indicators */

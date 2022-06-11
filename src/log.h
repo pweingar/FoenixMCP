@@ -12,6 +12,21 @@
 #define LOG_TRACE   4   /* Log tracing information (like entry into a subroutine) */
 #define LOG_VERBOSE 5   /* Log a truly verbose message... the sort you almost never want to bother with */
 
+#define LOG_CHANNEL_UART0 -1
+#define LOG_CHANNEL_CHANNEL_A 0
+#define LOG_CHANNEL_CHANNEL B 1
+
+/*
+ * Settings
+ */
+#ifndef DEFAULT_LOG_LEVEL
+#define DEFAULT_LOG_LEVEL LOG_TRACE
+#endif
+
+#ifndef LOG_CHANNEL
+#define LOG_CHANNEL LOG_CHANNEL_UART0
+#endif
+
 /*
  * Return human readable message for an error number
  */
@@ -34,6 +49,12 @@ extern void err_print(short channel, const char * message, short err_number);
  * vector = the number of the vector that was called
  */
 extern void panic(void);
+
+
+/*
+ * Setup the logging facility (for debugging)
+ */
+extern void log_init(void);
 
 /*
  * Set the maximum level of verbosity in logging.

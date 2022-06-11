@@ -15,23 +15,24 @@
 extern const unsigned char MSX_CP437_8x8_bin[];
 
 /* Default text color lookup table values (AARRGGBB) */
-const unsigned long a2560u_a_lut[VKY3_LUT_SIZE] = {
-    0xFF000000,	// Black (transparent)
-	0xFF800000, // Mid-Tone Red
-	0xFF008000, // Mid-Tone Green
-	0xFF808000, // Mid-Tone Yellow
-	0xFF000080, // Mid-Tone Blue
-	0xFFAA5500, // Mid-Tone Orange
-	0xFF008080, // Mid-Tone Cian
-	0xFF808080, // 50% Grey
-	0xFF555555, // Dark Grey
-    0xFFFF0000, // Bright Red
-	0xFF55FF55, // Bright Green
-	0xFFFFFF55, // Bright Yellow
-	0xFF5555FF, // Bright Blue
-	0xFFFF7FFF, // Bright Orange
-	0xFF55FFFF, // Bright Cyan
-	0xFFFFFFFF 	// White
+/*  0xGGBB, 0xAARR */
+const unsigned short a2560u_a_lut[] = {
+	0x0000, 0xFF00,	// Black (transparent)
+	0x0000, 0xFF80, // Mid-Tone Red
+	0x8000, 0xFF00, // Mid-Tone Green
+	0x8000, 0xFF80, // Mid-Tone Yellow
+	0x0080, 0xFF00, // Mid-Tone Blue
+	0x5500, 0xFFAA, // Mid-Tone Orange
+	0x8080, 0xFF00, // Mid-Tone Cian
+	0x8080, 0xFF80, // 50% Grey
+	0x5555, 0xFF55, // Dark Grey
+    0x5555, 0xFFFF, // Bright Red
+	0xFF55, 0xFF55, // Bright Green
+	0xFF55, 0xFFFF, // Bright Yellow
+	0x55FF, 0xFF55, // Bright Blue
+	0x7FFF, 0xFFFF, // Bright Orange
+	0xFFFF, 0xFF55, // Bright Cyan
+	0xFFFF, 0xFFFF 	// White
 };
 
 /*
@@ -90,12 +91,19 @@ static void txt_a2560u_set_sizes() {
         if ((a2560u_border_width != 0) && (a2560u_border_height != 0)) {
             short border_width = (2 * a2560u_border_width) / a2560u_font_size.width;
             short border_height = (2 * a2560u_border_height) / a2560u_font_size.height;
+
             a2560u_visible_size.width = a2560u_max_size.width - border_width;
             a2560u_visible_size.height = a2560u_max_size.height - border_height;
         } else {
-            a2560u_visible_size.width = a2560u_max_size.width;
+            a2560u_visible_size.width = a2560u_max_size.width;            
             a2560u_visible_size.height = a2560u_max_size.height;
         }
+
+        {
+            char msg[80];
+            sprintf(msg,"txt_a2560u_set_sizes max:%d,%d, visible:%d,%d", a2560u_max_size.width, a2560u_max_size.height, a2560u_visible_size.width, a2560u_visible_size.height);
+            DEBUG(msg);
+        }          
     }
 }
 
@@ -166,11 +174,18 @@ static short txt_a2560u_set_resolution(short width, short height) {
         }
     }
 
+{
+    char msg[80];
+    sprintf(msg, "Setting resolution %dx%d", width, height);
+    DEBUG(msg);
+}
+
     /* Turn off resolution bits */
     /* TODO: there gotta be a better way to do that */
     msr_shadow &= ~(VKY3_MCR_RES_MASK);
 
     if ((width == 800) && (height == 600)) {
+        msr_shadow |= VKY3_MCR_800x600;
         a2560u_resolution.width = width;
         a2560u_resolution.height = height;
 
@@ -219,18 +234,14 @@ static void txt_a2560u_set_border(short width, short height) {
         a2560u_border_width = width;
         a2560u_border_height = height;
         *BorderControlReg = (height & 0x3f) << 16 | (width & 0x3f) << 8 | VKY3_BRDR_EN;
-
-        // Recalculate the size of the screen
-        txt_a2560u_set_sizes();
-
     } else {
         a2560u_border_width = 0;
         a2560u_border_height = 0;
         *BorderControlReg = 0;
-
-        // Recalculate the size of the screen
-        txt_a2560u_set_sizes();
     }
+
+    // Recalculate the size of the screen
+    txt_a2560u_set_sizes();    
 }
 
 /**
@@ -252,7 +263,7 @@ static void txt_a2560u_set_border_color(unsigned char red, unsigned char green, 
  * @param data pointer to the raw font data to be loaded
  */
 static short txt_a2560u_set_font(short width, short height, const unsigned char * data) {
-    if (((width == 8) && (height == 8)) ) {
+    if (width == 8 && height == 8) {
         int i;
 
         /* The size is valid... set the font */
@@ -312,6 +323,12 @@ static short txt_a2560u_get_region(p_rect region) {
     region->size.width = a2560u_region.size.width;
     region->size.height = a2560u_region.size.height;
 
+    {
+        char msg[80];
+        sprintf(msg,"txt_a2560u_get_region %p: x:%d, y:%d, w:%d, h:%d", region, region->origin.x, region->origin.y, region->size.width, region->size.height);
+        DEBUG(msg);
+    }  
+
     return 0;
 }
 
@@ -323,20 +340,33 @@ static short txt_a2560u_get_region(p_rect region) {
  *
  * @return 0 on success, any other number means the region was invalid
  */
-static short txt_a2560u_set_region(p_rect region) {
+static short txt_a2560u_set_region(const p_rect region) {    
+        char msg[80];
+        sprintf(msg,"SET REGION %p x:%d, y:%d, w:%d, h:%d (visible:%d,%d)",
+        region, region->origin.x, region->origin.y, region->size.width, region->size.height, a2560u_visible_size.width, a2560u_visible_size.height);
+        //DEBUG(msg);
+
     if ((region->size.width == 0) || (region->size.height == 0)) {
         /* Set the region to the default (full screen) */
         a2560u_region.origin.x = 0;
         a2560u_region.origin.y = 0;
         a2560u_region.size.width = a2560u_visible_size.width;
-        a2560u_region.size.height = a2560u_visible_size.height;
-
+        a2560u_region.size.height = a2560u_visible_size.height;        
     } else {
         a2560u_region.origin.x = region->origin.x;
         a2560u_region.origin.y = region->origin.y;
         a2560u_region.size.width = region->size.width;
         a2560u_region.size.height = region->size.height;
+
+        //sprintf(msg,"specific region %d %d %d %d", region->origin.x, region->origin.y, region->size.width, region->size.height);
+        //DEBUG(msg);
     }
+
+    {
+        sprintf(msg,"txt_a2560u_set_region: NEW REGION %p x:%d, y:%d, w:%d, h:%d (visible:%d,%d)",
+        region, region->origin.x, region->origin.y, region->size.width, region->size.height, a2560u_visible_size.width, a2560u_visible_size.height);
+        //DEBUG(msg);
+    }  
 
     return 0;
 }
@@ -379,7 +409,7 @@ static void txt_a2560u_scroll(short horizontal, short vertical) {
     /*
      * Determine limits of rectangles to move and fill and directions of loops
      * x0 and y0 are the positions of the first cell to be over-written
-     * x1 and y1 are the positions of the first cell to be copyed... TEXT[x0,y0] := TEXT[x1,y1]
+     * x1 and y1 are the positions of the first cell to be copied... TEXT[x0,y0] := TEXT[x1,y1]
      * x2 and y2 are the position of the last cell to be over-written
      * x3 and y3 are the position of the last cell to be copied... TEXT[x2,y2] := TEXT[x3,y3]
      *
@@ -418,6 +448,24 @@ static void txt_a2560u_scroll(short horizontal, short vertical) {
         dx = -1;
     }
 
+    {        
+        // char buffer[80];
+        // sprintf(buffer,"a2560u_region.origin:%d,%d size:%d,%d", a2560u_region.origin.x, a2560u_region.origin.y, a2560u_region.size.width, a2560u_region.size.height);        
+        // DEBUG(buffer);
+
+        // sprintf(buffer,"%d %d dx:%d dy:%d", a2560u_region.size.width, a2560u_region.size.height, dx, dy);
+        // DEBUG(buffer);
+
+        // sprintf(buffer,"(%d,%d) (%d,%d) vers (%d,%d) (%d,%d)",
+        // x1,y1, x3,y3, x0,y0, x2,y2);
+        // x1 % a2560u_region.size.width,y1 / a2560u_region.size.width,
+        // x3 % a2560u_region.size.width,y3 / a2560u_region.size.width,
+        // x0 % a2560u_region.size.width,y0 / a2560u_region.size.width,
+        // x2 % a2560u_region.size.width,y2 / a2560u_region.size.width);
+        //DEBUG(buffer);
+    }
+
+#if 1
     /* Copy the rectangle */
 
     for (y = y0; y != y2; y += dy) {
@@ -430,7 +478,31 @@ static void txt_a2560u_scroll(short horizontal, short vertical) {
             ColorText_A[offset_dst] = ColorText_A[offset_src];
         }
     }
+#else
 
+    /* Copy the rectangle */
+    int ydiff = vertical * a2560u_max_size.width;   
+    for (y = y0; y != y2; y += dy) {
+        int row_dst = y * a2560u_max_size.width;
+        int row_src = row_dst + ydiff;
+
+        /* FIXME: this will crash on a 68k if the offsets are not even */
+        unsigned short *src = (unsigned short*)(&ScreenText_A[row_src + x0]);
+        unsigned short *dst = (unsigned short*)(&ScreenText_A[row_dst + x0 + horizontal]);
+        unsigned short *csrc = (unsigned short*)(&ColorText_A[row_src + x0]);
+        unsigned short *cdst = (unsigned short*)(&ColorText_A[row_dst + x0 + horizontal]);
+
+        /* FIXME: not sure if horizontal scrolling works ok in both directions. */
+        int width = x2 - x0;
+        if (width < 0)
+            width -= width;
+        width >>= 1; // We copy shorts so /2
+        while (width--) {
+            *dst++ = *src++;
+            *cdst++ = *csrc++;
+        }
+    }
+#endif
     /* Clear the rectangles */
 
     if (horizontal != 0) {
@@ -544,13 +616,15 @@ static void txt_a2560u_init() {
     char buffer[255];
     t_rect region;
     int i;
-
+DEBUG("txt_a2560u_init-------------------");
     a2560u_resolution.width = 0;
     a2560u_resolution.height = 0;
+    a2560u_visible_size.width = 0;
+    a2560u_visible_size.height = 0;
     a2560u_font_size.width = 0;
     a2560u_font_size.height = 0;
 
-    /* Disable the set_sizes call for now */
+    /* Disable the set_sizes call for now, to avoid computing transcient unnecessary values */
     a2560u_enable_set_sizes = 0;
 
     /* Start with nothing on */
@@ -569,13 +643,13 @@ static void txt_a2560u_init() {
     a2560u_caps.resolutions = a2560u_resolutions;
 
     /* Only 8x8 on the U */
-    a2560u_caps.font_size_count = sizeof(a2560u_fonts) / sizeof(t_extent);;
+    a2560u_caps.font_size_count = sizeof(a2560u_fonts) / sizeof(t_extent);
     a2560u_caps.font_sizes = a2560u_fonts;
 
-    /* Initialze the color lookup tables */
-    for (i = 0; i < VKY3_LUT_SIZE; i++) {
-        FG_CLUT_A[i] = a2560u_a_lut[i];
-        BG_CLUT_A[i] = a2560u_a_lut[i];
+    /* Initialize the color lookup tables */
+    for (i = 0; i < sizeof(a2560u_a_lut)/sizeof(unsigned short); i++) {
+		FG_CLUT_A[i] = a2560u_a_lut[i];
+		BG_CLUT_A[i] = a2560u_a_lut[i];        
     }
 
     /* Set the mode to text */
