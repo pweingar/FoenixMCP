@@ -1,8 +1,10 @@
 /**
  * Implementation of 68000 specific syscall routines.
  *
- * NOTE: these routines are not called directly but are instead called through TRAP#13
+ * NOTE: these routines are not called directly but are instead called through TRAP#15
  */
+
+// #define KDEBUG
 
 #include "log.h"
 #include "types.h"
@@ -21,11 +23,17 @@
 #else
 #include "dev/ps2.h"
 #endif
-
+#include <stdio.h>
 /*
  * Determine the correct system function implementation and call it.
  */
 unsigned long syscall_dispatch(int32_t function, int32_t param0, int32_t param1, int32_t param2, int32_t param3, int32_t param4, int32_t param5) {
+#ifdef KDEBUG
+    char buf[80];
+    sprintf(buf,"fn:0x%04x d1:%04x d2:0x%04x d3:0x%04x", (int)function, (int)param0, (int)param1, (int)param2);
+    DEBUG(buf);
+#endif
+
     switch (function & 0x00f0) {
         case 0x00:
             /* Core System Calls */
@@ -306,21 +314,30 @@ unsigned long syscall_dispatch(int32_t function, int32_t param0, int32_t param1,
                     return 0;
 
                 case KFN_TXT_SET_REGION:
+#ifdef KDEBUG
                     {
-                        char buf[60];
-                        sprintf(buf, "KFN_TXT_SET_REGION: %d %p", (short)param0, (p_rect)param1);
+                        short ret;
+                        sprintf(buf, "KFN_TXT_SET_REGION: %d %p", param0, (p_rect)param1);
                         DEBUG(buf);
-                    }                 
-                    /* Sets the clipping/scrolling region for further text operations */
+
+                        ret = txt_set_region((short)param0, (p_rect)param1);
+                        sprintf(buf, "KFN_TXT_SET_REGION returning");
+                        DEBUG(buf);                        
+                        /* Sets the clipping/scrolling region for further text operations */
+                        return ret;
+                    }
+#else
                     return txt_set_region((short)param0, (p_rect)param1);
+#endif
 
                 case KFN_TXT_GET_REGION:
+#ifdef KDEBUG                
                     /* Gets the current clipping/scrolling region */
                     {
-                        char buf[60];
                         sprintf(buf, "KFN_TXT_GET_REGION: %d %p", (short)param0, (p_rect)param1);
                         DEBUG(buf);
-                    }                    
+                    }
+#endif
                     return txt_get_region((short)param0, (p_rect)param1);
 
                 case KFN_TXT_SET_COLOR:

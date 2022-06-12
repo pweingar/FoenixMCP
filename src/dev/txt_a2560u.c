@@ -344,7 +344,7 @@ static short txt_a2560u_set_region(const p_rect region) {
         char msg[80];
         sprintf(msg,"SET REGION %p x:%d, y:%d, w:%d, h:%d (visible:%d,%d)",
         region, region->origin.x, region->origin.y, region->size.width, region->size.height, a2560u_visible_size.width, a2560u_visible_size.height);
-        //DEBUG(msg);
+        DEBUG(msg);
 
     if ((region->size.width == 0) || (region->size.height == 0)) {
         /* Set the region to the default (full screen) */
@@ -504,7 +504,6 @@ static void txt_a2560u_scroll(short horizontal, short vertical) {
     }
 #endif
     /* Clear the rectangles */
-
     if (horizontal != 0) {
         for (y = y0; y != y3; y += dy) {
             int row_dst = y * a2560u_max_size.width;
@@ -523,7 +522,7 @@ static void txt_a2560u_scroll(short horizontal, short vertical) {
                 ColorText_A[row_dst + x] = a2560u_color;
             }
         }
-    }
+    } 
 }
 
 /**

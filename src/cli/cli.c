@@ -56,8 +56,8 @@
 #define CLI_KEY_HELP    0x8012  /* A2560K Menu/Help key */
 
 // DEBUG: if I uncomment this then I get a crash
-//#define sys_txt_get_region txt_get_region
-//#define sys_txt_set_region txt_set_region
+#define sys_txt_get_region txt_get_region
+#define sys_txt_set_region txt_set_region
 
 //
 // Types

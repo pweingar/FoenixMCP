@@ -358,7 +358,7 @@ _syscall:
             move.l (44,sp),d3           ; Parameter 2 to D3
             move.l (40,sp),d2           ; Parameter 1 to D2
             move.l (36,sp),d1           ; Parameter 0 to D1
-            move.l (32,sp),d0           ; Function number to D0
+            move.l (32,sp),d0           ; Function number to D0 (32 = 4(PC)+7(regs)*4)
 
             TRAP #15                    ; Call into the kernel
 
@@ -383,7 +383,7 @@ h_trap_15:
             jsr _syscall_dispatch       ; Call the C routine to do the dispatch
                                         ; Note: the C routine depends upon the register push order
 
-            add.l #28,sp                ; Remove parameters from the stack
+            adda.l #7*4,sp              ; Remove parameters from the stack
             rte                         ; Return to the caller
 
 h_trap_elev ori #$2000,(a7)             ; Change the caller's privilege to supervisor

@@ -5,7 +5,7 @@
 #ifndef __VICKYIII_General_H
 #define __VICKYIII_General_H
 
-#define VKY3_LUT_SIZE     16
+#define VKY3_TEXT_LUT_SIZE 16
 #define VKY3_TEXT_LUT_FG  ((volatile unsigned long *)0x00B6C400)  /**< Text foreground color look up table */
 #define VKY3_TEXT_LUT_BG  ((volatile unsigned long *)0x00B6C440)  /**< Text background color look up table */
 

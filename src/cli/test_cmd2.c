@@ -774,6 +774,85 @@ short cmd_test_ansi(short screen, int argc, const char * argv[]) {
     return 0;
 }
 
+static short cli_test_textscroll (short screen, int argc, const char * argv[]) {
+    int i;
+    char c;    
+    char *scr;
+    short *swrw;
+    char *dst;
+
+    if (argc != 2) {
+        printf("Copy size missing!");
+        return 0;
+    }        
+
+#if MODEL == MODEL_FOENIX_A2560K
+        switch (screen)
+        case TXT_SCREEN_A2560K_A: 
+            scr = (char*)ScreenText_A;
+            break:
+        case TXT_SCREEN_A2560K_B:
+            scr = (char*)ScreenText_B;
+            break;
+        default:
+            // How would we even get here ??
+            return 0;
+        end;
+#elif MODEL == MODEL_FOENIX_A2560U || MODEL == MODEL_FOENIX_A2560U_PLUS
+       scr = (short*)ScreenText_A;
+#endif 
+
+    // Fill screen byte by byte
+    const int line_length = 640/8; // # chars on a line
+    const int full_screen_size= line_length*480/8;    
+    unsigned long jiffies = sys_time_jiffies() + 60*3;
+
+    if (strcmp("word", argv[1]) == 0) {       
+        short *dstw;
+        char w[2];
+
+        // Fill using words
+        for (i=0, dstw=(short*)scr; i<full_screen_size/2; i++) {
+            if (w[0] > 'Y' || (i % (line_length/2)) == 0) {
+                w[0] = 'A';
+                w[1] = 'B';
+            }
+                
+            *dstw++ = *((short*)&w);
+            w[0] += 2;
+            w[1] += 2;            
+        }
+
+        // Wait a bit
+        while (sys_time_jiffies() < jiffies);
+
+        for (i=0, dstw = (short*)scr; i<(full_screen_size-line_length)/2; i++) {
+            *dstw = dstw[1];
+            dstw++;
+        }
+    }
+    else if (strcmp("byte", argv[1]) == 0) {
+        // Fill using bytes
+        for (i=0, dst=scr; i<full_screen_size; i++) {
+            if (c > 'Z' || (i % line_length) == 0)
+                c = 'A';
+            *dst++ = c++;
+        }
+
+        // Wait a bit
+        while (sys_time_jiffies() < jiffies);
+
+        for (i=0, dst = scr; i<full_screen_size-line_length; i++) {
+            *dst = dst[1];
+            dst++;
+        }
+    }
+    else
+        print(screen, "Unrecognized option!");
+
+    return 0;
+}
+
 const t_cli_test_feature cli_test_features[] = {
     {"ANSI", "ANSI: test the ANSI escape codes", cmd_test_ansi},
     {"BITMAP", "BITMAP: test the bitmap screen", cli_test_bitmap},
@@ -802,6 +881,7 @@ const t_cli_test_feature cli_test_features[] = {
     {"SID", "SID [EXT|INT]: test the SID sound chips", sid_test},
 #endif
     {"UART","UART [1|2]: test the serial port",cli_test_uart},
+    {"TEXTSCROLL", "TEXTSCROLL [byte|word]: fills the text memory with A..Z then scroll one char to the left", cli_test_textscroll},
     {"END", "END", 0}
 };
 

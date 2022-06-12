@@ -20,7 +20,7 @@
  * Settings
  */
 #ifndef DEFAULT_LOG_LEVEL
-#define DEFAULT_LOG_LEVEL LOG_TRACE
+#define DEFAULT_LOG_LEVEL LOG_DEBUG
 #endif
 
 #ifndef LOG_CHANNEL
