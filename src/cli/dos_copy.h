@@ -9,6 +9,6 @@
  * The DOS COPY command itself:
  * COPY <src path> <dst path>
  */
-extern short cmd_copy(short screen, int argc, char * argv[]);
+extern short cmd_copy(short screen, int argc, const char * argv[]);
 
 #endif

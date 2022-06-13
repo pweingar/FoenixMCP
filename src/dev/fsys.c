@@ -20,6 +20,7 @@
 #include "log.h"
 #include "syscalls.h"
 #include "simpleio.h"
+#include "utilities.h"
 
 #define MAX_DRIVES      8       /* Maximum number of drives */
 #define MAX_DIRECTORIES 8       /* Maximum number of open directories */

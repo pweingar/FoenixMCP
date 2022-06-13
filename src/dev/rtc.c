@@ -91,7 +91,7 @@ short rtc_register_periodic(short rate, FUNC_V_2_V handler) {
         *RTC_ENABLES = RTC_PIE;
         int_enable(INT_RTC);
     }
-
+    return 0;
 }
 
 /*
