@@ -5,6 +5,8 @@
 #ifndef __LOG_H
 #define __LOG_H
 
+#include <stdio.h> /* Not used here but convenience: there is every chance log messages will use sprintf */
+
 #define LOG_FATAL   0   /* Log a critical or fatal event */
 #define LOG_ERROR   1   /* Log an error */
 #define LOG_INFO    2   /* Log miscellaneous information */
@@ -72,7 +74,7 @@ extern void log_setlevel(short level);
  * level = the severity of the message... the logging level will filter messages displayed
  * message = the message to log
  */
-extern void log(short level, char * message);
+extern void log(short level, const char * message);
 
 /*
  * Log a message to the console
@@ -82,7 +84,7 @@ extern void log(short level, char * message);
  * message1 = the first part of the message to log
  * message2 = the second part of the message to log
  */
-extern void log2(short level, char * message1, char * message2);
+extern void log2(short level, const char * message1, const char * message2);
 
 /*
  * Log a message to the console

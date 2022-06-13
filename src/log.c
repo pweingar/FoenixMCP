@@ -262,7 +262,7 @@ static void log_to_screen(const char *message) {
  * level = the severity of the message... the logging level will filter messages displayed
  * message = the message to log
  */
-void log(short level, char * message) {
+void log(short level, const char * message) {
     if (level > log_level)
         return;
 
@@ -277,7 +277,7 @@ void log(short level, char * message) {
  * message1 = the first part of the message to log
  * message2 = the second part of the message to log
  */
-void log2(short level, char * message1, char * message2) {
+void log2(short level, const char * message1, const char * message2) {
     if (level <= log_level) {
         char line[80];
         sprintf(line, "%s%s\n", message1, message2);
