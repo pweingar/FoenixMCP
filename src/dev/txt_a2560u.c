@@ -395,6 +395,21 @@ static short txt_a2560u_set_color(unsigned char foreground, unsigned char backgr
 }
 
 
+/* This works around a bug in the A2560U's FPGA where reading bytes of text memory
+ * (possibly color as well ?) are inverted. Ie if the memory contains AB, A beint on an
+ * even address,  then when reading A you'll get B and reading B you'll get A. This
+ * functions can be removed if the FPGA is corrected. */
+static char read_swapped_byte(char *addr) {
+    if ((long)addr & 1) {
+        short w = *(short*)(addr-1);
+        return (char)w;
+    }
+    else {
+        short w = *(short*)(addr);
+        return ((char*)&w)[0];
+    }
+}
+
 /**
  * Scroll the text in the current region
  *
@@ -447,66 +462,32 @@ static void txt_a2560u_scroll(short horizontal, short vertical) {
         x2 = x3 - horizontal;
         dx = -1;
     }
+   
+    /* Copy the rectangle. We can't copy byte by byte, they get swapped (FPGA bug) */
+    char * const text_mem = (char*)ScreenText_A;
+    char * const color_mem = (char*)ColorText_A;
 
-    {        
-        // char buffer[80];
-        // sprintf(buffer,"a2560u_region.origin:%d,%d size:%d,%d", a2560u_region.origin.x, a2560u_region.origin.y, a2560u_region.size.width, a2560u_region.size.height);        
-        // DEBUG(buffer);
-
-        // sprintf(buffer,"%d %d dx:%d dy:%d", a2560u_region.size.width, a2560u_region.size.height, dx, dy);
-        // DEBUG(buffer);
-
-        // sprintf(buffer,"(%d,%d) (%d,%d) vers (%d,%d) (%d,%d)",
-        // x1,y1, x3,y3, x0,y0, x2,y2);
-        // x1 % a2560u_region.size.width,y1 / a2560u_region.size.width,
-        // x3 % a2560u_region.size.width,y3 / a2560u_region.size.width,
-        // x0 % a2560u_region.size.width,y0 / a2560u_region.size.width,
-        // x2 % a2560u_region.size.width,y2 / a2560u_region.size.width);
-        //DEBUG(buffer);
-    }
-
-#if 1
-    /* Copy the rectangle */
-
+    int delta_y = dy * a2560u_max_size.width;
+    int row_dst = y0 * a2560u_max_size.width - delta_y;
+    int row_src = y0 * a2560u_max_size.width + vertical * a2560u_max_size.width - delta_y;
     for (y = y0; y != y2; y += dy) {
-        int row_dst = y * a2560u_max_size.width;
-        int row_src = (y + vertical) * a2560u_max_size.width;
+        row_dst += delta_y;
+        row_src += delta_y;
+        int offset_dst = row_dst + x0 - dx;
+        int offset_src = row_src + horizontal + x0 - dx;
         for (x = x0; x != x2; x += dx) {
-            int offset_dst = row_dst + x;
-            int offset_src = row_src + x + horizontal;
-            ScreenText_A[offset_dst] = ScreenText_A[offset_src];
-            ColorText_A[offset_dst] = ColorText_A[offset_src];
+            offset_dst += dx;
+            offset_src += dx;
+            ScreenText_A[offset_dst] = read_swapped_byte(&ScreenText_A[offset_src]);
+            ColorText_A[offset_dst] = read_swapped_byte(&ColorText_A[offset_src]);
         }
     }
-#else
 
-    /* Copy the rectangle */
-    int ydiff = vertical * a2560u_max_size.width;   
-    for (y = y0; y != y2; y += dy) {
-        int row_dst = y * a2560u_max_size.width;
-        int row_src = row_dst + ydiff;
-
-        /* FIXME: this will crash on a 68k if the offsets are not even */
-        unsigned short *src = (unsigned short*)(&ScreenText_A[row_src + x0]);
-        unsigned short *dst = (unsigned short*)(&ScreenText_A[row_dst + x0 + horizontal]);
-        unsigned short *csrc = (unsigned short*)(&ColorText_A[row_src + x0]);
-        unsigned short *cdst = (unsigned short*)(&ColorText_A[row_dst + x0 + horizontal]);
-
-        /* FIXME: not sure if horizontal scrolling works ok in both directions. */
-        int width = x2 - x0;
-        if (width < 0)
-            width -= width;
-        width >>= 1; // We copy shorts so /2
-        while (width--) {
-            *dst++ = *src++;
-            *cdst++ = *csrc++;
-        }
-    }
-#endif
     /* Clear the rectangles */
     if (horizontal != 0) {
+        row_dst = y0 * a2560u_max_size.width - delta_y;
         for (y = y0; y != y3; y += dy) {
-            int row_dst = y * a2560u_max_size.width;
+            row_dst += delta_y;
             for (x = x2; x != x3; x += dx) {
                 ScreenText_A[row_dst + x] = ' ';
                 ColorText_A[row_dst + x] = a2560u_color;
@@ -515,8 +496,9 @@ static void txt_a2560u_scroll(short horizontal, short vertical) {
     }
 
     if (vertical != 0) {
+        row_dst = y2 * a2560u_max_size.width - delta_y;
         for (y = y2; y != y3; y += dy) {
-            int row_dst = y * a2560u_max_size.width;
+            row_dst += delta_y;
             for (x = x0; x != x3; x += dx) {
                 ScreenText_A[row_dst + x] = ' ';
                 ColorText_A[row_dst + x] = a2560u_color;
