@@ -32,6 +32,8 @@
 
 #if MODEL == MODEL_FOENIX_A2560K
 #include "dev/kbd_mo.h"
+#include "dev/txt_a2560k_a.h"
+#include "dev/txt_a2560k_b.h"
 #endif
 
 typedef struct s_cli_test_feature {
@@ -229,7 +231,7 @@ short cli_test_uart(short channel, int argc, const char * argv[]) {
     uart_index = cdev - CDEV_COM1;
     uart_address = (unsigned long)uart_get_base(uart_index);
 
-    sprintf(buffer, "Serial port loopback test of COM%d at 0x%08X...\n", cdev - CDEV_COM1 + 1, uart_address);
+    sprintf(buffer, "Serial port loopback test of COM%d at %p...\n", cdev - CDEV_COM1 + 1, (void*)uart_address);
     print(channel, buffer);
 
     uart = sys_chan_open(cdev, "9600,8,1,NONE", 0);
@@ -326,7 +328,7 @@ short cli_mem_test(short channel, int argc, const char * argv[]) {
     }
 #endif
 
-    sprintf(message, "\x1B[H\x1B[2JTesting memory from 0x%08X to 0x%08X\n", (unsigned long)mem_start, (unsigned long)mem_end);
+    sprintf(message, "\x1B[H\x1B[2JTesting memory from %p to %p\n", (void*)mem_start, (void*)mem_end);
     print(channel, message);
 
     for (i = mem_start; i < mem_end; i++) {
@@ -787,19 +789,19 @@ static short cli_test_textscroll (short screen, int argc, const char * argv[]) {
     }        
 
 #if MODEL == MODEL_FOENIX_A2560K
-        switch (screen)
+        switch (screen) {
         case TXT_SCREEN_A2560K_A: 
             scr = (char*)ScreenText_A;
-            break:
+            break;
         case TXT_SCREEN_A2560K_B:
             scr = (char*)ScreenText_B;
             break;
         default:
             // How would we even get here ??
             return 0;
-        end;
+        }
 #elif MODEL == MODEL_FOENIX_A2560U || MODEL == MODEL_FOENIX_A2560U_PLUS
-       scr = (short*)ScreenText_A;
+       scr = (char*)ScreenText_A;
 #endif 
 
     // Fill screen byte by byte
