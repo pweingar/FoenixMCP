@@ -26,23 +26,35 @@ MEMORY := ram
 # Determine target CPU and MODEL based on the UNIT
 
 ifeq ($(UNIT),a2560k)
-export CPU_NUMBER = 6		# M68040V
-export VASM_CPU = -m68040	# VASM CPU flag
-export VBCC_CPU = 68040		# VBCC CPU flag
-export MODEL_NUMBER = 11	# A2560K
+# M68040V
+export CPU_NUMBER = 6
+# VASM CPU flag
+export VASM_CPU = -m68040
+# VBCC CPU flag
+export VBCC_CPU = 68040
+# A2560K
+export MODEL_NUMBER = 11
 export cpu = m68040
 
 else ifeq ($(UNIT),genx)
-export CPU_NUMBER = 6		# M68040V
-export VASM_CPU = -m68040	# VASM CPU flag
-export VBCC_CPU = 68040		# VBCC CPU flag
-export MODEL_NUMBER = 4		# GenX
+# M68040V
+export CPU_NUMBER = 6
+# VASM CPU flag
+export VASM_CPU = -m68040
+# VBCC CPU flag
+export VBCC_CPU = 68040
+# GenX
+export MODEL_NUMBER = 4
 export cpu = m68040
 
 else ifeq ($(UNIT),a2560u)
-export CPU_NUMBER = 0		# M680SEC00
-export VASM_CPU = -m68000	# VASM CPU flag
-export VBCC_CPU = 68000		# VBCC CPU flag
+# The comments are on a separate line to avoid inserting white space in the commande line where these variables are used
+# M680SEC00
+export CPU_NUMBER = 0
+# VASM CPU flag
+export VASM_CPU = -m68000
+# VBCC CPU flag
+export VBCC_CPU = 68000
 export MODEL_NUMBER = 9		# A2560U
 export CFG_FILE = $(VBCC)/config/a2560u_ram
 export cpu = m68k
