@@ -257,7 +257,7 @@ short boot_screen() {
     make_key_name("RETURN", cr_text);
 
 #if MODEL == MODEL_FOENIX_A2560K
-    sprintf(buffer, "BOOT: %%s=SD CARD, %s=HARD DRIVE, s=FLOPPY, %s=DEFAULT, %s=SAFE", f1, f2, f3, space, cr_text);
+    sprintf(buffer, "BOOT: %s=SD CARD, %s=HARD DRIVE, s=FLOPPY, %s=DEFAULT, %s=SAFE", f1, f2, f3, space, cr_text);
 #else
     sprintf(buffer, "BOOT: %s=SD CARD, %s=HARD DRIVE, %s=DEFAULT, %s=SAFE", f1, f2, space, cr_text);
 #endif
@@ -329,20 +329,13 @@ short boot_screen() {
     }
     
     /* Initialise all screens */
-    log_num(LOG_DEBUG,"boot_screen: initialize Screen", screen);
-
     txt_init_screen(screen); /* This is the one used for the boot message */
-
     /* No need to txt_set_resolution(screen, 0, 0) because during screen_init, the defaults are applied */
-
 #if MODEL == MODEL_FOENIX_A2560K
     txt_set_resolution(1, 0, 0);    // Set the resolution based on the DIP switch
 #endif
-    DEBUG("boot_screen: Screen(s) initialized");
-{
-    t_rect region;
-    txt_get_region(screen, &region);
-}
+
+    /* Display message saying what we're booting from */
     print(screen, buffer);
 
 #if MODEL == MODEL_FOENIX_A2560K
