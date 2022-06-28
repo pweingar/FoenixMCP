@@ -60,7 +60,7 @@ void ym_write(enum e_ym_snd_dev dev, enum e_ym_position position, short port, un
  * Initialize and mute all the Yamaha sound chips
  */
 void ym_init() {
-    short position;
+    enum e_ym_position position;
     short port;
 
 #if MODEL == MODEL_FOENIX_A2560K
@@ -83,6 +83,6 @@ void ym_init() {
 
     /* OPL3 */
     for (port = 0x40; port <= 0x55; port++) {
-        ym_write(SND_OPL3, position, port, 0x3F);       /* Maximum attenuation */
+        ym_write(SND_OPL3, INTERNAL, port, 0x3F);       /* Maximum attenuation */
     }
 }

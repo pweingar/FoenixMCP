@@ -221,8 +221,8 @@ short cmd_help(short channel, int argc, const char * argv[]) {
     p_cli_command command;
 
     for (command = (p_cli_command)g_cli_commands; (command != 0) && (command->name != 0); command++) {
-        sys_chan_write(channel, command->help, strlen(command->help));
-        sys_chan_write(channel, "\n", 2);
+        sys_chan_write(channel, (unsigned char*)command->help, strlen(command->help));
+        sys_chan_write(channel, (unsigned char*)"\n", 2);
     }
     return 0;
 }
@@ -231,7 +231,7 @@ short cmd_getjiffies(short channel, int argc, const char * argv[]) {
     char buffer[80];
 
     sprintf(buffer, "%ld\n", timers_jiffies());
-    sys_chan_write(channel, buffer, strlen(buffer));;
+    sys_chan_write(channel, (unsigned char*)buffer, strlen(buffer));;
     return 0;
 }
 
@@ -242,7 +242,7 @@ short cmd_get_ticks(short channel, int argc, const char * argv[]) {
     char buffer[80];
 
     sprintf(buffer, "%ld\n", rtc_get_jiffies());
-    sys_chan_write(channel, buffer, strlen(buffer));
+    sys_chan_write(channel, (unsigned char*)buffer, strlen(buffer));
     return 0;
 }
 
@@ -252,7 +252,7 @@ short cmd_get_ticks(short channel, int argc, const char * argv[]) {
 short cmd_cls(short channel, int argc, const char * argv[]) {
     const char * ansi_cls = "\x1B[2J\x1B[H";
 
-    sys_chan_write(channel, ansi_cls, strlen(ansi_cls));
+    sys_chan_write(channel, (unsigned char*)ansi_cls, strlen(ansi_cls));
     return 0;
 }
 
@@ -771,8 +771,10 @@ short cli_process_line(short channel, char * command_line) {
         }
 
         // Try to execute the command
-        return cli_exec(channel, argv[0], argc, argv);
+        return cli_exec(channel, argv[0], argc, (char**)argv);
     }
+
+    return 0;
 }
 
 void cli_draw_window(short channel, const char * status, short is_active) {
@@ -909,7 +911,7 @@ short cli_repl(short channel) {
             }
         }
 
-        sys_chan_write(g_current_channel, "\x10 ", 2);                           // Print our prompt
+        sys_chan_write(g_current_channel, (unsigned char*)"\x10 ", 2);                           // Print our prompt
         result = cli_readline(g_current_channel, command_line);
         switch (result) {
             case -1:
@@ -1053,7 +1055,7 @@ short cli_exec_batch(short channel, const char * path) {
         short result = 0;
 
         do {
-            result = sys_chan_readline(fd, command_line, MAX_COMMAND_SIZE);
+            result = sys_chan_readline(fd, (unsigned char*)command_line, MAX_COMMAND_SIZE);
             if (result > 0) {
                 // We got a line, so parse it
                 cli_process_line(channel, command_line);

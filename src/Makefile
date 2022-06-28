@@ -3,8 +3,8 @@
 # User may over-ride the UNIT and MEMORY parameters to specify target machine
 # and where the MCP will run (ram or flash)
 #
-UNIT := a2560k
-MEMORY := flash
+UNIT := a2560u
+MEMORY := ram
 
 # CPU_WDC65816                0x16  /* CPU code for the Western Design Center 65816 */
 # CPU_M68000                  0x20  /* CPU code for the Motorola 68000 */
@@ -40,10 +40,11 @@ export MODEL_NUMBER = 4		# GenX
 export cpu = m68040
 
 else ifeq ($(UNIT),a2560u)
-export CPU_NUMBER = 0		# M680SEC00
-export VASM_CPU = -m68000	# VASM CPU flag
-export VBCC_CPU = 68000		# VBCC CPU flag
-export MODEL_NUMBER = 9		# A2560U
+# M680SEC00
+export CPU_NUMBER = 0
+#export VASM_CPU = -m68000
+export VBCC_CPU = 68000
+export MODEL_NUMBER = 9
 export CFG_FILE = $(VBCC)/config/a2560u_ram
 export cpu = m68k
 endif
@@ -56,16 +57,19 @@ else
 export CFG_FILE = $(VBCC)/config/$(UNIT)_flash
 endif
 
-export AS = vasmm68k_mot
-export ASFLAGS = $(VASM_CPU) -quiet -Fvobj -nowarn=62
-export CC = vc
+export AS = as68k
+export ASFLAGS =
+export CC = cc68k
+export LINKER = ln68k
 export DEFINES = -DCPU=$(CPU_NUMBER) -DMODEL=$(MODEL_NUMBER) # -DKBD_POLLED
 
 ifeq ($(OS),Windows_NT)
-	export CFLAGS = -cpu=$(VBCC_CPU) +$(CFG_FILE) -I. -I$(CURDIR)/include -I$(CURDIR)
+	export CFLAGS = --core $(VBCC_CPU) -I. -I$(CURDIR)/include -I$(CURDIR)
+;-cpu=$(VBCC_CPU) +$(CFG_FILE) -I. -I$(CURDIR)/include -I$(CURDIR)
 	export RM = cmd /C del /Q /F
 else
-	export CFLAGS = -cpu=$(VBCC_CPU) +$(CFG_FILE)_linux -I. -I$(CURDIR)/include -I$(CURDIR)
+	export CFLAGS =
+;-cpu=$(VBCC_CPU) +$(CFG_FILE)_linux -I. -I$(CURDIR)/include -I$(CURDIR)
 	export RM = rm -f
 endif
 
@@ -115,13 +119,13 @@ cli:
 	$(MAKE) --directory=cli
 
 foenixmcp.s68: $(c_obj) $(cpu) dev fatfs snd cli
-	$(CC) $(CFLAGS) $(DEFINES) -o foenixmcp.s68 $(c_obj) $(cpu_c_obj) $(dev_c_obj) $(fat_c_obj) $(snd_c_obj) $(cli_c_obj)
+	$(LINKER) -o foenixmcp.s68 $(cpu_assembly_obj) $(c_obj) $(cpu_c_obj) $(dev_c_obj) $(fat_c_obj) $(snd_c_obj) $(cli_c_obj) clib-68000-lc-sd.a a2560u_memory.scm --output-format S28 --no-data-init-table-section  --target=Foenix
 
 foenixmcp.bin: $(c_obj) $(cpu) dev fatfs snd cli
 	$(CC) $(CFLAGS) $(DEFINES) -o foenixmcp.bin $(c_obj) $(cpu_c_obj) $(dev_c_obj) $(fat_c_obj) $(snd_c_obj) $(cli_c_obj)
 
 %.o: %.c $(DEPS)
-	$(CC) -S -c -o $@ $< $(CFLAGS) $(DEFINES)
+	$(CC) -o $@ $< $(CFLAGS) $(DEFINES)
 
 .PHONEY: clean
 

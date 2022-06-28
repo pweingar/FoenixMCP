@@ -20,6 +20,7 @@
 #include "log.h"
 #include "syscalls.h"
 #include "simpleio.h"
+#include "utilities.h"
 
 #define MAX_DRIVES      8       /* Maximum number of drives */
 #define MAX_DIRECTORIES 8       /* Maximum number of open directories */
@@ -612,7 +613,7 @@ FIL * fchan_to_file(t_channel * chan) {
 short fchan_read(t_channel * chan, unsigned char * buffer, short size) {
     FIL * file;
     FRESULT result;
-    int total_read;
+    UINT total_read;
 
     log(LOG_TRACE, "fchan_read");
 
@@ -639,9 +640,9 @@ short fchan_readline(t_channel * chan, unsigned char * buffer, short size) {
 
     file = fchan_to_file(chan);
     if (file) {
-        result = f_gets(buffer, size, file);
+        result = f_gets((char*)buffer, size, file);
         if (result) {
-            return strlen(buffer);
+            return strlen((char*)buffer);
         } else {
             return fatfs_to_foenix(f_error(file));
         }
@@ -682,7 +683,7 @@ short fchan_read_b(t_channel * chan) {
 short fchan_write(p_channel chan, const unsigned char * buffer, short size) {
     FIL * file;
     FRESULT result;
-    int total_written;
+    unsigned int total_written;
 
     file = fchan_to_file(chan);
     if (file) {
@@ -704,7 +705,7 @@ short fchan_write(p_channel chan, const unsigned char * buffer, short size) {
 short fchan_write_b(t_channel * chan, const unsigned char b) {
     FIL * file;
     FRESULT result;
-    int total_written;
+    unsigned int total_written;
     unsigned char buffer[1];
 
     file = fchan_to_file(chan);
@@ -791,7 +792,7 @@ short fchan_seek(t_channel * chan, long position, short base) {
             return fatfs_to_foenix(result);
         }
 
-        return fatfs_to_foenix(f_lseek(file, new_position));
+        return FSYS_ERR_INVALID_PARAMETER;
     }
 
     return ERR_BADCHANNEL;
@@ -1284,6 +1285,11 @@ static bool loader_exists(const char * extension) {
     return 0;
 }
 
+/*
+ * Returns the upper-cased extension of the file name (dot excluded), null terminated.
+ * FIXME: C:\FOLDER.pgx\ would return "PGX", but there's really no file in that path.
+ * 1: success, 0: no extension
+ */
 static int get_app_ext(const char * path, char * extension) {
     char * point = strrchr(path, '.');
     extension[0] = 0;
@@ -1298,9 +1304,8 @@ static int get_app_ext(const char * path, char * extension) {
                 return 1;
             }
         }
-    } else {
-        return 0;
     }
+    return 0;
 }
 
 static short fsys_load_ext(const char * path, const char * extension, long destination, long * start) {
@@ -1310,7 +1315,7 @@ static short fsys_load_ext(const char * path, const char * extension, long desti
 
     TRACE("fsys_load_ext");
 
-    log2(LOG_VERBOSE, "fsys_load_ext ext: ", extension);
+    log2(LOG_VERBOSE, "fsys_load_ext ext: ", (char*)extension);
 
     if (extension[0] == 0) {
         if (destination != 0) {

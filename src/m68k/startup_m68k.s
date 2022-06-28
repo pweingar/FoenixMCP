@@ -1,130 +1,141 @@
-            xref ___main
-            xref _cli_rerepl
-            xref _panic
-            xref _panic_number
+            .extern ___main
+            .extern _cli_rerepl
+            .extern _panic
+            .extern _panic_number
+            .extern _panic_pc
+            .extern _panic_address	
+            .extern _syscall_dispatch
+	    .extern _g_int_handler
+            .extern _int_vicky_channel_a
 
-            xdef _syscall
-            xdef ___exit
-            xdef _int_enable_all
-            xdef _int_disable_all
-            xdef _call_user
-            xdef _restart_cli
+            .public _syscall
+            .public ___exit
+            .public _int_enable_all
+            .public _int_disable_all
+            .public _call_user
+            .public _restart_cli
+
+
+            .section bss,bss
+            .section stack
 
 ;
 ; Interrupt registers for A2560U and U+
 ;
-PENDING_GRP0 = $00B00100
-PENDING_GRP1 = $00B00102
-PENDING_GRP2 = $00B00104
+PENDING_GRP0 .equ 0x00B00100
+PENDING_GRP1 .equ 0x00B00102
+PENDING_GRP2 .equ 0x00B00104
 
-            section "VECTORS",code
 
-            dc.l ___STACK           ; 00 - Initial stack pointer
-            dc.l coldboot           ; 01 - Initial PC
-            dc.l _handle_bus_err    ; 02 - Bus error
-            dc.l _handle_addr_err   ; 03 - Address error
-            dc.l _handle_inst_err   ; 04 - Illegal instruction
-            dc.l _handle_div0_err   ; 05 - Zero divide
-            dc.l _handle_chk_err    ; 06 - CHK instruction
-            dc.l _handle_trapv_err  ; 07 - TRAPV instruction
-            dc.l _handle_priv_err   ; 08 - Privilege error
-            dc.l not_impl           ; 09 - Trace
-            dc.l not_impl           ; 10 - Line 1010
-            dc.l not_impl           ; 11 - Line 1111
-            dc.l not_impl           ; 12 - Reserved
-            dc.l not_impl           ; 13 - Reserved
-            dc.l not_impl           ; 14 - Format error
-            dc.l not_impl           ; 15 - Uninitialized Interrupt Error
-            dc.l not_impl           ; 16 - Reserved
-            dc.l not_impl           ; 17 - Reserved
-            dc.l not_impl           ; 18 - Reserved
-            dc.l not_impl           ; 19 - Reserved
-            dc.l not_impl           ; 20 - Reserved
-            dc.l not_impl           ; 21 - Reserved
-            dc.l not_impl           ; 22 - Reserved
-            dc.l not_impl           ; 23 - Reserved
-            dc.l _handle_spurious   ; 24 - Spurious Interrupt
-            dc.l not_impl           ; 25 - Level 1 Interrupt Autovector
-            dc.l not_impl           ; 26 - Level 2 Interrupt Autovector
-            dc.l not_impl           ; 27 - Level 3 Interrupt Autovector
-            dc.l not_impl           ; 28 - Level 4 Interrupt Autovector
-            dc.l not_impl           ; 29 - Level 5 Interrupt Autovector
-            dc.l autovec2           ; 30 - Level 6 Interrupt Autovector
-            dc.l not_impl           ; 31 - Level 7 Interrupt Autovector
-            dc.l not_impl           ; 32 - TRAP #0
-            dc.l not_impl           ; 33 - TRAP #1
-            dc.l not_impl           ; 34 - TRAP #2
-            dc.l not_impl           ; 35 - TRAP #3
-            dc.l not_impl           ; 36 - TRAP #4
-            dc.l not_impl           ; 37 - TRAP #5
-            dc.l not_impl           ; 38 - TRAP #6
-            dc.l not_impl           ; 39 - TRAP #7
-            dc.l not_impl           ; 40 - TRAP #8
-            dc.l not_impl           ; 41 - TRAP #9
-            dc.l not_impl           ; 42 - TRAP #10
-            dc.l not_impl           ; 43 - TRAP #11
-            dc.l not_impl           ; 44 - TRAP #12
-            dc.l not_impl           ; 45 - TRAP #13
-            dc.l not_impl           ; 46 - TRAP #14
-            dc.l h_trap_15          ; 47 - TRAP #15
-            dc.l not_impl           ; 48 - Reserved
-            dc.l not_impl           ; 49 - Reserved
-            dc.l not_impl           ; 50 - Reserved
-            dc.l not_impl           ; 51 - Reserved
-            dc.l not_impl           ; 52 - Reserved
-            dc.l not_impl           ; 53 - Reserved
-            dc.l not_impl           ; 54 - Reserved
-            dc.l not_impl           ; 55 - Reserved
-            dc.l not_impl           ; 56 - Reserved
-            dc.l not_impl           ; 57 - Reserved
-            dc.l not_impl           ; 58 - Reserved
-            dc.l not_impl           ; 59 - Reserved
-            dc.l not_impl           ; 60 - Reserved
-            dc.l not_impl           ; 61 - Reserved
-            dc.l not_impl           ; 62 - Reserved
-            dc.l not_impl           ; 63 - Reserved
-            dc.l interrupt_x10      ; 64 - Interrupt 0x10 - SuperIO - PS/2 Keyboard
-            dc.l interrupt_x11      ; 65 - Interrupt 0x11 - A2560K Built-in Keyboard (Mo)
-            dc.l interrupt_x12      ; 66 - Interrupt 0x12 - SuperIO - PS/2 Mouse
-            dc.l interrupt_x13      ; 67 - Interrupt 0x13 - SuperIO - COM1
-            dc.l interrupt_x14      ; 68 - Interrupt 0x14 - SuperIO - COM2
-            dc.l interrupt_x15      ; 69 - Interrupt 0x15 - SuperIO - LPT1
-            dc.l interrupt_x16      ; 70 - Interrupt 0x16 - SuperIO - Floppy Disk Controller
-            dc.l interrupt_x17      ; 71 - Interrupt 0x17 - SuperIO - MIDI
-            dc.l interrupt_x18      ; 72 - Interrupt 0x18 - Timer 0
-            dc.l interrupt_x19      ; 73 - Interrupt 0x19 - Timer 1
-            dc.l interrupt_x1A      ; 74 - Interrupt 0x1A - Timer 2
-            dc.l interrupt_x1B      ; 76 - Interrupt 0x1B - Timer 3
-            dc.l interrupt_x1C      ; 75 - Interrupt 0x1C - Timer 4
-            dc.l interrupt_x1D      ; 77 - Interrupt 0x1D - Reserved
-            dc.l interrupt_x1E      ; 78 - Interrupt 0x1E - Reserved
-            dc.l interrupt_x1F      ; 79 - Interrupt 0x1F - Real Time Clock
+            .section reset
+            .long .sectionEnd stack  ; 00 - Initial stack pointer
+            .long coldboot           ; 01 - Initial PC
 
-            dc.l interrupt_x20      ; 80 - Interrupt 0x20 - IDE HDD Generated Interrupt
-            dc.l interrupt_x21      ; 81 - Interrupt 0x21 - SDCard Insert
-            dc.l interrupt_x22      ; 82 - Interrupt 0x22 - SDCard Controller
-            dc.l interrupt_x23      ; 83 - Interrupt 0x23 - Internal OPM
-            dc.l interrupt_x24      ; 84 - Interrupt 0x24 - External OPN2
-            dc.l interrupt_x25      ; 85 - Interrupt 0x25 - External OPL3
-            dc.l interrupt_x26      ; 86 - Interrupt 0x26 - Reserved
-            dc.l interrupt_x27      ; 87 - Interrupt 0x27 - Reserved
-            dc.l interrupt_x28      ; 88 - Interrupt 0x28 - Beatrix Interrupt 0
-            dc.l interrupt_x29      ; 89 - Interrupt 0x29 - Beatrix Interrupt 1
-            dc.l interrupt_x2A      ; 90 - Interrupt 0x2A - Beatrix Interrupt 2
-            dc.l interrupt_x2B      ; 91 - Interrupt 0x2B - Beatrix Interrupt 3
-            dc.l interrupt_x2C      ; 92 - Interrupt 0x2C - Reserved
-            dc.l interrupt_x2D      ; 93 - Interrupt 0x2D - DAC1 Playback Done Interrupt (48K)
-            dc.l interrupt_x2E      ; 94 - Interrupt 0x2E - Reserved
-            dc.l interrupt_x2F      ; 95 - Interrupt 0x2F - DAC0 Playback Done Interrupt (44.1K)
+            .section vectors
+            .long _handle_bus_err    ; 02 - Bus error
+            .long _handle_addr_err   ; 03 - Address error
+            .long _handle_inst_err   ; 04 - Illegal instruction
+            .long _handle_div0_err   ; 05 - Zero divide
+            .long _handle_chk_err    ; 06 - CHK instruction
+            .long _handle_trapv_err  ; 07 - TRAPV instruction
+            .long _handle_priv_err   ; 08 - Privilege error
+            .long not_impl           ; 09 - Trace
+            .long not_impl           ; 10 - Line 1010
+            .long not_impl           ; 11 - Line 1111
+            .long not_impl           ; 12 - Reserved
+            .long not_impl           ; 13 - Reserved
+            .long not_impl           ; 14 - Format error
+            .long not_impl           ; 15 - Uninitialized Interrupt Error
+            .long not_impl           ; 16 - Reserved
+            .long not_impl           ; 17 - Reserved
+            .long not_impl           ; 18 - Reserved
+            .long not_impl           ; 19 - Reserved
+            .long not_impl           ; 20 - Reserved
+            .long not_impl           ; 21 - Reserved
+            .long not_impl           ; 22 - Reserved
+            .long not_impl           ; 23 - Reserved
+            .long _handle_spurious   ; 24 - Spurious Interrupt
+            .long not_impl           ; 25 - Level 1 Interrupt Autovector
+            .long not_impl           ; 26 - Level 2 Interrupt Autovector
+            .long not_impl           ; 27 - Level 3 Interrupt Autovector
+            .long not_impl           ; 28 - Level 4 Interrupt Autovector
+            .long not_impl           ; 29 - Level 5 Interrupt Autovector
+            .long autovec2           ; 30 - Level 6 Interrupt Autovector
+            .long not_impl           ; 31 - Level 7 Interrupt Autovector
+            .long not_impl           ; 32 - TRAP #0
+            .long not_impl           ; 33 - TRAP #1
+            .long not_impl           ; 34 - TRAP #2
+            .long not_impl           ; 35 - TRAP #3
+            .long not_impl           ; 36 - TRAP #4
+            .long not_impl           ; 37 - TRAP #5
+            .long not_impl           ; 38 - TRAP #6
+            .long not_impl           ; 39 - TRAP #7
+            .long not_impl           ; 40 - TRAP #8
+            .long not_impl           ; 41 - TRAP #9
+            .long not_impl           ; 42 - TRAP #10
+            .long not_impl           ; 43 - TRAP #11
+            .long not_impl           ; 44 - TRAP #12
+            .long not_impl           ; 45 - TRAP #13
+            .long not_impl           ; 46 - TRAP #14
+            .long h_trap_15          ; 47 - TRAP #15
+            .long not_impl           ; 48 - Reserved
+            .long not_impl           ; 49 - Reserved
+            .long not_impl           ; 50 - Reserved
+            .long not_impl           ; 51 - Reserved
+            .long not_impl           ; 52 - Reserved
+            .long not_impl           ; 53 - Reserved
+            .long not_impl           ; 54 - Reserved
+            .long not_impl           ; 55 - Reserved
+            .long not_impl           ; 56 - Reserved
+            .long not_impl           ; 57 - Reserved
+            .long not_impl           ; 58 - Reserved
+            .long not_impl           ; 59 - Reserved
+            .long not_impl           ; 60 - Reserved
+            .long not_impl           ; 61 - Reserved
+            .long not_impl           ; 62 - Reserved
+            .long not_impl           ; 63 - Reserved
+            .long interrupt_x10      ; 64 - Interrupt 0x10 - SuperIO - PS/2 Keyboard
+            .long interrupt_x11      ; 65 - Interrupt 0x11 - A2560K Built-in Keyboard (Mo)
+            .long interrupt_x12      ; 66 - Interrupt 0x12 - SuperIO - PS/2 Mouse
+            .long interrupt_x13      ; 67 - Interrupt 0x13 - SuperIO - COM1
+            .long interrupt_x14      ; 68 - Interrupt 0x14 - SuperIO - COM2
+            .long interrupt_x15      ; 69 - Interrupt 0x15 - SuperIO - LPT1
+            .long interrupt_x16      ; 70 - Interrupt 0x16 - SuperIO - Floppy Disk Controller
+            .long interrupt_x17      ; 71 - Interrupt 0x17 - SuperIO - MIDI
+            .long interrupt_x18      ; 72 - Interrupt 0x18 - Timer 0
+            .long interrupt_x19      ; 73 - Interrupt 0x19 - Timer 1
+            .long interrupt_x1A      ; 74 - Interrupt 0x1A - Timer 2
+            .long interrupt_x1B      ; 76 - Interrupt 0x1B - Timer 3
+            .long interrupt_x1C      ; 75 - Interrupt 0x1C - Timer 4
+            .long interrupt_x1D      ; 77 - Interrupt 0x1D - Reserved
+            .long interrupt_x1E      ; 78 - Interrupt 0x1E - Reserved
+            .long interrupt_x1F      ; 79 - Interrupt 0x1F - Real Time Clock
 
-            code
+            .long interrupt_x20      ; 80 - Interrupt 0x20 - IDE HDD Generated Interrupt
+            .long interrupt_x21      ; 81 - Interrupt 0x21 - SDCard Insert
+            .long interrupt_x22      ; 82 - Interrupt 0x22 - SDCard Controller
+            .long interrupt_x23      ; 83 - Interrupt 0x23 - Internal OPM
+            .long interrupt_x24      ; 84 - Interrupt 0x24 - External OPN2
+            .long interrupt_x25      ; 85 - Interrupt 0x25 - External OPL3
+            .long interrupt_x26      ; 86 - Interrupt 0x26 - Reserved
+            .long interrupt_x27      ; 87 - Interrupt 0x27 - Reserved
+            .long interrupt_x28      ; 88 - Interrupt 0x28 - Beatrix Interrupt 0
+            .long interrupt_x29      ; 89 - Interrupt 0x29 - Beatrix Interrupt 1
+            .long interrupt_x2A      ; 90 - Interrupt 0x2A - Beatrix Interrupt 2
+            .long interrupt_x2B      ; 91 - Interrupt 0x2B - Beatrix Interrupt 3
+            .long interrupt_x2C      ; 92 - Interrupt 0x2C - Reserved
+            .long interrupt_x2D      ; 93 - Interrupt 0x2D - DAC1 Playback Done Interrupt (48K)
+            .long interrupt_x2E      ; 94 - Interrupt 0x2E - Reserved
+            .long interrupt_x2F      ; 95 - Interrupt 0x2F - DAC0 Playback Done Interrupt (44.1K)
 
-coldboot:   lea ___STACK,sp
+            .section code
+
+coldboot:   lea .sectionEnd stack,sp
             bsr _int_disable_all
 
             ; Clear BSS segment
-            lea	   ___BSSSTART,a0
-            move.l #___BSSSIZE,d0
+            lea	   .sectionStart bss,a0
+            move.l #.sectionSize bss,d0
             beq.s  callmain
 
             move.l #0,d1
@@ -149,15 +160,7 @@ ___exit:
             bra	___exit
 
 ;
-; Autovector #1: Used by VICKY III Channel B interrupts
-;
-autovec1:   movem.l d0-d7/a0-a6,-(a7)
-            jsr _int_vicky_channel_b        ; Call the dispatcher for Channel B interrupts
-            movem.l (a7)+,d0-d7/a0-a6
-            rte
-
-;
-; Autovector #1: Used by VICKY III Channel A interrupts
+; Autovector #2: Used by VICKY III Channel A interrupts
 ;
 autovec2:   movem.l d0-d7/a0-a6,-(a7)
             jsr _int_vicky_channel_a        ; Call the dispatcher for Channel A interrupts
@@ -172,7 +175,7 @@ autovec2:   movem.l d0-d7/a0-a6,-(a7)
 ;
 int_dispatch:
             lea _g_int_handler,a0           ; Look in the interrupt handler table
-            move.l (0,a0,d0),d0             ; Get the address of the handler
+            move.l (0,a0,d0.w),d0               ; Get the address of the handler
             beq intdis_end                  ; If there isn't one, just return
             movea.l d0,a0
             jsr (a0)                        ; If there is, call it.
@@ -190,54 +193,56 @@ intdis_end: movem.l (a7)+,d0-d7/a0-a6       ; Restore affected registers
             ; 5. Restore all registers
             ; 6. Return to the interrupted code
             ;
-            macro inthandler                ; Individual interrupt handler. Parameters: interrupt number, interrupt mask, pending register
-            movem.l d0-d7/a0-a6,-(a7)       ; Save affected registers
-            move.w #\2,(\3)                 ; Clear the flag for the interrupt
-            move.w #(\1<<2),d0              ; Get the offset to interrupt 0x11
+inthandler  .macro irq_no,irq_mask,pending_reg
+; Individual interrupt handler. Parameters: interrupt number, interrupt mask, pending register
+            movem.l d0-d7/a0-a6,-(a7)        ; Save affected registers
+            move.w #\irq_mask,(\pending_reg) ; Clear the flag for the interrupt
+            move.w #(\irq_no<<2),d0          ; Get the offset to interrupt 0x11
             bra int_dispatch
-            endm
+            .endm
 
 ;
 ; Group 1 Interrupt Handlers
 ;
 
-interrupt_x10:  inthandler $10, $0001, PENDING_GRP1     ; Interrupt Vector 0x10 -- SuperIO Keyboard
-interrupt_x11:  inthandler $11, $0002, PENDING_GRP1     ; Interrupt Vector 0x11 -- A2560K "Mo" keyboard
-interrupt_x12:  inthandler $12, $0004, PENDING_GRP1     ; Interrupt Vector 0x12 -- SuperIO Mouse
-interrupt_x13:  inthandler $13, $0008, PENDING_GRP1     ; Interrupt Vector 0x13 -- COM1
-interrupt_x14:  inthandler $14, $0010, PENDING_GRP1     ; Interrupt Vector 0x14 -- COM2
-interrupt_x15:  inthandler $15, $0020, PENDING_GRP1     ; Interrupt Vector 0x15 -- LPT1
-interrupt_x16:  inthandler $16, $0040, PENDING_GRP1     ; Interrupt Vector 0x16 -- Floppy drive controller
-interrupt_x17:  inthandler $17, $0080, PENDING_GRP1     ; Interrupt Vector 0x17 -- MIDI
-interrupt_x18:  inthandler $18, $0100, PENDING_GRP1     ; Interrupt Vector 0x18 -- Timer 0
-interrupt_x19:  inthandler $19, $0200, PENDING_GRP1     ; Interrupt Vector 0x19 -- Timer 1
-interrupt_x1A:  inthandler $1A, $0400, PENDING_GRP1     ; Interrupt Vector 0x1A -- Timer 2
-interrupt_x1B:  inthandler $1B, $0800, PENDING_GRP1     ; Interrupt Vector 0x1B -- Timer 3
-interrupt_x1C:  inthandler $1C, $1000, PENDING_GRP1     ; Interrupt Vector 0x1C -- Timer 4
-interrupt_x1D:  inthandler $1D, $2000, PENDING_GRP1     ; Interrupt Vector 0x1D -- Reserved
-interrupt_x1E:  inthandler $1E, $4000, PENDING_GRP1     ; Interrupt Vector 0x1E -- Reserved
-interrupt_x1F:  inthandler $1F, $8000, PENDING_GRP1     ; Interrupt Vector 0x1F -- Real Time Clock
+interrupt_x10:  inthandler 0x10,0x0001,PENDING_GRP1
+				; Interrupt Vector 0x10 -- SuperIO Keyboard
+interrupt_x11:  inthandler 0x11, 0x0002, PENDING_GRP1     ; Interrupt Vector 0x11 -- A2560K "Mo" keyboard
+interrupt_x12:  inthandler 0x12, 0x0004, PENDING_GRP1     ; Interrupt Vector 0x12 -- SuperIO Mouse
+interrupt_x13:  inthandler 0x13, 0x0008, PENDING_GRP1     ; Interrupt Vector 0x13 -- COM1
+interrupt_x14:  inthandler 0x14, 0x0010, PENDING_GRP1     ; Interrupt Vector 0x14 -- COM2
+interrupt_x15:  inthandler 0x15, 0x0020, PENDING_GRP1     ; Interrupt Vector 0x15 -- LPT1
+interrupt_x16:  inthandler 0x16, 0x0040, PENDING_GRP1     ; Interrupt Vector 0x16 -- Floppy drive controller
+interrupt_x17:  inthandler 0x17, 0x0080, PENDING_GRP1     ; Interrupt Vector 0x17 -- MIDI
+interrupt_x18:  inthandler 0x18, 0x0100, PENDING_GRP1     ; Interrupt Vector 0x18 -- Timer 0
+interrupt_x19:  inthandler 0x19, 0x0200, PENDING_GRP1     ; Interrupt Vector 0x19 -- Timer 1
+interrupt_x1A:  inthandler 0x1A, 0x0400, PENDING_GRP1     ; Interrupt Vector 0x1A -- Timer 2
+interrupt_x1B:  inthandler 0x1B, 0x0800, PENDING_GRP1     ; Interrupt Vector 0x1B -- Timer 3
+interrupt_x1C:  inthandler 0x1C, 0x1000, PENDING_GRP1     ; Interrupt Vector 0x1C -- Timer 4
+interrupt_x1D:  inthandler 0x1D, 0x2000, PENDING_GRP1     ; Interrupt Vector 0x1D -- Reserved
+interrupt_x1E:  inthandler 0x1E, 0x4000, PENDING_GRP1     ; Interrupt Vector 0x1E -- Reserved
+interrupt_x1F:  inthandler 0x1F, 0x8000, PENDING_GRP1     ; Interrupt Vector 0x1F -- Real Time Clock
 
 ;
 ; Group 2 Interrupt Handlers
 ;
 
-interrupt_x20:  inthandler $20, $0001, PENDING_GRP2     ; Interrupt Vector 0x20 -- IDE HDD Generated Interrupt
-interrupt_x21:  inthandler $21, $0002, PENDING_GRP2     ; Interrupt Vector 0x21 -- SDCard Insert
-interrupt_x22:  inthandler $22, $0004, PENDING_GRP2     ; Interrupt Vector 0x22 -- SDCard Controller
-interrupt_x23:  inthandler $23, $0008, PENDING_GRP2     ; Interrupt Vector 0x23 -- Internal OPM
-interrupt_x24:  inthandler $24, $0010, PENDING_GRP2     ; Interrupt Vector 0x24 -- External OPN2
-interrupt_x25:  inthandler $25, $0020, PENDING_GRP2     ; Interrupt Vector 0x25 -- External OPL3
-interrupt_x26:  inthandler $26, $0040, PENDING_GRP2     ; Interrupt Vector 0x26 -- Reserved
-interrupt_x27:  inthandler $27, $0080, PENDING_GRP2     ; Interrupt Vector 0x27 -- Reserved
-interrupt_x28:  inthandler $28, $0100, PENDING_GRP2     ; Interrupt Vector 0x28 -- Beatrix Interrupt 0
-interrupt_x29:  inthandler $29, $0200, PENDING_GRP2     ; Interrupt Vector 0x29 -- Beatrix Interrupt 1
-interrupt_x2A:  inthandler $2A, $0400, PENDING_GRP2     ; Interrupt Vector 0x2A -- Beatrix Interrupt 2
-interrupt_x2B:  inthandler $2B, $0800, PENDING_GRP2     ; Interrupt Vector 0x2B -- Beatrix Interrupt 3
-interrupt_x2C:  inthandler $2C, $1000, PENDING_GRP2     ; Interrupt Vector 0x2C -- Reserved
-interrupt_x2D:  inthandler $2D, $2000, PENDING_GRP2     ; Interrupt Vector 0x2D -- DAC1 Playback Done Interrupt (48K)
-interrupt_x2E:  inthandler $2E, $4000, PENDING_GRP2     ; Interrupt Vector 0x2E -- Reserved
-interrupt_x2F:  inthandler $2F, $8000, PENDING_GRP2     ; Interrupt Vector 0x2F -- DAC0 Playback Done Interrupt (44.1K)
+interrupt_x20:  inthandler 0x20, 0x0001, PENDING_GRP2     ; Interrupt Vector 0x20 -- IDE HDD Generated Interrupt
+interrupt_x21:  inthandler 0x21, 0x0002, PENDING_GRP2     ; Interrupt Vector 0x21 -- SDCard Insert
+interrupt_x22:  inthandler 0x22, 0x0004, PENDING_GRP2     ; Interrupt Vector 0x22 -- SDCard Controller
+interrupt_x23:  inthandler 0x23, 0x0008, PENDING_GRP2     ; Interrupt Vector 0x23 -- Internal OPM
+interrupt_x24:  inthandler 0x24, 0x0010, PENDING_GRP2     ; Interrupt Vector 0x24 -- External OPN2
+interrupt_x25:  inthandler 0x25, 0x0020, PENDING_GRP2     ; Interrupt Vector 0x25 -- External OPL3
+interrupt_x26:  inthandler 0x26, 0x0040, PENDING_GRP2     ; Interrupt Vector 0x26 -- Reserved
+interrupt_x27:  inthandler 0x27, 0x0080, PENDING_GRP2     ; Interrupt Vector 0x27 -- Reserved
+interrupt_x28:  inthandler 0x28, 0x0100, PENDING_GRP2     ; Interrupt Vector 0x28 -- Beatrix Interrupt 0
+interrupt_x29:  inthandler 0x29, 0x0200, PENDING_GRP2     ; Interrupt Vector 0x29 -- Beatrix Interrupt 1
+interrupt_x2A:  inthandler 0x2A, 0x0400, PENDING_GRP2     ; Interrupt Vector 0x2A -- Beatrix Interrupt 2
+interrupt_x2B:  inthandler 0x2B, 0x0800, PENDING_GRP2     ; Interrupt Vector 0x2B -- Beatrix Interrupt 3
+interrupt_x2C:  inthandler 0x2C, 0x1000, PENDING_GRP2     ; Interrupt Vector 0x2C -- Reserved
+interrupt_x2D:  inthandler 0x2D, 0x2000, PENDING_GRP2     ; Interrupt Vector 0x2D -- DAC1 Playback Done Interrupt (48K)
+interrupt_x2E:  inthandler 0x2E, 0x4000, PENDING_GRP2     ; Interrupt Vector 0x2E -- Reserved
+interrupt_x2F:  inthandler 0x2F, 0x8000, PENDING_GRP2     ; Interrupt Vector 0x2F -- DAC0 Playback Done Interrupt (44.1K)
 
 ;
 ; Unimplemented Exception Handler -- just return
@@ -248,22 +253,22 @@ not_impl:   rte
 ; Enable all interrupts
 ;
 _int_enable_all:    move.w SR,d0        ; Save the old level for return
-                    andi.w #$0700,d0
+                    andi.w #0x0700,d0
                     lsr.w #8,d0
                     ext.l d0
 
-                    andi.w #$F8FF,SR    ; Clear the level
+                    andi.w #0xF8FF,SR    ; Clear the level
                     rts
 
 ;
 ; Disable all interrupts
 ;
 _int_disable_all:   move.w SR,d0        ; Save the old level for return
-                    andi.w #$0700,d0
+                    andi.w #0x0700,d0
                     lsr.w #8,d0
                     ext.l d0
 
-                    ori.w #$0700,SR     ; Set the level to 7
+                    ori.w #0x0700,SR     ; Set the level to 7
                     rts
 
 ;
@@ -274,7 +279,7 @@ _int_restore:       move.w (4,sp),d0    ; Get the priority into d0
                     lsl.w #8,d0
 
                     move.w sr,d1        ; Get the current SR into d1
-                    andi.w #$F8FF,d1    ; Clear the old priority
+                    andi.w #0xF8FF,d1    ; Clear the old priority
                     or.w d0,d1          ; And set it to the current
                     move.w d1,sr        ; And set the level
 
@@ -402,7 +407,7 @@ _call_user:
             move.l (8,a7),a1            ; Get the pointer to the process's stack
             move.l (12,a7),d0           ; Get the number of parameters passed
             move.l (16,a7),a2           ; Get the pointer to the parameters
-            ; andi #$dfff,sr              ; Drop into user mode
+            ; andi #0xdfff,sr              ; Drop into user mode
             movea.l a1,a7               ; Set the stack
 
             move.l a2,-(a7)             ; Push the parameters list
@@ -410,6 +415,6 @@ _call_user:
             jsr (a0)
 
 _restart_cli:
-            lea ___STACK,sp
+            lea .sectionEnd stack,sp
             jsr _cli_rerepl
             bra _restart_cli

@@ -65,10 +65,9 @@ short bdev_init(short dev)  {
         p_dev_block bdev = &g_block_devs[dev];
         if (bdev->number == dev) {
             return bdev->init();
-        } else {
-            return DEV_ERR_BADDEV;
-        }
+        };
     }
+    return DEV_ERR_BADDEV;
 }
 
 //
@@ -90,10 +89,9 @@ short bdev_read(short dev, long lba, unsigned char * buffer, short size) {
         p_dev_block bdev = &g_block_devs[dev];
         if (bdev->number == dev) {
             return bdev->read(lba, buffer, size);
-        } else {
-            return DEV_ERR_BADDEV;
         }
     }
+    return DEV_ERR_BADDEV;
 }
 
 //
@@ -115,10 +113,9 @@ short bdev_write(short dev, long lba, const unsigned char * buffer, short size) 
         p_dev_block bdev = &g_block_devs[dev];
         if (bdev->number == dev) {
             return bdev->write(lba, buffer, size);
-        } else {
-            return DEV_ERR_BADDEV;
         }
     }
+    return DEV_ERR_BADDEV;
 }
 
 //
@@ -137,10 +134,9 @@ short bdev_status(short dev) {
         p_dev_block bdev = &g_block_devs[dev];
         if (bdev->number == dev) {
             return bdev->status();
-        } else {
-            return DEV_ERR_BADDEV;
         }
     }
+    return DEV_ERR_BADDEV;
 }
 
 //
@@ -159,10 +155,9 @@ short bdev_flush(short dev) {
         p_dev_block bdev = &g_block_devs[dev];
         if (bdev->number == dev) {
             return bdev->flush();
-        } else {
-            return DEV_ERR_BADDEV;
         }
     }
+    return DEV_ERR_BADDEV;
 }
 
 //
@@ -184,8 +179,7 @@ short bdev_ioctrl(short dev, short command, unsigned char * buffer, short size) 
         p_dev_block bdev = &g_block_devs[dev];
         if (bdev->number == dev) {
             return bdev->ioctrl(command, buffer, size);
-        } else {
-            return DEV_ERR_BADDEV;
         }
     }
+    return DEV_ERR_BADDEV;
 }

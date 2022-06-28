@@ -201,7 +201,7 @@ unsigned long syscall_dispatch(int32_t function, int32_t param0, int32_t param1,
             /* Process and Memory functions */
             switch (function) {
                 case KFN_RUN:
-                    return proc_run((char *)param0, (int)param1, (char *)param2);
+                    return proc_run((char *)param0, (int)param1, (char **)param2);
 
                 case KFN_MEM_GET_RAMTOP:
                     return mem_get_ramtop();
