@@ -1,0 +1,6 @@
+# Remapping of SREC files for the A2560U to build a flash file
+# Each line is a range of memory address:
+#   <start address in hex>,<end address in hex>,<new start address in hex>
+390000,3FFFFF,020000
+380000,38FFFF,010000
+000000,00FFFF,010000
