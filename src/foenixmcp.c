@@ -137,10 +137,12 @@ void initialize() {
 
     /* Initialize the text channels */
     txt_init();
+#if MODEL == MODEL_FOENIX_A2560K
     txt_a2560k_a_install();
     txt_a2560k_b_install();
     txt_init_screen(1);
     txt_init_screen(0);
+#endif
     log(LOG_INFO, "Text system initialized");
 
     /* Initialize the indicators */

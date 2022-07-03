@@ -1,23 +1,19 @@
-            .extern ___main
-            .extern _cli_rerepl
-            .extern _panic
-            .extern _panic_number
-            .extern _panic_pc
-            .extern _panic_address	
-            .extern _syscall_dispatch
-	    .extern _g_int_handler
-            .extern _int_vicky_channel_a
+            .extern main
+            .extern cli_rerepl
+            .extern panic
+            .extern panic_number
+            .extern panic_pc
+            .extern panic_address	
+            .extern syscall_dispatch
+	        .extern g_int_handler
+            .extern int_vicky_channel_a
 
-            .public _syscall
-            .public ___exit
-            .public _int_enable_all
-            .public _int_disable_all
-            .public _call_user
-            .public _restart_cli
-
-
-            .section bss,bss
-            .section stack
+            .public syscall
+            .public int_enable_all
+            .public int_disable_all
+            .public call_user
+            .public restart_cli
+            .public h_trap_15
 
 ;
 ; Interrupt registers for A2560U and U+
@@ -25,11 +21,6 @@
 PENDING_GRP0 .equ 0x00B00100
 PENDING_GRP1 .equ 0x00B00102
 PENDING_GRP2 .equ 0x00B00104
-
-
-            .section reset
-            .long .sectionEnd stack  ; 00 - Initial stack pointer
-            .long coldboot           ; 01 - Initial PC
 
             .section vectors
             .long _handle_bus_err    ; 02 - Bus error
@@ -60,7 +51,7 @@ PENDING_GRP2 .equ 0x00B00104
             .long not_impl           ; 27 - Level 3 Interrupt Autovector
             .long not_impl           ; 28 - Level 4 Interrupt Autovector
             .long not_impl           ; 29 - Level 5 Interrupt Autovector
-            .long autovec2           ; 30 - Level 6 Interrupt Autovector
+            .long not_impl           ; 30 - Level 6 Interrupt Autovector
             .long not_impl           ; 31 - Level 7 Interrupt Autovector
             .long not_impl           ; 32 - TRAP #0
             .long not_impl           ; 33 - TRAP #1
@@ -128,44 +119,8 @@ PENDING_GRP2 .equ 0x00B00104
             .long interrupt_x2E      ; 94 - Interrupt 0x2E - Reserved
             .long interrupt_x2F      ; 95 - Interrupt 0x2F - DAC0 Playback Done Interrupt (44.1K)
 
+            .section stack
             .section code
-
-coldboot:   lea .sectionEnd stack,sp
-            bsr _int_disable_all
-
-            ; Clear BSS segment
-            lea	   .sectionStart bss,a0
-            move.l #.sectionSize bss,d0
-            beq.s  callmain
-
-            move.l #0,d1
-
-clrloop:    ; We don't use clr.l because it's a read-modify-write operation
-            ; that is not yet supported by the FPGA's bus logic for now.
-            ; So we use a move instead.
-            ; clr.l  (a0)+
-            move.l d1,(a0)+
-            subq.l #4,d0
-            bne.s  clrloop
-
-            ; Set TRAP #15 vector handler
-            lea h_trap_15,a0        ; Address of the handler
-            move.l #(13+32)<<2,a1   ; TRAP#15 vector address
-            move.l a0,(a1)          ; Set the vector
-
-callmain:   jsr ___main             ; call __main to transfer to the C code
-
-;	endless loop; can be changed accordingly
-___exit:
-            bra	___exit
-
-;
-; Autovector #2: Used by VICKY III Channel A interrupts
-;
-autovec2:   movem.l d0-d7/a0-a6,-(a7)
-            jsr _int_vicky_channel_a        ; Call the dispatcher for Channel A interrupts
-            movem.l (a7)+,d0-d7/a0-a6
-            rte
 
 ;
 ; Given the interrupt's offset in the interrupt handler table, fetch the pointer
@@ -174,7 +129,7 @@ autovec2:   movem.l d0-d7/a0-a6,-(a7)
 ; Assumes registers D0-D7, A0-A6 have been saved to the stack with MOVEM
 ;
 int_dispatch:
-            lea _g_int_handler,a0           ; Look in the interrupt handler table
+            lea g_int_handler,a0           ; Look in the interrupt handler table
             move.l (0,a0,d0.w),d0               ; Get the address of the handler
             beq intdis_end                  ; If there isn't one, just return
             movea.l d0,a0
@@ -252,7 +207,7 @@ not_impl:   rte
 ;
 ; Enable all interrupts
 ;
-_int_enable_all:    move.w SR,d0        ; Save the old level for return
+int_enable_all:    move.w SR,d0        ; Save the old level for return
                     andi.w #0x0700,d0
                     lsr.w #8,d0
                     ext.l d0
@@ -263,7 +218,7 @@ _int_enable_all:    move.w SR,d0        ; Save the old level for return
 ;
 ; Disable all interrupts
 ;
-_int_disable_all:   move.w SR,d0        ; Save the old level for return
+int_disable_all:   move.w SR,d0        ; Save the old level for return
                     andi.w #0x0700,d0
                     lsr.w #8,d0
                     ext.l d0
@@ -295,73 +250,73 @@ _int_restore:       move.w (4,sp),d0    ; Get the priority into d0
 ;
 
 _handle_bus_err:
-                    lea _panic_number,a0
-                    lea _panic_pc,a1
-                    lea _panic_address,a2
+                    lea panic_number,a0
+                    lea panic_pc,a1
+                    lea panic_address,a2
                     move.w #2,(a0)
                     move.l (10,a7),(a1)
                     move.l (2,a7),(a2)
                     bra call_panic
 
 _handle_addr_err:
-                    lea _panic_number,a0
-                    lea _panic_pc,a1
-                    lea _panic_address,a2
+                    lea panic_number,a0
+                    lea panic_pc,a1
+                    lea panic_address,a2
                     move.w #3,(a0)
                     move.l (10,a7),(a1)
                     move.l (2,a7),(a2)
                     bra call_panic
 
 _handle_inst_err:
-                    lea _panic_number,a0
-                    lea _panic_pc,a1
+                    lea panic_number,a0
+                    lea panic_pc,a1
                     move.w #4,(a0)
                     move.l (2,a7),(a1)
                     bra call_panic
 
 _handle_div0_err:
-                    lea _panic_number,a0
-                    lea _panic_pc,a1
+                    lea panic_number,a0
+                    lea panic_pc,a1
                     move.w #5,(a0)
                     move.l (2,a7),(a1)
                     bra call_panic
 
 _handle_chk_err:
-                    lea _panic_number,a0
-                    lea _panic_pc,a1
+                    lea panic_number,a0
+                    lea panic_pc,a1
                     move.w #6,(a0)
                     move.l (2,a7),(a1)
                     bra call_panic
 
 _handle_trapv_err:
-                    lea _panic_number,a0
-                    lea _panic_pc,a1
+                    lea panic_number,a0
+                    lea panic_pc,a1
                     move.w #7,(a0)
                     move.l (2,a7),(a1)
                     bra call_panic
 
 _handle_priv_err:
-                    lea _panic_number,a0
-                    lea _panic_pc,a1
+                    lea panic_number,a0
+                    lea panic_pc,a1
                     move.w #8,(a0)
                     move.l (2,a7),(a1)
                     bra call_panic
 
 _handle_spurious:
-                    lea _panic_number,a0
-                    lea _panic_pc,a1
+                    lea panic_number,a0
+                    lea panic_pc,a1
                     move.w #24,(a0)
                     move.l (2,a7),(a1)
                     bra call_panic
 
-call_panic:         jsr _panic
+call_panic:         jsr panic
 panic_lock:         bra panic_lock
 
 ;
 ; Function to make a system call based on the number of the system function:
 ; int32_t syscall(int32_t number, int32_t p0, int32_t p1, int32_t p2, int32_t p3, int32_t p4, int32_t p5)
 ;
-_syscall:
+syscall:
             movem.l d1-d7,-(sp)         ; Save caller's registers
             move.l (56,sp),d6           ; Parameter 5 to D6
             move.l (52,sp),d5           ; Parameter 4 to D5
@@ -388,7 +343,7 @@ h_trap_15:
             move.l d1,-(sp)
             move.l d0,-(sp)
 
-            jsr _syscall_dispatch       ; Call the C routine to do the dispatch
+            jsr syscall_dispatch       ; Call the C routine to do the dispatch
                                         ; Note: the C routine depends upon the register push order
 
             add.l #28,sp                ; Remove parameters from the stack
@@ -402,7 +357,7 @@ h_trap_15:
 ; a0 = pointer to code to execute
 ; a1 = location to set user stack pointer
 ;
-_call_user:
+call_user:
             move.l (4,a7),a0            ; Get the pointer to the code to start
             move.l (8,a7),a1            ; Get the pointer to the process's stack
             move.l (12,a7),d0           ; Get the number of parameters passed
@@ -414,7 +369,7 @@ _call_user:
             move.l d0,-(a7)             ; Push the parameter count
             jsr (a0)
 
-_restart_cli:
+restart_cli:
             lea .sectionEnd stack,sp
-            jsr _cli_rerepl
-            bra _restart_cli
+            jsr cli_rerepl
+            bra restart_cli
