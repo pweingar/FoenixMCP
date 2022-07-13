@@ -9,6 +9,11 @@
 #ifndef __PROC_H
 #define __PROC_H
 
+/**
+ * Initialize the procedure sub-system
+ */
+extern void proc_init();
+
 /*
  * Start a user mode process
  *

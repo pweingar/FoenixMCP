@@ -126,8 +126,13 @@ void initialize() {
     /* Set the logging level */
     log_setlevel(LOG_FATAL);
 
-    /* Initialize the memory system */
+    /* Initialize the memory system
+     * NOTE: this is hard coded because I haven't figured out how to get VBCC to fill this in
+     */
     mem_init(0x3d0000);
+
+    /* Initialize the procedure system */
+    proc_init();
 
     // /* Hide the mouse */
     mouse_set_visible(0);
