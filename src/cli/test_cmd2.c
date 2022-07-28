@@ -60,12 +60,12 @@ short cli_test_ps2(short channel, int argc, const char * argv[]) {
     unsigned short scancode = 0;
 
     sprintf(message, "Press keys on a PS/2 keyboard... CTRL-C to quit.\n");
-    sys_chan_write(channel, message, strlen(message));
+    sys_chan_write(channel, (unsigned char*)message, strlen(message));
 
     do {
         if (scancode != 0) {
             sprintf(message, "Scan code: %04x\n", scancode);
-            sys_chan_write(channel, message, strlen(message));
+            sys_chan_write(channel, (unsigned char*)message, strlen(message));
         }
     } while (sys_chan_ioctrl(channel, 0x05, 0, 0) == 0);
 
@@ -83,7 +83,7 @@ short cli_test_joystick(short channel, int argc, const char * argv[]) {
     unsigned short scancode = 0;
 
     sprintf(message, "Plug a joystick into either port 0 or port 1... ESC to quit.\n");
-    sys_chan_write(channel, message, strlen(message));
+    sys_chan_write(channel, (unsigned char*)message, strlen(message));
 
     /* Make sure we're in Atari joystick mode */
     *game_ctrl_port = 0;
@@ -93,7 +93,7 @@ short cli_test_joystick(short channel, int argc, const char * argv[]) {
         if (joy_state != old_joy_state) {
             old_joy_state = joy_state;
             sprintf(message, "Joystick: %08X\n", joy_state);
-            sys_chan_write(channel, message, strlen(message));
+            sys_chan_write(channel, (unsigned char*)message, strlen(message));
         }
 
         scancode = sys_kbd_scancode();
@@ -129,7 +129,7 @@ short cli_test_gamepad(short channel, int argc, const char * argv[]) {
     }
 
     sprintf(message, "Testing SNES gamepad port %d... ESC to quit.\n", (short)port);
-    sys_chan_write(channel, message, strlen(message));
+    sys_chan_write(channel, (unsigned char*)message, strlen(message));
 
     /* Make sure we're in SNES mode */
     if (port == 0) {
@@ -161,7 +161,7 @@ short cli_test_gamepad(short channel, int argc, const char * argv[]) {
             old_game_state_0 = game_state_0;
             old_game_state_1 = game_state_1;
             sprintf(message, "Gamepads: %08X %08X\n", game_state_0, game_state_1);
-            sys_chan_write(channel, message, strlen(message));
+            sys_chan_write(channel, (unsigned char*)message, strlen(message));
         }
 
         scancode = sys_kbd_scancode();
@@ -232,7 +232,7 @@ short cli_test_uart(short channel, int argc, const char * argv[]) {
     sprintf(buffer, "Serial port loopback test of COM%d at 0x%08X...\n", cdev - CDEV_COM1 + 1, uart_address);
     print(channel, buffer);
 
-    uart = sys_chan_open(cdev, "9600,8,1,NONE", 0);
+    uart = sys_chan_open(cdev, (unsigned char*)"9600,8,1,NONE", 0);
     if (uart >= 0) {
         sprintf(buffer, "COM%d: 9600, no parity, 1 stop bit, 8 data bits\nPress ESC to finish.\n", cdev - CDEV_COM1 + 1);
         print(channel, buffer);
@@ -287,14 +287,14 @@ short cli_test_rtc(short channel, int argc, const char * argv[]) {
     ticks = sys_time_jiffies();
 
     sprintf(buffer, "Waiting for updated ticks starting from %ld\n", ticks);
-    sys_chan_write(channel, buffer, strlen(buffer));
+    sys_chan_write(channel, (unsigned char*)buffer, strlen(buffer));
 
     for (;;) {
         if (ticks < sys_time_jiffies()) {
             /* We got the periodic interrupt */
 
             sprintf(buffer, "Tick! %ld\n", ticks);
-            sys_chan_write(channel, buffer, strlen(buffer));
+            sys_chan_write(channel, (unsigned char*)buffer, strlen(buffer));
 
             ticks = sys_time_jiffies();
         }
@@ -371,14 +371,14 @@ short cli_test_recalibrate(short screen, int argc, const char * argv[]) {
     bdev_ioctrl(BDEV_FDC, FDC_CTRL_MOTOR_ON, 0, 0);
 
     sprintf(buffer, "Recalibrating the floppy drive\n");
-    sys_chan_write(screen, buffer, strlen(buffer));
+    sys_chan_write(screen, (unsigned char*)buffer, strlen(buffer));
 
     if (fdc_recalibrate() == 0) {
         sprintf(buffer, "Success\n");
-        sys_chan_write(screen, buffer, strlen(buffer));
+        sys_chan_write(screen, (unsigned char*)buffer, strlen(buffer));
     } else {
         sprintf(buffer, "Failed\n");
-        sys_chan_write(screen, buffer, strlen(buffer));
+        sys_chan_write(screen, (unsigned char*)buffer, strlen(buffer));
     }
 
     bdev_ioctrl(BDEV_FDC, FDC_CTRL_MOTOR_OFF, 0, 0);
@@ -396,14 +396,14 @@ short cli_test_seek(short screen, int argc, const char * argv[]) {
     cylinder = (unsigned char)cli_eval_number(argv[1]);
 
     sprintf(buffer, "Seeking to %d\n", (short)cylinder);
-    sys_chan_write(screen, buffer, strlen(buffer));
+    sys_chan_write(screen, (unsigned char*)buffer, strlen(buffer));
 
     if (fdc_seek(cylinder) == 0) {
         sprintf(buffer, "Success\n");
-        sys_chan_write(screen, buffer, strlen(buffer));
+        sys_chan_write(screen, (unsigned char*)buffer, strlen(buffer));
     } else {
         sprintf(buffer, "Failed\n");
-        sys_chan_write(screen, buffer, strlen(buffer));
+        sys_chan_write(screen, (unsigned char*)buffer, strlen(buffer));
     }
 
     bdev_ioctrl(BDEV_FDC, FDC_CTRL_MOTOR_OFF, 0, 0);
@@ -461,7 +461,7 @@ short cli_test_fdc(short screen, int argc, const char * argv[]) {
         result = bdev_init(BDEV_FDC);
         if (result != 0) {
             sprintf(buffer, "Could not initialize FDC: %s\n", sys_err_message(result));
-            sys_chan_write(screen, buffer, strlen(buffer));
+            sys_chan_write(screen, (unsigned char*)buffer, strlen(buffer));
             return result;
         }
 
@@ -543,7 +543,7 @@ short cli_test_create(short screen, int argc, const char * argv[]) {
         short channel = fsys_open(argv[1], FA_CREATE_NEW | FA_WRITE);
         if (channel >= 0) {
             char * message = "Hello, world!\n";
-            n = chan_write(channel, message, strlen(message));
+            n = chan_write(channel, (unsigned char*)message, strlen(message));
             if (n <= 0) {
                 err_print(screen, "Unable to write to file", n);
             }
@@ -568,9 +568,9 @@ short cli_test_lpt(short screen, int argc, const char * argv[]) {
     unsigned char scancode;
 
     sprintf(message, "Test parallel port:\nF1: DATA='B'  F2: DATA='A'  F3: STRB=1  F4: STRB=0\n");
-    sys_chan_write(screen, message, strlen(message));
+    sys_chan_write(screen, (unsigned char*)message, strlen(message));
     sprintf(message, "F5: INIT=1  F6: INIT=0  F7: SEL=1  F8: SEL=0\nESC: Quit\n");
-    sys_chan_write(screen, message, strlen(message));
+    sys_chan_write(screen, (unsigned char*)message, strlen(message));
 
     unsigned char ctrl = 0;
     *LPT_CTRL_PORT = ctrl;
@@ -659,7 +659,7 @@ short cmd_test_print(short screen, int argc, const char * argv[]) {
         print(screen, "Sending test patterns to printer (ESC to quit)...\n");
 
         while (scancode != 0x01) {
-            short result = sys_chan_write(lpt, test_pattern, strlen(test_pattern));
+            short result = sys_chan_write(lpt, (unsigned char*)test_pattern, strlen(test_pattern));
             if (result != 0) {
                 sprintf(message, "Unable to print: %s\n", err_message(result));
                 print(screen, message);
@@ -713,10 +713,10 @@ short cmd_test_ansi(short screen, int argc, const char * argv[]) {
         }
 
         sprintf(buffer, "\x1b[%dm%10s\x1b[37;44m \x1b[30;%dm%10s\x1b[37;44m", 30 + i, color_name, 40 + i, color_name);
-        sys_chan_write(screen, buffer, strlen(buffer));
+        sys_chan_write(screen, (unsigned char*)buffer, strlen(buffer));
 
         sprintf(buffer, "\t\x1b[%dm%10s\x1b[37;44m \x1b[30;%dm%10s\x1b[37;44m\n", 90 + i, color_name, 100 + i, color_name);
-        sys_chan_write(screen, buffer, strlen(buffer));
+        sys_chan_write(screen, (unsigned char*)buffer, strlen(buffer));
     }
 
     print(screen, "\x1b[1;13H0123456789ABCDEF\x1b[6;13H\x1b[2@^^\x1b[20;13H<--2 characters inserted");

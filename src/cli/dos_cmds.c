@@ -37,8 +37,8 @@ short cmd_diskread(short screen, int argc, const char * argv[]) {
     bdev_number = (short)cli_eval_number(argv[1]);
     lba = cli_eval_number(argv[2]);
 
-    sprintf(buffer, "Reading drive #%d, sector %p\n", bdev_number, (void*)lba);
-    print(screen, buffer);
+    sprintf((char*)buffer, "Reading drive #%d, sector %p\n", bdev_number, (void*)lba);
+    print(screen, (char*)buffer);
 
     result = bdev_read(bdev_number, lba, buffer, 512);
     if (result < 512) {
@@ -73,8 +73,8 @@ short cmd_diskfill(short screen, int argc, const char * argv[]) {
     lba = cli_eval_number(argv[2]);
     value = (unsigned char)cli_eval_number(argv[3]);
 
-    sprintf(buffer, "Filling drive #%d, sector %p with 0x%02X\n", bdev_number, (void*)lba, (short)value);
-    print(screen, buffer);
+    sprintf((char*)buffer, "Filling drive #%d, sector %p with 0x%02X\n", bdev_number, (void*)lba, (short)value);
+    print(screen, (char*)buffer);
 
     for (i = 0; i < 512; i++) {
         buffer[i] = value;
@@ -127,6 +127,7 @@ short cmd_mkdir(short screen, int argc, const char * argv[]) {
         print(screen, "USAGE: MKDIR <path>\n");
         return -1;
     }
+    return 0;
 }
 
 /*
@@ -142,6 +143,7 @@ short cmd_del(short screen, int argc, const char * argv[]) {
             err_print(screen, "Unable to delete file", result);
             return result;
         }
+        return 0;
     } else {
         print(screen, "USAGE: DEL <path>\n");
         return -1;
@@ -328,7 +330,7 @@ short cmd_dir(short screen, int argc, const char * argv[]) {
         result = fsys_getlabel(path, label);
         if ((result == 0) && (strlen(label) > 0)) {
             sprintf(buffer, "Drive: %s\n", label);
-            chan_write(screen, buffer, strlen(buffer));
+            chan_write(screen, (unsigned char*)buffer, strlen(buffer));
         }
 
         while (1) {
@@ -490,6 +492,7 @@ short cmd_label(short screen, int argc, const char * argv[]) {
             err_print(screen, "Unable to set volume label", result);
             return -1;
         }
+        return 0;
 
     } else {
         print(screen, "USAGE: LABEL <drive #> <label>\n");
@@ -594,6 +597,7 @@ short cmd_format(short screen, int argc, const char * argv[]) {
             return -1;
         }
 
+        return 0;
     } else {
         print(screen, "USAGE: FORMAT <drive #>\n");
         return -1;

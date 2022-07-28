@@ -22,6 +22,39 @@
 #include "dev/ps2.h"
 #endif
 
+FUNC_V_2_V set_vector(uint16_t number, FUNC_V_2_V new_handler) {
+    FUNC_V_2_V vec = (FUNC_V_2_V)(number >> 2);
+    FUNC_V_2_V old = *vec;
+    if (new_handler == (FUNC_V_2_V)-1L)
+        return *vec;
+    return old;
+}
+
+extern FUNC_V_2_V h_trap_15; /* in startup_m68k.s */
+
+/* Called by Calypsi early in the startup. */
+long __low_level_init(void) {
+    /* If the CPU is reset and we happen to reboot the MCP, the vectors may be messed up.
+     * So at least we ensure that the trap interface to the kernel is functional. */
+    set_vector(47/*trap #15*/, h_trap_15);
+
+    /* Stay in supervisor, we're the OS */
+    return -1L; 
+}
+
+/* Set the given 680x0 vector number. Must be called in supervisor */
+
+
+#define M68K_VEC_AUTOVECTOR6 30 /* Level 6 Interrupt Autovector */
+#if MODEL == MODEL_FOENIX_A2560K
+// Used by VICKY III Channel A interrupts
+__attribute__((interrupt(M68K_VEC_AUTOVECTOR6)))
+void vec_vick_channel_a(void) { 
+    int_vicky_channel_a();
+}
+#endif
+
+
 /*
  * Determine the correct system function implementation and call it.
  */
@@ -201,7 +234,7 @@ unsigned long syscall_dispatch(int32_t function, int32_t param0, int32_t param1,
             /* Process and Memory functions */
             switch (function) {
                 case KFN_RUN:
-                    return proc_run((char *)param0, (int)param1, (char *)param2);
+                    return proc_run((char *)param0, (int)param1, (char **)param2);
 
                 case KFN_MEM_GET_RAMTOP:
                     return mem_get_ramtop();

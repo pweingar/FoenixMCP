@@ -163,7 +163,7 @@ void uart_put(short uart, unsigned char b) {
  * uart = the number of the UART: 0 for COM1, 1 for COM2
  *
  * Returns:
- * the byte read from the UART
+ * the byte read from the UART or 0 if invalid uart
  */
 unsigned char uart_get(short uart) {
     volatile unsigned char * uart_base = uart_get_base(uart);
@@ -179,6 +179,9 @@ unsigned char uart_get(short uart) {
         /* Return the byte */
         return uart_base[UART_TRHB];
     }
+
+    /* TODO: better report error */
+    return 0;
 }
 
 /**
@@ -219,12 +222,12 @@ short uart_status(p_channel chan) {
  * @param mode an unused parameter
  * @return 0 on success, any other number is an error
  */
-short uart_open(p_channel chan, const char * spec, short mode) {
+short uart_open(p_channel chan, const unsigned char * spec, short mode) {
     unsigned short bps = 0, lcr = 0;
     char * saveptr;
     char spec_copy[80];
     char *token = 0;
-    short i = 0;
+    long i = 0;
     short bps_code = 0;
     short lcr_code = 0;
 
@@ -232,14 +235,14 @@ short uart_open(p_channel chan, const char * spec, short mode) {
     uart_init(cdev_to_uart(chan->dev));
 
     // Make a local copy of the specification so we can tokenize it
-    strncpy(spec_copy, spec, 80);
+    strncpy(spec_copy, (char*)spec, 80);
 
     // Get the first token
     saveptr = spec_copy;
     token = strtok_r(spec_copy, ",", &saveptr);
     if (token) {
         // Parse the bit rate token
-        i = atoi(token);
+        i = atol(token);
         switch (i) {
             case 300:
                 bps_code = UART_300;
@@ -384,7 +387,7 @@ short uart_read_b(p_channel chan) {
  * @param size the size of the buffer.
  * @return number of bytes read, any negative number is an error code
  */
-short uart_read(p_channel chan, char * buffer, short size) {
+short uart_read(p_channel chan, unsigned char * buffer, short size) {
     short i = 0, count = 0;
     for (i = 0; i < size; i++) {
         buffer[i] = uart_get(cdev_to_uart(chan->dev));
@@ -402,7 +405,7 @@ short uart_read(p_channel chan, char * buffer, short size) {
  * @param size the size of the buffer.
  * @returns number of bytes read, any negative number is an error code
  */
-short uart_readline(p_channel chan, char * buffer, short size) {
+short uart_readline(p_channel chan, unsigned char * buffer, short size) {
     short i = 0, count = 0;
     for (i = 0; i < size; i++) {
         char c = uart_get(cdev_to_uart(chan->dev));
@@ -436,7 +439,7 @@ short uart_write_b(p_channel chan, unsigned char c) {
  * @param size the size of the buffer.
  * @return number of bytes written, any negative number is an error code
  */
-short uart_write(p_channel chan, const char * buffer, short size) {
+short uart_write(p_channel chan, const unsigned char * buffer, short size) {
     int i;
     for (i = 0; i < size; i++) {
         uart_put(cdev_to_uart(chan->dev), buffer[i]);
@@ -477,7 +480,5 @@ short uart_install() {
 
     result = cdev_register(&dev);
 
-    if (result) {
-        return result;
-    }
+    return result;
 }

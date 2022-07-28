@@ -398,10 +398,9 @@ short sdc_ioctrl(short command, unsigned char * buffer, short size) {
             p_dword = (unsigned long *)buffer;
             *p_dword = 1;
             break;
-
-        default:
-            return 0;
     }
+    
+    return 0;
 }
 
 //

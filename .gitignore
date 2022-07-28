@@ -44,6 +44,10 @@ C256Mgr/__pycache__/
 *.idb
 *.pdb
 
+# Build results
+src/foenixmcp.s68
+src/mapfile
+
 # Kernel Module Compile Results
 *.mod*
 .tmp_versions/

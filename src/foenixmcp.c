@@ -142,10 +142,12 @@ void initialize() {
 
     /* Initialize the text channels */
     txt_init();
+#if MODEL == MODEL_FOENIX_A2560K
     txt_a2560k_a_install();
     txt_a2560k_b_install();
     txt_init_screen(1);
     txt_init_screen(0);
+#endif
     log(LOG_INFO, "Text system initialized");
 
     /* Initialize the indicators */
@@ -178,7 +180,7 @@ void initialize() {
     bdev_init_system();   // Initialize the channel device system
     log(LOG_INFO, "Block device system ready.");
 
-    if (res = con_install()) {
+    if ((res = con_install())) {
         log_num(LOG_ERROR, "FAILED: Console installation", res);
     } else {
         log(LOG_INFO, "Console installed.");
@@ -200,20 +202,20 @@ void initialize() {
     /* Play the SID test bong on the Gideon SID implementation */
     sid_test_internal();
 
-    if (res = pata_install()) {
+    if ((res = pata_install())) {
         log_num(LOG_ERROR, "FAILED: PATA driver installation", res);
     } else {
         log(LOG_INFO, "PATA driver installed.");
     }
 
-    if (res = sdc_install()) {
+    if ((res = sdc_install())) {
         log_num(LOG_ERROR, "FAILED: SDC driver installation", res);
     } else {
         log(LOG_INFO, "SDC driver installed.");
     }
 
 #if MODEL == MODEL_FOENIX_A2560K
-    if (res = fdc_install()) {
+    if ((res = fdc_install())) {
         log_num(LOG_ERROR, "FAILED: Floppy drive initialization", res);
     } else {
         log(LOG_INFO, "Floppy drive initialized.");
@@ -222,47 +224,45 @@ void initialize() {
 
     // At this point, we should be able to call into to console to print to the screens
 
-    if (res = ps2_init()) {
+    if ((res = ps2_init())) {
         print_error(0, "FAILED: PS/2 keyboard initialization", res);
     } else {
         log(LOG_INFO, "PS/2 keyboard initialized.");
     }
 
 #if MODEL == MODEL_FOENIX_A2560K
-    if (res = kbdmo_init()) {
+    if ((res = kbdmo_init())) {
         log_num(LOG_ERROR, "FAILED: A2560K built-in keyboard initialization", res);
     } else {
         log(LOG_INFO, "A2560K built-in keyboard initialized.");
     }
 
-    if (res = lpt_install()) {
+    if ((res = lpt_install())) {
         log_num(LOG_ERROR, "FAILED: LPT installation", res);
     } else {
         log(LOG_INFO, "LPT installed.");
     }
 
-    if (res = midi_install()) {
+    if ((res = midi_install())) {
         log_num(LOG_ERROR, "FAILED: MIDI installation", res);
     } else {
         log(LOG_INFO, "MIDI installed.");
     }
 #endif
 
-    if (res = uart_install()) {
+    if ((res = uart_install())) {
         log_num(LOG_ERROR, "FAILED: serial port initialization", res);
     } else {
         log(LOG_INFO, "Serial ports initialized.");
     }
 
-
-
-    if (res = cli_init()) {
+    if ((res = cli_init())) {
         log_num(LOG_ERROR, "FAILED: CLI initialization", res);
     } else {
         log(LOG_INFO, "CLI initialized.");
     }
 
-    if (res = fsys_init()) {
+    if ((res = fsys_init())) {
         log_num(LOG_ERROR, "FAILED: file system initialization", res);
     } else {
         log(LOG_INFO, "File system initialized.");

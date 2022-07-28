@@ -51,7 +51,7 @@ void sys_get_information(p_sys_info info) {
     info->has_ethernet = 0;
     info->screens = 1;
 
-    info->fpga_date = *FPGA_DATE_YEAR << 16 | *FPGA_DATE_MONTHDAY;
+    //    info->fpga_date = *FPGA_DATE_YEAR << 16 | *FPGA_DATE_MONTHDAY;
     info->fpga_model = *FPGA_MODEL_H << 16 | *FPGA_MODEL_L;
     info->fpga_version = *FPGA_VER;
     info->fpga_subver = *FPGA_SUBVER;

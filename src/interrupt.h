@@ -32,6 +32,10 @@ typedef void (*p_int_handler)();
 #define MASK_GRP1 			((volatile unsigned short *)0xFEC0011A)
 #define MASK_GRP2 			((volatile unsigned short *)0xFEC0011C)
 
+
+void int_vicky_channel_a(void);
+void int_vicky_channel_b(void);
+
 #elif MODEL == MODEL_FOENIX_A2560U || MODEL == MODEL_FOENIX_A2560U_PLUS
 
 #define PENDING_GRP0 		((volatile unsigned short *)0x00B00100)

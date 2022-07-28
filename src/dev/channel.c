@@ -179,10 +179,9 @@ short cdev_init(short dev) {
             } else {
                 return 0;
             }
-        } else {
-            return DEV_ERR_BADDEV;
         }
     }
+    return DEV_ERR_BADDEV;
 }
 
 /*

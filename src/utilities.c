@@ -4,7 +4,9 @@
  * Define some handy macros and utility functions
  */
 
-#include <utilities.h>
+#include <ctype.h>
+
+#include "utilities.h"
 
 /**
  * Re-entrant version of strtok_r, because VBCC does not provide it

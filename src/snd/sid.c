@@ -150,6 +150,7 @@ void sid_test_internal() {
 }
 
 void sid_test_external() {
+#if MODEL == MODEL_FOENIX_A2560K
     unsigned char i;
 	unsigned int j;
     long jiffies;
@@ -233,4 +234,5 @@ void sid_test_external() {
 
 	*SID_EXT_L_MODE_VOL = 0;
 	*SID_EXT_R_MODE_VOL = 0;
+#endif
 }

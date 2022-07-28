@@ -29,7 +29,7 @@ void print_c(short channel, char c) {
  * message = the ASCII-Z string to print
  */
 void print(short channel, const char * message) {
-    sys_chan_write(channel, message, strlen(message));
+    sys_chan_write(channel, (unsigned char*)message, strlen(message));
 }
 
 /**
