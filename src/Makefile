@@ -3,7 +3,7 @@
 # User may over-ride the UNIT and MEMORY parameters to specify target machine
 # and where the MCP will run (ram or flash)
 #
-UNIT := a2560u
+UNIT := c256uplus
 MEMORY := ram
 
 # CPU_WDC65816                0x16  /* CPU code for the Western Design Center 65816 */
@@ -30,6 +30,10 @@ export CPU_NUMBER = 6		# M68040V
 export VASM_CPU = -m68040	# VASM CPU flag
 export VBCC_CPU = 68040		# VBCC CPU flag
 export MODEL_NUMBER = 11	# A2560K
+export AS = as68k
+export ASFLAGS =
+export CC = cc68k
+export LINKER = ln68k
 export cpu = m68040
 
 else ifeq ($(UNIT),genx)
@@ -37,6 +41,10 @@ export CPU_NUMBER = 6		# M68040V
 export VASM_CPU = -m68040	# VASM CPU flag
 export VBCC_CPU = 68040		# VBCC CPU flag
 export MODEL_NUMBER = 4		# GenX
+export AS = as68k
+export ASFLAGS =
+export CC = cc68k
+export LINKER = ln68k
 export cpu = m68040
 
 else ifeq ($(UNIT),a2560u)
@@ -46,7 +54,45 @@ export CPU_NUMBER = 0
 export VBCC_CPU = 68000
 export MODEL_NUMBER = 9
 export CFG_FILE = $(VBCC)/config/a2560u_ram
+export AS = as68k
+export ASFLAGS =
+export CC = cc68k
+export LINKER = ln68k
 export cpu = m68k
+
+else ifeq ($(UNIT),c256u)
+export CPU_NUMBER = 256		# WDC65816
+export VASM_CPU = -m65816	# VASM CPU flag
+export VBCC_CPU = 65816		# VBCC CPU flag
+export MODEL_NUMBER = 1		# C256 U
+export cpu = wdc65816
+export AS = as65816
+export ASFLAGS =
+export CC = cc65816
+export LINKER = ln65816
+
+else ifeq ($(UNIT),c256uplus)
+export CPU_NUMBER = 256		# WDC65816
+export VASM_CPU = -m65816	# VASM CPU flag
+export VBCC_CPU = 65816		# VBCC CPU flag
+export MODEL_NUMBER = 5		# C256 U+
+export cpu = wdc65816
+export AS = as65816
+export ASFLAGS =
+export CC = cc65816
+export LINKER = ln65816
+
+else ifeq ($(UNIT),c256fmx)
+export CPU_NUMBER = 256		# WDC65816
+export VASM_CPU = -m65816	# VASM CPU flag
+export VBCC_CPU = 65816		# VBCC CPU flag
+export MODEL_NUMBER = 0		# C256 FMX
+export cpu = wdc65816
+export AS = as65816
+export ASFLAGS =
+export CC = cc65816
+export LINKER = ln65816
+
 endif
 
 # Determine the correct configuration file (barring OS)
@@ -57,10 +103,6 @@ else
 export CFG_FILE = $(VBCC)/config/$(UNIT)_flash
 endif
 
-export AS = as68k
-export ASFLAGS =
-export CC = cc68k
-export LINKER = ln68k
 export DEFINES = -DCPU=$(CPU_NUMBER) -DMODEL=$(MODEL_NUMBER) # -DKBD_POLLED
 
 ifeq ($(OS),Windows_NT)

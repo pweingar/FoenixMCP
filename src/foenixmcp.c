@@ -31,9 +31,15 @@
 #include "dev/ps2.h"
 #include "dev/rtc.h"
 #include "dev/sdc.h"
+
 #include "dev/txt_screen.h"
+#if MODEL == MODEL_FOENIX_A2560K
 #include "dev/txt_a2560k_a.h"
 #include "dev/txt_a2560k_b.h"
+#elif MODEL == MODEL_FOENIX_C256U || MODEL == MODEL_FOENIX_C256U_PLUS || MODEL_FOENIX_FMX
+#include "dev/txt_c256.h"
+#endif
+
 #include "dev/uart.h"
 #include "snd/codec.h"
 #include "snd/psg.h"
@@ -124,18 +130,23 @@ void initialize() {
     short res;
 
     /* Set the logging level */
-    log_setlevel(LOG_FATAL);
+    log_setlevel(LOG_INFO);
 
     /* Initialize the memory system
      * NOTE: this is hard coded because I haven't figured out how to get VBCC to fill this in
      */
-    mem_init(0x3d0000);
+     #if MODEL == MODEL_FOENIX_A2560K || MODEL == MODEL_FOENIX_C256U_PLUS || MODEL_FOENIX_FMX
+        mem_init(0x3d0000);
+     #elif MODEL == MODEL_FOENIX_C256U
+        mem_init(0x1d0000);
+     #endif
+
 
     /* Initialize the procedure system */
     proc_init();
 
     // /* Hide the mouse */
-    mouse_set_visible(0);
+    //mouse_set_visible(0);
 
     /* Initialize the variable system */
     var_init();
@@ -147,8 +158,14 @@ void initialize() {
     txt_a2560k_b_install();
     txt_init_screen(1);
     txt_init_screen(0);
+#elif MODEL == MODEL_FOENIX_C256U || MODEL == MODEL_FOENIX_C256U_PLUS || MODEL_FOENIX_FMX
+    txt_c256_install();
+    txt_init_screen(0);
 #endif
+
     log(LOG_INFO, "Text system initialized");
+
+    while (1) ;
 
     /* Initialize the indicators */
     ind_init();
