@@ -23,6 +23,7 @@ void timers_init() {
     // int_register(INT_SOF_A, sof_a_handler);
     // int_enable(INT_SOF_A);
 
+#if MODEL == MODEL_FOENIX_A2560K || MODEL == MODEL_FOENIX_A2560U || MODEL == MODEL_FOENIX_A2560U_PLUS
     *TIMER_TCR0 = 0;    // Reset timers 0, 1, and 2
     *TIMER_TCR1 = 0;    // Reset timers 3, and 4 (if 4 is available)
 
@@ -34,6 +35,7 @@ void timers_init() {
     // Set timer 3 to count up and auto clear
 
     *TIMER_TCR1 = TCR_ENABLE_3 | TCR_CNTUP_3;
+#endif
 }
 
 /*
@@ -41,5 +43,9 @@ void timers_init() {
  */
 long timers_jiffies() {
     // return jiffy_count;
+#if MODEL == MODEL_FOENIX_A2560K || MODEL == MODEL_FOENIX_A2560U || MODEL == MODEL_FOENIX_A2560U_PLUS
     return *TIMER_VALUE_3;
+#else
+    return 0;
+#endif
 }

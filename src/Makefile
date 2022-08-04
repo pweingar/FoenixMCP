@@ -3,7 +3,7 @@
 # User may over-ride the UNIT and MEMORY parameters to specify target machine
 # and where the MCP will run (ram or flash)
 #
-UNIT := c256uplus
+UNIT := c256fmx
 MEMORY := ram
 
 # CPU_WDC65816                0x16  /* CPU code for the Western Design Center 65816 */
@@ -106,7 +106,7 @@ endif
 export DEFINES = -DCPU=$(CPU_NUMBER) -DMODEL=$(MODEL_NUMBER) # -DKBD_POLLED
 
 ifeq ($(OS),Windows_NT)
-	export CFLAGS = --core $(VBCC_CPU) -I. -I$(CURDIR)/include -I$(CURDIR)
+	export CFLAGS = --core $(VBCC_CPU) -I. -I$(CURDIR)/include -I$(CURDIR) --code-model large --data-model large
 ;-cpu=$(VBCC_CPU) +$(CFG_FILE) -I. -I$(CURDIR)/include -I$(CURDIR)
 	export RM = cmd /C del /Q /F
 else
@@ -123,16 +123,23 @@ cpu_c_obj := $(subst .c,.o,$(cpu_c_src))
 dev_base_sources = dev/block.c dev/channel.c dev/console.c dev/fsys.c dev/pata.c dev/ps2.c dev/rtc.c dev/sdc.c dev/txt_screen.c dev/uart.c
 ifeq ($(UNIT),a2560k)
 dev_c_src := $(dev_base_sources) dev/fdc.c dev/kbd_mo.c dev/lpt.c dev/midi.c dev/txt_a2560k_a.o dev/txt_a2560k_b.o m68040/fdc_m68040.o
-else
-dev_c_src := $(dev_base_sources)
+else ifeq ($(UNIT),a2560u)
+dev_c_src := $(dev_base_sources) dev/txt_a2560k_a.o dev/txt_a2560k_b.o m68040/fdc_m68040.o
+else ifeq ($(UNIT),c256fmx)
+dev_c_src := $(dev_base_sources) dev/fdc.c dev/lpt.c dev/midi.c dev/txt_c256.c
 endif
+
+# Temporary: filter out source files that have not been ported yet
+dev_unported = timers.c interrupt.c proc.c dev/block.c dev/channel.c dev/console.c dev/fsys.c dev/pata.c dev/ps2.c dev/rtc.c dev/sdc.c dev/uart.c dev/fdc.c dev/lpt.c dev/midi.c
+dev_c_src := $(filter foenixmcp.c,$(dev_c_src))
+
 dev_c_obj := $(subst .c,.o,$(dev_c_src))
 
-snd_c_src := $(wildcard snd/*.c)
+snd_c_src := # $(wildcard snd/*.c)
 snd_c_obj := $(subst .c,.o,$(snd_c_src))
-fat_c_src := $(wildcard fatfs/*.c)
+fat_c_src := #$(wildcard fatfs/*.c)
 fat_c_obj := $(subst .c,.o,$(fat_c_src))
-cli_c_src := $(wildcard cli/*.c)
+cli_c_src := #$(wildcard cli/*.c)
 cli_c_obj := $(subst .c,.o,$(cli_c_src))
 c_src :=  $(wildcard *.c)
 c_obj := $(subst .c,.o,$(c_src))
@@ -161,7 +168,7 @@ cli:
 	$(MAKE) --directory=cli
 
 foenixmcp.s68: $(c_obj) $(cpu) dev fatfs snd cli
-	$(LINKER) -o foenixmcp.s68 $(cpu_assembly_obj) $(c_obj) $(cpu_c_obj) $(dev_c_obj) $(fat_c_obj) $(snd_c_obj) $(cli_c_obj) clib-68000-lc-sd.a a2560u_memory.scm --output-format S28 --no-data-init-table-section  --target=Foenix
+	$(LINKER) -o foenixmcp.s68 $(cpu_assembly_obj) $(c_obj) $(cpu_c_obj) $(dev_c_obj) $(fat_c_obj) $(snd_c_obj) $(cli_c_obj) clib-lc-ld.a c256fmx.scm --output-format S28 --no-data-init-table-section  --target=Foenix
 
 foenixmcp.bin: $(c_obj) $(cpu) dev fatfs snd cli
 	$(CC) $(CFLAGS) $(DEFINES) -o foenixmcp.bin $(c_obj) $(cpu_c_obj) $(dev_c_obj) $(fat_c_obj) $(snd_c_obj) $(cli_c_obj)

@@ -73,6 +73,15 @@
 #define VKY2_TXT_CRSR_Y             ((volatile unsigned short __attribute__((far)) *)0xaf0016)
 
 /*
+ * Bitmap registers
+ */
+
+typedef volatile unsigned char __far24 *pointer_24;
+
+#define BM0_Control_Reg             ((volatile unsigned char __attribute__((far)) *)0xaf0108)
+#define BM0_Addy_Pointer_Reg        ((volatile pointer_24 __attribute__((far)) *)0xaf0109)
+
+/*
  * For the moment... skip the rest of VICKYII registers
  */
 
@@ -85,5 +94,17 @@
 #define VKY2_COLOR_MATRIX           ((volatile unsigned char __attribute__((far)) *)0xafc000)
 #define VKY2_TXT_FORE_LUT           ((volatile unsigned char __attribute__((far)) *)0xaf1f40)
 #define VKY2_TXT_BACK_LUT           ((volatile unsigned char __attribute__((far)) *)0xaf1f80)
+
+/*
+ * Graphics LUTs
+ */
+
+#define LUT_0                       ((volatile unsigned char __attribute__((far)) *)0xaf2000)
+
+/*
+ * VRAM
+ */
+
+#define VRAM_Bank0                  ((volatile unsigned char __attribute__((far)) *)0xb00000)
 
 #endif

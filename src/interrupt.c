@@ -4,6 +4,10 @@
 
 #include "interrupt.h"
 
+/*
+ * TODO: re-write to handle byte sized registers on the C256s
+ */
+
 #define MAX_HANDLERS 48
 
 p_int_handler g_int_handler[MAX_HANDLERS];
@@ -38,6 +42,17 @@ void int_init() {
 
     // At Reset, all of those already have those values
 	// the Pol are @ 0x0000 and normally pending are reseted, but it is not impossible that some might be triggered during init
+#if MODEL == FOENIX_MODEL_FMX || MODEL == FOENIX_MODEL_C256U || MODEL == FOENIX_MODEL_C256U_PLUS
+	*EDGE_GRP0 = 0xFF;
+	*EDGE_GRP1 = 0xFF;
+	*EDGE_GRP2 = 0xFF;
+	*EDGE_GRP3 = 0xFF;
+
+	*MASK_GRP0 = 0xFF;
+	*MASK_GRP1 = 0xFF;
+	*MASK_GRP2 = 0xFF;
+	*MASK_GRP3 = 0xFF;
+#else
 	*EDGE_GRP0 = 0xFFFF;
 	*EDGE_GRP1 = 0xFFFF;
 	*EDGE_GRP2 = 0xFFFF;
@@ -45,6 +60,7 @@ void int_init() {
 	*MASK_GRP0 = 0xFFFF;
 	*MASK_GRP1 = 0xFFFF;
 	*MASK_GRP2 = 0xFFFF;
+#endif
 }
 
 /*

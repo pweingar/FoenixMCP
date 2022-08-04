@@ -25,6 +25,8 @@
 #include "rsrc/bitmaps/splash_a2560u.h"
 #elif MODEL == MODEL_FOENIX_A2560K
 #include "rsrc/bitmaps/splash_a2560k.h"
+#else
+#include "rsrc/bitmaps/splash_a2560k.h"
 #endif
 
 #define SPLASH_WAIT_SEC     10      /* How many seconds to wait on the splash screen */
@@ -226,6 +228,11 @@ short boot_screen() {
 #if MODEL == MODEL_FOENIX_A2560K
     *BackGroundControlReg_B = 0x00202020;
     screen = 0;
+#elif MODEL == MODEL_FOENIX_FMX || MODEL == MODEL_FOENIX_C256U || MODEL == MODEL_FOENIX_C256UPLUS
+    *VKY2_BACKGND_COLOR_R = 0x00;
+    *VKY2_BACKGND_COLOR_G = 0x00;
+    *VKY2_BACKGND_COLOR_B = 0x00;
+
 #else
     *BackGroundControlReg_A = 0x00202020;
     screen = 0;
