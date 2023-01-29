@@ -79,13 +79,13 @@ void uart_init(short uart) {
     volatile unsigned char * uart_base = uart_get_base(uart);
 
     if (uart_base) {
-        /* Default to 9600 bps */
-        uart_setbps(uart, UART_9600);
+        /* Default default speed */
+        uart_setbps(uart, UART_115200);
 
         /* Set: no parity, 1 stop bit, 8 data bits */
         uart_setlcr(uart,  LCR_PARITY_NONE | LCR_STOPBIT_1 | LCR_DATABITS_8);
 
-#if MODEL == MODEL_FOENIX_A2560U || MODEL == MODEL_FOENIX_A2560U_PLUS
+#if 0 && (MODEL == MODEL_FOENIX_A2560U || MODEL == MODEL_FOENIX_A2560U_PLUS) // TODO Fix ?
         /* The A2560U has a 16750 rather than 16550
         uart_base[UART_FCR] = 39;
         uart_base[UART_IER] = 0;
