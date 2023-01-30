@@ -6,13 +6,7 @@
 #define __LOG_H
 
 #include <stdio.h> /* Not used here but convenience: there is every chance log messages will use sprintf */
-
-#define LOG_FATAL   0   /* Log a critical or fatal event */
-#define LOG_ERROR   1   /* Log an error */
-#define LOG_INFO    2   /* Log miscellaneous information */
-#define LOG_DEBUG   3   /* Log a debugging message */
-#define LOG_TRACE   4   /* Log tracing information (like entry into a subroutine) */
-#define LOG_VERBOSE 5   /* Log a truly verbose message... the sort you almost never want to bother with */
+#include "log_level.h"
 
 #define LOG_CHANNEL_UART0 -1
 #define LOG_CHANNEL_CHANNEL_A 0
@@ -22,7 +16,7 @@
  * Settings
  */
 #ifndef DEFAULT_LOG_LEVEL
-#define DEFAULT_LOG_LEVEL LOG_DEBUG
+ #define DEFAULT_LOG_LEVEL LOG_TRACE
 #endif
 
 #ifndef LOG_CHANNEL
@@ -74,8 +68,8 @@ extern void log_setlevel(short level);
  * level = the severity of the message... the logging level will filter messages displayed
  * message = the message to log
  */
-extern void log(short level, const char * message);
-
+extern void log(short level, const char * message, ...);
+extern void trace(const char * message, ...);
 /*
  * Log a message to the console
  *
@@ -115,8 +109,71 @@ extern void log_c(short log_level, char c);
 /*
  * Send a message to the debugging channel
  */
-#define DEBUG(m)    log(LOG_DEBUG, m);
-#define TRACE(m)    log(LOG_TRACE, m);
+
+#if DEFAULT_LOG_LEVEL >= LOG_ERROR
+# define ERROR(m)    log(LOG_ERROR, m)
+# define ERROR1(a,b)     log(LOG_ERROR, a, b)
+# define ERROR2(a,b,c)     log(LOG_ERROR, a, b, c)
+# define ERROR3(a,b,c,d)     log(LOG_ERROR, a, b, c, d)
+# define ERROR4(a,b,c,d,e)     log(LOG_ERROR, a, b, c, d, e)
+# define ERROR5(a,b,c,d,e,f)     log(LOG_ERROR, a, b, c, d, e, f)
+#else
+# define ERROR(m,...)
+# define ERROR1(a,b)
+# define ERROR2(a,b,c)
+# define ERROR3(a,b,c,d)
+# define ERROR4(a,b,c,d,e)
+# define ERROR5(a,b,c,d,e,f)
+#endif
+
+
+#if DEFAULT_LOG_LEVEL >= LOG_INFO
+# define INFO(m)    log(LOG_INFO, m)
+# define INFO1(a,b)     log(LOG_INFO, a, b)
+# define INFO2(a,b,c)     log(LOG_INFO, a, b, c)
+# define INFO3(a,b,c,d)     log(LOG_INFO, a, b, c, d)
+# define INFO4(a,b,c,d,e)     log(LOG_INFO, a, b, c, d, e)
+# define INFO5(a,b,c,d,e,f)     log(LOG_INFO, a, b, c, d, e, f)
+#else
+# define INFO(m,...)
+# define INFO1(a,b)
+# define INFO2(a,b,c)
+# define INFO3(a,b,c,d)
+# define INFO4(a,b,c,d,e)
+# define INFO5(a,b,c,d,e,f)
+#endif
+
+#if DEFAULT_LOG_LEVEL >= LOG_DEBUG
+# define DEBUG(m)    log(LOG_DEBUG, m)
+# define DEBUG1(a,b)     log(LOG_DEBUG, a, b)
+# define DEBUG2(a,b,c)     log(LOG_DEBUG, a, b, c)
+# define DEBUG3(a,b,c,d)     log(LOG_DEBUG, a, b, c, d)
+# define DEBUG4(a,b,c,d,e)     log(LOG_DEBUG, a, b, c, d, e)
+# define DEBUG5(a,b,c,d,e,f)     log(LOG_DEBUG, a, b, c, d, e, f)
+#else
+# define DEBUG(m,...)
+# define DEBUG1(a,b)
+# define DEBUG2(a,b,c)
+# define DEBUG3(a,b,c,d)
+# define DEBUG4(a,b,c,d,e)
+# define DEBUG5(a,b,c,d,e,f)
+#endif
+
+#if DEFAULT_LOG_LEVEL >= LOG_TRACE
+# define TRACE(m)    trace(m)
+# define TRACE1(a,b)     trace(a, b)
+# define TRACE2(a,b,c)     trace(a, b, c)
+# define TRACE3(a,b,c,d)     trace(a, b, c, d)
+# define TRACE4(a,b,c,d,e)     trace(a, b, c, d, e)
+# define TRACE5(a,b,c,d,e,f)     trace(a, b, c, d, e, f)
+#else
+# define TRACE(m)
+# define TRACE1(a,b)
+# define TRACE2(a,b,c)
+# define TRACE3(a,b,c,d)
+# define TRACE4(a,b,c,d,e)
+# define TRACE5(a,b,c,d,e,f)
+#endif
 #define TRACEC(c)   log_c(LOG_TRACE, c);
 
 #endif

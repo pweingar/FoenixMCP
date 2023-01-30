@@ -2,6 +2,11 @@
  * Implementation of the SDC device driver
  */
 
+#include "log_level.h"
+#ifndef DEFAULT_LOG_LEVEL
+    #define DEFAULT_LOG_LEVEL LOG_TRACE
+#endif
+
 #include "log.h"
 #include "constants.h"
 #include "errors.h"
@@ -48,6 +53,7 @@ void sdc_reset() {
 // Return true if there is an SD card in the slot
 //
 short sdc_detected() {
+    TRACE("sdc_detected()");
     return (*GABE_SDC_REG & GABE_SDC_PRESENT) != GABE_SDC_PRESENT;
 }
 
@@ -55,6 +61,7 @@ short sdc_detected() {
 // Return true if there is an SD card is protected
 //
 short sdc_protected() {
+    TRACE("sdc_protected()");
     return (*GABE_SDC_REG & GABE_SDC_WPROT) == GABE_SDC_WPROT;
 }
 
@@ -87,6 +94,7 @@ short sdc_wait_busy() {
     do {
         if (rtc_get_jiffies() > timer_ticks) {
             // If we have run out of tries, return a TIMEOUT error
+            TRACE("sdc_wait_busy: DEV_TIMEOUT");
             return DEV_TIMEOUT;
         }
         status = *SDC_TRANS_STATUS_REG;
@@ -149,13 +157,14 @@ short sdc_init() {
 short sdc_read(long lba, unsigned char * buffer, short size) {
     long adjusted_lba;
 
-    TRACE("sdc_read");
+    TRACE3("sdc_read(%ld,%p,%d)", lba, buffer, (int)size);
 
     // Check for presence of the card
 
     if (!sdc_detected()) {
         // SDC_DETECTED is active 0... 1 means there is no card
         g_sdc_status = SDC_STAT_NOINIT;
+        TRACE("sdc_read: DEV_NOMEDIA");
         return DEV_NOMEDIA;
     }
 
@@ -181,7 +190,7 @@ short sdc_read(long lba, unsigned char * buffer, short size) {
         if (g_sdc_error != 0) {
             /* Turn off the SDC LED */
             ind_set(IND_SDC, IND_OFF);
-
+            TRACE("sdc_read: DEV_CANNOT_READ");
             return DEV_CANNOT_READ;
 
         } else {
@@ -193,7 +202,7 @@ short sdc_read(long lba, unsigned char * buffer, short size) {
             if (count > size) {
                 /* Turn off the SDC LED */
                 ind_set(IND_SDC, IND_OFF);
-
+                TRACE("sdc_read: DEV_BOUNDS_ERR");
                 return DEV_BOUNDS_ERR;
             }
 
@@ -207,13 +216,14 @@ short sdc_read(long lba, unsigned char * buffer, short size) {
             if (g_sdc_error != 0) {
                 /* Turn off the SDC LED */
                 ind_set(IND_SDC, IND_OFF);
-
+                TRACE("sdc_read: DEV_CANNOT_READ");
                 return DEV_CANNOT_READ;
             } else {
                 /* Turn off the SDC LED */
                 ind_set(IND_SDC, IND_OFF);
 
                 // Success: return the byte count
+                TRACE1("sdc_read: returning %d", count);
                 return count;
             }
         }
@@ -221,6 +231,7 @@ short sdc_read(long lba, unsigned char * buffer, short size) {
         /* Turn off the SDC LED */
         ind_set(IND_SDC, IND_OFF);
 
+        TRACE("sdc_read: DEV_TIMEOUT");
         return DEV_TIMEOUT;
     }
 }
@@ -320,6 +331,8 @@ short sdc_write(long lba, const unsigned char * buffer, short size) {
 short sdc_status() {
     short status = g_sdc_status;
 
+    TRACE("sdc_status");
+
     if (sdc_detected()) {
         // Add the PRESENT flag, if the card is inserted
         status |= SDC_STAT_PRESENT;
@@ -330,6 +343,7 @@ short sdc_status() {
         status |= SDC_STAT_PROTECTED;
     }
 
+    TRACE1("sdc_status: %x", (int)status);
     return status;
 }
 

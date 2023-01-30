@@ -5,6 +5,11 @@
  *
  */
 
+#include "log_level.h"
+#ifndef DEFAULT_LOG_LEVEL
+    #define DEFAULT_LOG_LEVEL LOG_INFO
+#endif
+
 #include <ctype.h>
 #include <string.h>
 #include "log.h"

@@ -2,6 +2,12 @@
  * A simple collection of I/O functions the kernel will need often
  */
 
+#include "log_level.h"
+#ifndef DEFAULT_LOG_LEVEL
+    #define DEFAULT_LOG_LEVEL LOG_TRACE
+#endif
+
+
 #include <ctype.h>
 #include <string.h>
 #include <stdio.h>
@@ -30,10 +36,11 @@ void print_c(short channel, char c) {
  * message = the ASCII-Z string to print
  */
 void print(short channel, const char * message) {
-    short ret;
-    ret = sys_chan_write(channel, message, strlen(message));
+	TRACE1("print(%d,..)", channel);
+	
+    short ret = sys_chan_write(channel, message, strlen(message));
     if (ret < 0)
-        log_num(LOG_ERROR, "Error while printing: ", ret);
+        ERROR1("Error while printing: %d", ret);
 }
 
 /**

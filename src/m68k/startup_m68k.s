@@ -13,9 +13,34 @@
 ;
 ; Interrupt registers for A2560U and U+
 ;
-PENDING_GRP0 = $00B00100
-PENDING_GRP1 = $00B00102
-PENDING_GRP2 = $00B00104
+; Don't try to use semething like "if MODEL=6 || MODEL=9", that doesn't work work in vasm 1.8 :/
+            if MODEL==6 	; A2560U
+PENDING_GRP0 equ $00B00100
+PENDING_GRP1 equ $00B00102
+PENDING_GRP2 equ $00B00104
+            else if MODEL==9    ; A2560U+
+PENDING_GRP0 equ $00B00100
+PENDING_GRP1 equ $00B00102
+PENDING_GRP2 equ $00B00104
+    	    else if MODEL==11	; A2560K
+PENDING_GRP0 equ $00C00100
+PENDING_GRP1 equ $00C00102
+PENDING_GRP2 equ $00C00104
+            else fail MODEL not recognized !
+            endif
+
+;
+; Interrupt Vector 0x1F -- Real Time Clock
+;
+    if MODEL==6
+RTC_FLAGS   equ $00B0009A       ; A2560U
+    else if MODEL==9
+RTC_FLAGS   equ $00B0009A       ; A2560U+
+    else if MODEL==11
+RTC_FLAGS   equ $FEC0008D       ; A2560K
+    else    fail Cannot set RTC_FLAGs: Unknown model
+    endif
+
 
             section "VECTORS",code
 
@@ -142,6 +167,7 @@ callmain:   jsr ___main             ; call __main to transfer to the C code
 ___exit:
             bra	___exit
 
+            if MODEL==11	; A2560K
 ;
 ; Autovector #1: Used by VICKY III Channel B interrupts
 ;
@@ -149,6 +175,7 @@ autovec1:   movem.l d0-d7/a0-a6,-(a7)
             jsr _int_vicky_channel_b        ; Call the dispatcher for Channel B interrupts
             movem.l (a7)+,d0-d7/a0-a6
             rte
+            endif
 
 ;
 ; Autovector #1: Used by VICKY III Channel A interrupts
@@ -210,29 +237,10 @@ interrupt_x1B:  inthandler $1B, $0800, PENDING_GRP1     ; Interrupt Vector 0x1B 
 interrupt_x1C:  inthandler $1C, $1000, PENDING_GRP1     ; Interrupt Vector 0x1C -- Timer 4
 interrupt_x1D:  inthandler $1D, $2000, PENDING_GRP1     ; Interrupt Vector 0x1D -- Reserved
 interrupt_x1E:  inthandler $1E, $4000, PENDING_GRP1     ; Interrupt Vector 0x1E -- Reserved
+interrupt_x1F:  
+    tst.b   RTC_FLAGS               ; Acknowledge interrupt by reading the flags. Because of this we can't use the inthandler macro.
+    inthandler $1F, $8000, PENDING_GRP1     ; Interrupt Vector 0x1F -- Real Time Clock
 
-    ;; interrupt_x1F:  inthandler $1F, $8000, PENDING_GRP1     ; Interrupt Vector 0x1F -- Real Time Clock
-
-;
-; Interrupt Vector 0x1F -- Real Time Clock
-;
-    if MODEL==6
-RTC_FLAGS   equ $00B0009A       ; A2560U
-    else if MODEL==9
-RTC_FLAGS   equ $00B0009A       ; A2560U+
-    else if MODEL==11
-RTC_FLAGS   equ $FEC0008D       ; A2560K
-    else    fail Cannot set RTC_FLAGs: Unknown model
-    endif
-
-interrupt_x1F:
-            tst.b   RTC_FLAGS               ; Acknowledge interrupt by reading the flags. Because of this we can't use the inthandler macro.
-            move.w #$8000,(PENDING_GRP1)    ; Clear the flag for INT 1F
-            movem.l d0-d7/a0-a6,-(a7)       ; Save affected registers
-            move.w #($1f<<2),d0             ; Get the offset to interrupt 0x1f
-            bra int_dispatch                ; And process the interrupt
-
-    
 ;
 ; Group 2 Interrupt Handlers
 ;

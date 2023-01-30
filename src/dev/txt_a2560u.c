@@ -75,6 +75,8 @@ const p_txt_capabilities txt_a2560u_get_capabilities() {
  * NOTE: this should be called whenever the VKY3 registers are changed
  */
 static void txt_a2560u_set_sizes() {
+	TRACE("txt_a2560u_set_sizes");
+	
     if (a2560u_enable_set_sizes) {
         /* Only recalculate after initialization is mostly completed */
 
@@ -98,12 +100,8 @@ static void txt_a2560u_set_sizes() {
             a2560u_visible_size.width = a2560u_max_size.width;            
             a2560u_visible_size.height = a2560u_max_size.height;
         }
-
-        {
-            char msg[80];
-            sprintf(msg,"txt_a2560u_set_sizes max:%d,%d, visible:%d,%d", a2560u_max_size.width, a2560u_max_size.height, a2560u_visible_size.width, a2560u_visible_size.height);
-            DEBUG(msg);
-        }          
+	
+        DEBUG4("txt_a2560u_set_sizes max:%d,%d, visible:%d,%d", a2560u_max_size.width, a2560u_max_size.height, a2560u_visible_size.width, a2560u_visible_size.height);
     }
 }
 
@@ -597,7 +595,7 @@ static void txt_a2560u_init() {
     char buffer[255];
     t_rect region;
     int i;
-DEBUG("txt_a2560u_init-------------------");
+DEBUG("txt_a2560u_init");
     a2560u_resolution.width = 0;
     a2560u_resolution.height = 0;
     a2560u_visible_size.width = 0;
@@ -672,6 +670,8 @@ DEBUG("txt_a2560u_init-------------------");
     /* Clear the screen */
     txt_a2560u_fill(' ');
 }
+
+static     t_txt_device device;
 
 /**
  * Initialize and install the driver

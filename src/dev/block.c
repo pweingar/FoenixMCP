@@ -2,6 +2,11 @@
  * Implementation of block device routines
  */
 
+#include "log_level.h"
+#ifndef DEFAULT_LOG_LEVEL
+    #define DEFAULT_LOG_LEVEL LOG_TRACE
+#endif
+
 #include "log.h"
 #include "block.h"
 
@@ -27,7 +32,7 @@ void bdev_init_system() {
 short bdev_register(p_dev_block device) {
     short dev;
 
-    TRACE("bdev_register");
+    TRACE1("bdev_register(%s)", device->name);
 
     dev = device->number;
     if (dev < BDEV_DEVICES_MAX) {
@@ -42,8 +47,10 @@ short bdev_register(p_dev_block device) {
         bdev->status = device->status;
         bdev->flush = device->flush;
         bdev->ioctrl = device->ioctrl;
+        TRACE("bdev_register returning 0");
         return 0;
     } else {
+        TRACE("bdev_register returning DEV_ERR_BADDEV");
         return DEV_ERR_BADDEV;
     }
 }
@@ -57,18 +64,19 @@ short bdev_register(p_dev_block device) {
 // Returns:
 //  0 on success, any negative number is an error code
 //
-short bdev_init(short dev)  {
+short bdev_init(short dev) {
+    TRACE1("bdev_init(%d)", (int)dev);
 
-    TRACE("bdev_init");
+    short ret = DEV_ERR_BADDEV;
 
     if (dev < BDEV_DEVICES_MAX) {
         p_dev_block bdev = &g_block_devs[dev];
-        if (bdev->number == dev) {
-            return bdev->init();
-        } else {
-            return DEV_ERR_BADDEV;
-        }
+        if (bdev->number == dev)
+            ret = bdev->init();
     }
+
+    TRACE1("bdev_init returning %d", (int)ret);
+    return ret;
 }
 
 //
@@ -84,16 +92,18 @@ short bdev_init(short dev)  {
 //  number of bytes read, any negative number is an error code
 //
 short bdev_read(short dev, long lba, unsigned char * buffer, short size) {
-    TRACE("bdev_read");
+    TRACE4("bdev_read(%d,%ld,%p,%d)", (int)dev, lba, buffer, (int)size);
+
+    short ret = DEV_ERR_BADDEV;
 
     if (dev < BDEV_DEVICES_MAX) {
         p_dev_block bdev = &g_block_devs[dev];
-        if (bdev->number == dev) {
-            return bdev->read(lba, buffer, size);
-        } else {
-            return DEV_ERR_BADDEV;
-        }
+        if (bdev->number == dev)
+            ret = bdev->read(lba, buffer, size);
     }
+
+    TRACE1("bdev_read returning %d", (int)ret);
+    return ret;
 }
 
 //
@@ -109,16 +119,18 @@ short bdev_read(short dev, long lba, unsigned char * buffer, short size) {
 //  number of bytes written, any negative number is an error code
 //
 short bdev_write(short dev, long lba, const unsigned char * buffer, short size) {
-    TRACE("bdev_write");
+    TRACE4("bdev_write(%d,%ld,%p,%d)", (int)dev, lba, buffer, (int)size);
+
+    short ret = DEV_ERR_BADDEV;
 
     if (dev < BDEV_DEVICES_MAX) {
         p_dev_block bdev = &g_block_devs[dev];
-        if (bdev->number == dev) {
-            return bdev->write(lba, buffer, size);
-        } else {
-            return DEV_ERR_BADDEV;
-        }
+        if (bdev->number == dev)
+            ret = bdev->write(lba, buffer, size);
     }
+
+    TRACE1("bdev_write returning %d", (int)ret);
+    return ret;
 }
 
 //
@@ -131,16 +143,18 @@ short bdev_write(short dev, long lba, const unsigned char * buffer, short size) 
 //  the status of the device
 //
 short bdev_status(short dev) {
-    TRACE("bdev_status");
+    TRACE1("bdev_status(%d)", dev);
+
+    short ret = DEV_ERR_BADDEV;
 
     if (dev < BDEV_DEVICES_MAX) {
         p_dev_block bdev = &g_block_devs[dev];
-        if (bdev->number == dev) {
-            return bdev->status();
-        } else {
-            return DEV_ERR_BADDEV;
-        }
+        if (bdev->number == dev)
+            ret = bdev->status();
     }
+
+    TRACE1("bdev_status returning %d", (int)ret);
+    return ret;
 }
 
 //
@@ -153,16 +167,18 @@ short bdev_status(short dev) {
 //  0 on success, any negative number is an error code
 //
 short bdev_flush(short dev) {
-    TRACE("bdev_flush");
+    TRACE1("bdev_flush(%d)", (int)dev);
+
+    short ret = DEV_ERR_BADDEV;
 
     if (dev < BDEV_DEVICES_MAX) {
         p_dev_block bdev = &g_block_devs[dev];
-        if (bdev->number == dev) {
+        if (bdev->number == dev)
             return bdev->flush();
-        } else {
-            return DEV_ERR_BADDEV;
-        }
     }
+
+    TRACE1("bdev_flush returning %d", (int)ret);
+    return ret;
 }
 
 //
@@ -178,14 +194,16 @@ short bdev_flush(short dev) {
 //  0 on success, any negative number is an error code
 //
 short bdev_ioctrl(short dev, short command, unsigned char * buffer, short size) {
-    TRACE("bdev_ioctrl");
+    TRACE4("bdev_ioctrl(%d, %d, %p, %d)", (int)dev, command, buffer, (int)size);
+
+    short ret = DEV_ERR_BADDEV;
 
     if (dev < BDEV_DEVICES_MAX) {
         p_dev_block bdev = &g_block_devs[dev];
-        if (bdev->number == dev) {
-            return bdev->ioctrl(command, buffer, size);
-        } else {
-            return DEV_ERR_BADDEV;
-        }
+        if (bdev->number == dev)
+            ret =  bdev->ioctrl(command, buffer, size);
     }
+
+    TRACE1("bdev_ioctrl returning %d", (int)ret);
+    return ret;
 }

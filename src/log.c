@@ -2,6 +2,7 @@
  * A logging utility
  */
 
+#include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -50,7 +51,7 @@ void log_init(void) {
     if (log_channel == LOG_CHANNEL_UART0) {
         uart_init(UART_COM1);
         do_log = log_to_uart;
-        log(LOG_INFO,"FOENIX DEBUG OUTPUT");
+        log(LOG_INFO,"FOENIX DEBUG OUTPUT------------------------------------------------------------");
     }
     else
         do_log = log_to_screen;
@@ -145,7 +146,7 @@ void panic(void) {
     short row = 2;
     short address_expected = 0;
     t_rect region;
-
+TRACE("PANIC------------------------------------------");
     /* Shut off all interrupts */
     int_disable_all();
 
@@ -256,17 +257,41 @@ static void log_to_screen(const char *message) {
 }
 
 /*
- * Log a message to the console
+ * Log a message to the console.
  *
  * Inputs:
  * level = the severity of the message... the logging level will filter messages displayed
- * message = the message to log
+ * message/args = like printf.
+ *
+ * Caveat:
+ * The total length should not exceed 512 chars.
  */
-void log(short level, const char * message) {
+void log(short level, const char * message, ...) {
     if (level > log_level)
         return;
 
-    (*do_log)(message);
+    char buf[80]; // Should hopefully be long enough ! MCP stack is only 1K
+
+    va_list args;
+    va_start(args, message);
+    vsprintf(buf, message, args);
+    va_end(args);
+
+    (*do_log)(buf);
+}
+
+void trace(const char * message, ...) {
+    if (LOG_TRACE > log_level)
+        return;
+
+    char buf[80]; // Should hopefully be long enough !
+
+    va_list args;
+    va_start(args, message);
+    vsprintf(buf, message, args);
+    va_end(args);
+
+    (*do_log)(buf);
 }
 
 /*

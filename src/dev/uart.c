@@ -479,6 +479,7 @@ short uart_install() {
         return result;
     }
 
+#if MODEL == MODEL_FOENIX_A2560K
     dev.name = "COM2";
     dev.number = CDEV_COM2;
 
@@ -487,4 +488,5 @@ short uart_install() {
     if (result) {
         return result;
     }
+#endif
 }

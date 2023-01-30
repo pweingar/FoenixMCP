@@ -153,7 +153,7 @@ void int_clear(unsigned short n) {
  */
 void int_vicky_channel_a() {
 	unsigned short n;
-	unsigned short mask = 1;
+	unsigned short mask;
 	unsigned short pending = *PENDING_GRP0 & 0xff;
 
 	/* Acknowledge all the pending interrupts:
@@ -161,7 +161,7 @@ void int_vicky_channel_a() {
 	*PENDING_GRP0 = 0x00ff;
 
 	if (pending != 0) {
-		for (n = 0; n < 8; n++) {
+		for (n = 0, mask = 1; n < 8; n++, mask <<= 1) {
 			if (pending & mask) {
 				p_int_handler handler = g_int_handler[n];
 
@@ -170,13 +170,11 @@ void int_vicky_channel_a() {
 					handler();
 				}
 			}
-
-			// Compute the next mask
-			mask = mask << 1;
 		}
 	}
 }
 
+#if MODEL == MODEL_FOENIX_A2560K
 /*
  * Interrupt dispatcher for Vicky Channel B interrupts (8 - 15)
  */
@@ -204,3 +202,4 @@ void int_vicky_channel_b() {
 		}
 	}
 }
+#endif

@@ -2,6 +2,12 @@
  * Implementation of the command line interface
  */
 
+#include "log_level.h"
+#ifndef DEFAULT_LOG_LEVEL
+    #define DEFAULT_LOG_LEVEL LOG_TRACE
+#endif
+
+
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -355,6 +361,9 @@ short cli_exec(short channel, char * command, int argc, const char * argv[]) {
  * Make sure all the console settings are setup so that the console works correctly
  */
 void cli_ensure_console(short channel) {
+
+    TRACE1("cli_ensure_console(%d)", channel);
+
     // Make sure the console is set up correctly for the CLI
     sys_chan_ioctrl(channel, CON_IOCTRL_ECHO_OFF, 0, 0);
     sys_chan_ioctrl(channel, CON_IOCTRL_ANSI_ON, 0, 0);
@@ -362,6 +371,8 @@ void cli_ensure_console(short channel) {
 
     // Make sure the screen has text enabled
     txt_set_mode(sys_chan_device(channel), TXT_MODE_TEXT);
+
+    TRACE1("cli_ensure_console returning", channel);
 }
 
 /**
@@ -648,6 +659,8 @@ short cli_readline(short channel, char * command_line) {
                     print(channel, "\x1b[3G\x1b[K");
 
                 } else if (c == CHAR_BS) {
+					TRACE("HANDLING BACKSPACE");
+					
                     // Backspace
                     if (i > 0) {
                         i--;
@@ -657,6 +670,7 @@ short cli_readline(short channel, char * command_line) {
                         }
                         print(channel, "\x1b[1P");
                     }
+					TRACE("HANDLING BACKSPACE");
                 }
 
             } else {
@@ -985,6 +999,8 @@ short cli_start_repl(short channel, const char * init_cwd) {
     short result = 0;
     short i = 0;
     t_point cursor;
+
+    TRACE2("cli_start_repl(%d,\"%s\")", channel, init_cwd);
 
     g_current_channel = channel;
 

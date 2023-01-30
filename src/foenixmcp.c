@@ -2,6 +2,11 @@
  * Startup file for the Foenix/MCP
  */
 
+#include "log_level.h"
+#ifndef DEFAULT_LOG_LEVEL
+    #define DEFAULT_LOG_LEVEL LOG_TRACE
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -177,15 +182,15 @@ void initialize() {
     init_codec();
 
     cdev_init_system();   // Initialize the channel device system
-    log(LOG_INFO, "Channel device system ready.");
+    INFO("Channel device system ready.");
 
     bdev_init_system();   // Initialize the channel device system
-    log(LOG_INFO, "Block device system ready.");
+    INFO("Block device system ready.");
 
     if (res = con_install()) {
         log_num(LOG_ERROR, "FAILED: Console installation", res);
     } else {
-        log(LOG_INFO, "Console installed.");
+        INFO("Console installed.");
     }
 
     /* Initialize the timers the MCP uses */
@@ -195,11 +200,11 @@ void initialize() {
     rtc_init();
 
     target_jiffies = sys_time_jiffies() + 300;     /* 5 seconds minimum */
-    log_num(LOG_DEBUG, "target_jiffies assigned: ", target_jiffies);
+    DEBUG1("target_jiffies assigned: %d", target_jiffies);
 
     /* Enable all interrupts */
     int_enable_all();
-    log(LOG_TRACE, "Interrupts enabled");
+    TRACE("Interrupts enabled");
 
     /* Play the SID test bong on the Gideon SID implementation */
     sid_test_internal();
@@ -207,20 +212,20 @@ void initialize() {
     if (res = pata_install()) {
         log_num(LOG_ERROR, "FAILED: PATA driver installation", res);
     } else {
-        log(LOG_INFO, "PATA driver installed.");
+        INFO("PATA driver installed.");
     }
 
     if (res = sdc_install()) {
-        log_num(LOG_ERROR, "FAILED: SDC driver installation", res);
+        ERROR1("FAILED: SDC driver installation %d", res);
     } else {
-        log(LOG_INFO, "SDC driver installed.");
+        INFO("SDC driver installed.");
     }
 
 #if MODEL == MODEL_FOENIX_A2560K
     if (res = fdc_install()) {
-        log_num(LOG_ERROR, "FAILED: Floppy drive initialization", res);
+        ERROR1("FAILED: Floppy drive initialization %d", res);
     } else {
-        log(LOG_INFO, "Floppy drive initialized.");
+        INFO("Floppy drive initialized.");
     }
 #endif
 

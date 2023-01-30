@@ -7,6 +7,12 @@
  * to the low level drivers (e.g. txt_a2560k_a) registered with it.
  */
 
+#include "log_level.h"
+#ifndef DEFAULT_LOG_LEVEL
+    #define DEFAULT_LOG_LEVEL LOG_TRACE
+#endif
+
+
 #include "constants.h"
 #include "log.h"
 #include "dev/txt_screen.h"
@@ -65,9 +71,8 @@ void txt_init() {
  * @return 0 on success, any other number is an error
  */
 short txt_register(p_txt_device device) {
-    char buf[80];
-    sprintf(buf,"txt_register %p", device);
-    DEBUG(buf);
+    DEBUG1("txt_register(%s)", device->name);
+	
     if (device->number < TXT_CNT_SCREENS) {
         int i = device->number;
 
@@ -101,7 +106,6 @@ short txt_register(p_txt_device device) {
     }
 }
 
-#include <stdio.h>
 /**
  * Find the device driver for the screen, if installed
  *
@@ -115,7 +119,7 @@ p_txt_device txt_get_device(short screen) {
         if (device->number == screen) {
             return device;
         } else {
-            log_num(LOG_ERROR, "txt_get_device: number mismatch ", screen);
+            ERROR1("txt_get_device: number mismatch %d", screen);
         }
     }
 
@@ -128,14 +132,14 @@ p_txt_device txt_get_device(short screen) {
  * @param screen the number of the text device
  */
 void txt_init_screen(short screen) {
-    TRACE("txt_init_screen");
+    TRACE1("txt_init_screen(%d)", (int)screen);
     p_txt_device device = txt_get_device(screen);
     if (device) {
         if (device->init) {
             device->init();
         }
     } else {
-        log_num(LOG_ERROR, "Could not find screen ", screen);
+        ERROR1("Could not find screen %d", screen);
     }
 }
 
@@ -309,9 +313,7 @@ void txt_set_cursor_visible(short screen, short enable) {
  * @return 0 on success, any other number means the region was invalid
  */
 short txt_get_region(short screen, p_rect region) {
-    char buf[80];
-    sprintf(buf, "txt_get_region screen:%d region:%p", screen, region);
-    DEBUG(buf);
+    DEBUG2("txt_get_region screen:%d region:%p", screen, region);
     p_txt_device device = txt_get_device(screen);
     if (device) {
         if (device->get_region) {
@@ -331,7 +333,7 @@ short txt_get_region(short screen, p_rect region) {
  * @return 0 on success, any other number means the region was invalid
  */
 short txt_set_region(short screen, p_rect region) {
-    TRACE("txt_set_region");
+    TRACE5("txt_set_region(%d,{x:%d; y:%d w:%d, h:%d})", (int)screen, (int)region->origin.x, (int)region->origin.y, (int)region->size.width, (int)region->size.height);
     p_txt_device device = txt_get_device(screen);
     if (device) {
         if (device->set_region) {
@@ -349,7 +351,7 @@ short txt_set_region(short screen, p_rect region) {
  * @param background the Text LUT index of the new current background color (0 - 15)
  */
 short txt_set_color(short screen, unsigned char foreground, unsigned char background) {
-    TRACE("txt_set_color");
+    TRACE3("txt_get_color(%d,%d,%d)", (int)screen, (int)foreground, (int)background);
     p_txt_device device = txt_get_device(screen);
     if (device) {
         if (device->set_color) {
@@ -368,7 +370,7 @@ short txt_set_color(short screen, unsigned char foreground, unsigned char backgr
  * background = pointer to the background color number
  */
 void txt_get_color(short screen, unsigned char * foreground, unsigned char * background) {
-    TRACE("txt_get_color");
+    TRACE3("txt_get_color(%d,%p,%p)", (int)screen, foreground, background);
     p_txt_device device = txt_get_device(screen);
     if (device) {
         if (device->get_color) {
@@ -388,6 +390,7 @@ void txt_get_color(short screen, unsigned char * foreground, unsigned char * bac
  * @param y the row for the cursor
  */
 void txt_set_xy(short screen, short x, short y) {
+	DEBUG3("txt_set_xy(%d,%d,%d)", screen, (int)x, (int)y);
     p_txt_device device = txt_get_device(screen);
     if (device) {
         if (device->set_xy) {
@@ -501,6 +504,7 @@ void txt_print(short screen, const char * message) {
  * @param vertical the number of rows to scroll (negative is down, positive is up)
  */
 void txt_scroll(short screen, short horizontal, short vertical) {
+    TRACE3("txt_scroll(%d,%d,%d)", screen, horizontal, vertical);
     p_txt_device device = txt_get_device(screen);
     if (device) {
         if (device->scroll) {
@@ -537,6 +541,8 @@ void txt_clear(short screen, short mode) {
     t_point cursor;
     t_rect old_region, region;
 
+	TRACE2("txt_clear(%d,%d)", (int)screen, (int)mode);
+	
     txt_get_xy(screen, &cursor);
     txt_get_region(screen, &old_region);
 
@@ -610,6 +616,8 @@ void txt_clear_line(short screen, short mode) {
     t_point cursor;
     t_rect old_region, region;
 
+	TRACE2("txt_clear_line(%d,%d)", (int)screen, (int)mode);
+	
     txt_get_xy(screen, &cursor);
     txt_get_region(screen, &old_region);
 
@@ -673,6 +681,8 @@ void txt_insert(short screen, short count) {
     t_point cursor;
     t_rect old_region, region;
 
+	TRACE2("txt_clear_line(%d,%d)", (int)screen, (int)count);
+	
     if (count > 0) {
         txt_get_xy(screen, &cursor);
         txt_get_region(screen, &old_region);
@@ -699,6 +709,8 @@ void txt_delete(short screen, short count) {
     t_rect old_region, region;
     short left;
 
+   	TRACE2("txt_delete(%d,%d)", screen, count);
+	
     if (count > 0) {
         txt_get_xy(screen, &cursor);
         txt_get_region(screen, &old_region);
@@ -715,6 +727,8 @@ void txt_delete(short screen, short count) {
         txt_scroll(screen, count, 0);
         txt_set_region(screen, &old_region);
     }
+
+   	TRACE("txt_delete( returning");
 }
 
 /**

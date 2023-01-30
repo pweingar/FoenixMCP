@@ -4,6 +4,11 @@
  * Routines to support the boot process
  */
 
+#include "log_level.h"
+#ifndef DEFAULT_LOG_LEVEL
+    #define DEFAULT_LOG_LEVEL LOG_TRACE
+#endif
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -197,6 +202,8 @@ short boot_screen() {
     char f1[3], f2[3], f3[3];
     char space[10], cr_text[10];
 
+    TRACE("boot_screen");
+
     // We'll display boot information on the common screen
     screen = 0;
 
@@ -343,6 +350,7 @@ short boot_screen() {
     kbdmo_set_led_matrix_fill(0);
 #endif
 
+    TRACE1("boot_screen: returning %d", device);
     return device;
 }
 
@@ -355,6 +363,10 @@ void boot_from_bdev(short device) {
     char initial_path[10];
     unsigned short boot_dip = 0;        // The setting on the user and boot mode DIP switches
     short bootable = 0;                 // Is the boot sector of the selected device bootable?
+
+    TRACE1("boot_from_bdev(%d)", device);
+
+    initial_path[0] = '\0';
 
     // Get the boot device
     switch (device) {
@@ -407,6 +419,7 @@ void boot_from_bdev(short device) {
         }
 
         // Try to load the boot sector
+        DEBUG("boot_from_bdev: trying to read boot sector");
         short result = bdev_read(device, 0, BOOT_SECTOR_BUFFER, 512);
         if (result > 0) {
             // Check to see if it's bootable
@@ -415,17 +428,19 @@ void boot_from_bdev(short device) {
     }
 
     if (bootable) {
+        DEBUG("boot_from_bdev: boot sector is bootable, trying to run");
         // If bootable, run it
         boot_sector_run(device);
 
     } else {
+        DEBUG("boot_from_bdev: boot sector not bootable");
         // If not bootable...
 
         // Get the screen for the CLI
         short cli_screen = cli_txt_screen_get();
 
         if (device >= 0) {
-            // Execute startup file on boot device (if present)
+            DEBUG("Execute startup file on boot device (if present)");
             switch (device) {
                 case BDEV_SDC:
                     strcpy(initial_path, "/sd");
