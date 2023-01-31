@@ -382,10 +382,6 @@ panic_lock:         bra panic_lock
 ; Function to make a system call based on the number of the system function:
 ; int32_t syscall(int32_t number, int32_t p0, int32_t p1, int32_t p2, int32_t p3, int32_t p4, int32_t p5)
 ;
- xdef _trace
-aze dc.b "return address: %p",0
- even
-
 _syscall:
             ; Repush the parameters
             move.l  28(sp),-(sp)
@@ -395,13 +391,14 @@ _syscall:
             move.l  28(sp),-(sp)
             move.l  28(sp),-(sp)
             move.l  28(sp),-(sp)
-            trap    #15                    ; Call into the kernel
+            trap    #15                 ; Call into the kernel
             lea     28(sp),sp
             rts
 
 ;
 ; TRAP#15 handler... transfer control to the C dispatcher
 ;
+KFN_ELEVATE equ $43
 h_trap_15:
             ; Save sr, return address and non-scratch registers into our save area
             ; TODO we should guard this if we want to allow system calls from interrupts.
@@ -418,7 +415,7 @@ h_trap_15:
             move.l  usp,sp              ; If not, the argument are on the user stack, so use it
 syscall_stack_set:
 
-            cmpi.w  #$43,(sp)           ; Is this a sys_proc_elevate call?
+            cmpi.w  #KFN_ELEVATE,(sp)   ; Is this a sys_proc_elevate call?
             beq.s   h_trap_elev         ; Yes, just handle it here
 
             jsr     _syscall_dispatch   ; Call the C routine to do the dispatch
