@@ -826,8 +826,7 @@ short fsys_mount(short bdev) {
 
     fres = f_mount(&g_drive[bdev], drive, 0);
     if (fres != FR_OK) {
-        DEBUG("Unable to mount drive:");
-        DEBUG(drive);
+        DEBUG1("Unable to mount drive: %s", drive);        
         return fatfs_to_foenix(fres);
     } else {
         return 0;

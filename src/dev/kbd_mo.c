@@ -293,7 +293,7 @@ short kbdmo_break() {
 }
 
 /*
- * Initialize the PS2 controller and any attached devices
+ * Initialize Maurice (a.k.a) and any attached devices
  * Enable keyboard and mouse interrupts as appropriate.
  *
  * Returns:
