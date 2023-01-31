@@ -148,6 +148,7 @@ coldboot:   move.w #$2700,SR        ; Supervisor mode, disable all interrupts
             lea ___STACK,sp
             bsr _int_disable_all
 
+
             lea	___BSSSTART,a0
             move.l #___BSSSIZE,d0
             beq	callmain
@@ -160,6 +161,8 @@ clrloop:    ; We don't use clr.l because it's a read-modify-write operation
             move.l d1,(a0)+
             subq.l #4,d0
             bpl.s  clrloop
+
+            move.l #trap_save_area,trap_save_area
 
 callmain:   jsr ___main             ; call __main to transfer to the C code
 
@@ -379,40 +382,54 @@ panic_lock:         bra panic_lock
 ; Function to make a system call based on the number of the system function:
 ; int32_t syscall(int32_t number, int32_t p0, int32_t p1, int32_t p2, int32_t p3, int32_t p4, int32_t p5)
 ;
+ xdef _trace
+aze dc.b "return address: %p",0
+ even
+
 _syscall:
-            movem.l d1-d7,-(sp)         ; Save caller's registers
-            move.l (56,sp),d6           ; Parameter 5 to D6
-            move.l (52,sp),d5           ; Parameter 4 to D5
-            move.l (48,sp),d4           ; Parameter 3 to D4
-            move.l (44,sp),d3           ; Parameter 2 to D3
-            move.l (40,sp),d2           ; Parameter 1 to D2
-            move.l (36,sp),d1           ; Parameter 0 to D1
-            move.l (32,sp),d0           ; Function number to D0 (32 = 4(PC)+7(regs)*4)
-
-            TRAP #15                    ; Call into the kernel
-
-            movem.l (sp)+,d1-d7         ; Restore caller's registers
+            ; Repush the parameters
+            move.l  28(sp),-(sp)
+            move.l  28(sp),-(sp)
+            move.l  28(sp),-(sp)
+            move.l  28(sp),-(sp)
+            move.l  28(sp),-(sp)
+            move.l  28(sp),-(sp)
+            move.l  28(sp),-(sp)
+            trap    #15                    ; Call into the kernel
+            lea     28(sp),sp
             rts
 
 ;
 ; TRAP#15 handler... transfer control to the C dispatcher
 ;
 h_trap_15:
-            cmpi.w #$43,d1              ; Is this a sys_proc_elevate call?
-            beq.s  h_trap_elev          ; Yes, just handle it here
+            ; Save sr, return address and non-scratch registers into our save area
+            ; TODO we should guard this if we want to allow system calls from interrupts.
+            move.l  trap_save_area,a0
+            move.w  (sp)+,d0            ; Status register
+            move.w  d0,-(a0)
+            move.l  (sp)+,-(a0)         ; Return address
+            movem.l d2-d7/a2-a7,-(a0)
+            move.l  a0,trap_save_area   ; TODO should we check if we're beyond the end of that area ? As we'd be corrupting data.
+            
+            ; Fix stack if necessary so it points to the arguments for the dispatcher
+            btst    #13,d0              ; Check supervisor bit from caller's status register to see if were we called from user mode
+            bne.s   syscall_stack_set   ; If yes, sp already points to the arguments
+            move.l  usp,sp              ; If not, the argument are on the user stack, so use it
+syscall_stack_set:
 
-            move.l d6,-(sp)             ; Push the parameters to the stack for the C call
-            move.l d5,-(sp)
-            move.l d4,-(sp)
-            move.l d3,-(sp)
-            move.l d2,-(sp)
-            move.l d1,-(sp)
-            move.l d0,-(sp)
+            cmpi.w  #$43,(sp)           ; Is this a sys_proc_elevate call?
+            beq.s   h_trap_elev         ; Yes, just handle it here
 
-            jsr _syscall_dispatch       ; Call the C routine to do the dispatch
-                                        ; Note: the C routine depends upon the register push order
+            jsr     _syscall_dispatch   ; Call the C routine to do the dispatch
 
-            adda.l #7*4,sp              ; Remove parameters from the stack
+            ; Restore context from our save area
+            move.l  trap_save_area,a0
+            movem.l (a0)+,d2-d7/a2-a7
+            move.l  (a0)+,-(sp)         ; Return address
+            move.w  (a0)+,-(sp)         ; Status register
+            move.l  a0,trap_save_area
+    
             rte                         ; Return to the caller
 
 h_trap_elev ori #$2000,(a7)             ; Change the caller's privilege to supervisor
@@ -446,3 +463,9 @@ _restart_cli:
             lea ___STACK,sp
             jsr _cli_rerepl
             bra _restart_cli
+
+    section BSS
+
+TRAP_MAX_REENTRANCY EQU 4  ; Max number of reentrant calls to the trap handler
+    ds.b (6+12*4)*TRAP_MAX_REENTRANCY ; Each time we save status register .w and return address .l, so 6 bytes, + the saved registers (non-scratch) d2-d7/a2-a7 according to VBCC doc
+trap_save_area: ds.l 1
