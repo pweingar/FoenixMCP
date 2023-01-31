@@ -268,13 +268,13 @@ void initialize() {
     if (res = cli_init()) {
         log_num(LOG_ERROR, "FAILED: CLI initialization", res);
     } else {
-        log(LOG_INFO, "CLI initialized.");
+        INFO("CLI initialized.");
     }
 
     if (res = fsys_init()) {
         log_num(LOG_ERROR, "FAILED: file system initialization", res);
     } else {
-        log(LOG_INFO, "File system initialized.");
+        INFO("File system initialized.");
     }
 }
 

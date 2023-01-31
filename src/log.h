@@ -166,6 +166,8 @@ extern void log_c(short log_level, char c);
 # define TRACE3(a,b,c,d)     trace(a, b, c, d)
 # define TRACE4(a,b,c,d,e)     trace(a, b, c, d, e)
 # define TRACE5(a,b,c,d,e,f)     trace(a, b, c, d, e, f)
+# define TRACE6(a,b,c,d,e,f,g)     trace(a, b, c, d, e, f, g)
+# define TRACE7(a,b,c,d,e,f,g,h)     trace(a, b, c, d, e, f, g, h)
 #else
 # define TRACE(m)
 # define TRACE1(a,b)
@@ -173,6 +175,8 @@ extern void log_c(short log_level, char c);
 # define TRACE3(a,b,c,d)
 # define TRACE4(a,b,c,d,e)
 # define TRACE5(a,b,c,d,e,f)
+# define TRACE6(a,b,c,d,e,f,g)
+# define TRACE7(a,b,c,d,e,f,g,h)
 #endif
 #define TRACEC(c)   log_c(LOG_TRACE, c);
 

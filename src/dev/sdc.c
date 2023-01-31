@@ -331,7 +331,7 @@ short sdc_write(long lba, const unsigned char * buffer, short size) {
 short sdc_status() {
     short status = g_sdc_status;
 
-    TRACE("sdc_status");
+    TRACE1("sdc_status, status=0x%x",(int)status);
 
     if (sdc_detected()) {
         // Add the PRESENT flag, if the card is inserted
@@ -343,7 +343,7 @@ short sdc_status() {
         status |= SDC_STAT_PROTECTED;
     }
 
-    TRACE1("sdc_status: %x", (int)status);
+    TRACE1("sdc_status: %x", (short)status);
     return status;
 }
 
