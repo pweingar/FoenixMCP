@@ -58,14 +58,14 @@ short kbd_break() {
  * Test the PS/2 keyboard
  */
 short cli_test_ps2(short channel, int argc, const char * argv[]) {
-    char message[80];
+    const char help[] = "Press keys on a PS/2 keyboard... CTRL-C to quit.\n";
     unsigned short scancode = 0;
 
-    sprintf(message, "Press keys on a PS/2 keyboard... CTRL-C to quit.\n");
-    sys_chan_write(channel, message, strlen(message));
+    sys_chan_write(channel, help, strlen(help));
 
     do {
         if (scancode != 0) {
+            char message[80];
             sprintf(message, "Scan code: %04x\n", scancode);
             sys_chan_write(channel, message, strlen(message));
         }
@@ -863,16 +863,22 @@ const t_cli_test_feature cli_test_features[] = {
 #if MODEL == MODEL_FOENIX_A2560K
     {"FDC", "FDC DSKCHG | [<lba> [WRITE <data>]]: test reading/writing the MBR from the floppy drive", cli_test_fdc},
     {"GAMEPAD", "GAMEPAD [0 | 1]: test SNES gamepads", cli_test_gamepad},
+#endif    
     {"JOY", "JOY: test the joystick", cli_test_joystick},
-#endif
+#if MODEL == MODEL_FOENIX_A2560K
     {"LPT", "LPT: test the parallel port", cli_test_lpt},
+#endif
     {"MEM", "MEM [SYS|MERA]: test reading and writing of system or MERA memory", cli_mem_test},
+#if MODEL == MODEL_FOENIX_A2560K
     {"MIDILOOP", "MIDILOOP: perform a loopback test on the MIDI ports", midi_loop_test},
     {"MIDIRX", "MIDIRX: perform a receive test on the MIDI ports", midi_rx_test},
     {"MIDITX", "MIDITX: send a note to a MIDI keyboard", midi_tx_test},
+#endif    
     {"OPL3", "OPL3: test the OPL3 sound chip", opl3_test},
+#if MODEL == MODEL_FOENIX_A2560K
     {"OPN", "OPN [EXT|INT]: test the OPN sound chip", opn_test},
     {"OPM", "OPM [EXT|INT]: test the OPM sound chip", opm_test},
+#endif
     {"PANIC", "PANIC: test the kernel panic mechanism", cli_test_panic},
     {"PS2", "PS2: test the PS/2 keyboard", cli_test_ps2},
     {"PSG", "PSG [EXT|INTL|INTR|INTS]: test the PSG sound chip", psg_test},
@@ -880,8 +886,8 @@ const t_cli_test_feature cli_test_features[] = {
 #if MODEL == MODEL_FOENIX_A2560K
     {"RECALIBRATE", "RECALIBRATE: recalibrate the floppy drive", cli_test_recalibrate},
     {"SEEK", "SEEK <track>: move the floppy drive head to a track", cli_test_seek},
-    {"SID", "SID [EXT|INT]: test the SID sound chips", sid_test},
 #endif
+    {"SID", "SID [EXT|INT]: test the SID sound chips", sid_test},
     {"UART","UART [1|2]: test the serial port",cli_test_uart},
     {"TEXTSCROLL", "TEXTSCROLL [byte|word]: fills the text memory with A..Z then scroll one char to the left", cli_test_textscroll},
     {"END", "END", 0}

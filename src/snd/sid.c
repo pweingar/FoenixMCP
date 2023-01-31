@@ -2,6 +2,11 @@
  * Implementation of the SID code
  */
 
+#include "log_level.h"
+#ifndef DEFAULT_LOG_LEVEL
+    #define DEFAULT_LOG_LEVEL LOG_TRACE
+#endif
+
 #include "snd/sid.h"
 #include "sound_reg.h"
 #include "dev/rtc.h"
@@ -44,7 +49,7 @@ void sid_init(short sid) {
     volatile unsigned char *sid_base = sid_get_base(sid);
     if (sid_base) {
         int offset;
-        for (offset = 0; offset < 25; offset++) {
+        for (offset = 0; offset < 32; offset++) { // 32 is the number of register of a SID
             sid_base[offset] = 0;
         }
     }
@@ -55,7 +60,7 @@ void sid_init(short sid) {
  */
 void sid_init_all() {
     int sid;
-    for (sid = 0; sid < 5; sid++) {
+    for (sid = 0; sid < N_SIDS; sid++) {
         sid_init(sid);
     }
 }

@@ -69,12 +69,6 @@ short psg_test(short channel, int argc, const char * argv[]) {
  * Play a sound on the SID
  */
 short sid_test(short channel, int argc, const char * argv[]) {
-    short i;
-    unsigned char reg;
-    unsigned char data;
-    long target_time;
-    volatile unsigned char * opm_base = OPM_INT_BASE;
-
 #if MODEL == MODEL_FOENIX_A2560K
     if (argc >= 2) {
         /* Allow the user to select the external OPM */
@@ -91,7 +85,7 @@ short sid_test(short channel, int argc, const char * argv[]) {
     return 0;
 }
 
-
+#if MODEL == MODEL_FOENIX_A2560K
  void Test_EXT_FM2151( void ) {
 
      unsigned char i;
@@ -202,6 +196,7 @@ short sid_test(short channel, int argc, const char * argv[]) {
 
      * EXT_OPM_08_KEY_ON_OFF = 0x00;
  }
+#endif
 
  void Test_EXT_FM2612( void ) {
  			unsigned char i;
@@ -452,7 +447,7 @@ short sid_test(short channel, int argc, const char * argv[]) {
  			for (j=0 ; j<262144; j++);
  }
 
-
+#if MODEL == MODEL_FOENIX_A2560K
 /*
  * Test tone for OPM: register, value
  */
@@ -654,6 +649,7 @@ short opn_test(short channel, int argc, const char * argv[]) {
 
     return 0;
 }
+#endif
 
 const unsigned char opl3_tone_on[] = {
     0x01,0x00,              /* initialise */
@@ -738,11 +734,11 @@ short opl3_test(short channel, int argc, const char * argv[]) {
     return 0;
 }
 
+#if MODEL == MODEL_FOENIX_A2560K
 /*
  * Perform a transmit test on the MIDI ports
  */
 short midi_tx_test(short channel, int argc, const char * argv[]) {
-#if MODEL == MODEL_FOENIX_A2560K
     const char note_on[] = { 0x90, 0x3c, 0x3f };
     const char note_off[] = { 0x80, 0x3c, 0x00 };
     char message[80];
@@ -784,7 +780,7 @@ short midi_tx_test(short channel, int argc, const char * argv[]) {
         print(channel, message);
         return 0;
     }
-#endif
+
     return 0;
 }
 
@@ -792,7 +788,6 @@ short midi_tx_test(short channel, int argc, const char * argv[]) {
  * Perform a receive test on the MIDI ports
  */
 short midi_rx_test(short channel, int argc, const char * argv[]) {
-#if MODEL == MODEL_FOENIX_A2560K
     char message[80];
     unsigned short scancode = 0;
     int i;
@@ -834,7 +829,6 @@ short midi_rx_test(short channel, int argc, const char * argv[]) {
         print(channel, message);
         return 0;
     }
-#endif
     return 0;
 }
 
@@ -842,7 +836,6 @@ short midi_rx_test(short channel, int argc, const char * argv[]) {
  * Perform a loopback test on the MIDI ports
  */
 short midi_loop_test(short channel, int argc, const char * argv[]) {
-#if MODEL == MODEL_FOENIX_A2560K
     char message[80];
     unsigned short scancode = 0;
     unsigned char output;
@@ -891,6 +884,6 @@ short midi_loop_test(short channel, int argc, const char * argv[]) {
         print(channel, message);
         return 0;
     }
-#endif
     return 0;
 }
+#endif // Testing of MIDI for A2560K
