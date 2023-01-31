@@ -16,7 +16,7 @@
  * Settings
  */
 #ifndef DEFAULT_LOG_LEVEL
- #define DEFAULT_LOG_LEVEL LOG_TRACE
+  #define DEFAULT_LOG_LEVEL LOG_ERROR
 #endif
 
 #ifndef LOG_CHANNEL
@@ -118,7 +118,7 @@ extern void log_c(short log_level, char c);
 # define ERROR4(a,b,c,d,e)     log(LOG_ERROR, a, b, c, d, e)
 # define ERROR5(a,b,c,d,e,f)     log(LOG_ERROR, a, b, c, d, e, f)
 #else
-# define ERROR(m,...)
+# define ERROR(m)
 # define ERROR1(a,b)
 # define ERROR2(a,b,c)
 # define ERROR3(a,b,c,d)
@@ -135,7 +135,7 @@ extern void log_c(short log_level, char c);
 # define INFO4(a,b,c,d,e)     log(LOG_INFO, a, b, c, d, e)
 # define INFO5(a,b,c,d,e,f)     log(LOG_INFO, a, b, c, d, e, f)
 #else
-# define INFO(m,...)
+# define INFO(m)
 # define INFO1(a,b)
 # define INFO2(a,b,c)
 # define INFO3(a,b,c,d)
@@ -151,7 +151,7 @@ extern void log_c(short log_level, char c);
 # define DEBUG4(a,b,c,d,e)     log(LOG_DEBUG, a, b, c, d, e)
 # define DEBUG5(a,b,c,d,e,f)     log(LOG_DEBUG, a, b, c, d, e, f)
 #else
-# define DEBUG(m,...)
+# define DEBUG(m)
 # define DEBUG1(a,b)
 # define DEBUG2(a,b,c)
 # define DEBUG3(a,b,c,d)

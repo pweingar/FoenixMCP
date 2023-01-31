@@ -28,6 +28,7 @@
 static short log_channel = LOG_CHANNEL;
 static short log_level;
 
+// do_log either points to log_to_uart or log_to_screen.
 static void (*do_log)(const char* message);
 static void log_to_uart(const char* message);
 static void log_to_screen(const char* message);
@@ -270,7 +271,7 @@ void log(short level, const char * message, ...) {
     if (level > log_level)
         return;
 
-    char buf[80]; // Should hopefully be long enough ! MCP stack is only 1K
+    char buf[80]; // Should hopefully be long enough !
 
     va_list args;
     va_start(args, message);
