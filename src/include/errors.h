@@ -7,6 +7,7 @@
 
 // #define MAX_ERROR_NUMBER    16      // Largest (absolute value) of the error number
 
+#define E_OK                            0   // Success, no error
 #define ERR_GENERAL                     -1  // A general error condition
 #define DEV_ERR_BADDEV                  -2  // Device number is bad (too big or no device assigned)
 #define DEV_TIMEOUT                     -3  // The block device function timed out
