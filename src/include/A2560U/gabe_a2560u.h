@@ -28,6 +28,22 @@
 #define GABE_CPU_SPEED      0x0F00
 #define GABE_CPU_ID         0xF000  // 0000 = MC68SEC000 @ 20MHz
 
+#define GAVIN_ATARI_JOYSTICK ((volatile unsigned short *)0x00B00500)
+#define JOY1_UP             0x0001
+#define JOY1_DOWN           0x0002
+#define JOY1_LEFT           0x0004
+#define JOY1_RIGHT          0x0008
+#define JOY1_BTN0           0x0010
+#define JOY1_BTN1           0x0040
+#define JOY1_BTN2           0x0080
+#define JOY2_UP             0x0100
+#define JOY2_DOWN           0x0200
+#define JOY2_LEFT           0x0400
+#define JOY2_RIGHT          0x0800
+#define JOY2_BTN0           0x1000
+#define JOY2_BTN1           0x4000
+#define JOY2_BTN2           0x8000
+
 #define FPGA_DATE_YEAR      ((volatile unsigned short *)0x00B40030) // YYYY
 #define FPGA_DATE_MONTHDAY  ((volatile unsigned short *)0x00B40032) // MMDD
 

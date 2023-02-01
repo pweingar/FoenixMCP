@@ -27,7 +27,9 @@
 #include "simpleio.h"
 #include "syscalls.h"
 #include "sys_general.h"
+// TODO: the CLI should use system calls rather than depend on hardware directly
 #include "uart_reg.h"
+#include "gabe_reg.h"
 #include "vicky_general.h"
 
 #if MODEL == MODEL_FOENIX_A2560K
@@ -87,6 +89,56 @@ short cli_test_ps2(short channel, int argc, const char * argv[]) {
  * Test the joystick ports
  */
 short cli_test_joystick(short channel, int argc, const char * argv[]) {
+#if MODEL == MODEL_FOENIX_A2560U
+    volatile uint16_t * const atari_db9 = (uint16_t *)0xb00500;
+    uint16_t current,previous;
+    //const char msg[] = "Displays UPLR012 as Up/Down/Left/Right/Button0/Button1/Button2\nPress ESC to exit.\n";
+    //sys_chan_write(channel, msg, strlen(msg));
+
+    current = previous = ~*atari_db9;
+
+    // CAVEAT: this tests the hardware, not the MCP Device driver.
+    while (sys_kbd_scancode() != 0x01) {
+        if ((current = ~*atari_db9) == previous)
+            continue;
+        else {
+            char state[40];
+            int i = 0;
+            
+            if ((current & 0x00ff) != (previous & 0x00ff)) {
+                state[i] = '\0';
+                strcat(state, "JOY1:");
+                i = strlen(state);
+                if (current & JOY1_UP) state[i++] = 'U';
+                if (current & JOY1_DOWN) state[i++] = 'D';
+                if (current & JOY1_LEFT) state[i++] = 'L';
+                if (current & JOY1_RIGHT) state[i++] = 'R';
+                if (current & JOY1_BTN0) state[i++] = '0';
+                if (current & JOY1_BTN1) state[i++] = '1';
+                if (current & JOY1_BTN2) state[i++] = '2';
+                state[i++] = ' ';
+            }
+
+            if ((current & 0xff00) != (previous & 0xff00)) {
+                state[i] = '\0';
+                strcat(state, "JOY2:");
+                i = strlen(state);
+                if (current & JOY2_UP) state[i++] = 'U';
+                if (current & JOY2_DOWN) state[i++] = 'D';
+                if (current & JOY2_LEFT) state[i++] = 'L';
+                if (current & JOY2_RIGHT) state[i++] = 'R';
+                if (current & JOY2_BTN0) state[i++] = '0';
+                if (current & JOY2_BTN1) state[i++] = '1';
+                if (current & JOY2_BTN2) state[i++] = '2';
+            }
+
+            state[i++] = '\n';
+            state[i] = '\0';
+            sys_chan_write(channel, state, strlen(state));
+            previous = current;
+        }
+    }
+#else
     char message[80];
     volatile unsigned int * joystick_port = (volatile unsigned int *)0xFEC00500;
     volatile unsigned int * game_ctrl_port = (volatile unsigned int *)0xFEC00504;
@@ -109,7 +161,7 @@ short cli_test_joystick(short channel, int argc, const char * argv[]) {
 
         scancode = sys_kbd_scancode();
     } while (sys_chan_ioctrl(channel, 5, 0, 0) == 0);
-
+#endif
     return 0;
 }
 
