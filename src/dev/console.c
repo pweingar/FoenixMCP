@@ -12,6 +12,7 @@
 
 #include <ctype.h>
 #include <string.h>
+#include "errors.h"
 #include "log.h"
 #include "types.h"
 #include "constants.h"
@@ -795,27 +796,15 @@ short con_install() {
     dev.ioctrl = con_ioctrl;
 
     result = cdev_register(&dev);
-    if (result) {
+    if (result != E_OK) {
         return result;
     }
 
     dev.name = "EVID";
     dev.number = CDEV_EVID;
-    dev.init = con_init;
-    dev.open = con_open;
-    dev.close = con_close;
-    dev.read = con_read;
-    dev.readline = con_readline;
-    dev.read_b = con_read_b;
-    dev.write = con_write;
-    dev.write_b = con_write_b;
-    dev.flush = con_flush;
-    dev.seek = con_seek;
-    dev.status = con_status;
-    dev.ioctrl = con_ioctrl;
 
     result = cdev_register(&dev);
-    if (result) {
+    if (result != E_OK) {
         return result;
     }
 
