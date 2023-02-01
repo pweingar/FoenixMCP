@@ -46,6 +46,7 @@ typedef struct s_cli_test_feature {
  * Tests...
  */
 
+#if MODEL == MODEL_FOENIX_A2560K
 /*
  * Return true if the BREAK key has been pressed
  */
@@ -53,6 +54,7 @@ short kbd_break() {
     /* Channel 0, CON_IOCTRL_BREAK */
     return sys_chan_ioctrl(0, 5, 0, 0);
 }
+#endif
 
 /*
  * Test the PS/2 keyboard
@@ -69,7 +71,14 @@ short cli_test_ps2(short channel, int argc, const char * argv[]) {
             sprintf(message, "Scan code: %04x\n", scancode);
             sys_chan_write(channel, message, strlen(message));
         }
-    } while (sys_chan_ioctrl(channel, 0x05, 0, 0) == 0);
+    } while (
+#if MODEL == MODEL_FOENIX_A2560K
+        // Not totally sure what this is supposed to test. Doesn't seem related to PS/2 anyway.
+        sys_chan_ioctrl(channel, 0x05, 0, 0) == 0)
+#else
+        (scancode = kbd_get_scancode()) || 1
+#endif
+    );
 
     return 0;
 }
