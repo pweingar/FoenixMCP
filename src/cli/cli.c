@@ -802,7 +802,7 @@ void cli_draw_window(short channel, const char * status, short is_active) {
 
     short dev = sys_chan_device(channel);
     if (dev == ERR_BADCHANNEL) {
-        log_num(LOG_ERROR, "cli_draw_window on bad channel ", dev);
+        ERROR1("cli_draw_window on bad channel %d", channel);
         return;
     }
 
@@ -862,11 +862,7 @@ void cli_setup_screen(short channel, const char * path, short is_active) {
     t_rect full_region, command_region;
     char message[80];
 
-    {
-        char buf[60];
-        sprintf(buf, "cli_setup_screen for channel %d", channel);
-        DEBUG(buf);
-    }
+    DEBUG1("cli_setup_screen for channel %d", channel);
 
     short dev = sys_chan_device(channel);
 
@@ -876,19 +872,14 @@ void cli_setup_screen(short channel, const char * path, short is_active) {
     full_region.size.width = 0;
     full_region.size.height = 0;
 
-    {
-        char buf[60];
-        sprintf(buf, "cli_setup_screen: get screen size, dev=%d, region=%p", dev, &full_region);
-        DEBUG(buf);
-    }
+    DEBUG2("cli_setup_screen: get screen size, dev=%d, region=%p", dev, &full_region);
 
     sys_txt_set_region(dev, &full_region);
-DEBUG("1");
     sys_txt_get_region(dev, &full_region);
-DEBUG("2");
+
     // Clear the screen
     print(channel, "\x1b[2J\x1b[H");
-DEBUG("3");
+
     // Figure out the size of the command box and its region
     command_region.origin.x = 0;
     command_region.origin.y = 1;
@@ -938,12 +929,14 @@ short cli_repl(short channel) {
                 // char message[80];
                 // sprintf(message, "%d", strlen(cwd_buffer));
                 print(CDEV_CONSOLE, "");
+#if MODEL == MODEL_FOENIX_A2560K
                 if (g_channels_swapped) {
                     // If channel has changed, deactivate old channel
                     cli_draw_window(CDEV_EVID, cwd_buffer, 0);
                     old_channel = g_current_channel;
                     g_channels_swapped = 0;
                 }
+#endif
                 cli_draw_window(CDEV_CONSOLE, cwd_buffer, 1);
             }
         }
