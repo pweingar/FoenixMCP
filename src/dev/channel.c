@@ -46,7 +46,7 @@ void cdev_init_system() {
 //
 // Register a channel device driver
 //
-short cdev_register(p_dev_chan device) {
+short cdev_register(const p_dev_chan device) {
 
     TRACE1("cdev_register %s", device->name);
     short dev;
@@ -70,7 +70,7 @@ short cdev_register(p_dev_chan device) {
         cdev->seek = device->seek;
         cdev->flush = device->flush;
         cdev->ioctrl = device->ioctrl;
-        return 0;
+        return E_OK;
     } else {
         return DEV_ERR_BADDEV;
     }
