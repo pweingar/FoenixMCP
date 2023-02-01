@@ -352,7 +352,7 @@ short cli_test_rtc(short channel, int argc, const char * argv[]) {
     sprintf(buffer, "Waiting for updated ticks starting from %ld\n", ticks);
     sys_chan_write(channel, buffer, strlen(buffer));
 
-    for (;;) {
+    while (sys_kbd_scancode() != 0x01) {
         if (ticks < sys_time_jiffies()) {
             /* We got the periodic interrupt */
 
@@ -946,6 +946,9 @@ const t_cli_test_feature cli_test_features[] = {
     {"PRINT", "PRINT: sent text to the printer", cmd_test_print},
 #if MODEL == MODEL_FOENIX_A2560K
     {"RECALIBRATE", "RECALIBRATE: recalibrate the floppy drive", cli_test_recalibrate},
+#endif
+    {"RTC", "RTC: Test the RTC interrupts", cli_test_rtc},
+#if MODEL == MODEL_FOENIX_A2560K
     {"SEEK", "SEEK <track>: move the floppy drive head to a track", cli_test_seek},
 #endif
     {"SID", "SID [EXT|INT]: test the SID sound chips", sid_test},
