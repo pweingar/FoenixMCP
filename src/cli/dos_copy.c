@@ -56,17 +56,17 @@
  * Check to see if the path points to a directory
  *
  * @param path the path to check
- * @return 1 if the path points to a directory, 0 otherwise
+ * @return true if the path points to a directory, false otherwise
  */
-short is_directory(const char * path) {
+bool is_directory(const char * path) {
     t_file_info file;
 
     short result = sys_fsys_stat(path, &file);
     if ((result < 0) || ((file.attributes & FSYS_AM_DIR) == 0)) {
-        return 0;
+        return false;
     }
 
-    return 1;
+    return true;
 }
 
 /**

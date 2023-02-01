@@ -35,14 +35,14 @@ void kbdmo_set_led_matrix_fill(unsigned short color);
 
 /*
  * Check to see if a BREAK code has been pressed recently
- * If so, return 1 and reset the internal flag.
+ * If so, return true and reset the internal flag.
  *
  * BREAK will be F-ESC on the A2560K
  *
  * Returns:
- * 1 if a BREAK has been pressed since the last check
+ * true if a BREAK has been pressed since the last check
  */
-extern short kbdmo_break();
+extern bool kbdmo_break();
 
 /*
  * Try to retrieve the next scancode from the keyboard.

@@ -274,21 +274,21 @@ void kbdmo_flush_out() {
 
 /*
  * Check to see if a BREAK code has been pressed recently
- * If so, return 1 and reset the internal flag.
+ * If so, return true and reset the internal flag.
  *
  * BREAK will be F-ESC on the A2560K
  *
  * Returns:
- * 1 if a BREAK has been pressed since the last check
+ * true if a BREAK has been pressed since the last check
  */
-short kbdmo_break() {
+bool kbdmo_break() {
     if (g_kbdmo_control.status & KBD_STAT_BREAK) {
         /* BREAK was pressed: clear the flag and return a 1 */
         g_kbdmo_control.status &= ~KBD_STAT_BREAK;
-        return 1;
+        return true;
     } else {
         /* BREAK was not pressed: return a 0 */
-        return 0;
+        return false;
     }
 }
 

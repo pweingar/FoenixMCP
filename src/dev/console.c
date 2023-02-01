@@ -94,15 +94,15 @@ const t_ansi_seq ansi_sequence[] = {
  * c = the character to test
  *
  * Returns:
- * 0 if the character is not an ANSI initial, 1 if it is
+ * false if the character is not an ANSI initial, true if it is
  */
-short ansi_start_code(char c) {
+bool ansi_start_code(char c) {
     switch (c) {
         case '\x1b':
-            return 1;
+            return true;
 
         default:
-            return 0;
+            return false;
     }
 }
 
@@ -650,7 +650,7 @@ short con_write(p_channel chan, const uint8_t * buffer, short size) {
     return i;
 }
 
-short con_has_input(p_channel chan) {
+bool con_has_input(p_channel chan) {
     p_console_data con_data;
     char c;
 
@@ -659,7 +659,7 @@ short con_has_input(p_channel chan) {
 
     if (con_data->key_buffer != 0) {
         /* If we already peeked and have a character... return true */
-        return 1;
+        return true;
 
     } else {
         /* Otherwise, peek at the keyboard to see if there is a valid key */
@@ -681,12 +681,12 @@ short con_has_input(p_channel chan) {
 
         if (c == 0) {
             /* No: return false */
-            return 0;
+            return false;
 
         } else {
             /* Yes: save the key we got and return true */
             con_data->key_buffer = c;
-            return 1;
+            return true;
         }
     }
 }

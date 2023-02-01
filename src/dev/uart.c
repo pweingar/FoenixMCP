@@ -104,40 +104,24 @@ void uart_init(short uart) {
  * uart = the number of the UART: 0 for COM1, 1 for COM2
  *
  * Returns:
- * non-zero if there is data to read, 0 if there is no data.
+ * true if there is data to read, false if there is no data.
  */
-short uart_has_bytes(short uart) {
+bool uart_has_bytes(short uart) {
     volatile unsigned char * uart_base = uart_get_base(uart);
 
-    if (uart_base) {
-        if (uart_base[UART_LSR] & LSR_DATA_AVAIL) {
-            return 1;
-        } else {
-            return 0;
-        }
-    } else {
-        return 0;
-    }
+    return uart_base && (uart_base[UART_LSR] & LSR_DATA_AVAIL) ? true : false;
 }
 
 /**
  * Return true (non-zero) if the UART transmit FIFO is not full
  *
  * @param uart the number of the UART: 0 for COM1, 1 for COM2
- * @return non-zero if the FIFO can accept a byte, 0 if it is full
+ * @return non-zero if the FIFO can accept a byte, false if it is full
  */
-short uart_can_send(short uart) {
+bool uart_can_send(short uart) {
     volatile unsigned char * uart_base = uart_get_base(uart);
 
-    if (uart_base) {
-        if (uart_base[UART_LSR] & LSR_XMIT_EMPTY) {
-            return 1;
-        } else {
-            return 0;
-        }
-    } else {
-        return 0;
-    }
+    return uart_base && (uart_base[UART_LSR] & LSR_XMIT_EMPTY) ? true : false;
 }
 
 /*

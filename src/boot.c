@@ -108,7 +108,7 @@ void boot_animate_keyboard(unsigned long max_ticks, unsigned long ticks, unsigne
  *
  * @return 0 if not bootable, non-zero if bootable
  */
-short is_bootable(unsigned char * sector, short device) {
+bool is_bootable(unsigned char * sector, short device) {
     switch(device) {
         case BDEV_FDC:
             // The SDC and HDC boot off the MBR...
@@ -118,7 +118,7 @@ short is_bootable(unsigned char * sector, short device) {
                 if ((sector[BOOT_SIG_VBR_OFF] == ((BOOT_SIG >> 8) & 0x00FF)) &&
                     (sector[BOOT_SIG_VBR_OFF+1] == (BOOT_SIG & 0x00FF))) {
                     // The CPU is supported, and the boot signature is correct
-                    return 1;
+                    return true;
                 }
             }
             break;
@@ -132,7 +132,7 @@ short is_bootable(unsigned char * sector, short device) {
                 if ((sector[BOOT_SIG_MBR_OFF] == ((BOOT_SIG >> 8) & 0x00FF)) &&
                     (sector[BOOT_SIG_MBR_OFF+1] == (BOOT_SIG & 0x00FF))) {
                     // The CPU is supported, and the boot signature is correct
-                    return 1;
+                    return true;
                 }
             }
             break;
@@ -143,7 +143,7 @@ short is_bootable(unsigned char * sector, short device) {
     }
 
     // If we have reached this point, the sector is not bootable
-    return 0;
+    return false;
 }
 
 /**

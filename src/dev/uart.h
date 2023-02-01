@@ -47,7 +47,7 @@ extern void uart_init(short uart);
  * Returns:
  * non-zero if there is data to read, 0 if there is no data.
  */
-extern short uart_has_bytes(short uart);
+extern bool uart_has_bytes(short uart);
 
 /*
  * Send a byte to the UART. Blocks until the FIFO is ready to recieve a byte.

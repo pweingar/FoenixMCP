@@ -18,37 +18,37 @@ const long midi_timeout = 60;
 /**
  * Wait for data to be ready to read...
  *
- * @return 1 on success, 0 if there is a timeout
+ * @return true on success, false if there is a timeout
  */
-short midi_can_read() {
+bool midi_can_read() {
     long target = timers_jiffies() + midi_timeout;
     do {
         if ((*MIDI_STAT & MIDI_STAT_RX_EMPTY) == 0) {
             // There is data waiting
-            return 1;
+            return true;
         }
     } while (target > timers_jiffies());
 
     // We have waited too long
-    return 0;
+    return false;
 }
 
 /**
  * Wait for the MIDI transmiter to be empty...
  *
- * @return 1 on success, 0 if there is a timeout
+ * @return true on success, false if there is a timeout
  */
 short midi_can_write() {
     long target = timers_jiffies() + midi_timeout;
     do {
         if ((*MIDI_STAT & MIDI_STAT_TX_BUSY) != 0) {
             // The transmit buffer is empty
-            return 1;
+            return true;
         }
     } while (target > timers_jiffies());
 
     // We have waited too long
-    return 0;
+    return false;
 }
 
 /**

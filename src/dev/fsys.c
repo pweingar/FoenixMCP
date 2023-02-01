@@ -1277,14 +1277,14 @@ static bool loader_exists(const char * extension) {
     for (i = 0; i < MAX_LOADERS; i++) {
         if (g_file_loader[i].status) {
             if (strcmp(g_file_loader[i].extension, extension) == 0) {
-                return 1;
+                return true;
             }
         }
     }
-    return 0;
+    return false;
 }
 
-static int get_app_ext(const char * path, char * extension) {
+static bool get_app_ext(const char * path, char * extension) {
     char * point = strrchr(path, '.');
     extension[0] = 0;
     if (point != 0) {
@@ -1295,11 +1295,11 @@ static int get_app_ext(const char * path, char * extension) {
                 extension[i] = toupper(c);
             } else {
                 extension[i] = 0;
-                return 1;
+                return true;
             }
         }
     } else {
-        return 0;
+        return false;
     }
 }
 

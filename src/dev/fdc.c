@@ -114,16 +114,16 @@ void fdc_media_change() {
  * Check to see if the media has changed
  * If so, recalibrate the drive and flag the change
  */
-short fdc_media_check_change() {
+bool fdc_media_check_change() {
     // Check for the a disk change
     if (*FDC_DIR & 0x80) {
         // The disk has changed... recalibrate and set that it's changed
         fdc_recalibrate();
         fdc_seek(1);
         g_fdc_stat = FDC_STAT_NOINIT;
-        return 1;
+        return true;
     }
-    return 0;
+    return false;
 }
 
 /*
