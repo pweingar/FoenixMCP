@@ -660,7 +660,7 @@ short fchan_read_b(t_channel * chan) {
     short total_read;
     char buffer[2];
 
-    log(LOG_TRACE, "fchan_read");
+    log(LOG_TRACE, "fchan_read_b");
 
     file = fchan_to_file(chan);
     if (file) {
