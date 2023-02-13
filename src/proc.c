@@ -6,6 +6,11 @@
  *
  */
 
+#include "log_level.h"
+#ifndef DEFAULT_LOG_LEVEL
+    #define DEFAULT_LOG_LEVEL LOG_ERROR
+#endif
+
 #include "errors.h"
 #include "log.h"
 #include "dev/fsys.h"
@@ -73,7 +78,7 @@ int proc_get_result() {
  */
 short proc_run(const char * path, int argc, char * argv[]) {
 
-    TRACE("proc_run");
+    TRACE1("proc_run(\"%s\")", path);
 
     /* TODO: allow for commands without extensions */
     /* TODO: allow for a search PATH */
@@ -86,11 +91,11 @@ short proc_run(const char * path, int argc, char * argv[]) {
             proc_exec(start, k_default_stack, argc, argv);
             return 0;
         } else {
-            log_num(LOG_ERROR, "Couldn't execute file: ", result);
+            ERROR1("Couldn't execute file: %d", result);
             return ERR_NOT_EXECUTABLE;
         }
     } else {
-        log_num(LOG_ERROR, "Couldn't load file: ", result);
+        ERROR1("Couldn't load file: %d", result);
         return result;
     }
 }
