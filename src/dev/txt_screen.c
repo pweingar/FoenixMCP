@@ -12,10 +12,12 @@
     #define DEFAULT_LOG_LEVEL LOG_TRACE
 #endif
 
+#include <string.h>
 
 #include "constants.h"
 #include "log.h"
 #include "dev/txt_screen.h"
+
 
 /**
  * The array of device drivers.
@@ -28,34 +30,8 @@ static t_txt_device txt_device_driver[TXT_CNT_SCREENS];
  * Initialize the text system.
  */
 void txt_init() {
-    int i;
-
     /* Initialize all the drivers to blank... */
-    for (i = 0; i < TXT_CNT_SCREENS; i++) {
-        txt_device_driver[i].number = 0;
-        txt_device_driver[i].name = 0;
-
-        txt_device_driver[i].init = 0;
-        txt_device_driver[i].get_capabilities = 0;
-        txt_device_driver[i].set_mode = 0;
-        txt_device_driver[i].set_sizes = 0;
-        txt_device_driver[i].set_resolution = 0;
-        txt_device_driver[i].set_border = 0;
-        txt_device_driver[i].set_border_color = 0;
-        txt_device_driver[i].set_font = 0;
-        txt_device_driver[i].set_cursor = 0;
-        txt_device_driver[i].set_cursor_visible = 0;
-        txt_device_driver[i].get_region = 0;
-        txt_device_driver[i].set_region = 0;
-        txt_device_driver[i].get_color = 0;
-        txt_device_driver[i].set_color = 0;
-        txt_device_driver[i].set_xy = 0;
-        txt_device_driver[i].get_xy = 0;
-        txt_device_driver[i].put = 0;
-        txt_device_driver[i].scroll = 0;
-        txt_device_driver[i].fill = 0;
-        txt_device_driver[i].get_sizes = 0;
-    }
+    memset(txt_device_driver, 0, sizeof(txt_device_driver));
 }
 
 /**
