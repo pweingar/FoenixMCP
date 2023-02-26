@@ -89,7 +89,7 @@ extern void cdev_init_system();
  * Inputs:
  * p_dev_chan = pointer to the description of the channel device
  */
-extern short cdev_register(const p_dev_chan device);
+extern short cdev_register(p_dev_chan device);
 
 /*
  * Get a free channel

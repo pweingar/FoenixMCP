@@ -362,13 +362,7 @@ short chan_write(short channel, const uint8_t * buffer, short size) {
     p_channel chan;
     p_dev_chan cdev;
     short res;
-short test=0x1234;
-    log(LOG_TRACE,"chan_write(%d,%p,%x)", channel, buffer, test/*(int)size*/);
-    TRACE1("chan_write(%d)", (short)channel);
-    TRACE1("chan_write(,%p,)", buffer);
-    TRACE1("chan_write(,,%x)", (short)test/*(int)size*/);
-
-    // log_num(LOG_INFO, "chan_write: ", channel);
+    log(LOG_TRACE,"chan_write(%d,%p,%x)", channel, buffer, (int)size);
 
     res = chan_get_records(channel, &chan, &cdev);
     if (res == 0)

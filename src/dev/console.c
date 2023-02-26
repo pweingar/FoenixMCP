@@ -7,6 +7,7 @@
 
 #include <ctype.h>
 #include <string.h>
+#include "features.h"
 #include "log.h"
 #include "types.h"
 #include "constants.h"
@@ -818,7 +819,7 @@ short con_install() {
 
     chan_open(CDEV_CONSOLE, 0, 0);
 
-#if HAS_DUAL_SCREEN
+#if MODEL == MODEL_FOENIX_A2560K || MODEL == MODEL_FOENIX_GENX || MODEL == MODEL_FOENIX_A2560X
     chan_open(CDEV_EVID, 0, 0);
 #endif
 

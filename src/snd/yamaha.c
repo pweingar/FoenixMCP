@@ -2,6 +2,7 @@
  * Master file for the Yamaha sound chips
  */
 
+#include "features.h"
 #include "sound_reg.h"
 #include "snd/yamaha.h"
 
@@ -16,7 +17,7 @@
  */
 void ym_write(enum e_ym_snd_dev dev, enum e_ym_position position, short port, unsigned char value) {
     switch (dev) {
-#if MODEL == MODEL_FOENIX_A2560K
+#if HAS_OPN
         case SND_OPN2:
             switch (position) {
                 case EXTERNAL:
@@ -31,7 +32,8 @@ void ym_write(enum e_ym_snd_dev dev, enum e_ym_position position, short port, un
                     break;
             }
             break;
-
+#endif
+#if HAS_OPM
         case SND_OPM:
         switch (position) {
             case EXTERNAL:
@@ -63,22 +65,22 @@ void ym_init() {
     short position;
     short port;
 
-#if MODEL == MODEL_FOENIX_A2560K
-
+#if HAS_OPN
     /* OPN */
     for (position = EXTERNAL; position <= INTERNAL; position++) {
         for (port = 0x40; port <= 0x4F; port++) {
             ym_write(SND_OPN2, position, port, 0x7F);       /* Maximum attentuation */
         }
     }
+#endif
 
+#if HAS_OPM
     /* OPM */
     for (position = EXTERNAL; position <= INTERNAL; position++) {
         for (port = 0x60; port <= 0x6F; port++) {
             ym_write(SND_OPM, position, port, 0x7F);        /* Maximum attentuation */
         }
     }
-
 #endif
 
     /* OPL3 */

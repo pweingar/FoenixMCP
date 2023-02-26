@@ -15,19 +15,19 @@
 #include "dev/kbd_mo.h"
 #endif
 
-#if (MODEL == MODEL_FOENIX_A2560K || MODEL == MODEL_FOENIX_GENX || MODEL == MODEL_FOENIX_A2560X)
+#if ( MODEL == MODEL_FOENIX_A2560K || MODEL == MODEL_FOENIX_GENX || MODEL == MODEL_FOENIX_A2560X)
 short ind_state_color(short state) {
     switch (state) {
         case IND_ON:
             /* Green for on */
-#if MODEL == MODEL_FOENIX_A2560K
+#if MODEL == MODEL_FOENIX_A2560K            
             return 0x02;
 #elif MODEL == MODEL_FOENIX_GENX
             return 0x05;
 #elif MODEL == MODEL_FOENIX_A2560X
             return 0x06;
 #else            
-            return 0x03; // That is not possble because of the #if so why did Stefany mean ?
+            return 0x03;
 #endif
         case IND_ERROR:
             /* Red for error */
@@ -95,12 +95,15 @@ void ind_set_hdc(short state) {
 }
 #else 
 void ind_set_fdc(short state) {
+
 }
 
 void ind_set_sdc(short state) {
+
 }
 
 void ind_set_hdc(short state) {
+
 }
 #endif
 
@@ -113,11 +116,10 @@ void ind_set_hdc(short state) {
  */
 void ind_set(short ind_number, short state) {
     switch (ind_number) {
-#if (MODEL == MODEL_FOENIX_A2560K || MODEL == MODEL_FOENIX_GENX || MODEL == MODEL_FOENIX_A2560X)        
         case IND_POWER:
             ind_set_power(state);
             break;
-#endif
+
         case IND_FDC:
             ind_set_fdc(state);
             break;
