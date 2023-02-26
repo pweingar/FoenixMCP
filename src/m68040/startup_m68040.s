@@ -85,7 +85,11 @@ PENDING_GRP2 = $FEC00104
             dc.l not_impl           ; 62 - Reserved
             dc.l not_impl           ; 63 - Reserved
             dc.l interrupt_x10      ; 64 - Interrupt 0x10 - SuperIO - PS/2 Keyboard
+            if MODEL==11	; A2560K
             dc.l interrupt_x11      ; 65 - Interrupt 0x11 - A2560K Built-in Keyboard (Mo)
+            else
+            dc.l not_impl           ; 65 - Reserved
+            endif
             dc.l interrupt_x12      ; 66 - Interrupt 0x12 - SuperIO - PS/2 Mouse
             dc.l interrupt_x13      ; 67 - Interrupt 0x13 - SuperIO - COM1
             dc.l interrupt_x14      ; 68 - Interrupt 0x14 - SuperIO - COM2
@@ -121,7 +125,11 @@ PENDING_GRP2 = $FEC00104
             code
 
 coldboot:   move.w #$2700,SR        ; Supervisor mode, Interrupt mode (68040), disable all interrupts
-  move.l #$0,$fec80008 ; black border
+
+            moveq #0,d0   ; Disable 040's MMU
+            movec d0,TC
+
+  move.l #$ffff8800,$fec80008
             lea ___STACK,sp
             bsr _int_disable_all
 
@@ -132,7 +140,7 @@ coldboot:   move.w #$2700,SR        ; Supervisor mode, Interrupt mode (68040), d
 clrloop:    move.l #0,(a0)+
             subq.l #4,d0
             bne	clrloop
-  move.l #$ffff00ff,$fec80008
+  move.l #$ffff0000,$fec80008
 callmain:   jsr _main             ; call __main to transfer to the C code
 
 ;	endless loop; can be changed accordingly
