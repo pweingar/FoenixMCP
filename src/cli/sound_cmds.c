@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "features.h"
 #include "timers.h"
 #include "sound_cmds.h"
 #include "sound_reg.h"
@@ -17,6 +18,9 @@
 
 #include "include/A2560K/YM2151.h"
 #include "include/A2560K/YM2612_Ext.h"
+#if MODEL == MODEL_FOENIX_A2560K || MODEL == MODEL_FOENIX_A2560X || MODEL == MODEL_FOENIX_GENX
+#include "include/A2560K/sound_a2560k.h"
+#endif
 
 /*
  * Play a sound on the PSG
@@ -69,7 +73,7 @@ short psg_test(short channel, int argc, const char * argv[]) {
  * Play a sound on the SID
  */
 short sid_test(short channel, int argc, const char * argv[]) {
-#if MODEL == MODEL_FOENIX_A2560K
+#if HAS_EXTERNAL_SIDS
     if (argc >= 2) {
         /* Allow the user to select the external OPM */
         if ((strcmp(argv[1], "ext") == 0) || (strcmp(argv[1], "EXT") == 0)) {
@@ -85,7 +89,8 @@ short sid_test(short channel, int argc, const char * argv[]) {
     return 0;
 }
 
-#if MODEL == MODEL_FOENIX_A2560K
+
+#if HAS_OPM
  void Test_EXT_FM2151( void ) {
 
      unsigned char i;
@@ -198,6 +203,7 @@ short sid_test(short channel, int argc, const char * argv[]) {
  }
 #endif
 
+#if HAS_OPN
  void Test_EXT_FM2612( void ) {
  			unsigned char i;
  			unsigned int j;
@@ -446,8 +452,9 @@ short sid_test(short channel, int argc, const char * argv[]) {
  			// 400ms Delay (prolly not quite the time it needs)
  			for (j=0 ; j<262144; j++);
  }
+#endif
 
-#if MODEL == MODEL_FOENIX_A2560K
+#if HAS_OPM
 /*
  * Test tone for OPM: register, value
  */
@@ -651,6 +658,7 @@ short opn_test(short channel, int argc, const char * argv[]) {
 }
 #endif
 
+#if HAS_OPL3
 const unsigned char opl3_tone_on[] = {
     0x01,0x00,              /* initialise */
     0x05,0x01,              /* OPL3 mode, necessary for stereo */
@@ -733,8 +741,9 @@ short opl3_test(short channel, int argc, const char * argv[]) {
 
     return 0;
 }
+#endif
 
-#if MODEL == MODEL_FOENIX_A2560K
+#if HAS_MIDI_PORTS
 /*
  * Perform a transmit test on the MIDI ports
  */
@@ -780,9 +789,9 @@ short midi_tx_test(short channel, int argc, const char * argv[]) {
         print(channel, message);
         return 0;
     }
-
     return 0;
 }
+
 
 /*
  * Perform a receive test on the MIDI ports
@@ -829,6 +838,7 @@ short midi_rx_test(short channel, int argc, const char * argv[]) {
         print(channel, message);
         return 0;
     }
+
     return 0;
 }
 
@@ -886,4 +896,5 @@ short midi_loop_test(short channel, int argc, const char * argv[]) {
     }
     return 0;
 }
-#endif // Testing of MIDI for A2560K
+
+#endif

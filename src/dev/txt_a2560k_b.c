@@ -6,6 +6,7 @@
 #include <string.h>
 #include <stdio.h>
 #include "log.h"
+#include "sys_general.h"
 #include "utilities.h"
 #include "A2560K/vky_chan_a.h"
 #include "A2560K/vky_chan_b.h"
@@ -16,22 +17,26 @@ extern const unsigned char MSX_CP437_8x8_bin[];
 
 /* Default text color lookup table values (AARRGGBB) */
 const unsigned long a2560k_b_lut[VKY3_B_LUT_SIZE] = {
-    0xFF000000,	// Black (transparent)
-	0xFF800000, // Mid-Tone Red
-	0xFF008000, // Mid-Tone Green
-	0xFF808000, // Mid-Tone Yellow
-	0xFF000080, // Mid-Tone Blue
-	0xFFAA5500, // Mid-Tone Orange
-	0xFF008080, // Mid-Tone Cian
-	0xFF808080, // 50% Grey
+    0xFF000000,	// Black (transparent) - 0x00
+	0xFF800000, // Mid-Tone Red - 0x01
+	0xFF008000, // Mid-Tone Green - 0x02
+	0xFF808000, // Mid-Tone Yellow - 0x03
+	0xFF000080, // Mid-Tone Blue - 0x04
+	0xFFAA5500, // Mid-Tone Orange - 0x05
+	0xFF008080, // Mid-Tone Cian - 0x06
+	0xFF808080, // 50% Grey - 0x07
+#if MACHINE_FOENIX_A2560X
+    0xFF202020, // Dark Grey
+#else
 	0xFF555555, // Dark Grey
-    0xFFFF0000, // Bright Red
-	0xFF55FF55, // Bright Green
-	0xFFFFFF55, // Bright Yellow
-	0xFF5555FF, // Bright Blue
-	0xFFFF7FFF, // Bright Orange
-	0xFF55FFFF, // Bright Cyan
-	0xFFFFFFFF 	// White
+#endif
+    0xFFFF0000, // Bright Red - 0x09
+	0xFF55FF55, // Bright Green - 0x0A
+	0xFFFFFF55, // Bright Yellow - 0x0B
+	0xFF5555FF, // Bright Blue - 0x0C
+	0xFFFF7FFF, // Bright Orange - 0x0D
+	0xFF55FFFF, // Bright Cyan - 0x0E
+	0xFFFFFFFF 	// White - 0x0F
 };
 
 /*
@@ -634,8 +639,12 @@ void txt_a2560k_b_init() {
     /* Set the resolution */
     txt_a2560k_b_set_resolution(640, 480);                  /* Default resolution is 640x480 */
 
-    /* Set the default color: light grey on blue */
-    txt_a2560k_b_set_color(0x07, 0x04);
+    /* Set default colour */
+#if MACHINE_FOENIX_A2560X
+    txt_a2560k_a_set_color(0x0F, 0x08);
+#else
+    txt_a2560k_a_set_color(0x07, 0x04);
+#endif
 
     /* Set the font */
     txt_a2560k_b_set_font(8, 8, MSX_CP437_8x8_bin);         /* Use 8x8 font */
@@ -644,9 +653,13 @@ void txt_a2560k_b_init() {
     txt_a2560k_b_set_cursor(1, 0, 0xB1);
 
     /* Set the border */
-    txt_a2560k_b_set_border(16, 16);                            /* Set up the border */
-    txt_a2560k_b_set_border_color(0, 0, 0x3f);
-
+#if MACHINE_FOENIX_A2560X
+    txt_a2560k_a_set_border(8, 8);                            /* Set up the border */
+    txt_a2560k_a_set_border_color(0x10, 0x00, 0x10);
+#else
+    txt_a2560k_a_set_border(16, 16);                            /* Set up the border */
+    txt_a2560k_a_set_border_color(0, 0, 0x3f);
+#endif
     /*
      * Enable set_sizes, now that everything is set up initially
      * And calculate the size of the screen

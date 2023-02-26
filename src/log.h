@@ -16,7 +16,7 @@
  * Settings
  */
 #ifndef DEFAULT_LOG_LEVEL
-  #define DEFAULT_LOG_LEVEL LOG_ERROR
+  #define DEFAULT_LOG_LEVEL LOG_TRACE
 #endif
 
 #ifndef LOG_CHANNEL

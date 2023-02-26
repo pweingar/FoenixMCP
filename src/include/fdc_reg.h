@@ -7,7 +7,7 @@
 
 #include "sys_general.h"
 
-#if MODEL == MODEL_FOENIX_A2560K
+#if HAS_FLOPPY
 #include "A2560K/fdc_a2560k.h"
 #endif
 

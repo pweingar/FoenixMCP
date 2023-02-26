@@ -2,6 +2,7 @@
  * Parallel port printer driver
  */
 
+#include "features.h"
 #include "errors.h"
 #include "log.h"
 #include "lpt_reg.h"
@@ -11,7 +12,7 @@
 #include "sys_general.h"
 #include "syscalls.h"
 
-#if MODEL == MODEL_FOENIX_A2560K
+#if HAS_PARALLEL_PORT
 
 #define MAX_LPT_JIFFIES     600
 

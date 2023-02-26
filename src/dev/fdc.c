@@ -2,8 +2,8 @@
  * Definitions support low level FDC device driver
  */
 
-#include "sys_general.h"
-#if MODEL == MODEL_FOENIX_A2560K
+#include "features.h"
+#if HAS_FLOPPY
 
 #include <stdio.h>
 #include <string.h>

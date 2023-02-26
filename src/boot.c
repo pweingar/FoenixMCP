@@ -12,6 +12,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include "features.h"
 #include "boot.h"
 #include "constants.h"
 #include "errors.h"
@@ -31,10 +32,15 @@
 #include "dev/txt_a2560u.h"
 #elif MODEL == MODEL_FOENIX_A2560K
 #include "rsrc/bitmaps/splash_a2560k.h"
+#elif MODEL == MODEL_FOENIX_A2560X || MODEL == MODEL_FOENIX_GENX
+#include "rsrc/bitmaps/splash_a2560x.h"
 #endif
 
-#define SPLASH_WAIT_SEC     10      /* How many seconds to wait on the splash screen */
-
+#if MODEL == MODEL_FOENIX_A2560K
+    #define SPLASH_WAIT_SEC     10      /* How many seconds to wait on the splash screen */
+#else
+    #define SPLASH_WAIT_SEC     4      /* How many seconds to wait on the splash screen */
+#endif    
 /*
  * Important scan codes
  */
@@ -231,16 +237,16 @@ short boot_screen() {
     *BM0_Control_Reg = 1;
 
     /* Set a background color for the bitmap mode */
-#if MODEL == MODEL_FOENIX_A2560K
+#if MODEL == MODEL_FOENIX_A2560K || MODEL == MODEL_FOENIX_GENX || MODEL == MODEL_FOENIX_A2560X
     *BackGroundControlReg_B = 0x00202020;
     screen = 0;
 #else
-    *BackGroundControlReg_A = 0x00202020;
+    *BackGroundControlReg_A = 0x00402040;
     screen = 0;
 #endif
 
     /* Display the splashscreen at 640x480 without a border */
-    txt_set_resolution(screen, 640, 680);
+    txt_set_resolution(screen, 640, 480);
     txt_set_border(screen, 0, 0);
     txt_set_font(screen, 8, 8, quadrotextFONT);
 
@@ -263,7 +269,7 @@ short boot_screen() {
     make_key_name("SPACE", space);
     make_key_name("RETURN", cr_text);
 
-#if MODEL == MODEL_FOENIX_A2560K
+#if HAS_FLOPPY
     sprintf(buffer, "BOOT: %s=SD CARD, %s=HARD DRIVE, s=FLOPPY, %s=DEFAULT, %s=SAFE", f1, f2, f3, space, cr_text);
 #else
     sprintf(buffer, "BOOT: %s=SD CARD, %s=HARD DRIVE, %s=DEFAULT, %s=SAFE", f1, f2, space, cr_text);
@@ -316,7 +322,7 @@ short boot_screen() {
                 strcpy(buffer, "Booting from hard drive.\n");
                 break;
 
-#if MODEL == MODEL_FOENIX_A2560K
+#if HAS_FLOPPY
             case SC_F3:
                 device = BDEV_FDC;
                 strcpy(buffer, "Booting from floppy drive.\n");
@@ -338,11 +344,9 @@ short boot_screen() {
     /* Initialise all screens */
     txt_init_screen(screen); /* This is the one used for the boot message */
     /* No need to txt_set_resolution(screen, 0, 0) because during screen_init, the defaults are applied */
-#if MODEL == MODEL_FOENIX_A2560K
+#if MODEL == MODEL_FOENIX_A2560K || MODEL == MODEL_FOENIX_A2560X || MODEL == MODEL_FOENIX_GENX
     txt_set_resolution(1, 0, 0);    // Set the resolution based on the DIP switch
 #endif
-
-    /* Display message saying what we're booting from */
     print(screen, buffer);
 
 #if MODEL == MODEL_FOENIX_A2560K
@@ -350,7 +354,6 @@ short boot_screen() {
     kbdmo_set_led_matrix_fill(0);
 #endif
 
-    TRACE1("boot_screen: returning %d", device);
     return device;
 }
 
@@ -361,7 +364,11 @@ short boot_screen() {
  */
 void boot_from_bdev(short device) {
     char initial_path[10];
+#if MODEL == MODEL_FOENIX_A2560K
+    unsigned int boot_dip = 0;        // The setting on the user and boot mode DIP switches
+#elif MODEL == MODEL_FOENIX_GENX || MODEL == MODEL_FOENIX_A2560X || MODEL_FOENIX_A2560U_PLUS
     unsigned short boot_dip = 0;        // The setting on the user and boot mode DIP switches
+#endif 
     short bootable = 0;                 // Is the boot sector of the selected device bootable?
 
     TRACE1("boot_from_bdev(%d)", device);
@@ -388,7 +395,7 @@ void boot_from_bdev(short device) {
                     strcpy(initial_path, "/sd");
                     break;
 
-#if MODEL == MODEL_FOENIX_A2560K
+#if HAS_FLOPPY
                 case 0x0002:
                     // Boot from Floppy
                     device = BDEV_FDC;
@@ -396,7 +403,6 @@ void boot_from_bdev(short device) {
                     strcpy(initial_path, "/fd");
                     break;
 #endif
-
                 default:
                     // Boot straight to REPL
                     log(LOG_INFO, "Boot DIP set for REPL");

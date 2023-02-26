@@ -8,7 +8,7 @@
 #include "types.h"
 #include "sys_general.h"
 
-#if MODEL == MODEL_FOENIX_A2560K
+#if MODEL == MODEL_FOENIX_A2560K || MODEL == MODEL_FOENIX_GENX || MODEL == MODEL_FOENIX_A2560X
 #include "A2560K/sdc_a2560k.h"
 #elif MODEL == MODEL_FOENIX_A2560U || MODEL == MODEL_FOENIX_A2560U_PLUS
 #include "A2560U/sdc_a2560u.h"

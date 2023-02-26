@@ -7,9 +7,11 @@
     #define DEFAULT_LOG_LEVEL LOG_TRACE
 #endif
 
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "features.h"
 #include "sys_general.h"
 #include "simpleio.h"
 #include "log.h"
@@ -17,9 +19,14 @@
 #include "interrupt.h"
 #include "gabe_reg.h"
 
-#if MODEL == MODEL_FOENIX_A2560K
+#if HAS_SUPERIO
 #include "superio.h"
+#endif
+
+#if MODEL == MODEL_FOENIX_A2560K
 #include "dev/kbd_mo.h"
+#endif
+#if HAS_DUAL_SCREEN
 #include "dev/txt_a2560k_a.h"
 #include "dev/txt_a2560k_b.h"
 #elif MODEL == MODEL_FOENIX_A2560U || MODEL == MODEL_FOENIX_A2560U_PLUS
@@ -57,7 +64,7 @@ const char* VolumeStr[FF_VOLUMES] = { "sd", "fd", "hd" };
 
 extern unsigned long __memory_start;
 
-#if MODEL == MODEL_FOENIX_A2560K
+#if HAS_SUPERIO
 /*
  * Initialize the SuperIO registers
  */
@@ -145,7 +152,7 @@ void initialize() {
 
     /* Initialize the text channels */
     txt_init();
-#if MODEL == MODEL_FOENIX_A2560K    
+#if HAS_DUAL_SCREEN
     txt_a2560k_a_install();
     txt_a2560k_b_install();
     txt_init_screen(TXT_SCREEN_A2560K_A);
@@ -153,6 +160,8 @@ void initialize() {
 #elif MODEL == MODEL_FOENIX_A2560U || MODEL == MODEL_FOENIX_A2560U_PLUS
     txt_a2560u_install();
     txt_init_screen(TXT_SCREEN_A2560U);
+#else
+#error Cannot identify screen setup
 #endif
 
     log(LOG_INFO, "Text system initialized");
@@ -164,7 +173,7 @@ void initialize() {
     /* Initialize the interrupt system */
     int_init();
 
-#if MODEL == MODEL_FOENIX_A2560K
+#if HAS_SUPERIO
     /* Initialize the SuperIO chip */
     init_superio();
 #endif
@@ -243,7 +252,9 @@ void initialize() {
     } else {
         log(LOG_INFO, "A2560K built-in keyboard initialized.");
     }
+#endif
 
+#if HAS_SUPERIO
     if (res = lpt_install()) {
         log_num(LOG_ERROR, "FAILED: LPT installation", res);
     } else {
@@ -263,8 +274,6 @@ void initialize() {
         log(LOG_INFO, "Serial ports initialized.");
     }
 
-
-
     if (res = cli_init()) {
         log_num(LOG_ERROR, "FAILED: CLI initialization", res);
     } else {
@@ -283,8 +292,10 @@ void initialize() {
 int main(int argc, char * argv[]) {
     short result;
     short i;
-
+*((volatile uint32_t*const)0xfec80008) = 0xff00ff00L;
     initialize();
+
+//*((volatile uint32_t*const)0xfec00000) = 0x16;
 
     // Make sure the command path is set to the default before we get started
     cli_command_set("");

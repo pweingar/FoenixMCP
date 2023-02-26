@@ -98,4 +98,7 @@ extern short cli_txt_screen_get();
  */
 extern void cli_flag_cwd();
 
+// Dummy routine don't use
+extern short cmd_Dummy (short screen, int argc, const char * argv[]);
+
 #endif

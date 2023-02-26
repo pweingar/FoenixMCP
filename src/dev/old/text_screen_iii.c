@@ -93,11 +93,15 @@ int text_init() {
 
 #if MODEL == MODEL_FOENIX_A2560K
     border_color = 0x00004000;          /* Dark blue border for the K */
+#elif MODEL == MODEL_FOENIX_GENX 
+    border_color = 0x00200020;
+#elif MODEL == MODEL_FOENIX_A2560X
+    border_color = 0x00002020;
 #elif MODEL == MODEL_FOENIX_A2560U || MODEL == MODEL_FOENIX_A2560U_PLUS
     border_color = 0x00008080;          /* Dark blue border for the K */
 #endif
 
-#if MODEL == MODEL_FOENIX_A2560K
+#if MODEL == MODEL_FOENIX_A2560K || MODEL == MODEL_FOENIX_GENX || MODEL == MODEL_FOENIX_A2560X
     p_text_channel chan_b = &text_channel[1];
 #endif
 
@@ -121,7 +125,7 @@ int text_init() {
         text_channel[i].y = 0;
     }
 
-#if MODEL == MODEL_FOENIX_A2560K
+#if MODEL == MODEL_FOENIX_A2560K || MODEL == MODEL_FOENIX_GENX || MODEL == MODEL_FOENIX_A2560X
     // Init CLUT for the Color Memory
     for (i = 0; i < 16; i++) {
         unsigned long fg_color = fg_color_lut[2*i + 1] << 16 | fg_color_lut[2*i];
@@ -150,7 +154,7 @@ int text_init() {
     chan_a->cursor_position = CursorControlReg_H_A;
     chan_a->border_control = BorderControlReg_L_A;
 
-#if MODEL == MODEL_FOENIX_A2560K
+#if MODEL == MODEL_FOENIX_A2560K || MODEL == MODEL_FOENIX_GENX || MODEL == MODEL_FOENIX_A2560X
     /* A2560K has support for 8x16 characters and therefore font sizes */
     chan_a->font_size_ctrl = FONT_Size_Ctrl_A;
     chan_a->font_count_ctrl = FONT_Count_Ctrl_A;
@@ -212,7 +216,7 @@ int text_init() {
     }
 
 
-#if MODEL == MODEL_FOENIX_A2560K
+#if MODEL == MODEL_FOENIX_A2560K || MODEL == MODEL_FOENIX_GENX || MODEL == MODEL_FOENIX_A2560X
 
     chan_b->master_control = MasterControlReg_B;
     chan_b->text_cells = ScreenText_B;
@@ -606,7 +610,7 @@ void text_scroll(short screen) {
         short row, column;
         p_text_channel chan = &text_channel[screen];
 
-#if MODEL == MODEL_FOENIX_A2560K
+#if MODEL == MODEL_FOENIX_A2560K || MODEL == MODEL_FOENIX_GENX || MODEL == MODEL_FOENIX_A2560X
         for (row = 0; row < chan->rows_visible - 1; row++) {
             short offset1 = row * chan->columns_max;
             short offset2 = (row + 1) * chan->columns_max;

@@ -14,7 +14,7 @@ typedef void (*p_int_handler)();
  * Interrupt control registers
  */
 
-#if MODEL == MODEL_FOENIX_A2560K
+#if (MODEL == MODEL_FOENIX_A2560K || MODEL == MODEL_FOENIX_GENX || MODEL == MODEL_FOENIX_A2560X)
 
 #define PENDING_GRP0 		((volatile unsigned short *)0xFEC00100)
 #define PENDING_GRP1 		((volatile unsigned short *)0xFEC00102)

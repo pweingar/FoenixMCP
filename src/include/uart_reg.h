@@ -7,7 +7,7 @@
 
 #include "sys_general.h"
 
-#if MODEL == MODEL_FOENIX_A2560K
+#if MODEL == MODEL_FOENIX_A2560K || MODEL == MODEL_FOENIX_GENX || MODEL == MODEL_FOENIX_A2560X
 #define UART1_BASE              0xFEC023F8  /* Base address for UART 1 (COM1) */
 #define UART2_BASE              0xFEC022F8  /* Base address for UART 2 (COM2) */
 

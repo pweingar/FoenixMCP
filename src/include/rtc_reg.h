@@ -7,7 +7,7 @@
 
 #include "sys_general.h"
 
-#if MODEL == MODEL_FOENIX_A2560K
+#if MODEL == MODEL_FOENIX_A2560K || MODEL == MODEL_FOENIX_GENX || MODEL == MODEL_FOENIX_A2560X
 
 #define RTC_BASE        ((volatile unsigned char *)0xFEC00080)
 #define RTC_SEC         ((volatile unsigned char *)0xFEC00080)

@@ -7,6 +7,8 @@
     #define DEFAULT_LOG_LEVEL LOG_TRACE
 #endif
 
+#include "features.h"
+#include "sys_general.h"
 #include "snd/sid.h"
 #include "sound_reg.h"
 #include "dev/rtc.h"
@@ -28,7 +30,7 @@ volatile unsigned char * sid_get_base(short sid) {
             return SID_INT_L_V1_FREQ_LO;
         case 2:
             return SID_INT_R_V1_FREQ_LO;
-#if MODEL == MODEL_FOENIX_A2560K
+#if MODEL == MODEL_FOENIX_A2560K || MODEL == MODEL_FOENIX_GENX || MODEL == MODEL_FOENIX_A2560X
         case 3:
             return SID_EXT_L_V1_FREQ_LO;
         case 4:
@@ -60,9 +62,15 @@ void sid_init(short sid) {
  */
 void sid_init_all() {
     int sid;
-    for (sid = 0; sid < N_SIDS; sid++) {
+#if HAS_EXTERNAL_SIDS
+    #define N_EXT_SIDS 2
+#else
+    #define N_EXT_SIDS 0
+#endif
+    for (sid = 0; sid <= 2+N_EXT_SIDS; sid++) {
         sid_init(sid);
     }
+
 }
 
 /*
@@ -154,7 +162,7 @@ void sid_test_internal() {
 	*SID_INT_R_MODE_VOL = 0;
 }
 
-#if MODEL == MODEL_FOENIX_A2560K
+#if HAS_EXTERNAL_SIDS
 void sid_test_external() {
     unsigned char i;
 	unsigned int j;
@@ -240,4 +248,4 @@ void sid_test_external() {
 	*SID_EXT_L_MODE_VOL = 0;
 	*SID_EXT_R_MODE_VOL = 0;
 }
-#endif /* MODEL == MODEL_FOENIX_A2560K */
+#endif /* HAS_EXTERNAL_SIDS */

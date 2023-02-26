@@ -9,6 +9,7 @@
  */
 void sys_get_information(p_sys_info info) {
     unsigned long gabe_id = 0;
+    unsigned short genx_model_id = 0;
     unsigned short clock_speed = 0;
     unsigned short cpu = 0;
     unsigned short machine_id = 0;
@@ -21,7 +22,7 @@ void sys_get_information(p_sys_info info) {
 
     info->system_ram_size = 0x400000;
 
-#if MODEL == MODEL_FOENIX_A2560K
+#if MODEL == MODEL_FOENIX_A2560K || MODEL == MODEL_FOENIX_GENX || MODEL == MODEL_FOENIX_A2560X
     gabe_id = *GABE_SUBVER_ID;
     clock_speed = (gabe_id & 0xE0) >> 5;
     cpu = (gabe_id & 0xF000) >> 12;
@@ -33,11 +34,27 @@ void sys_get_information(p_sys_info info) {
     info->has_ethernet = 1;
     info->screens = 2;
 
+#if MODEL == MODEL_FOENIX_GENX || MODEL == MODEL_FOENIX_A2560X
+    genx_model_id = *GABE_SUB_MODEL_ID; // This gets the MID on the board that tells us if it is a PB/LB/CU
+                                        // Now, that doesn't tell us if it is stuffed with audio chip or not
+                                        // However, those will tell us about if there is a Floppy or not
+                                        // This of course is good also for the A2560X
+    genx_model_id = genx_model_id & GABE_SUB_MOD_MASK;  // This isolate 2 bits, 
+    // 00 = PB
+    // 01 = LB
+    // 10 = CU
+    info->sub_model = genx_model_id;
+#else 
+    info->sub_model = 0;
+#endif
+
     // Get the FPGA information
     info->fpga_date = /* YYYYMMDD */
         ((((*GABE_FIRMWARE_DATE) & GABE_FIRMWARE_DATE_YEAR_MASK) + 2000) << 16) |
         ((*GABE_FIRMWARE_DATE) & GABE_FIRMWARE_DATE_MONTH_MASK) |
         (((*GABE_FIRMWARE_DATE) & GABE_FIRMWARE_DATE_DAY_MASK) >> 16 );
+
+    // Get the FPGA number and version/sub-version
     info->fpga_model = (*GABE_CHIP_VERSION & GABE_CHIP_N_MASK) >> 16;
     info->fpga_version = *GABE_CHIP_VERSION & GABE_CHIP_V_MASK;
     info->fpga_subver = (gabe_id & GABE_CHIP_SV_MASK) >> 16;
@@ -182,7 +199,12 @@ void sys_get_information(p_sys_info info) {
             break;
 
         case MODEL_FOENIX_GENX:
-            info->model_name = "A2560 GenX";
+            switch (genx_model_id) {
+                case 0: info->model_name = "GenX32 - PB"; break;
+                case 1: info->model_name = "GenX32 - LB"; break;
+                case 2: info->model_name = "GenX32 - CUBE"; break;
+                default: info->model_name = "GenX32"; break;
+            }        
             break;
 
         case MODEL_FOENIX_C256U_PLUS:
@@ -194,7 +216,12 @@ void sys_get_information(p_sys_info info) {
             break;
 
         case MODEL_FOENIX_A2560X:
-            info->model_name = "A2560 X";
+            switch (genx_model_id) {
+                case 0: info->model_name = "A2560X - PB"; break;
+                case 1: info->model_name = "A2560X - LB"; break;
+                case 2: info->model_name = "A2560X - CUBE"; break;
+                default: info->model_name = "A2560 X"; break;
+            }
             break;
 
         case MODEL_FOENIX_A2560U:
@@ -210,3 +237,40 @@ void sys_get_information(p_sys_info info) {
             break;
     }
 }
+
+#if MODEL == MODEL_FOENIX_GENX || MODEL == MODEL_FOENIX_A2560X
+static short genx_leds = 0;
+
+/*
+ * Set the color of the LED for the floppy drive
+ *
+ * Inputs:
+ * colors = color specification, three bits: 0x_____RGB
+ */
+void genx_set_fdc_led(short colors) {
+    genx_leds = (genx_leds & 0xFFF8) | (colors & 0x07);
+    *GABE_GENX_STAT_LEDS = genx_leds;
+}
+
+/*
+ * Set the color of the LED for the SD card slot
+ *
+ * Inputs:
+ * colors = color specification, three bits: 0x_____RGB
+ */
+void genx_set_sdc_led(short colors) {
+    genx_leds = (genx_leds & 0xFFC7) | ((colors & 0x07) << 3);
+    *GABE_GENX_STAT_LEDS = genx_leds;
+}
+
+/*
+ * Set the color of the LED for the IDE hard drive
+ *
+ * Inputs:
+ * colors = color specification, three bits: 0x_____RGB
+ */
+void genx_set_hdc_led(short colors)  {
+    genx_leds = (genx_leds & 0xFE3F) | ((colors & 0x07) << 6);
+    *GABE_GENX_STAT_LEDS = genx_leds;
+}
+#endif

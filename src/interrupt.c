@@ -2,6 +2,7 @@
  * Definitions for the interrupt controls
  */
 
+#include "features.h"
 #include "interrupt.h"
 
 #define MAX_HANDLERS 48
@@ -174,7 +175,7 @@ void int_vicky_channel_a() {
 	}
 }
 
-#if MODEL == MODEL_FOENIX_A2560K
+#if HAS_DUAL_SCREEN
 /*
  * Interrupt dispatcher for Vicky Channel B interrupts (8 - 15)
  */

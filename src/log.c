@@ -17,7 +17,7 @@
 
 #if MODEL == MODEL_FOENIX_A2560U || MODEL == MODEL_FOENIX_A2560U_PLUS
 #include "A2560U/gabe_a2560u.h"
-#elif MODEL == MODEL_FOENIX_A2560K
+#elif (MODEL == MODEL_FOENIX_A2560K || MODEL == MODEL_FOENIX_GENX || MODEL == MODEL_FOENIX_A2560X)
 #include "A2560K/gabe_a2560k.h"
 #endif
 
@@ -33,7 +33,7 @@ static void (*do_log)(const char* message);
 static void log_to_uart(const char* message);
 static void log_to_screen(const char* message);
 
-#define UART_COM1 0
+#define UART_COM1 1
 
 /* Can use the buzzer as sound clues */
 void buzzer_on(void) {
@@ -42,7 +42,7 @@ void buzzer_on(void) {
 
 
 void buzzer_off(void) {
-    *(GABE_CTRL_REG) &= ~BUZZER_CONTROL;    
+    *(GABE_CTRL_REG) &= ~BUZZER_CONTROL;
 }
 
 

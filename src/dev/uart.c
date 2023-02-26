@@ -79,21 +79,14 @@ void uart_init(short uart) {
     volatile unsigned char * uart_base = uart_get_base(uart);
 
     if (uart_base) {
-        /* Default default speed */
-        uart_setbps(uart, UART_115200);
+        /* Default to 9600 bps */
+        uart_setbps(uart, UART_9600);
 
         /* Set: no parity, 1 stop bit, 8 data bits */
         uart_setlcr(uart,  LCR_PARITY_NONE | LCR_STOPBIT_1 | LCR_DATABITS_8);
 
-#if 0 && (MODEL == MODEL_FOENIX_A2560U || MODEL == MODEL_FOENIX_A2560U_PLUS) // TODO Fix ?
-        /* The A2560U has a 16750 rather than 16550
-        uart_base[UART_FCR] = 39;
-        uart_base[UART_IER] = 0;
-        uart_base[UART_MCR] = 3;
-#else
         /* Enable FIFO, set for 56 byte trigger level */
         uart_base[UART_FCR] = 0xC1;
-#endif
     }
 }
 
@@ -116,12 +109,20 @@ bool uart_has_bytes(short uart) {
  * Return true (non-zero) if the UART transmit FIFO is not full
  *
  * @param uart the number of the UART: 0 for COM1, 1 for COM2
- * @return non-zero if the FIFO can accept a byte, false if it is full
+ * @return non-zero if the FIFO can accept a byte, 0 if it is full
  */
-bool uart_can_send(short uart) {
+short uart_can_send(short uart) {
     volatile unsigned char * uart_base = uart_get_base(uart);
 
-    return uart_base && (uart_base[UART_LSR] & LSR_XMIT_EMPTY) ? true : false;
+    if (uart_base) {
+        if (uart_base[UART_LSR] & LSR_XMIT_EMPTY) {
+            return 1;
+        } else {
+            return 0;
+        }
+    } else {
+        return 0;
+    }
 }
 
 /*
@@ -210,7 +211,7 @@ short uart_status(p_channel chan) {
  * @param mode an unused parameter
  * @return 0 on success, any other number is an error
  */
-short uart_open(p_channel chan, const unsigned char * spec, short mode) {
+short uart_open(p_channel chan, const char * spec, short mode) {
     unsigned short bps = 0, lcr = 0;
     char * saveptr;
     char spec_copy[80];
@@ -375,7 +376,7 @@ short uart_read_b(p_channel chan) {
  * @param size the size of the buffer.
  * @return number of bytes read, any negative number is an error code
  */
-short uart_read(p_channel chan, unsigned char * buffer, short size) {
+short uart_read(p_channel chan, char * buffer, short size) {
     short i = 0, count = 0;
     for (i = 0; i < size; i++) {
         buffer[i] = uart_get(cdev_to_uart(chan->dev));
@@ -393,7 +394,7 @@ short uart_read(p_channel chan, unsigned char * buffer, short size) {
  * @param size the size of the buffer.
  * @returns number of bytes read, any negative number is an error code
  */
-short uart_readline(p_channel chan, unsigned char * buffer, short size) {
+short uart_readline(p_channel chan, char * buffer, short size) {
     short i = 0, count = 0;
     for (i = 0; i < size; i++) {
         char c = uart_get(cdev_to_uart(chan->dev));
@@ -427,7 +428,7 @@ short uart_write_b(p_channel chan, unsigned char c) {
  * @param size the size of the buffer.
  * @return number of bytes written, any negative number is an error code
  */
-short uart_write(p_channel chan, const unsigned char * buffer, short size) {
+short uart_write(p_channel chan, const char * buffer, short size) {
     int i;
     for (i = 0; i < size; i++) {
         uart_put(cdev_to_uart(chan->dev), buffer[i]);
@@ -463,7 +464,6 @@ short uart_install() {
         return result;
     }
 
-#if MODEL == MODEL_FOENIX_A2560K
     dev.name = "COM2";
     dev.number = CDEV_COM2;
 
@@ -472,5 +472,4 @@ short uart_install() {
     if (result) {
         return result;
     }
-#endif
 }

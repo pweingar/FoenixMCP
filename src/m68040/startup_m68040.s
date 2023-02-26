@@ -13,9 +13,6 @@
 ;
 ; Interrupt registers for A2560U and U+
 ;
-; PENDING_GRP0 = $00B00100
-; PENDING_GRP1 = $00B00102
-; PENDING_GRP2 = $00B00104
 
 PENDING_GRP0 = $FEC00100
 PENDING_GRP1 = $FEC00102
@@ -124,6 +121,7 @@ PENDING_GRP2 = $FEC00104
             code
 
 coldboot:   move.w #$2700,SR        ; Supervisor mode, Interrupt mode (68040), disable all interrupts
+  move.l #$0,$fec80008 ; black border
             lea ___STACK,sp
             bsr _int_disable_all
 
@@ -134,8 +132,8 @@ coldboot:   move.w #$2700,SR        ; Supervisor mode, Interrupt mode (68040), d
 clrloop:    move.l #0,(a0)+
             subq.l #4,d0
             bne	clrloop
-
-callmain:   jsr ___main             ; call __main to transfer to the C code
+  move.l #$ffff00ff,$fec80008
+callmain:   jsr _main             ; call __main to transfer to the C code
 
 ;	endless loop; can be changed accordingly
 ___exit:

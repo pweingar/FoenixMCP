@@ -18,6 +18,7 @@
 #define MODEL_FOENIX_A2560X         8
 #define MODEL_FOENIX_A2560U         9
 #define MODEL_FOENIX_A2560K         11
+#define MODEL_FOENIX_A2560M         12
 
 /* IDs for the CPUs supported */
 
@@ -33,6 +34,7 @@
 #define CPU_486DX2_50               0x08  /* Intel 486 chips... */
 #define CPU_486DX2_60               0x09
 #define CPU_486DX4                  0x0A
+#define CPU_MC68EC060               0x0B  /* New things Coming... */
 
 /* Clock speeds */
 
@@ -53,11 +55,12 @@ typedef struct s_sys_info {
     unsigned short mcp_rev;         /* Current revision, or sub-version of the MCP kernel */
     unsigned short mcp_build;       /* Current vuild # of the MCP kernel */
     unsigned short model;           /* Code to say what model of machine this is */
+    unsigned short sub_model;         /* 0x00 = PB, 0x01 = LB, 0x02 = CUBE */
     const char * model_name;        /* Human readable name of the model of the computer */
     unsigned short cpu;             /* Code to say which CPU is running */
     const char * cpu_name;          /* Human readable name for the CPU */
     unsigned int cpu_clock_khz;     /* Speed of the CPU clock in KHz */
-    unsigned long fpga_date;        /* YYYYMMDD */
+    unsigned long fpga_date;        /* YYYYMMDD */    
     unsigned long fpga_model;       /* FPGA model number */
     unsigned short fpga_version;    /* FPGA version */
     unsigned short fpga_subver;     /* FPGA sub-version */
@@ -76,5 +79,31 @@ typedef struct s_sys_info {
  * info = pointer to a s_sys_info structure to fill out
  */
 extern void sys_get_information(p_sys_info info);
+
+#if MODEL == MODEL_FOENIX_GENX || MODEL == MODEL_FOENIX_A2560X
+/*
+ * Set the color of the LED for the floppy drive
+ *
+ * Inputs:
+ * colors = color specification, three bits: 0x_____RGB
+ */
+extern void genx_set_fdc_led(short colors);
+
+/*
+ * Set the color of the LED for the SD card slot
+ *
+ * Inputs:
+ * colors = color specification, three bits: 0x_____RGB
+ */
+extern void genx_set_sdc_led(short colors);
+
+/*
+ * Set the color of the LED for the IDE hard drive
+ *
+ * Inputs:
+ * colors = color specification, three bits: 0x_____RGB
+ */
+extern void genx_set_hdc_led(short colors);
+#endif
 
 #endif

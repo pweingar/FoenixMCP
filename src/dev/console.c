@@ -5,14 +5,8 @@
  *
  */
 
-#include "log_level.h"
-#ifndef DEFAULT_LOG_LEVEL
-    #define DEFAULT_LOG_LEVEL LOG_INFO
-#endif
-
 #include <ctype.h>
 #include <string.h>
-#include "errors.h"
 #include "log.h"
 #include "types.h"
 #include "constants.h"
@@ -95,15 +89,15 @@ const t_ansi_seq ansi_sequence[] = {
  * c = the character to test
  *
  * Returns:
- * false if the character is not an ANSI initial, true if it is
+ * 0 if the character is not an ANSI initial, 1 if it is
  */
-bool ansi_start_code(char c) {
+short ansi_start_code(char c) {
     switch (c) {
         case '\x1b':
-            return true;
+            return 1;
 
         default:
-            return false;
+            return 0;
     }
 }
 
@@ -533,17 +527,17 @@ short con_read_b(p_channel chan) {
 
 #if MODEL == MODEL_FOENIX_A2560K
 #ifdef KBD_POLLED
-            //ps2_mouse_get_packet();
+            ps2_mouse_get_packet();
             c = kbdmo_getc_poll();
 #else
             c = kbdmo_getc();
 #endif
 #else
-#ifdef KBD_POLLED
-            c = kbd_getc_poll();
-#else
+ #ifdef KBD_POLLED
+           c = kbd_getc_poll();
+ #else
             c = kbd_getc();
-#endif
+ #endif
 #endif
         }
 
@@ -651,7 +645,7 @@ short con_write(p_channel chan, const uint8_t * buffer, short size) {
     return i;
 }
 
-bool con_has_input(p_channel chan) {
+short con_has_input(p_channel chan) {
     p_console_data con_data;
     char c;
 
@@ -660,7 +654,7 @@ bool con_has_input(p_channel chan) {
 
     if (con_data->key_buffer != 0) {
         /* If we already peeked and have a character... return true */
-        return true;
+        return 1;
 
     } else {
         /* Otherwise, peek at the keyboard to see if there is a valid key */
@@ -673,8 +667,8 @@ bool con_has_input(p_channel chan) {
                 c = kbdmo_getc();
     #endif
     #else
-    #ifdef KBD_POLLED
-                c = kbd_getc_poll();
+    #ifdef KBD_POLLED  
+              c = kbd_getc_poll();      
     #else
                 c = kbd_getc();
     #endif
@@ -682,12 +676,12 @@ bool con_has_input(p_channel chan) {
 
         if (c == 0) {
             /* No: return false */
-            return false;
+            return 0;
 
         } else {
             /* Yes: save the key we got and return true */
             con_data->key_buffer = c;
-            return true;
+            return 1;
         }
     }
 }
@@ -796,15 +790,27 @@ short con_install() {
     dev.ioctrl = con_ioctrl;
 
     result = cdev_register(&dev);
-    if (result != E_OK) {
+    if (result) {
         return result;
     }
 
     dev.name = "EVID";
     dev.number = CDEV_EVID;
+    dev.init = con_init;
+    dev.open = con_open;
+    dev.close = con_close;
+    dev.read = con_read;
+    dev.readline = con_readline;
+    dev.read_b = con_read_b;
+    dev.write = con_write;
+    dev.write_b = con_write_b;
+    dev.flush = con_flush;
+    dev.seek = con_seek;
+    dev.status = con_status;
+    dev.ioctrl = con_ioctrl;
 
     result = cdev_register(&dev);
-    if (result != E_OK) {
+    if (result) {
         return result;
     }
 
@@ -812,7 +818,7 @@ short con_install() {
 
     chan_open(CDEV_CONSOLE, 0, 0);
 
-#if MODEL == MODEL_FOENIX_A2560K
+#if HAS_DUAL_SCREEN
     chan_open(CDEV_EVID, 0, 0);
 #endif
 

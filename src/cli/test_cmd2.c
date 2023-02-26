@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "features.h"
 #include "cli.h"
 #include "cli/test_cmds.h"
 #include "cli/sound_cmds.h"
@@ -34,6 +35,9 @@
 
 #if MODEL == MODEL_FOENIX_A2560K
 #include "dev/kbd_mo.h"
+#endif
+
+#if HAS_DUAL_SCREEN
 #include "dev/txt_a2560k_a.h"
 #include "dev/txt_a2560k_b.h"
 #endif
@@ -378,7 +382,7 @@ short cli_mem_test(short channel, int argc, const char * argv[]) {
     char message[80];
     unsigned long i;
 
-#if MODEL == MODEL_FOENIX_A2560K
+#if (MODEL == MODEL_FOENIX_A2560K || MODEL == MODEL_FOENIX_GENX || MODEL == MODEL_FOENIX_A2560X)
     if (argc > 1) {
         if ((strcmp(argv[1], "MERA") == 0) || (strcmp(argv[1], "mera") == 0)) {
             mem_start = 0x02000000;
@@ -425,7 +429,7 @@ short cli_mem_test(short channel, int argc, const char * argv[]) {
     return 0;
 }
 
-#if MODEL == MODEL_FOENIX_A2560K
+#if HAS_FLOPPY
 short cli_test_recalibrate(short screen, int argc, const char * argv[]) {
     unsigned char buffer[512];
     short i;
@@ -625,8 +629,8 @@ short cli_test_create(short screen, int argc, const char * argv[]) {
     }
 }
 
+#if HAS_PARALLEL_PORT
 short cli_test_lpt(short screen, int argc, const char * argv[]) {
-#if MODEL == MODEL_FOENIX_A2560K
     char message[80];
     unsigned char scancode;
 
@@ -704,12 +708,11 @@ short cli_test_lpt(short screen, int argc, const char * argv[]) {
                 break;
         }
     }
-#endif
+
     return 0;
 }
 
 short cmd_test_print(short screen, int argc, const char * argv[]) {
-#if MODEL == MODEL_FOENIX_A2560K
     const char * test_pattern = "0123456789ABCDEFGHIJKLMNOPQRTSUVWZXYZ\r\n";
 
     char message[80];
@@ -742,9 +745,9 @@ short cmd_test_print(short screen, int argc, const char * argv[]) {
         sprintf(message, "Could not open channel to printer: %s\n", err_message(lpt));
         print(screen, message);
     }
-#endif
     return 0;
 }
+#endif
 
 /**
  * Test the ANSI escape codes
@@ -849,20 +852,21 @@ static short cli_test_textscroll (short screen, int argc, const char * argv[]) {
         return 0;
     }        
 
-#if MODEL == MODEL_FOENIX_A2560K
-        switch (screen) {
-        case TXT_SCREEN_A2560K_A: 
-            scr = (char*)ScreenText_A;
-            break;
-        case TXT_SCREEN_A2560K_B:
-            scr = (char*)ScreenText_B;
-            break;
-        default:
-            // How would we even get here ??
-            return 0;
-        }
+#if HAS_DUAL_SCREEN
+    switch (screen) {
+    case TXT_SCREEN_A2560K_A: 
+        scr = (char*)ScreenText_A;
+        break;
+    case TXT_SCREEN_A2560K_B:
+        scr = (char*)ScreenText_B;
+        break;
+    default:
+        // How would we even get here ??
+        // TODO return error somehow
+        return 0;
+    }
 #elif MODEL == MODEL_FOENIX_A2560U || MODEL == MODEL_FOENIX_A2560U_PLUS
-       scr = (char*)ScreenText_A;
+    scr = (char*)ScreenText_A;
 #endif 
 
     // Fill screen byte by byte
@@ -921,34 +925,42 @@ const t_cli_test_feature cli_test_features[] = {
     {"BITMAP", "BITMAP: test the bitmap screen", cli_test_bitmap},
     {"CREATE", "CREATE <path>: test creating a file", cli_test_create},
     {"IDE", "IDE: test reading the MBR of the IDE drive", cli_test_ide},
-#if MODEL == MODEL_FOENIX_A2560K
+#if HAS_FLOPPY
     {"FDC", "FDC DSKCHG | [<lba> [WRITE <data>]]: test reading/writing the MBR from the floppy drive", cli_test_fdc},
+#endif
+#if HAS_SNES_GAMEPAD
     {"GAMEPAD", "GAMEPAD [0 | 1]: test SNES gamepads", cli_test_gamepad},
 #endif    
     {"JOY", "JOY: test the joystick", cli_test_joystick},
-#if MODEL == MODEL_FOENIX_A2560K
+#if HAS_PARALLEL_PORT
     {"LPT", "LPT: test the parallel port", cli_test_lpt},
 #endif
     {"MEM", "MEM [SYS|MERA]: test reading and writing of system or MERA memory", cli_mem_test},
-#if MODEL == MODEL_FOENIX_A2560K
+#if HAS_SUPERIO
     {"MIDILOOP", "MIDILOOP: perform a loopback test on the MIDI ports", midi_loop_test},
     {"MIDIRX", "MIDIRX: perform a receive test on the MIDI ports", midi_rx_test},
     {"MIDITX", "MIDITX: send a note to a MIDI keyboard", midi_tx_test},
-#endif    
+#endif
+#if HAS_OPL3
     {"OPL3", "OPL3: test the OPL3 sound chip", opl3_test},
-#if MODEL == MODEL_FOENIX_A2560K
+#endif
+#if HAS_OPN
     {"OPN", "OPN [EXT|INT]: test the OPN sound chip", opn_test},
+#endif
+#if HAS_OPM
     {"OPM", "OPM [EXT|INT]: test the OPM sound chip", opm_test},
 #endif
     {"PANIC", "PANIC: test the kernel panic mechanism", cli_test_panic},
     {"PS2", "PS2: test the PS/2 keyboard", cli_test_ps2},
     {"PSG", "PSG [EXT|INTL|INTR|INTS]: test the PSG sound chip", psg_test},
+#if HAS_PARALLEL_PORT
     {"PRINT", "PRINT: sent text to the printer", cmd_test_print},
-#if MODEL == MODEL_FOENIX_A2560K
+#endif
+#if HAS_FLOPPY
     {"RECALIBRATE", "RECALIBRATE: recalibrate the floppy drive", cli_test_recalibrate},
 #endif
     {"RTC", "RTC: Test the RTC interrupts", cli_test_rtc},
-#if MODEL == MODEL_FOENIX_A2560K
+#if HAS_FLOPPY
     {"SEEK", "SEEK <track>: move the floppy drive head to a track", cli_test_seek},
 #endif
     {"SID", "SID [EXT|INT]: test the SID sound chips", sid_test},
@@ -1004,4 +1016,12 @@ short cmd_test(short screen, int argc, const char * argv[]) {
     }
 
     return 0;
+}
+
+// This is meant as a buffer so because of one byte missing in the transfer might get the whole command Test to fail.
+// Don't use this routine.
+short cmd_Dummy (short screen, int argc, const char * argv[]) 
+{
+    argc = argc + 1;
+    return (argc);
 }

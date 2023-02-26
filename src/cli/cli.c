@@ -361,9 +361,6 @@ short cli_exec(short channel, char * command, int argc, const char * argv[]) {
  * Make sure all the console settings are setup so that the console works correctly
  */
 void cli_ensure_console(short channel) {
-
-    TRACE1("cli_ensure_console(%d)", channel);
-
     // Make sure the console is set up correctly for the CLI
     sys_chan_ioctrl(channel, CON_IOCTRL_ECHO_OFF, 0, 0);
     sys_chan_ioctrl(channel, CON_IOCTRL_ANSI_ON, 0, 0);
@@ -371,8 +368,6 @@ void cli_ensure_console(short channel) {
 
     // Make sure the screen has text enabled
     txt_set_mode(sys_chan_device(channel), TXT_MODE_TEXT);
-
-    TRACE1("cli_ensure_console returning", channel);
 }
 
 /**
@@ -659,8 +654,6 @@ short cli_readline(short channel, char * command_line) {
                     print(channel, "\x1b[3G\x1b[K");
 
                 } else if (c == CHAR_BS) {
-					TRACE("HANDLING BACKSPACE");
-					
                     // Backspace
                     if (i > 0) {
                         i--;
@@ -670,7 +663,6 @@ short cli_readline(short channel, char * command_line) {
                         }
                         print(channel, "\x1b[1P");
                     }
-					TRACE("HANDLING BACKSPACE");
                 }
 
             } else {
@@ -808,7 +800,6 @@ void cli_draw_window(short channel, const char * status, short is_active) {
 
     // Save the current region and cursor location
     sys_txt_get_xy(dev, &cursor);
-    DEBUG("Backup current region");
     sys_txt_get_region(dev, &old_region);
     sys_txt_get_color(dev, &foreground, &background);
 
@@ -817,7 +808,6 @@ void cli_draw_window(short channel, const char * status, short is_active) {
     region.origin.y = 0;
     region.size.width = 0;
     region.size.height = 0;
-    DEBUG("Get full screen dimensions");
     sys_txt_set_region(dev, &region);
     sys_txt_get_region(dev, &full_region);
 
@@ -845,7 +835,6 @@ void cli_draw_window(short channel, const char * status, short is_active) {
 
     // Restore the region and cursor location
     sys_txt_set_color(dev, foreground, background);
-    DEBUG("Restore region and cursor location");
     sys_txt_set_region(dev, &old_region);
     sys_txt_set_xy(dev, cursor.x, cursor.y);
 
@@ -862,8 +851,6 @@ void cli_setup_screen(short channel, const char * path, short is_active) {
     t_rect full_region, command_region;
     char message[80];
 
-    DEBUG1("cli_setup_screen for channel %d", channel);
-
     short dev = sys_chan_device(channel);
 
     // Get the size of the screen
@@ -871,9 +858,6 @@ void cli_setup_screen(short channel, const char * path, short is_active) {
     full_region.origin.y = 0;
     full_region.size.width = 0;
     full_region.size.height = 0;
-
-    DEBUG2("cli_setup_screen: get screen size, dev=%d, region=%p", dev, &full_region);
-
     sys_txt_set_region(dev, &full_region);
     sys_txt_get_region(dev, &full_region);
 
@@ -887,7 +871,6 @@ void cli_setup_screen(short channel, const char * path, short is_active) {
     command_region.size.height = full_region.size.height - 1;
 
     // Restrict the region to the command panel
-    DEBUG("Restrict the region to the command panel");
     sys_txt_set_region(dev, &command_region);
 
     // Draw the window
@@ -929,7 +912,7 @@ short cli_repl(short channel) {
                 // char message[80];
                 // sprintf(message, "%d", strlen(cwd_buffer));
                 print(CDEV_CONSOLE, "");
-#if MODEL == MODEL_FOENIX_A2560K
+#if MODEL == MODEL_FOENIX_A2560K || MODEL == MODEL_FOENIX_GENX || MODEL == MODEL_FOENIX_A2560X
                 if (g_channels_swapped) {
                     // If channel has changed, deactivate old channel
                     cli_draw_window(CDEV_EVID, cwd_buffer, 0);
@@ -992,8 +975,6 @@ short cli_start_repl(short channel, const char * init_cwd) {
     short result = 0;
     short i = 0;
     t_point cursor;
-
-    TRACE2("cli_start_repl(%d,\"%s\")", channel, init_cwd);
 
     g_current_channel = channel;
 

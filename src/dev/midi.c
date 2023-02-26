@@ -2,6 +2,7 @@
  * Definitions for the MIDI ports
  */
 
+#include "features.h"
 #include "midi_reg.h"
 #include "dev/channel.h"
 #include "dev/midi.h"
@@ -10,7 +11,7 @@
 #include "sys_general.h"
 #include "timers.h"
 
-#if MODEL == MODEL_FOENIX_A2560K
+#if HAS_MIDI_PORTS
 
 /** Timeout for waiting on the MIDI interface */
 const long midi_timeout = 60;
@@ -18,37 +19,37 @@ const long midi_timeout = 60;
 /**
  * Wait for data to be ready to read...
  *
- * @return true on success, false if there is a timeout
+ * @return 1 on success, 0 if there is a timeout
  */
-bool midi_can_read() {
+short midi_can_read() {
     long target = timers_jiffies() + midi_timeout;
     do {
         if ((*MIDI_STAT & MIDI_STAT_RX_EMPTY) == 0) {
             // There is data waiting
-            return true;
+            return 1;
         }
     } while (target > timers_jiffies());
 
     // We have waited too long
-    return false;
+    return 0;
 }
 
 /**
  * Wait for the MIDI transmiter to be empty...
  *
- * @return true on success, false if there is a timeout
+ * @return 1 on success, 0 if there is a timeout
  */
 short midi_can_write() {
     long target = timers_jiffies() + midi_timeout;
     do {
         if ((*MIDI_STAT & MIDI_STAT_TX_BUSY) != 0) {
             // The transmit buffer is empty
-            return true;
+            return 1;
         }
     } while (target > timers_jiffies());
 
     // We have waited too long
-    return false;
+    return 0;
 }
 
 /**

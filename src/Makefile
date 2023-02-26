@@ -3,7 +3,7 @@
 # User may over-ride the UNIT and MEMORY parameters to specify target machine
 # and where the MCP will run (ram or flash)
 #
-UNIT := a2560u
+UNIT := a2560x
 MEMORY := ram
 
 # CPU_WDC65816                0x16  /* CPU code for the Western Design Center 65816 */
@@ -24,6 +24,7 @@ MEMORY := ram
 # MODEL_FOENIX_A2560K         11
 
 # Determine target CPU and MODEL based on the UNIT
+# The comments are on a separate line to avoid inserting white space in the commande line where these variables are used
 
 ifeq ($(UNIT),a2560k)
 # M68040V
@@ -47,16 +48,25 @@ export VBCC_CPU = 68040
 export MODEL_NUMBER = 4
 export cpu = m68040
 
+else ifeq ($(UNIT),a2560x)
+# M68040V
+export CPU_NUMBER = 6
+# VASM CPU flag
+export VASM_CPU = -m68040
+# VBCC CPU flag
+export VBCC_CPU = 68040
+# A2560X
+export MODEL_NUMBER = 8
+export cpu = m68040
+
 else ifeq ($(UNIT),a2560u)
-# The comments are on a separate line to avoid inserting white space in the commande line where these variables are used
 # M680SEC00
 export CPU_NUMBER = 0
 # VASM CPU flag
 export VASM_CPU = -m68000
 # VBCC CPU flag
 export VBCC_CPU = 68000
-export MODEL_NUMBER = 9		# A2560U
-export CFG_FILE = $(VBCC)/config/a2560u_ram
+export MODEL_NUMBER = 9
 export cpu = m68k
 endif
 
@@ -89,8 +99,14 @@ cpu_c_obj := $(subst .c,.o,$(cpu_c_src))
 dev_base_sources = dev/block.c dev/channel.c dev/console.c dev/fsys.c dev/pata.c dev/ps2.c dev/rtc.c dev/sdc.c dev/txt_screen.c dev/uart.c
 ifeq ($(UNIT),a2560k)
 dev_c_src := $(dev_base_sources) dev/fdc.c dev/kbd_mo.c dev/lpt.c dev/midi.c dev/txt_a2560k_a.o dev/txt_a2560k_b.o m68040/fdc_m68040.o
+else ifeq ($(UNIT),genx)
+dev_c_src := $(dev_base_sources) dev/fdc.c dev/lpt.c dev/midi.c dev/txt_a2560k_a.o dev/txt_a2560k_b.o m68040/fdc_m68040.o
+else ifeq ($(UNIT),a2560x)
+dev_c_src := $(dev_base_sources) dev/fdc.c dev/lpt.c dev/midi.c dev/txt_a2560k_a.o dev/txt_a2560k_b.o m68040/fdc_m68040.o
 else ifeq ($(UNIT),a2560u)
 dev_c_src := $(dev_base_sources) dev/txt_a2560u.o
+else
+dev_c_src := $(dev_base_sources)
 endif
 dev_c_obj := $(subst .c,.o,$(dev_c_src))
 

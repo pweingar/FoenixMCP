@@ -10,7 +10,6 @@
 #define PSG_PORT        ((volatile uint8_t *)0x00B20130)  /* Control register for the SN76489 */
 #define OPL3_PORT       ((volatile uint8_t *)0x00B20200)  /* Access port for the OPL3 */
 #define CODEC           ((volatile uint16_t *)0x00B20E00) /* Control register for the CODEC */
-#define N_SIDS          2 /* Number of SIDs supported by the system */
 #define SID_INT_L       ((volatile uint8_t *)0x00B21000)  /* Left SID base */
 #define SID_INT_R       ((volatile uint8_t *)0x00B21200)  /* Right SID base */
 #define SID_INT_N       ((volatile uint8_t *)0x00B21400)  /* Both SIDs */

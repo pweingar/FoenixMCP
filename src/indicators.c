@@ -15,13 +15,20 @@
 #include "dev/kbd_mo.h"
 #endif
 
-#if MODEL == MODEL_FOENIX_A2560K
+#if (MODEL == MODEL_FOENIX_A2560K || MODEL == MODEL_FOENIX_GENX || MODEL == MODEL_FOENIX_A2560X)
 short ind_state_color(short state) {
     switch (state) {
         case IND_ON:
             /* Green for on */
+#if MODEL == MODEL_FOENIX_A2560K
             return 0x02;
-
+#elif MODEL == MODEL_FOENIX_GENX
+            return 0x05;
+#elif MODEL == MODEL_FOENIX_A2560X
+            return 0x06;
+#else            
+            return 0x03; // That is not possble because of the #if so why did Stefany mean ?
+#endif
         case IND_ERROR:
             /* Red for error */
             return 0x04;
@@ -36,7 +43,15 @@ void ind_set_power(short state) {
     switch (state) {
         case IND_ON:
             /* Dark green for on */
+#if MODEL == MODEL_FOENIX_A2560K
             *RGB_LED = 0x00004000;
+#elif MODEL == MODEL_FOENIX_GENX
+            *RGB_LED = 0x00200020;
+#elif MODEL == MODEL_FOENIX_A2560X
+            *RGB_LED = 0x00202000;
+#else
+            *RGB_LED = 0x00004020;
+#endif
             break;
 
         case IND_ERROR:
@@ -51,6 +66,9 @@ void ind_set_power(short state) {
     }
 }
 
+#endif 
+
+#if MODEL == MODEL_FOENIX_A2560K
 void ind_set_fdc(short state) {
     kbdmo_set_fdc_led(ind_state_color(state));
 }
@@ -62,22 +80,27 @@ void ind_set_sdc(short state) {
 void ind_set_hdc(short state) {
     kbdmo_set_hdc_led(ind_state_color(state));
 }
-#else
-
-void ind_set_power(short state) {
-    ;
-}
-
+#elif MODEL == MODEL_FOENIX_GENX || MODEL == MODEL_FOENIX_A2560X
+// This is for GEN X Status LED
 void ind_set_fdc(short state) {
-    ;
+    genx_set_fdc_led(ind_state_color(state));
 }
 
 void ind_set_sdc(short state) {
-    ;
+    genx_set_sdc_led(ind_state_color(state));
 }
 
 void ind_set_hdc(short state) {
-    ;
+    genx_set_hdc_led(ind_state_color(state));
+}
+#else 
+void ind_set_fdc(short state) {
+}
+
+void ind_set_sdc(short state) {
+}
+
+void ind_set_hdc(short state) {
 }
 #endif
 
@@ -90,10 +113,11 @@ void ind_set_hdc(short state) {
  */
 void ind_set(short ind_number, short state) {
     switch (ind_number) {
+#if (MODEL == MODEL_FOENIX_A2560K || MODEL == MODEL_FOENIX_GENX || MODEL == MODEL_FOENIX_A2560X)        
         case IND_POWER:
             ind_set_power(state);
             break;
-
+#endif
         case IND_FDC:
             ind_set_fdc(state);
             break;
