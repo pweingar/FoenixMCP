@@ -641,9 +641,9 @@ void txt_a2560k_b_init() {
 
     /* Set default colour */
 #if MACHINE_FOENIX_A2560X
-    txt_a2560k_a_set_color(0x0F, 0x08);
+    txt_a2560k_b_set_color(0x0F, 0x08);
 #else
-    txt_a2560k_a_set_color(0x07, 0x04);
+    txt_a2560k_b_set_color(0x07, 0x04);
 #endif
 
     /* Set the font */
@@ -654,11 +654,11 @@ void txt_a2560k_b_init() {
 
     /* Set the border */
 #if MACHINE_FOENIX_A2560X
-    txt_a2560k_a_set_border(8, 8);                            /* Set up the border */
-    txt_a2560k_a_set_border_color(0x10, 0x00, 0x10);
+    txt_a2560k_b_set_border(8, 8);                            /* Set up the border */
+    txt_a2560k_b_set_border_color(0x10, 0x00, 0x10);
 #else
-    txt_a2560k_a_set_border(16, 16);                            /* Set up the border */
-    txt_a2560k_a_set_border_color(0, 0, 0x3f);
+    txt_a2560k_b_set_border(16, 16);                            /* Set up the border */
+    txt_a2560k_b_set_border_color(0, 0, 0x3f);
 #endif
     /*
      * Enable set_sizes, now that everything is set up initially
