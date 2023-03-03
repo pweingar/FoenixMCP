@@ -5,6 +5,7 @@
 #ifndef __SYS_GENERAL_H
 #define __SYS_GENERAL_H
 
+#include "features.h"
 #include "version.h"
 #include "types.h"
 
