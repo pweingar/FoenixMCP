@@ -2,6 +2,8 @@
  * Definitions for the interrupt controls
  */
 
+#include <string.h>
+
 #include "features.h"
 #include "interrupt.h"
 
@@ -33,9 +35,7 @@ unsigned short int_mask(unsigned short n) {
 void int_init() {
 	int i;
 
-	for (i = 0; i < MAX_HANDLERS; i++) {
-		g_int_handler[i] = 0;
-	}
+	memset(g_int_handler, 0, sizeof(g_int_handler));
 
     // At Reset, all of those already have those values
 	// the Pol are @ 0x0000 and normally pending are reseted, but it is not impossible that some might be triggered during init
