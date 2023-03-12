@@ -129,18 +129,24 @@ coldboot:   move.w #$2700,SR        ; Supervisor mode, Interrupt mode (68040), d
             moveq #0,d0   ; Disable 040's MMU
             movec d0,TC
 
-  move.l #$ffff8800,$fec80008
+  ;move.l #$ffff0000,$fec80008 ; border color for debug
             lea ___STACK,sp
             bsr _int_disable_all
 
             lea	___BSSSTART,a0
             move.l #___BSSSIZE,d0
             beq	callmain
+            moveq #0,d1
+            ; Be save in case BSS is not long word-aligned
+clrloop:    move.b d1,(a0)+
+            subq.l #1,d0
+            bpl.s  clrloop
 
-clrloop:    move.l #0,(a0)+
-            subq.l #4,d0
-            bne	clrloop
-  move.l #$ffff0000,$fec80008
+;clrloop:    move.l d1,(a0)+ ; faster but requires BSS to be 4bytes aligned
+;            subq.l #4,d0
+;            bpl.s  clrloop
+
+  ;move.l #$ffffff00,$fec80008 ; change border color
 callmain:   jsr _main             ; call __main to transfer to the C code
 
 ;	endless loop; can be changed accordingly

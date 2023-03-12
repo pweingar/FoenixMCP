@@ -4,7 +4,7 @@ VECTOR_START = 0x00000000;
 STORE_START = 0x00180000;
 KERNEL_START = 0x001C0000;
 
-STACK_LEN = 0x400;
+STACK_LEN = 0x2000;
 VECTOR_LEN = 0x400;
 STORE_LEN = 0x00030000;
 KERNEL_LEN = 0x00040000;
@@ -23,7 +23,7 @@ MEMORY
 SECTIONS
 {
   vectors : { *(VECTORS) } >vectors
-  bss (NOLOAD) : { *(BSS) } >storeage
+  bss ALIGN(4) (NOLOAD) : { *(BSS) } >storeage
   text ALIGN(0x02) : { *(CODE) } >kernel
   .dtors ALIGN(0x02) : { *(.dtors) } >kernel
   .ctors ALIGN(0x02) : { *(.ctors) } >kernel
@@ -33,7 +33,7 @@ SECTIONS
   ___heapend = STORE_START + STORE_LEN - STACK_LEN;
 
   ___BSSSTART = ADDR(bss);
-  ___BSSSIZE  = SIZEOF(bss);
+  ___BSSSIZE  = (SIZEOF(bss)+3)%4;
 
   ___USER_STACK = 0x00010000;
   ___STACK = STORE_START + STORE_LEN;

@@ -52,7 +52,7 @@ void log_init(void) {
     if (log_channel == LOG_CHANNEL_UART0) {
         uart_init(UART_COM1);
         do_log = log_to_uart;
-        log(LOG_INFO,"FOENIX DEBUG OUTPUT------------------------------------------------------------");
+        //log(LOG_INFO,"FOENIX DEBUG OUTPUT------------");
     }
     else
         do_log = log_to_screen;

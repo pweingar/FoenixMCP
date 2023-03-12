@@ -7,6 +7,9 @@
  */
 
 #include "log_level.h"
+#ifdef DEFAULT_LOG_LEVEL
+    //#undef DEFAULT_LOG_LEVEL
+#endif
 #ifndef DEFAULT_LOG_LEVEL
     #define DEFAULT_LOG_LEVEL LOG_TRACE
 #endif
@@ -54,22 +57,7 @@ short cdev_register(const p_dev_chan device) {
     dev = device->number;
     if (dev < CDEV_DEVICES_MAX) {
         // Copy the device description into the master table
-
-        p_dev_chan cdev = &g_channel_devs[dev];
-        cdev->number = device->number;
-        cdev->name = device->name;
-        cdev->init = device->init;
-        cdev->open = device->open;
-        cdev->close = device->close;
-        cdev->read = device->read;
-        cdev->readline = device->readline;
-        cdev->read_b = device->read_b;
-        cdev->write = device->write;
-        cdev->write_b = device->write_b;
-        cdev->status = device->status;
-        cdev->seek = device->seek;
-        cdev->flush = device->flush;
-        cdev->ioctrl = device->ioctrl;
+        memcpy(&g_channel_devs[dev], device, sizeof(t_dev_chan));
         return E_OK;
     } else {
         return DEV_ERR_BADDEV;

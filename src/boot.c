@@ -12,7 +12,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include "features.h"
+#include "sys_general.h"
 #include "boot.h"
 #include "constants.h"
 #include "errors.h"
@@ -20,7 +20,6 @@
 #include "log.h"
 #include "simpleio.h"
 #include "syscalls.h"
-#include "sys_general.h"
 #include "vicky_general.h"
 #include "cli/cli.h"
 #include "dev/kbd_mo.h"
@@ -223,7 +222,8 @@ short boot_screen() {
         LUT_0[4*i+3] = splashscreen_lut[4*i+3];
     }
 
-    /* Copy the bitmap to video RAM */
+#if 1
+    /* Copy the bitmap to video RAM, it has simple RLE compression */
     for (pixels = splashscreen_pix; *pixels != 0;) {
         unsigned char count = *pixels++;
         unsigned char pixel = *pixels++;
@@ -231,13 +231,23 @@ short boot_screen() {
             *vram++ = pixel;
         }
     }
-
+#else
+ #if 0
+    // For debug, try something more basic
+    const line_len = 640;
+    //memset(vram, 1, 640*480);
+    for (i=0; i < 640*480; i++)
+        vram[i] = 3;
+    for (i = 0; i < 480; i++)
+        vram[640*i + i] = 2;
+  #endif
+#endif
     /* Set up the bitmap */
-    *BM0_Addy_Pointer_Reg = 0;
+    *BM0_Addy_Pointer_Reg = 0; /* Start of VRAM */
     *BM0_Control_Reg = 1;
 
     /* Set a background color for the bitmap mode */
-#if MODEL == MODEL_FOENIX_A2560K || MODEL == MODEL_FOENIX_GENX || MODEL == MODEL_FOENIX_A2560X
+#if HAS_DUAL_SCREEN
     *BackGroundControlReg_B = 0x00202020;
     screen = 0;
 #else

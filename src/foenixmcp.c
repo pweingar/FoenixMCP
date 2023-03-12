@@ -140,11 +140,23 @@ void initialize() {
 
     /* Setup logging early */
     log_init();
+    #if 0
+    char msg[] = "This is some text to test that the debug to UART works ok\r\n";
+    {
+        char *c = (char*)msg;
+        while (*c) {
+            uart_put(1, *c++);
+        }
+    }
+
+    // The text below gets corrupted. VBCC libc's not being properly initialized if we didn't call ___main ?
+    //DEBUG("This is some text to test that the debug to UART works ok");
+    #endif
 
     /* Initialize the memory system */
     mem_init(0x3d0000);
 
-    // /* Hide the mouse */
+    /* Hide the mouse */
     mouse_set_visible(0);
 
     /* Initialize the variable system */
@@ -155,6 +167,7 @@ void initialize() {
 #if HAS_DUAL_SCREEN
     txt_a2560k_a_install();
     txt_a2560k_b_install();
+    log(LOG_INFO, "Initializing screens...");
     txt_init_screen(TXT_SCREEN_A2560K_A);
     txt_init_screen(TXT_SCREEN_A2560K_B);
 #elif MODEL == MODEL_FOENIX_A2560U || MODEL == MODEL_FOENIX_A2560U_PLUS
@@ -230,7 +243,7 @@ void initialize() {
         INFO("SDC driver installed.");
     }
 
-#if MODEL == MODEL_FOENIX_A2560K
+#if HAS_FLOPPY
     if (res = fdc_install()) {
         ERROR1("FAILED: Floppy drive initialization %d", res);
     } else {
@@ -254,13 +267,15 @@ void initialize() {
     }
 #endif
 
-#if HAS_SUPERIO
+#if HAS_PARALLEL_PORT
     if (res = lpt_install()) {
         log_num(LOG_ERROR, "FAILED: LPT installation", res);
     } else {
         log(LOG_INFO, "LPT installed.");
     }
+#endif
 
+#if HAS_MIDI_PORTS
     if (res = midi_install()) {
         log_num(LOG_ERROR, "FAILED: MIDI installation", res);
     } else {
@@ -292,7 +307,8 @@ void initialize() {
 int main(int argc, char * argv[]) {
     short result;
     short i;
-*((volatile uint32_t*const)0xfec80008) = 0xff00ff00L;
+//*((volatile uint32_t*const)0xfec80008) = 0xff99ff22L;
+
     initialize();
 
 //*((volatile uint32_t*const)0xfec00000) = 0x16;

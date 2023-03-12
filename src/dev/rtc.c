@@ -36,7 +36,7 @@ void rtc_init() {
     int_disable(INT_RTC);
 
     /* Make sure the RTC is on */
-    *RTC_CTRL = RTC_STOP;
+    *RTC_CTRL = (*RTC_CTRL & 0x07) | RTC_STOP;
 
     /*
      * For the moment: Every so often, the RTC interrupt gets acknowledged
@@ -91,7 +91,7 @@ short rtc_register_periodic(short rate, FUNC_V_2_V handler) {
         *RTC_ENABLES = RTC_PIE;
         int_enable(INT_RTC);
     }
-    return 0;
+
 }
 
 /*
@@ -178,7 +178,7 @@ void rtc_set_time(p_time time) {
     }
 
     /* Re-enable updates to the clock */
-    *RTC_CTRL = (ctrl & 0x7f) | RTC_STOP;
+    *RTC_CTRL = (ctrl & 0x07) | RTC_STOP;
     log(LOG_INFO, "RTC Enabled");
     log_num(LOG_INFO, "RTC Rates: ", *RTC_RATES);
     log_num(LOG_INFO, "RTC Enables: ", *RTC_ENABLES);
@@ -221,7 +221,7 @@ void rtc_get_time(p_time time) {
     second_bcd = *RTC_SEC;
 
     /* Re-enable updates to the clock */
-    *RTC_CTRL = ctrl;
+    *RTC_CTRL = (ctrl & 0x07) | RTC_STOP;
     log(LOG_INFO, "RTC Enabled");
     log_num(LOG_INFO, "RTC Rates: ", *RTC_RATES);
     log_num(LOG_INFO, "RTC Enables: ", *RTC_ENABLES);
