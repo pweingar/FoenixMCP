@@ -627,7 +627,7 @@ void txt_a2560k_b_init() {
     a2560k_b_caps.font_size_count = 1;
     a2560k_b_caps.font_sizes = a2560k_b_fonts;
 
-    /* Initialze the color lookup tables */
+    /* Initialize the color lookup tables */
     for (i = 0; i < VKY3_B_LUT_SIZE; i++) {
         VKY3_B_TEXT_LUT_FG[i] = a2560k_b_lut[i];
         VKY3_B_TEXT_LUT_BG[i] = a2560k_b_lut[i];
