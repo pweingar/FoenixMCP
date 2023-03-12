@@ -116,6 +116,7 @@ void ind_set_hdc(short state) {
  */
 void ind_set(short ind_number, short state) {
     switch (ind_number) {
+#if MODEL_FOENIX_A2560K || MODEL == MODEL_FOENIX_GENX || MODEL == MODEL_FOENIX_A2560X
         case IND_POWER:
             ind_set_power(state);
             break;
@@ -123,7 +124,7 @@ void ind_set(short ind_number, short state) {
         case IND_FDC:
             ind_set_fdc(state);
             break;
-
+#endif
         case IND_SDC:
             ind_set_sdc(state);
             break;
