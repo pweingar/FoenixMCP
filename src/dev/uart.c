@@ -170,6 +170,8 @@ unsigned char uart_get(short uart) {
         /* Return the byte */
         return uart_base[UART_TRHB];
     }
+    else
+        return 0; // This is rubbish data.
 }
 
 /**
@@ -215,7 +217,7 @@ short uart_open(p_channel chan, const unsigned char * spec, short mode) {
     char * saveptr;
     char spec_copy[80];
     char *token = 0;
-    short i = 0;
+    int i = 0;
     short bps_code = 0;
     short lcr_code = 0;
 
@@ -223,7 +225,7 @@ short uart_open(p_channel chan, const unsigned char * spec, short mode) {
     uart_init(cdev_to_uart(chan->dev));
 
     // Make a local copy of the specification so we can tokenize it
-    strncpy(spec_copy, spec, 80);
+    strncpy(spec_copy, (char*)spec, 80);
 
     // Get the first token
     saveptr = spec_copy;
@@ -459,18 +461,13 @@ short uart_install() {
 
     result = cdev_register(&dev);
 
-    if (result) {
+#if MODEL != MODEL_FOENIX_A2560K
+    if (result)
         return result;
-    }
-
-#if MODEL == MODEL_FOENIX_A2560K
+#else
     dev.name = "COM2";
     dev.number = CDEV_COM2;
-
     result = cdev_register(&dev);
-
-    if (result) {
-        return result;
-    }
+    return result;
 #endif
 }

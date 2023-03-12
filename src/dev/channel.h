@@ -97,7 +97,7 @@ extern short cdev_register(const p_dev_chan device);
  * Returns:
  * A pointer to the free channel, 0 if none are available.
  */
-extern p_channel chan_alloc();
+extern p_channel chan_alloc(short dev);
 
 /*
  * Return a channel to the pool of unused channels

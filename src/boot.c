@@ -190,7 +190,7 @@ short boot_screen() {
     t_rect region;
     short device = BOOT_DEFAULT;
     short screen;
-    char buffer[256];
+    char buffer[128];
     char entry[50];
     unsigned long target_jiffies = 0;
     unsigned long min_jiffies = 0;
@@ -269,7 +269,7 @@ short boot_screen() {
     sprintf(buffer, "BOOT: %s=SD CARD, %s=HARD DRIVE, %s=DEFAULT, %s=SAFE", f1, f2, space, cr_text);
 #endif
     txt_set_xy(screen, (80 - strlen(buffer)) / 2, 58);
-    sys_chan_write(screen, buffer, strlen(buffer));
+    sys_chan_write(screen, (const unsigned char*)buffer, strlen(buffer));
 
     // Get the information about the system
     sys_get_info(&info);

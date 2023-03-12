@@ -38,7 +38,7 @@ void print_c(short channel, char c) {
 void print(short channel, const char * message) {
 	TRACE1("print(%d,..)", channel);
 	
-    short ret = sys_chan_write(channel, message, strlen(message));
+    short ret = sys_chan_write(channel, (const unsigned char*)message, strlen(message));
     if (ret < 0)
         ERROR1("Error while printing: %d", ret);
 }

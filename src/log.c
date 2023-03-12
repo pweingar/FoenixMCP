@@ -135,7 +135,7 @@ void err_print(short channel, const char * message, short err_number) {
         sprintf(buffer, "%s: #%d\n", message, err_number);
     }
 
-    sys_chan_write(channel, buffer, strlen(buffer));
+    sys_chan_write(channel, (const unsigned char*)buffer, strlen(buffer));
 }
 
 /*
