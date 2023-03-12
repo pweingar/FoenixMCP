@@ -5,6 +5,7 @@
 #
 UNIT := a2560u
 MEMORY := ram
+COMPILER := calypsi
 
 # CPU_WDC65816                0x16  /* CPU code for the Western Design Center 65816 */
 # CPU_M68000                  0x20  /* CPU code for the Motorola 68000 */
@@ -60,25 +61,67 @@ export CFG_FILE = $(VBCC)/config/a2560u_ram
 export cpu = m68k
 endif
 
+export DEFINES = -DCPU=$(CPU_NUMBER) -DMODEL=$(MODEL_NUMBER)
+# -DKBD_POLLED
+export INCLUDES =-I. -I$(CURDIR)/include -I$(CURDIR)
+
 # Determine the correct configuration file (barring OS)
 
-ifeq ($(MEMORY),ram)
-export CFG_FILE = $(VBCC)/config/$(UNIT)_ram
+
+
+ifeq ($(COMPILER),vbcc)
+  # VBCC setup ----------------------------------------------------------------
+  AS = vasmm68k_mot
+  ASFLAGS = $(VASM_CPU) -quiet -Fvobj -nowarn=62
+  CC = vc
+  
+  # Figure out which VBCC config file to use
+  CFG_FILE = $(VBCC)/config/$(UNIT)
+  ifeq ($(MEMORY),ram)
+    CFG_FILE := $(CFG_FILE)_ram
+  else ifeq ($(MEMORY),flash)
+    CFG_FILE := $(CFG_FILE)_flash
+  else
+    $(error Memory not recognized)
+  endif
+  ifeq ($(OS),Windows_NT)
+  else
+    CFG_FILE := $(CFG_FILE)_linux
+  endif
+
+  CFLAGS = -S -cpu=$(VBCC_CPU) +$(CFG_FILE)
+
+else ifeq ($(COMPILER),calypsi)
+  # Calypsi setup -------------------------------------------------------------
+  AS=as68k
+  CC=cc68k
+  AR=nlib
+  LD=ln68k
+  CLIB = clib-68000-lc-ld-foenix.a
+  LDFLAGS=$(CLIB)
+
 else
-export CFG_FILE = $(VBCC)/config/$(UNIT)_flash
+  $(error Compiler not recognized)
 endif
 
-export AS = vasmm68k_mot
-export ASFLAGS = $(VASM_CPU) -quiet -Fvobj -nowarn=62 -DMODEL=$(MODEL_NUMBER)
-export CC = vc
-export DEFINES = -DCPU=$(CPU_NUMBER) -DMODEL=$(MODEL_NUMBER) # -DKBD_POLLED
+export ASFLAGS := $(ASFLAGS) $(DEFINES)
+export CFLAGS :=$(CFLAGS) $(DEFINES) $(INCLUDES)
 
+# Export variables so sub-Makefiles can use them
+export AS
+export CC
+export AR
+export RM
+export ASFLAGS
+export CFGLAGS:=$(CFLAGS)
+export DEFINES:=$(DEFINES)
+export INCLUDES:=$(INCLUDES)
+
+# Shell tools
 ifeq ($(OS),Windows_NT)
-	export CFLAGS = -cpu=$(VBCC_CPU) +$(CFG_FILE) -I. -I$(CURDIR)/include -I$(CURDIR)
-	export RM = cmd /C del /Q /F
+  export RM = cmd /C del /Q /F
 else
-	export CFLAGS = -cpu=$(VBCC_CPU) +$(CFG_FILE)_linux -I. -I$(CURDIR)/include -I$(CURDIR)
-	export RM = rm -f
+  export RM = rm -f
 endif
 
 cpu_assembly_src := $(wildcard $(cpu)/*.s)
@@ -88,9 +131,9 @@ cpu_c_obj := $(subst .c,.o,$(cpu_c_src))
 
 dev_base_sources = dev/block.c dev/channel.c dev/console.c dev/fsys.c dev/pata.c dev/ps2.c dev/rtc.c dev/sdc.c dev/txt_screen.c dev/uart.c
 ifeq ($(UNIT),a2560k)
-dev_c_src := $(dev_base_sources) dev/fdc.c dev/kbd_mo.c dev/lpt.c dev/midi.c dev/txt_a2560k_a.o dev/txt_a2560k_b.o m68040/fdc_m68040.o
+  dev_c_src := $(dev_base_sources) dev/fdc.c dev/kbd_mo.c dev/lpt.c dev/midi.c dev/txt_a2560k_a.o dev/txt_a2560k_b.o m68040/fdc_m68040.o
 else ifeq ($(UNIT),a2560u)
-dev_c_src := $(dev_base_sources) dev/txt_a2560u.o
+  dev_c_src := $(dev_base_sources) dev/txt_a2560u.o
 endif
 dev_c_obj := $(subst .c,.o,$(dev_c_src))
 
@@ -106,9 +149,9 @@ c_obj := $(subst .c,.o,$(c_src))
 .PHONY: all $(cpu) dev fatfs snd cli
 
 ifeq ($(MEMORY),ram)
-all: foenixmcp.s68 $(cpu) dev snd cli
+  all: foenixmcp.s68 $(cpu) dev snd cli
 else
-all: foenixmcp.bin $(cpu) dev snd cli
+  all: foenixmcp.bin $(cpu) dev snd cli
 endif
 
 $(cpu):
@@ -126,14 +169,18 @@ snd:
 cli:
 	$(MAKE) --directory=cli
 
+
 foenixmcp.s68: $(c_obj) $(cpu) dev fatfs snd cli
-	$(CC) $(CFLAGS) $(DEFINES) -o foenixmcp.s68 $(c_obj) $(cpu_c_obj) $(dev_c_obj) $(fat_c_obj) $(snd_c_obj) $(cli_c_obj)
+# VBCC
+#	$(CC) $(CFLAGS) $(DEFINES) -o foenixmcp.s68 $(c_obj) $(cpu_c_obj) $(dev_c_obj) $(fat_c_obj) $(snd_c_obj) $(cli_c_obj)
+#Calypsi
+	$(LD) -o $@ $(c_obj) $(cpu_c_obj) $(dev_c_obj) $(fat_c_obj) $(snd_c_obj) $(cli_c_obj) $(LDFLAGS) --output-format=s28
 
 foenixmcp.bin: $(c_obj) $(cpu) dev fatfs snd cli
 	$(CC) $(CFLAGS) $(DEFINES) -o foenixmcp.bin $(c_obj) $(cpu_c_obj) $(dev_c_obj) $(fat_c_obj) $(snd_c_obj) $(cli_c_obj)
 
 %.o: %.c $(DEPS)
-	$(CC) -S -c -o $@ $< $(CFLAGS) $(DEFINES)
+	$(CC) -c -o $@ $< $(CFLAGS) $(DEFINES)
 
 .PHONEY: clean
 
