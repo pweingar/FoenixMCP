@@ -1,25 +1,22 @@
             ; Exports
-            .public _syscall
+            .public syscall
             .public ___exit
-            .public _int_enable_all
-            .public _int_disable_all
-            .public _call_user
-            .public _restart_cli
+            .public int_enable_all
+            .public int_disable_all
+            .public call_user
+            .public restart_cli
 
             ; Imports
-            .extern ___STACK
-            .extern ___BSSSTART
-            .extern _panic_number
-            .extern _panic_pc
-            .extern _panic_address
-            .extern _panic_number
-            .extern ___main
-            .extern _cli_rerepl
-            .extern _panic
-            .extern _int_vicky_channel_a
-            .extern _int_vicky_channel_b
-            .extern _g_int_handler
-            .extern _syscall_dispatch
+            .extern panic_number
+            .extern panic_pc
+            .extern panic_address
+            .extern main
+            .extern cli_rerepl
+            .extern panic
+            .extern int_vicky_channel_a
+            .extern int_vicky_channel_b
+            .extern g_int_handler
+            .extern syscall_dispatch
 
 ;
 ; Interrupt registers for A2560U and U+
@@ -54,10 +51,12 @@ RTC_FLAGS   .equ 0xFEC0008D       ; A2560K
       #error  Cannot set RTC_FLAGs: Unknown model
     #endif
 
+            .section sstack
+#define __STACK  .sectionEnd sstack + 1
 
             .section VECTORS,text
 
-            .long ___STACK           ; 00 - Initial stack pointer
+            .long __STACK            ; 00 - Initial stack pointer
             .long coldboot           ; 01 - Initial PC
             .long _handle_bus_err    ; 02 - Bus error
             .long _handle_addr_err   ; 03 - Address error
@@ -158,8 +157,8 @@ RTC_FLAGS   .equ 0xFEC0008D       ; A2560K
             .section text,text
 
 coldboot:   move.w #0x2700,SR        ; Supervisor mode, disable all interrupts
-            lea ___STACK,sp
-            bsr _int_disable_all
+            move.l #__STACK,sp
+            bsr int_disable_all
 
 
             lea	    .sectionStart BSS,a0
@@ -177,7 +176,7 @@ clrloop:    ; We don't use clr.l because it's a read-modify-write operation
 
             move.l #trap_save_area,trap_save_area
 
-callmain:   jsr ___main             ; call __main to transfer to the C code
+callmain:   jsr main                ; call __main to transfer to the C code
 
 ;	endless loop; can be changed accordingly
 ___exit:
@@ -188,7 +187,7 @@ ___exit:
 ; Autovector #1: Used by VICKY III Channel B interrupts
 ;
 autovec1:   movem.l d0-d7/a0-a6,-(a7)
-            jsr _int_vicky_channel_b        ; Call the dispatcher for Channel B interrupts
+            jsr int_vicky_channel_b         ; Call the dispatcher for Channel B interrupts
             movem.l (a7)+,d0-d7/a0-a6
             rte
             #endif
@@ -197,7 +196,7 @@ autovec1:   movem.l d0-d7/a0-a6,-(a7)
 ; Autovector #1: Used by VICKY III Channel A interrupts
 ;
 autovec2:   movem.l d0-d7/a0-a6,-(a7)
-            jsr _int_vicky_channel_a        ; Call the dispatcher for Channel A interrupts
+            jsr int_vicky_channel_a         ; Call the dispatcher for Channel A interrupts
             movem.l (a7)+,d0-d7/a0-a6
             rte
 
@@ -208,7 +207,7 @@ autovec2:   movem.l d0-d7/a0-a6,-(a7)
 ; Assumes registers D0-D7, A0-A6 have been saved to the stack with MOVEM
 ;
 int_dispatch:
-            lea _g_int_handler,a0           ; Look in the interrupt handler table
+            lea g_int_handler,a0            ; Look in the interrupt handler table
             move.l (0,a0,d0.w),d0           ; Get the address of the handler
             beq intdis_end                  ; If there isn't one, just return
             movea.l d0,a0
@@ -286,7 +285,7 @@ not_impl:   rte
 ;
 ; Enable all interrupts
 ;
-_int_enable_all:    move.w SR,d0        ; Save the old level for return
+int_enable_all:     move.w SR,d0        ; Save the old level for return
                     andi.w #0x0700,d0
                     lsr.w #8,d0
                     ext.l d0
@@ -297,7 +296,7 @@ _int_enable_all:    move.w SR,d0        ; Save the old level for return
 ;
 ; Disable all interrupts
 ;
-_int_disable_all:   move.w SR,d0        ; Save the old level for return
+int_disable_all:    move.w SR,d0        ; Save the old level for return
                     andi.w #0x0700,d0
                     lsr.w #8,d0
                     ext.l d0
@@ -329,73 +328,73 @@ _int_restore:       move.w (4,sp),d0    ; Get the priority into d0
 ;
 
 _handle_bus_err:
-                    lea _panic_number,a0
-                    lea _panic_pc,a1
-                    lea _panic_address,a2
+                    lea panic_number,a0
+                    lea panic_pc,a1
+                    lea panic_address,a2
                     move.w #2,(a0)
                     move.l (10,a7),(a1)
                     move.l (2,a7),(a2)
                     bra call_panic
 
 _handle_addr_err:
-                    lea _panic_number,a0
-                    lea _panic_pc,a1
-                    lea _panic_address,a2
+                    lea panic_number,a0
+                    lea panic_pc,a1
+                    lea panic_address,a2
                     move.w #3,(a0)
                     move.l (10,a7),(a1)
                     move.l (2,a7),(a2)
                     bra call_panic
 
 _handle_inst_err:
-                    lea _panic_number,a0
-                    lea _panic_pc,a1
+                    lea panic_number,a0
+                    lea panic_pc,a1
                     move.w #4,(a0)
                     move.l (2,a7),(a1)
                     bra call_panic
 
 _handle_div0_err:
-                    lea _panic_number,a0
-                    lea _panic_pc,a1
+                    lea panic_number,a0
+                    lea panic_pc,a1
                     move.w #5,(a0)
                     move.l (2,a7),(a1)
                     bra call_panic
 
 _handle_chk_err:
-                    lea _panic_number,a0
-                    lea _panic_pc,a1
+                    lea panic_number,a0
+                    lea panic_pc,a1
                     move.w #6,(a0)
                     move.l (2,a7),(a1)
                     bra call_panic
 
 _handle_trapv_err:
-                    lea _panic_number,a0
-                    lea _panic_pc,a1
+                    lea panic_number,a0
+                    lea panic_pc,a1
                     move.w #7,(a0)
                     move.l (2,a7),(a1)
                     bra call_panic
 
 _handle_priv_err:
-                    lea _panic_number,a0
-                    lea _panic_pc,a1
+                    lea panic_number,a0
+                    lea panic_pc,a1
                     move.w #8,(a0)
                     move.l (2,a7),(a1)
                     bra call_panic
 
 _handle_spurious:
-                    lea _panic_number,a0
-                    lea _panic_pc,a1
+                    lea panic_number,a0
+                    lea panic_pc,a1
                     move.w #24,(a0)
                     move.l (2,a7),(a1)
                     bra call_panic
 
-call_panic:         jsr _panic
+call_panic:         jsr panic
 panic_lock:         bra panic_lock
 
 ;
 ; Function to make a system call based on the number of the system function:
 ; int32_t syscall(int32_t number, int32_t p0, int32_t p1, int32_t p2, int32_t p3, int32_t p4, int32_t p5)
 ;
-_syscall:
+syscall:
             ; Repush the parameters
             move.l  28(sp),-(sp)
             move.l  28(sp),-(sp)
@@ -431,7 +430,7 @@ syscall_stack_set:
             cmpi.w  #KFN_ELEVATE,(sp)   ; Is this a sys_proc_elevate call?
             beq.s   h_trap_elev         ; Yes, just handle it here
 
-            jsr     _syscall_dispatch   ; Call the C routine to do the dispatch
+            jsr     syscall_dispatch    ; Call the C routine to do the dispatch
 
             ; Restore context from our save area
             move.l  trap_save_area,a0
@@ -452,7 +451,7 @@ h_trap_elev: or.w #0x2000,(sp)             ; Change the caller's privilege to su
 ; a0 = pointer to code to execute
 ; a1 = location to set user stack pointer
 ;
-_call_user:
+call_user:
             ; Set up the user stack
             move.l #0x00010000,a0        ; Get the pointer to the process's stack
             move.l (12,a7),d1           ; Get the number of parameters passed
@@ -469,10 +468,10 @@ _call_user:
             move.w #0x0000,-(a7)         ; Push the user's initial SR (to switch to user mode)
             rte                         ; Start the user process
 
-_restart_cli:
-            lea ___STACK,sp
-            jsr _cli_rerepl
-            bra _restart_cli
+restart_cli:
+            move.l #__STACK,sp
+            jsr cli_rerepl
+            bra restart_cli
 
             .section BSS,BSS
 

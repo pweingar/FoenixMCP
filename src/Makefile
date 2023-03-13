@@ -97,9 +97,9 @@ else ifeq ($(COMPILER),calypsi)
   CC=cc68k
   AR=nlib
   LD=ln68k
-  CLIB = clib-68000-lc-ld-foenix.a
-  LDFLAGS=$(CLIB)
-
+  CLIB = clib-68000-lc-fod-foenix.a
+  LDFLAGS=$(CLIB) --sstack-size=2000 --stack-size=1000 --heap-size=1000 -l --cross-reference --rom-code
+  CFLAGS = --code-model=large --data-model=far-only
 else
   $(error Compiler not recognized)
 endif
@@ -174,7 +174,7 @@ foenixmcp.s68: $(c_obj) $(cpu) dev fatfs snd cli
 # VBCC
 #	$(CC) $(CFLAGS) $(DEFINES) -o foenixmcp.s68 $(c_obj) $(cpu_c_obj) $(dev_c_obj) $(fat_c_obj) $(snd_c_obj) $(cli_c_obj)
 #Calypsi
-	$(LD) -o $@ $(c_obj) $(cpu_c_obj) $(dev_c_obj) $(fat_c_obj) $(snd_c_obj) $(cli_c_obj) $(LDFLAGS) --output-format=s28
+	$(LD) -o $@ $(c_obj) $(cpu_c_obj) $(cpu_assembly_obj) $(dev_c_obj) $(fat_c_obj) $(snd_c_obj) $(cli_c_obj) $(LDFLAGS) --output-format=s28 --semi-hosted mcp.scm
 
 foenixmcp.bin: $(c_obj) $(cpu) dev fatfs snd cli
 	$(CC) $(CFLAGS) $(DEFINES) -o foenixmcp.bin $(c_obj) $(cpu_c_obj) $(dev_c_obj) $(fat_c_obj) $(snd_c_obj) $(cli_c_obj)
