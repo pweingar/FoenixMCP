@@ -129,7 +129,7 @@ coldboot:   move.w #$2700,SR        ; Supervisor mode, Interrupt mode (68040), d
             moveq #0,d0   ; Disable 040's MMU
             movec d0,TC
 
-  ;move.l #$ffff0000,$fec80008 ; border color for debug
+  move.l #$ff00ff00,$fec80008 ; border color for debug
             lea ___STACK,sp
             bsr _int_disable_all
 
@@ -146,8 +146,8 @@ clrloop:    move.b d1,(a0)+
 ;            subq.l #4,d0
 ;            bpl.s  clrloop
 
-  ;move.l #$ffffff00,$fec80008 ; change border color
-callmain:   jsr _main             ; call __main to transfer to the C code
+  move.l #$ffffff00,$fec80008 ; change border color
+callmain:   jsr ___main             ; call __main to transfer to the C code
 
 ;	endless loop; can be changed accordingly
 ___exit:
