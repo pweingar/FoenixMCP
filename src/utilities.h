@@ -13,9 +13,6 @@
 /** Return the maximum value of x or y */
 #define max(x, y)   ((x < y) ? y : x)
 
-/** Return the absolute value of x */
-#define abs(x)      ((x >= 0) ? x : 0 - x)
-
 /**
  * Re-entrant version of strtok_r, because VBCC does not provide it
  *

@@ -40,6 +40,7 @@ long atol(const char *);
 long long atoll(const char *);
 #endif
 double strtod(const char *,char **);
+float strtof(const char *,char **);
 long strtol(const char *,char **,int);
 #if __STDC_VERSION__ >= 199901L
 signed long long strtoll(const char *,char **,int);
@@ -81,23 +82,24 @@ long long llabs(long long);
 #endif
 
 #ifndef __NOINLINE__
-int abs(__reg("d0") int) =
+__regsused("d0") int __asm_abs(__reg("d0") int) =
                 "\tinline\n"
                 "\ttst.l\td0\n"
                 "\tbpl\t.skip\n"
                 "\tneg.l\td0\n"
                 ".skip\n"
                 "\teinline";
-long labs(__reg("d0") long) =
+__regsused("d0") long __asm_labs(__reg("d0") long) =
                 "\tinline\n"
                 "\ttst.l\td0\n"
                 "\tbpl\t.skip\n"
                 "\tneg.l\td0\n"
                 ".skip\n"
                 "\teinline";
-
+#define abs(x) __asm_abs(x)
+#define labs(x) __asm_labs(x)
 #if __STDC_VERSION__ >= 199901L
-long long llabs(__reg("d0/d1") long long) =
+__regsused("d0/d1") long long __asm_llabs(__reg("d0/d1") long long) =
                 "\tinline\n"
                 "\ttst.l\td0\n"
                 "\tbpl\t.skip\n"
@@ -105,18 +107,21 @@ long long llabs(__reg("d0/d1") long long) =
                 "\tnegx.l\td0\n"
                 ".skip\n"
                 "\teinline";
+#define llabs(x) __asm_llabs(x)
 #endif
 
 #if !defined(__M68000) && !defined(__M68010)
-div_t div(__reg("d0") int,__reg("d1") int) =
+__regsused("d0/d1") div_t __asm_div(__reg("d0") int,__reg("d1") int) =
                 "\tinline\n"
                 "\tdivsl.l\td1,d1:d0\n"
                 "\teinline";
-ldiv_t ldiv(__reg("d0") long,__reg("d1") long) =
+__regsused("d0/d1") ldiv_t __asm_ldiv(__reg("d0") long,__reg("d1") long) =
                 "\tinline\n"
                 "\tdivsl.l\td1,d1:d0\n"
                 "\teinline";
 #endif
+#define div(n,d) __asm_div(n,d)
+#define ldiv(n,d) __asm_ldiv(n,d)
 #endif /* __NOINLINE__ */
 
 #define atof(s) strtod((s),(char **)NULL)
