@@ -125,9 +125,11 @@ int snprintf(char *,size_t,const char *,...);
   Simple versions of IO functions (see vbcc documentation).
   If versions with __v1 or __v2 are declared they are also used.
 */
+/*
 int __v0fprintf(FILE *, const char *);
 int __v0printf(const char *);
 int __v0sprintf(char *, const char *);
+*/
 int vprintf(const char *,va_list);
 int vfprintf(FILE *,const char *,va_list);
 int vsprintf(char *,const char *,va_list);

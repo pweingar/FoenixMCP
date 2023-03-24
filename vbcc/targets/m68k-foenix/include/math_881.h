@@ -1,4 +1,4 @@
-/* $VER: math_881.h 1.0 (06.04.2017)
+/* $VER: math_881.h 1.1 (25.09.2021)
 ** math.h 6888x specific support, link with -lm881
 */
 
@@ -100,23 +100,23 @@ int isunordered(__reg("fp0")double,__reg("fp1")double) =
 
 #ifndef __NOINLINE__
 /* faster inline functions */
-__fp0ret double acos(__reg("fp0")double) =
+__fp0ret double __asm_acos(__reg("fp0")double) =
         "\tinline\n"
         "\tfacos.x\tfp0\n"
         "\teinline";
-__fp0ret double asin(__reg("fp0")double) =
+__fp0ret double __asm_asin(__reg("fp0")double) =
         "\tinline\n"
         "\tfasin.x\tfp0\n"
         "\teinline";
-__fp0ret double atan(__reg("fp0")double) =
+__fp0ret double __asm_atan(__reg("fp0")double) =
         "\tinline\n"
         "\tfatan.x\tfp0\n"
         "\teinline";
-__fp0ret double atanh(__reg("fp0")double) =
+__fp0ret double __asm_atanh(__reg("fp0")double) =
         "\tinline\n"
         "\tfatanh.x\tfp0\n"
         "\teinline";
-__fp0ret double ceil(__reg("fp0")double) =
+__fp0ret double __asm_ceil(__reg("fp0")double) =
         "\tinline\n"
         "\tfmove.x\tfp0,fp1\n"
         "\tfintrz.x\tfp0\n"
@@ -125,7 +125,7 @@ __fp0ret double ceil(__reg("fp0")double) =
         "\tfadd.s\t#$3f800000,fp0\n"
         ".skip\n"
         "\teinline";
-__fp0ret double copysign(__reg("fp0")double,__reg("fp1")double) =
+__fp0ret double __asm_copysign(__reg("fp0")double,__reg("fp1")double) =
         "\tinline\n"
         "\tfmove.s\tfp1,d0\n"
         "\tfabs.x\tfp0\n"
@@ -134,40 +134,40 @@ __fp0ret double copysign(__reg("fp0")double,__reg("fp1")double) =
         "\tfneg.x\tfp0\n"
         ".skip\n"
         "\teinline";
-__fp0ret double cos(__reg("fp0")double) =
+__fp0ret double __asm_cos(__reg("fp0")double) =
         "\tinline\n"
         "\tfcos.x\tfp0\n"
         "\teinline";
-__fp0ret double cosh(__reg("fp0")double) =
+__fp0ret double __asm_cosh(__reg("fp0")double) =
         "\tinline\n"
         "\tfcosh.x\tfp0\n"
         "\teinline";
-__fp0ret double exp(__reg("fp0")double) =
+__fp0ret double __asm_exp(__reg("fp0")double) =
         "\tinline\n"
         "\tfetox.x\tfp0\n"
         "\teinline";
-__fp0ret double exp2(__reg("fp0")double) =
+__fp0ret double __asm_exp2(__reg("fp0")double) =
         "\tinline\n"
         "\tftwotox.x\tfp0\n"
         "\teinline";
-__fp0ret double exp10(__reg("fp0")double) =
+__fp0ret double __asm_exp10(__reg("fp0")double) =
         "\tinline\n"
         "\tftentox.x\tfp0\n"
         "\teinline";
-__fp0ret double expm1(__reg("fp0")double) =
+__fp0ret double __asm_expm1(__reg("fp0")double) =
         "\tinline\n"
         "\tfetoxm1.x\tfp0\n"
         "\teinline";
-__fp0ret double fabs(__reg("fp0")double) =
+__fp0ret double __asm_fabs(__reg("fp0")double) =
         "\tinline\n"
         "\tfabs.x\tfp0\n"
         "\teinline";
-__fp0ret double fdim(__reg("fp0")double,__reg("fp1")double) =
+__fp0ret double __asm_fdim(__reg("fp0")double,__reg("fp1")double) =
         "\tinline\n"
         "\tfsub.x\tfp1,fp0\n"
         "\tfabs.x\tfp0\n"
         "\teinline";
-__fp0ret double floor(__reg("fp0")double) =
+__fp0ret double __asm_floor(__reg("fp0")double) =
         "\tinline\n"
         "\tfmove.x\tfp0,fp1\n"
         "\tfintrz.x\tfp0\n"
@@ -176,12 +176,12 @@ __fp0ret double floor(__reg("fp0")double) =
         "\tfsub.s\t#$3f800000,fp0\n"
         ".skip\n"
         "\teinline";
-__fp0ret double fma(__reg("fp0")double,__reg("fp1")double,__reg("fp2")double) =
+__fp0ret double __asm_fma(__reg("fp0")double,__reg("fp1")double,__reg("fp2")double) =
         "\tinline\n"
         "\tfmul.x\tfp1,fp0\n"
         "\tfadd.x\tfp2,fp0\n"
         "\teinline";
-__fp0ret double fmax(__reg("fp0")double,__reg("fp1")double) =
+__fp0ret double __asm_fmax(__reg("fp0")double,__reg("fp1")double) =
         "\tinline\n"
         "\tfcmp.x\tfp1,fp0\n"
         "\tfboge\t.skip\n"
@@ -190,7 +190,7 @@ __fp0ret double fmax(__reg("fp0")double,__reg("fp1")double) =
         "\tfmove.x\tfp1,fp0\n"
         ".skip\n"
         "\teinline";
-__fp0ret double fmin(__reg("fp0")double,__reg("fp1")double) =
+__fp0ret double __asm_fmin(__reg("fp0")double,__reg("fp1")double) =
         "\tinline\n"
         "\tfcmp.x\tfp1,fp0\n"
         "\tfbole\t.skip\n"
@@ -199,42 +199,42 @@ __fp0ret double fmin(__reg("fp0")double,__reg("fp1")double) =
         "\tfmove.x\tfp1,fp0\n"
         ".skip\n"
         "\teinline";
-__fp0ret double fmod(__reg("fp0")double,__reg("fp1")double) =
+__fp0ret double __asm_fmod(__reg("fp0")double,__reg("fp1")double) =
         "\tinline\n"
         "\tfmod.x\tfp1,fp0\n"
         "\teinline";
-__fp0ret double hypot(__reg("fp0")double,__reg("fp1")double) =
+__fp0ret double __asm_hypot(__reg("fp0")double,__reg("fp1")double) =
         "\tinline\n"
         "\tfmul.x\tfp0,fp0\n"
         "\tfmul.x\tfp1,fp1\n"
         "\tfadd.x\tfp1,fp0\n"
         "\tfsqrt.x\tfp0\n"
         "\teinline";
-__fp0ret double ldexp(__reg("fp0")double,__reg("d0")int) =
+__fp0ret double __asm_ldexp(__reg("fp0")double,__reg("d0")int) =
         "\tinline\n"
         "\tfscale.l\td0,fp0\n"
         "\teinline";
-__fp0ret double log(__reg("fp0")double) =
+__fp0ret double __asm_log(__reg("fp0")double) =
         "\tinline\n"
         "\tflogn.x\tfp0\n"
         "\teinline";
-__fp0ret double log10(__reg("fp0")double) =
+__fp0ret double __asm_log10(__reg("fp0")double) =
         "\tinline\n"
         "\tflog10.x\tfp0\n"
         "\teinline";
-__fp0ret double log2(__reg("fp0")double) =
+__fp0ret double __asm_log2(__reg("fp0")double) =
         "\tinline\n"
         "\tflog2.x\tfp0\n"
         "\teinline";
-__fp0ret double logb(__reg("fp0")double) =
+__fp0ret double __asm_logb(__reg("fp0")double) =
         "\tinline\n"
         "\tfgetexp.x\tfp0\n"
         "\teinline";
-__fp0ret double lognp1(__reg("fp0")double) =
+__fp0ret double __asm_lognp1(__reg("fp0")double) =
         "\tinline\n"
         "\tflognp1.x\tfp0\n"
         "\teinline";
-long   lround(__reg("fp0")double) =
+long __asm_lround(__reg("fp0")double) =
         "\tinline\n"
         "\tfmove.s\tfp0,d0\n"
         "\tand.l\t#$80000000,d0\n"
@@ -243,19 +243,19 @@ long   lround(__reg("fp0")double) =
         "\tfintrz.x\tfp0\n"
         "\tfmove.l\tfp0,d0\n"
         "\teinline";
-__fp0ret double nan(__reg("a0")const char *) =
+__fp0ret double __asm_nan(__reg("a0")const char *) =
         "\tinline\n"
         "\tfmove.s\t#$7fc00000,fp0\n"
         "\teinline";
-__fp0ret double nearbyint(__reg("fp0")double) =
+__fp0ret double __asm_nearbyint(__reg("fp0")double) =
         "\tinline\n"
         "\tfint.x\tfp0\n"
         "\teinline";
-__fp0ret double remainder(__reg("fp0")double,__reg("fp1")double) =
+__fp0ret double __asm_remainder(__reg("fp0")double,__reg("fp1")double) =
         "\tinline\n"
         "\tfrem.x\tfp1,fp0\n"
         "\teinline";
-__fp0ret double round(__reg("fp0")double) =
+__fp0ret double __asm_round(__reg("fp0")double) =
         "\tinline\n"
         "\tfmove.s\tfp0,d0\n"
         "\tand.l\t#$80000000,d0\n"
@@ -263,67 +263,106 @@ __fp0ret double round(__reg("fp0")double) =
         "\tfadd.s\td0,fp0\n"
         "\tfintrz.x\tfp0\n"
         "\teinline";
-__fp0ret double sin(__reg("fp0")double) =
+__fp0ret double __asm_sin(__reg("fp0")double) =
         "\tinline\n"
         "\tfsin.x\tfp0\n"
         "\teinline";
-__fp0ret double sinh(__reg("fp0")double) =
+__fp0ret double __asm_sinh(__reg("fp0")double) =
         "\tinline\n"
         "\tfsinh.x\tfp0\n"
         "\teinline";
-__fp0ret double sqrt(__reg("fp0")double) =
+__fp0ret double __asm_sqrt(__reg("fp0")double) =
         "\tinline\n"
         "\tfsqrt.x\tfp0\n"
         "\teinline";
-__fp0ret double tan(__reg("fp0")double) =
+__fp0ret double __asm_tan(__reg("fp0")double) =
         "\tinline\n"
         "\tftan.x\tfp0\n"
         "\teinline";
-__fp0ret double tanh(__reg("fp0")double) =
+__fp0ret double __asm_tanh(__reg("fp0")double) =
         "\tinline\n"
         "\tftanh.x\tfp0\n"
         "\teinline";
-__fp0ret double trunc(__reg("fp0")double) =
+__fp0ret double __asm_trunc(__reg("fp0")double) =
         "\tinline\n"
         "\tfintrz.x\tfp0\n"
         "\teinline";
 
+/* double precision */
+#define acos(x) __asm_acos(x)
+#define asin(x) __asm_asin(x)
+#define atan(x) __asm_atan(x)
+#define atanh(x) __asm_atanh(x)
+#define ceil(x) __asm_ceil(x)
+#define copysign(x,y) __asm_copysign(x,y)
+#define cos(x) __asm_cos(x)
+#define cosh(x) __asm_cosh(x)
+#define exp(x) __asm_exp(x)
+#define exp2(x) __asm_exp2(x)
+#define exp10(x) __asm_exp10(x)
+#define expm1(x) __asm_expm1(x)
+#define fabs(x) __asm_fabs(x)
+#define fdim(x,y) __asm_fdim(x,y)
+#define floor(x) __asm_floor(x)
+#define fma(x,y) __asm_fma(x,y)
+#define fmax(x,y) __asm_fmax(x,y)
+#define fmin(x,y) __asm_fmin(x,y)
+#define fmod(x,y) __asm_fmod(x,y)
+#define hypot(x,y) __asm_hypot(x,y)
+#define ldexp(x,exp) __asm_ldexp(x,exp)
+#define log(x) __asm_log(x)
+#define log10(x) __asm_log10(x)
+#define log2(x) __asm_log2(x)
+#define logb(x) __asm_logb(x)
+#define lognp1(x) __asm_lognp1(x)
+#define lround(x) __asm_lround(x)
+#define nan(x) __asm_nan(x)
+#define nearbyint(x) __asm_nearbyint(x)
+#define remainder(x,y) __asm_remainder(x,y)
+#define round(x) __asm_round(x)
+#define sin(x) __asm_sin(x)
+#define sinh(x) __asm_sinh(x)
+#define sqrt(x) __asm_sqrt(x)
+#define tan(x) __asm_tan(x)
+#define tanh(x) __asm_tanh(x)
+#define trunc(x) __asm_trunc(x)
+
 /* single precision */
-#define acosf(x) acos(x)
-#define asinf(x) asin(x)
-#define atanf(x) atan(x)
-#define atanhf(x) atanh(x)
-#define ceilf(x) ceil(x)
-#define copysignf(x,y) copysign(x,y)
-#define cosf(x) cos(x)
-#define coshf(x) cosh(x)
-#define expf(x) exp(x)
-#define exp2f(x) exp2(x)
-#define exp10f(x) exp10(x)
-#define expm1f(x) expm1(x)
-#define fabsf(x) fabs(x)
-#define fdimf(x,y) fdim(x,y)
-#define floorf(x) floor(x)
-#define fmaf(x,y) fma(x,y)
-#define fmaxf(x,y) fmax(x,y)
-#define fminf(x,y) fmin(x,y)
-#define fmodf(x,y) fmod(x,y)
-#define hypotf(x,y) hypot(x,y)
-#define ldexpf(x,exp) ldexp(x,exp)
-#define logf(x) log(x)
-#define log10f(x) log10(x)
-#define log2f(x) log2(x)
-#define logbf(x) logb(x)
-#define lognp1f(x) lognp1(x)
-#define lroundf(x) lround(x)
-#define nanf(x) nan(x)
-#define nearbyintf(x) nearbyint(x)
-#define remainderf(x,y) remainder(x,y)
-#define roundf(x) round(x)
-#define sinf(x) sin(x)
-#define sinhf(x) sinh(x)
-#define sqrtf(x) sqrt(x)
-#define tanf(x) tan(x)
-#define tanhf(x) tanh(x)
-#define truncf(x) trunc(x)
+#define acosf(x) __asm_acos(x)
+#define asinf(x) __asm_asin(x)
+#define atanf(x) __asm_atan(x)
+#define atanhf(x) __asm_atanh(x)
+#define ceilf(x) __asm_ceil(x)
+#define copysignf(x,y) __asm_copysign(x,y)
+#define cosf(x) __asm_cos(x)
+#define coshf(x) __asm_cosh(x)
+#define expf(x) __asm_exp(x)
+#define exp2f(x) __asm_exp2(x)
+#define exp10f(x) __asm_exp10(x)
+#define expm1f(x) __asm_expm1(x)
+#define fabsf(x) __asm_fabs(x)
+#define fdimf(x,y) __asm_fdim(x,y)
+#define floorf(x) __asm_floor(x)
+#define fmaf(x,y) __asm_fma(x,y)
+#define fmaxf(x,y) __asm_fmax(x,y)
+#define fminf(x,y) __asm_fmin(x,y)
+#define fmodf(x,y) __asm_fmod(x,y)
+#define hypotf(x,y) __asm_hypot(x,y)
+#define ldexpf(x,exp) __asm_ldexp(x,exp)
+#define logf(x) __asm_log(x)
+#define log10f(x) __asm_log10(x)
+#define log2f(x) __asm_log2(x)
+#define logbf(x) __asm_logb(x)
+#define lognp1f(x) __asm_lognp1(x)
+#define lroundf(x) __asm_lround(x)
+#define nanf(x) __asm_nan(x)
+#define nearbyintf(x) __asm_nearbyint(x)
+#define remainderf(x,y) __asm_remainder(x,y)
+#define roundf(x) __asm_round(x)
+#define sinf(x) __asm_sin(x)
+#define sinhf(x) __asm_sinh(x)
+#define sqrtf(x) __asm_sqrt(x)
+#define tanf(x) __asm_tan(x)
+#define tanhf(x) __asm_tanh(x)
+#define truncf(x) __asm_trunc(x)
 #endif /* __NOINLINE__ */
