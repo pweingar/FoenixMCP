@@ -1,6 +1,5 @@
             ; Exports
             .public syscall
-            .public ___exit
             .public int_enable_all
             .public int_disable_all
             .public call_user
@@ -17,6 +16,8 @@
             .extern int_vicky_channel_b
             .extern g_int_handler
             .extern syscall_dispatch
+
+            .section sstack
 
 ;
 ; Interrupt registers for A2560U and U+
@@ -51,13 +52,7 @@ RTC_FLAGS   .equ 0xFEC0008D       ; A2560K
       #error  Cannot set RTC_FLAGs: Unknown model
     #endif
 
-            .section sstack
-#define __STACK  .sectionEnd sstack + 1
-
             .section VECTORS,text
-
-            .long __STACK            ; 00 - Initial stack pointer
-            .long coldboot           ; 01 - Initial PC
             .long _handle_bus_err    ; 02 - Bus error
             .long _handle_addr_err   ; 03 - Address error
             .long _handle_inst_err   ; 04 - Illegal instruction
@@ -154,33 +149,12 @@ RTC_FLAGS   .equ 0xFEC0008D       ; A2560K
             .long interrupt_x2E      ; 94 - Interrupt 0x2E - Reserved
             .long interrupt_x2F      ; 95 - Interrupt 0x2F - DAC0 Playback Done Interrupt (44.1K)
 
-            .section text,text
-
-coldboot:   move.w #0x2700,SR        ; Supervisor mode, disable all interrupts
-            move.l #__STACK,sp
-            bsr int_disable_all
-
-
-            lea	    .sectionStart BSS,a0
-            move.l  #.sectionSize BSS,d0
-            beq	    callmain
-            
-            moveq.l #0,d1
-clrloop:    ; We don't use clr.l because it's a read-modify-write operation
-            ; that is not yet supported by the FPGA's bus logic for now.
-            ; So we use a move instead.
-            ; clr.l  (a0)+
-            move.l d1,(a0)+
-            subq.l #4,d0
-            bpl.s  clrloop
-
+            .public __low_level_init
+            .section code
+__low_level_init: 
             move.l #trap_save_area,trap_save_area
-
-callmain:   jsr main                ; call __main to transfer to the C code
-
-;	endless loop; can be changed accordingly
-___exit:
-            bra	___exit
+            moveq.l #1,d0            ; stay in supervisor
+            rts
 
             #if MODEL==11	// A2560K
 ;
@@ -469,7 +443,7 @@ call_user:
             rte                         ; Start the user process
 
 restart_cli:
-            move.l #__STACK,sp
+            move.l #.sectionEnd sstack + 1,sp
             jsr cli_rerepl
             bra restart_cli
 
