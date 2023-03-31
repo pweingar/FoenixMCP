@@ -4,7 +4,7 @@
 # and where the MCP will run (ram or flash)
 #
 UNIT := a2560x
-MEMORY := ram
+MEMORY := flash
 
 # CPU_WDC65816                0x16  /* CPU code for the Western Design Center 65816 */
 # CPU_M68000                  0x20  /* CPU code for the Motorola 68000 */
@@ -83,12 +83,17 @@ export ASFLAGS = $(VASM_CPU) -quiet -Fvobj -nowarn=62 -DMODEL=$(MODEL_NUMBER)
 export CC = vc
 export DEFINES = -DCPU=$(CPU_NUMBER) -DMODEL=$(MODEL_NUMBER) # -DKBD_POLLED
 
+# When compiling an image for flash, size to which the image must be padded
+PAD_FLASH_SIZE=524288
+
 ifeq ($(OS),Windows_NT)
 	export CFLAGS = -cpu=$(VBCC_CPU) +$(CFG_FILE) -I. -I$(CURDIR)/include -I$(CURDIR)
 	export RM = cmd /C del /Q /F
+	PAD_CMD = fsutil seteof $@ $(PAD_FLASH_SIZE)
 else
 	export CFLAGS = -cpu=$(VBCC_CPU) +$(CFG_FILE)_linux -I. -I$(CURDIR)/include -I$(CURDIR)
 	export RM = rm -f
+	PAD_CMD = truncate -s $(PAD_FLASH_SIZE) $@
 endif
 
 cpu_assembly_src := $(wildcard $(cpu)/*.s)
@@ -147,6 +152,7 @@ foenixmcp.s68: $(c_obj) $(cpu) dev fatfs snd cli
 
 foenixmcp.bin: $(c_obj) $(cpu) dev fatfs snd cli
 	$(CC) $(CFLAGS) $(DEFINES) -o foenixmcp.bin $(c_obj) $(cpu_c_obj) $(dev_c_obj) $(fat_c_obj) $(snd_c_obj) $(cli_c_obj)
+	$(PAD_CMD)
 
 %.o: %.c $(DEPS)
 	$(CC) -S -c -o $@ $< $(CFLAGS) $(DEFINES)
