@@ -26,7 +26,7 @@ const unsigned long a2560k_a_lut[VKY3_A_LUT_SIZE] = {
 	0xFFAA5500, // Mid-Tone Orange
 	0xFF008080, // Mid-Tone Cian
 	0xFF808080, // 50% Grey
-#if MACHINE_FOENIX_A2560X
+#if MODEL_FOENIX_A2560X
     0xFF202020, // Dark Grey
 #else
 	0xFF555555, // Dark Grey
@@ -606,7 +606,7 @@ void txt_a2560k_a_init() {
     txt_a2560k_a_set_resolution(800, 600);                      /* Default resolution is 800x600 */
 
     /* Set the default color: light grey on blue */
-#if MACHINE_FOENIX_A2560X
+#if MODEL_FOENIX_A2560X
     txt_a2560k_a_set_color(0x0F, 0x08);
 #else
     txt_a2560k_a_set_color(0x07, 0x04);
@@ -619,7 +619,7 @@ void txt_a2560k_a_init() {
     txt_a2560k_a_set_cursor(1, 0, 0xB1);
 
     /* Set the border */
-#if MACHINE_FOENIX_A2560X
+#if MODEL_FOENIX_A2560X
     txt_a2560k_a_set_border(8, 8);                            /* Set up the border */
     txt_a2560k_a_set_border_color(0x10, 0x00, 0x10);
 #else
