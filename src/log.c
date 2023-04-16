@@ -33,7 +33,7 @@ static void (*do_log)(const char* message);
 static void log_to_uart(const char* message);
 static void log_to_screen(const char* message);
 
-#define UART_COM1 1
+#define UART_COM1 0
 
 /* Can use the buzzer as sound clues */
 void buzzer_on(void) {

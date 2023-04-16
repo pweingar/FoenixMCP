@@ -81,7 +81,15 @@ endif
 export AS = vasmm68k_mot
 export ASFLAGS = $(VASM_CPU) -quiet -Fvobj -nowarn=62 -DMODEL=$(MODEL_NUMBER)
 export CC = vc
-export DEFINES = -DCPU=$(CPU_NUMBER) -DMODEL=$(MODEL_NUMBER) # -DKBD_POLLED
+DEFINES = -DCPU=$(CPU_NUMBER) -DMODEL=$(MODEL_NUMBER)  # -DKBD_POLLED
+
+# Logging level
+ifeq ("$(DEFAULT_LOG_LEVEL)","")
+else
+ DEFINES := $(DEFINES) -DDEFAULT_LOG_LEVEL=$(DEFAULT_LOG_LEVEL)
+endif
+
+export DEFINES:=$(DEFINES)
 
 # When compiling an image for flash, size to which the image must be padded
 PAD_FLASH_SIZE=524288
