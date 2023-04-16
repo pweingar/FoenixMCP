@@ -9,7 +9,7 @@
 
 #include "log_level.h"
 #ifndef DEFAULT_LOG_LEVEL
-    #define DEFAULT_LOG_LEVEL LOG_TRACE
+    #define DEFAULT_LOG_LEVEL LOG_ERROR
 #endif
 
 #include <string.h>
