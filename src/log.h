@@ -10,17 +10,18 @@
 
 #define LOG_CHANNEL_UART0 -1
 #define LOG_CHANNEL_CHANNEL_A 0
-#define LOG_CHANNEL_CHANNEL B 1
+#define LOG_CHANNEL_CHANNEL_B 1
+#define LOG_CHANNEL_CHANNEL_A_LOW_LEVEL 10 // low-level routines (doesn't use MCP's console stuff)
 
 /*
  * Settings
  */
 #ifndef DEFAULT_LOG_LEVEL
-  #define DEFAULT_LOG_LEVEL LOG_ERROR
+  #define DEFAULT_LOG_LEVEL LOG_TRACE
 #endif
 
 #ifndef LOG_CHANNEL
-#define LOG_CHANNEL LOG_CHANNEL_UART0
+#define LOG_CHANNEL LOG_CHANNEL_CHANNEL_A_LOW_LEVEL
 #endif
 
 /*

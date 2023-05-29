@@ -13,7 +13,7 @@
 
 #include "dev/uart.h"
 #include "dev/txt_screen.h"
-
+#include "vicky3_txt_a_logger.h"
 
 #if MODEL == MODEL_FOENIX_A2560U || MODEL == MODEL_FOENIX_A2560U_PLUS
 #include "A2560U/gabe_a2560u.h"
@@ -32,6 +32,7 @@ static short log_level;
 static void (*do_log)(const char* message);
 static void log_to_uart(const char* message);
 static void log_to_screen(const char* message);
+static void log_to_channel_A_low_level(const char *message);
 
 #define UART_COM1 0
 
@@ -49,13 +50,20 @@ void buzzer_off(void) {
 void log_init(void) {
     log_setlevel(DEFAULT_LOG_LEVEL);
 
-    if (log_channel == LOG_CHANNEL_UART0) {
+    switch (log_channel) {
+    case LOG_CHANNEL_UART0:
         uart_init(UART_COM1);
         do_log = log_to_uart;
-        //log(LOG_INFO,"FOENIX DEBUG OUTPUT------------");
-    }
-    else
+
+        break;
+    case LOG_CHANNEL_CHANNEL_A_LOW_LEVEL:
+        channel_A_logger_init();
+        do_log = log_to_channel_A_low_level;
+        break;
+    default:
         do_log = log_to_screen;
+    }
+    log(LOG_INFO,"FOENIX DEBUG OUTPUT------------");
 }
 
 unsigned short panic_number;        /* The number of the kernel panic */
@@ -256,6 +264,12 @@ static void log_to_screen(const char *message) {
     txt_print(log_channel, message);
     txt_print(log_channel, "\n");
 }
+
+static void log_to_channel_A_low_level(const char *message) {
+    channel_A_write(message);
+    channel_A_write("\n");
+}
+
 
 /*
  * Log a message to the console.
