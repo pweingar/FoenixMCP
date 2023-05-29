@@ -11,7 +11,7 @@
     //#undef DEFAULT_LOG_LEVEL
 #endif
 #ifndef DEFAULT_LOG_LEVEL
-    #define DEFAULT_LOG_LEVEL LOG_TRACE
+    #define DEFAULT_LOG_LEVEL LOG_DEBUG
 #endif
 
 #include <string.h>
