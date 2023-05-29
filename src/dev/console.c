@@ -433,7 +433,7 @@ short con_init() {
 }
 
 /*
- * Open the consolde device for the given channel
+ * Open the console device for the given channel
  *
  * Inputs:
  * chan = the channel record for this console device
