@@ -37,12 +37,12 @@ static void log_to_screen(const char* message);
 
 /* Can use the buzzer as sound clues */
 void buzzer_on(void) {
-    *(GABE_CTRL_REG) = BUZZER_CONTROL;
+    // TODO: *(GABE_CTRL_REG) = BUZZER_CONTROL;
 }
 
 
 void buzzer_off(void) {
-    *(GABE_CTRL_REG) &= ~BUZZER_CONTROL;
+    // TODO: *(GABE_CTRL_REG) &= ~BUZZER_CONTROL;
 }
 
 

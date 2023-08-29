@@ -1,15 +1,59 @@
-csources = $(wildcard *.c)
-cobjects = $(subst .c,.o,$(csources))
 
-cobjects = $(subst .c,.o,$(csources))
+UNIT := C256U
 
-.PHONY: all
-all: $(cobjects)
+# Define OS-dependent variables
 
+ifeq ($(OS),Windows_NT)
+	RM = del /F/Q
+else
+	RM = rm -f
+endif
+
+# Define model-specific variables, including tools, source files, compiler flags, etc.
+
+ifeq ($(UNIT),C256U)
+	CC=cc65816
+	AS=as65816
+	AR=nlib
+
+	SRCS_FOR_UNIT=txt_c256.c txt_evid.c
+	CFLAGS_FOR_UNIT=-DMODEL=1 -DCPU=255 --target Foenix --code-model large --data-model large
+else ifeq ($(UNIT),C256U_PLUS)
+	CC=cc65816
+	AS=as65816
+	AR=nlib
+
+	SRCS_FOR_UNIT=txt_c256.c txt_evid.c
+	CFLAGS_FOR_UNIT=-DMODEL=5 -DCPU=255 --target Foenix --code-model large --data-model large
+else ifeq ($(UNIT),C256_FMX)
+	CC=cc65816
+	AS=as65816
+	AR=nlib
+
+	SRCS_FOR_UNIT=txt_c256.c txt_evid.c
+	CFLAGS_FOR_UNIT=-DMODEL=0 -DCPU=255 --target Foenix --code-model large --data-model large
+endif
+
+INCLUDES=-I.. -I../include
+CFLAGS=$(INCLUDES) $(CFLAGS_FOR_UNIT)
+ASFLAGS=$(INCLUDES)
+
+SRCS = channel.c txt_screen.c $(SRCS_FOR_UNIT)
+OBJS = $(patsubst %.c,%.o,$(SRCS))
+
+.PHONY: all clean
+
+all: devices.a
+
+# Build the devices library file for this model
+devices.a: $(OBJS)
+	@echo $(OBJS)
+	$(AR) $@ $^
+
+# Build the object files from C
 %.o: %.c
-	$(CC) -c -o $@ $< $(CFLAGS) $(DEFINES)
+	$(CC) $(CFLAGS) -o $@ $^
 
-.PHONY: clean
-
+# Clean up after a build
 clean:
-	$(RM) *.o *.asm
+	$(RM) $(OBJS) devices.a

@@ -7,6 +7,7 @@
     #define DEFAULT_LOG_LEVEL LOG_TRACE
 #endif
 
+#define LOG_CHANNEL LOG_CHANNEL_CHANNEL_A
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -31,6 +32,8 @@
 #include "dev/txt_a2560k_b.h"
 #elif MODEL == MODEL_FOENIX_A2560U || MODEL == MODEL_FOENIX_A2560U_PLUS
 #include "dev/txt_a2560u.h"
+#elif MODEL == MODEL_FOENIX_C256U || MODEL == MODEL_FOENIX_C256U_PLUS || MODEL == MODEL_FOENIX_FMX
+#include "dev/txt_c256.h"
 #endif
 
 #include "syscalls.h"
@@ -124,10 +127,11 @@ extern unsigned long __memory_start;
 #endif
 
 void print_error(short channel, char * message, short code) {
-    print(channel, message);
-    print(channel, ": ");
-    print_hex_16(channel, code);
-    print(channel, "\n");
+	// TODO: bring back...
+    // print(channel, message);
+    // print(channel, ": ");
+    // print_hex_16(channel, code);
+    // print(channel, "\n");
 }
 
 /*
@@ -138,8 +142,8 @@ void initialize() {
     int i;
     short res;
 
-    /* Setup logging early */
-    log_init();
+    // /* Setup logging early */
+    // log_init();
     #if 0
     char msg[] = "This is some text to test that the debug to UART works ok\r\n";
     {
@@ -153,14 +157,14 @@ void initialize() {
     //DEBUG("This is some text to test that the debug to UART works ok");
     #endif
 
-    /* Initialize the memory system */
-    mem_init(0x3d0000);
+    // /* Initialize the memory system */
+    // mem_init(0x3d0000);
 
-    /* Hide the mouse */
-    mouse_set_visible(0);
+    // /* Hide the mouse */
+    // mouse_set_visible(0);
 
-    /* Initialize the variable system */
-    var_init();
+    // /* Initialize the variable system */
+    // var_init();
 
     /* Initialize the text channels */
     txt_init();
@@ -173,133 +177,136 @@ void initialize() {
 #elif MODEL == MODEL_FOENIX_A2560U || MODEL == MODEL_FOENIX_A2560U_PLUS
     txt_a2560u_install();
     txt_init_screen(TXT_SCREEN_A2560U);
+#elif MODEL == MODEL_FOENIX_C256U || MODEL == MODEL_FOENIX_C256U_PLUS || MODEL == MODEL_FOENIX_FMX
+	txt_c256_install();
+	txt_init_screen(TXT_SCREEN_C256);
 #else
 #error Cannot identify screen setup
 #endif
 
-    log(LOG_INFO, "Text system initialized");
+    // log(LOG_INFO, "Text system initialized");
 
-    /* Initialize the indicators */
-    ind_init();
-    log(LOG_INFO, "Indicators initialized");
+//     /* Initialize the indicators */
+//     ind_init();
+//     log(LOG_INFO, "Indicators initialized");
 
-    /* Initialize the interrupt system */
-    int_init();
+//     /* Initialize the interrupt system */
+//     int_init();
 
-#if HAS_SUPERIO
-    /* Initialize the SuperIO chip */
-    init_superio();
-#endif
+// #if HAS_SUPERIO
+//     /* Initialize the SuperIO chip */
+//     init_superio();
+// #endif
 
-    /* Mute the PSG */
-    psg_mute_all();
+//     /* Mute the PSG */
+//     psg_mute_all();
 
-    /* Initialize and mute the SID chips */
-    sid_init_all();
+//     /* Initialize and mute the SID chips */
+//     sid_init_all();
 
-    /* Initialize the Yamaha sound chips (well, turn their volume down at least) */
-    ym_init();
+//     /* Initialize the Yamaha sound chips (well, turn their volume down at least) */
+//     ym_init();
 
-    /* Initialize the CODEC */
-    init_codec();
+//     /* Initialize the CODEC */
+//     init_codec();
 
-    cdev_init_system();   // Initialize the channel device system
-    INFO("Channel device system ready.");
+//     cdev_init_system();   // Initialize the channel device system
+//     INFO("Channel device system ready.");
 
-    bdev_init_system();   // Initialize the channel device system
-    INFO("Block device system ready.");
+//     bdev_init_system();   // Initialize the channel device system
+//     INFO("Block device system ready.");
 
-    if (res = con_install()) {
-        log_num(LOG_ERROR, "FAILED: Console installation", res);
-    } else {
-        INFO("Console installed.");
-    }
+//     if (res = con_install()) {
+//         log_num(LOG_ERROR, "FAILED: Console installation", res);
+//     } else {
+//         INFO("Console installed.");
+//     }
 
-    /* Initialize the timers the MCP uses */
-    timers_init();
+//     /* Initialize the timers the MCP uses */
+//     timers_init();
 
-    /* Initialize the real time clock */
-    rtc_init();
+//     /* Initialize the real time clock */
+//     rtc_init();
 
-    target_jiffies = sys_time_jiffies() + 300;     /* 5 seconds minimum */
-    DEBUG1("target_jiffies assigned: %d", target_jiffies);
+//     target_jiffies = sys_time_jiffies() + 300;     /* 5 seconds minimum */
+//     DEBUG1("target_jiffies assigned: %d", target_jiffies);
 
-    /* Enable all interrupts */
-    int_enable_all();
-    TRACE("Interrupts enabled");
+//     /* Enable all interrupts */
+//     int_enable_all();
+//     TRACE("Interrupts enabled");
 
-    /* Play the SID test bong on the Gideon SID implementation */
-    sid_test_internal();
+//     /* Play the SID test bong on the Gideon SID implementation */
+//     sid_test_internal();
 
-    if (res = pata_install()) {
-        log_num(LOG_ERROR, "FAILED: PATA driver installation", res);
-    } else {
-        INFO("PATA driver installed.");
-    }
+//     if (res = pata_install()) {
+//         log_num(LOG_ERROR, "FAILED: PATA driver installation", res);
+//     } else {
+//         INFO("PATA driver installed.");
+//     }
 
-    if (res = sdc_install()) {
-        ERROR1("FAILED: SDC driver installation %d", res);
-    } else {
-        INFO("SDC driver installed.");
-    }
+//     if (res = sdc_install()) {
+//         ERROR1("FAILED: SDC driver installation %d", res);
+//     } else {
+//         INFO("SDC driver installed.");
+//     }
 
-#if HAS_FLOPPY
-    if (res = fdc_install()) {
-        ERROR1("FAILED: Floppy drive initialization %d", res);
-    } else {
-        INFO("Floppy drive initialized.");
-    }
-#endif
+// #if HAS_FLOPPY
+//     if (res = fdc_install()) {
+//         ERROR1("FAILED: Floppy drive initialization %d", res);
+//     } else {
+//         INFO("Floppy drive initialized.");
+//     }
+// #endif
 
-    // At this point, we should be able to call into to console to print to the screens
+//     // At this point, we should be able to call into to console to print to the screens
 
-    if (res = ps2_init()) {
-        print_error(0, "FAILED: PS/2 keyboard initialization", res);
-    } else {
-        log(LOG_INFO, "PS/2 keyboard initialized.");
-    }
+//     if (res = ps2_init()) {
+//         print_error(0, "FAILED: PS/2 keyboard initialization", res);
+//     } else {
+//         log(LOG_INFO, "PS/2 keyboard initialized.");
+//     }
 
-#if MODEL == MODEL_FOENIX_A2560K
-    if (res = kbdmo_init()) {
-        log_num(LOG_ERROR, "FAILED: A2560K built-in keyboard initialization", res);
-    } else {
-        log(LOG_INFO, "A2560K built-in keyboard initialized.");
-    }
-#endif
+// #if MODEL == MODEL_FOENIX_A2560K
+//     if (res = kbdmo_init()) {
+//         log_num(LOG_ERROR, "FAILED: A2560K built-in keyboard initialization", res);
+//     } else {
+//         log(LOG_INFO, "A2560K built-in keyboard initialized.");
+//     }
+// #endif
 
-#if HAS_PARALLEL_PORT
-    if (res = lpt_install()) {
-        log_num(LOG_ERROR, "FAILED: LPT installation", res);
-    } else {
-        log(LOG_INFO, "LPT installed.");
-    }
-#endif
+// #if HAS_PARALLEL_PORT
+//     if (res = lpt_install()) {
+//         log_num(LOG_ERROR, "FAILED: LPT installation", res);
+//     } else {
+//         log(LOG_INFO, "LPT installed.");
+//     }
+// #endif
 
-#if HAS_MIDI_PORTS
-    if (res = midi_install()) {
-        log_num(LOG_ERROR, "FAILED: MIDI installation", res);
-    } else {
-        log(LOG_INFO, "MIDI installed.");
-    }
-#endif
+// #if HAS_MIDI_PORTS
+//     if (res = midi_install()) {
+//         log_num(LOG_ERROR, "FAILED: MIDI installation", res);
+//     } else {
+//         log(LOG_INFO, "MIDI installed.");
+//     }
+// #endif
 
-    if (res = uart_install()) {
-        log_num(LOG_ERROR, "FAILED: serial port initialization", res);
-    } else {
-        log(LOG_INFO, "Serial ports initialized.");
-    }
+//     if (res = uart_install()) {
+//         log_num(LOG_ERROR, "FAILED: serial port initialization", res);
+//     } else {
+//         log(LOG_INFO, "Serial ports initialized.");
+//     }
 
-    if (res = cli_init()) {
-        log_num(LOG_ERROR, "FAILED: CLI initialization", res);
-    } else {
-        INFO("CLI initialized.");
-    }
+//     if (res = cli_init()) {
+//         log_num(LOG_ERROR, "FAILED: CLI initialization", res);
+//     } else {
+//         INFO("CLI initialized.");
+//     }
 
-    if (res = fsys_init()) {
-        log_num(LOG_ERROR, "FAILED: file system initialization", res);
-    } else {
-        INFO("File system initialized.");
-    }
+//     if (res = fsys_init()) {
+//         log_num(LOG_ERROR, "FAILED: file system initialization", res);
+//     } else {
+//         INFO("File system initialized.");
+//     }
 }
 
 #define BOOT_DEFAULT    -1  // User chose default, or the time to over-ride has passed
@@ -307,22 +314,24 @@ void initialize() {
 int main(int argc, char * argv[]) {
     short result;
     short i;
-//*((volatile uint32_t*const)0xfec80008) = 0xff99ff22L;
+	char message[256];
 
     initialize();
 
-//*((volatile uint32_t*const)0xfec00000) = 0x16;
+	sprintf(message, "\nFoenix/MCP v0.0.0\n\n");
+	txt_print(0, message);
+	txt_print(0, "Type HELP or ? for help.\n");
 
-    // Make sure the command path is set to the default before we get started
-    cli_command_set("");
+    // // Make sure the command path is set to the default before we get started
+    // cli_command_set("");
 
-    // Display the splash screen and wait for user input
-    short boot_dev = boot_screen();
+    // // Display the splash screen and wait for user input
+    // short boot_dev = boot_screen();
 
-    // Start the boot process
-    boot_from_bdev(boot_dev);
+    // // Start the boot process
+    // boot_from_bdev(boot_dev);
 
-    log(LOG_INFO, "Stopping.");
+    // log(LOG_INFO, "Stopping.");
 
     /* Infinite loop... */
     while (1) {};

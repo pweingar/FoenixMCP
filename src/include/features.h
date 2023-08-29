@@ -27,6 +27,14 @@
     #define HAS_OPL3 1
 #elif MODEL == MODEL_FOENIX_A2560U
     #define HAS_OPL3 1
+#elif MODEL == MODEL_FOENIX_C256U_PLUS || MODEL == MODEL_FOENIX_C256U
+    #define HAS_OPL3 1
+#elif MODEL == MODEL_FOENIX_C256U_FMX
+    #define HAS_SUPERIO 1
+    #define HAS_PARALLEL_PORT 1
+    #define HAS_MIDI_PORTS 1
+    #define HAS_EXTERNAL_SIDS 1
+    #define HAS_OPL3 1
 #endif
 
 
