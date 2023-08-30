@@ -142,8 +142,11 @@ void initialize() {
     int i;
     short res;
 
-    // /* Setup logging early */
-    // log_init();
+    /* Setup logging early */
+    log_init();
+
+	log_setlevel(LOG_INFO);
+
     #if 0
     char msg[] = "This is some text to test that the debug to UART works ok\r\n";
     {
@@ -157,14 +160,14 @@ void initialize() {
     //DEBUG("This is some text to test that the debug to UART works ok");
     #endif
 
-    // /* Initialize the memory system */
-    // mem_init(0x3d0000);
+    /* Initialize the memory system */
+    mem_init(0x3d0000);
 
     // /* Hide the mouse */
-    // mouse_set_visible(0);
+    // TODO: mouse_set_visible(0);
 
-    // /* Initialize the variable system */
-    // var_init();
+    /* Initialize the variable system */
+    var_init();
 
     /* Initialize the text channels */
     txt_init();
@@ -184,7 +187,7 @@ void initialize() {
 #error Cannot identify screen setup
 #endif
 
-    // log(LOG_INFO, "Text system initialized");
+	log(LOG_INFO, "Text system initialized...");
 
 //     /* Initialize the indicators */
 //     ind_init();
@@ -318,9 +321,8 @@ int main(int argc, char * argv[]) {
 
     initialize();
 
-	sprintf(message, "\nFoenix/MCP v0.0.0\n\n");
-	txt_print(0, message);
-	txt_print(0, "Type HELP or ? for help.\n");
+	printf("\nFoenix/MCP v0.0.0\n\n");
+	printf("Type HELP or ? for help.\n");
 
     // // Make sure the command path is set to the default before we get started
     // cli_command_set("");

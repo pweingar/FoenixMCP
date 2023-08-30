@@ -4,7 +4,7 @@
     (memory LoRAM (address (#x4000 . #x8fff))
             (section stack data zdata data heap))
     (memory LoCODE (address (#x9000 . #xefff))
-            (section code cdata))
+            (section code cdata jumptable))
     (memory NearRAM (address (#x20000 . #x27fff))
             (section znear near))
     (memory NearFlash (address (#x28000 . #x2ffff))

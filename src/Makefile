@@ -16,17 +16,17 @@ ifeq ($(UNIT),C256U)
 	CPU=w65816
 	SRCS_FOR_UNIT=
 	CFLAGS_FOR_UNIT=-DMODEL=1 -DCPU=255 --target Foenix --code-model large --data-model large
-	LDFLAGS_FOR_UNIT=C256/ld_lc_c256_u.scm
+	LDFLAGS_FOR_UNIT=C256/ld_lc_c256_u.scm clib-lc-ld.a
 else ifeq ($(UNIT),C256U_PLUS)
 	CPU=w65816
-	SRCS_FOR_UNIT=
+	SRCS_FOR_UNIT=C256/jumptable.s C256/syscalls.s C256/io_stubs.c
 	CFLAGS_FOR_UNIT=-DMODEL=5 -DCPU=255 --target Foenix --code-model large --data-model large
-	LDFLAGS_FOR_UNIT=C256/ld_lc_c256_fmx.scm
+	LDFLAGS_FOR_UNIT=C256/ld_lc_c256_fmx.scm clib-lc-ld.a
 else ifeq ($(UNIT),C256_FMX)
 	CPU=w65816
 	SRCS_FOR_UNIT=
 	CFLAGS_FOR_UNIT=-DMODEL=0 -DCPU=255 --target Foenix --code-model large --data-model large
-	LDFLAGS_FOR_UNIT=C256/ld_lc_c256_fmx.scm
+	LDFLAGS_FOR_UNIT=C256/ld_lc_c256_fmx.scm clib-lc-ld.a
 endif
 
 ifeq ($(CPU),w65816)
@@ -41,8 +41,8 @@ CFLAGS=$(INCLUDES) $(CFLAGS_FOR_UNIT)
 ASFLAGS=$(INCLUDES)
 LDFLAGS=--target foenix --output-format s37 $(LDFLAGS_FOR_UNIT)
 
-SRCS = foenixmcp.c $(SRCS_FOR_UNIT)
-OBJS = $(patsubst %.c,%.o,$(SRCS))
+SRCS = foenixmcp.c log.c memory.c variables.c utilities.c $(SRCS_FOR_UNIT)
+OBJS = $(patsubst %.s,%.o,$(patsubst %.c,%.o,$(SRCS)))
 LIBS = dev/devices.a
 
 .PHONY: clean
@@ -56,6 +56,10 @@ dev/devices.a:
 # Build the object files from C
 %.o: %.c
 	$(CC) $(CFLAGS) -o $@ $^
+
+# Build the object files from assembly
+%.o: %.s
+	$(AS) $(ASFLAGS) -o $@ $^
 
 # Clean up after a build
 clean:

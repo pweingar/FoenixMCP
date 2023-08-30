@@ -49,12 +49,13 @@ void buzzer_off(void) {
 void log_init(void) {
     log_setlevel(DEFAULT_LOG_LEVEL);
 
-    if (log_channel == LOG_CHANNEL_UART0) {
-        uart_init(UART_COM1);
-        do_log = log_to_uart;
-        //log(LOG_INFO,"FOENIX DEBUG OUTPUT------------");
-    }
-    else
+	// TODO: bring back
+    // if (log_channel == LOG_CHANNEL_UART0) {
+    //     uart_init(UART_COM1);
+    //     do_log = log_to_uart;
+    //     //log(LOG_INFO,"FOENIX DEBUG OUTPUT------------");
+    // }
+    // else
         do_log = log_to_screen;
 }
 
@@ -135,7 +136,11 @@ void err_print(short channel, const char * message, short err_number) {
         sprintf(buffer, "%s: #%d\n", message, err_number);
     }
 
-    sys_chan_write(channel, buffer, strlen(buffer));
+	// TODO: bring back
+    // sys_chan_write(channel, buffer, strlen(buffer));
+
+	// TODO: remove
+	sys_txt_print(channel, buffer);
 }
 
 /*
@@ -149,7 +154,7 @@ void panic(void) {
     t_rect region;
 TRACE("PANIC------------------------------------------");
     /* Shut off all interrupts */
-    int_disable_all();
+    // TODO: int_disable_all();
 
     /* Re-initialize the text screen */
     txt_init_screen(0);
@@ -245,11 +250,12 @@ void log_setlevel(short level) {
 
 
 static void log_to_uart(const char *message) {
-    char *c = (char*)message;
-    while (*c)
-        uart_put(UART_COM1, *c++);
-    uart_put(UART_COM1,'\r');
-    uart_put(UART_COM1,'\n');
+	// TODO: bring back
+    // char *c = (char*)message;
+    // while (*c)
+    //     uart_put(UART_COM1, *c++);
+    // uart_put(UART_COM1,'\r');
+    // uart_put(UART_COM1,'\n');
 }
 
 static void log_to_screen(const char *message) {
@@ -278,7 +284,7 @@ void log(short level, const char * message, ...) {
     vsprintf(buf, message, args);
     va_end(args);
 
-    (*do_log)(buf);
+    txt_print(0, buf);
 }
 
 void trace(const char * message, ...) {
