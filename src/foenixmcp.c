@@ -189,9 +189,9 @@ void initialize() {
 
 	log(LOG_INFO, "Text system initialized...");
 
-//     /* Initialize the indicators */
-//     ind_init();
-//     log(LOG_INFO, "Indicators initialized");
+    /* Initialize the indicators */
+    ind_init();
+    log(LOG_INFO, "Indicators initialized");
 
 //     /* Initialize the interrupt system */
 //     int_init();
