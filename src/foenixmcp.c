@@ -134,6 +134,8 @@ void print_error(short channel, char * message, short code) {
     // print(channel, "\n");
 }
 
+t_sys_info info;
+
 /*
  * Initialize the kernel systems.
  */
@@ -192,6 +194,17 @@ void initialize() {
     /* Initialize the indicators */
     ind_init();
     log(LOG_INFO, "Indicators initialized");
+
+	sys_get_information(&info);
+	printf("\nSystem Information:\nModel: %s\n", info.model_name);
+	printf("CPU: %s @ %d kHz\n", info.cpu_name, (unsigned int)info.cpu_clock_khz);
+	printf("FPGA: %04X.%04X.%04X\n", info.fpga_model, info.fpga_version, info.fpga_subver);
+	printf("Memory: %d KB\n", (unsigned int)(info.system_ram_size  / 1024l));
+	printf("HD Installed: %s\n", info.has_hard_drive ? "YES" : "NO");
+	printf("Floppy: %s\n", info.has_floppy ? "YES" : "NO");
+	printf("Expansion: %s\n", info.has_expansion_card ? "YES" : "NO");
+	printf("Ethernet: %s\n", info.has_ethernet ? "YES" : "NO");
+	printf("Screens: %d\n", info.screens);
 
 //     /* Initialize the interrupt system */
 //     int_init();
@@ -253,13 +266,13 @@ void initialize() {
 //         INFO("SDC driver installed.");
 //     }
 
-// #if HAS_FLOPPY
-//     if (res = fdc_install()) {
-//         ERROR1("FAILED: Floppy drive initialization %d", res);
-//     } else {
-//         INFO("Floppy drive initialized.");
-//     }
-// #endif
+#if HAS_FLOPPY
+    if (res = fdc_install()) {
+        ERROR1("FAILED: Floppy drive initialization %d", res);
+    } else {
+        INFO("Floppy drive initialized.");
+    }
+#endif
 
 //     // At this point, we should be able to call into to console to print to the screens
 
@@ -269,29 +282,29 @@ void initialize() {
 //         log(LOG_INFO, "PS/2 keyboard initialized.");
 //     }
 
-// #if MODEL == MODEL_FOENIX_A2560K
-//     if (res = kbdmo_init()) {
-//         log_num(LOG_ERROR, "FAILED: A2560K built-in keyboard initialization", res);
-//     } else {
-//         log(LOG_INFO, "A2560K built-in keyboard initialized.");
-//     }
-// #endif
+#if MODEL == MODEL_FOENIX_A2560K
+    if (res = kbdmo_init()) {
+        log_num(LOG_ERROR, "FAILED: A2560K built-in keyboard initialization", res);
+    } else {
+        log(LOG_INFO, "A2560K built-in keyboard initialized.");
+    }
+#endif
 
-// #if HAS_PARALLEL_PORT
-//     if (res = lpt_install()) {
-//         log_num(LOG_ERROR, "FAILED: LPT installation", res);
-//     } else {
-//         log(LOG_INFO, "LPT installed.");
-//     }
-// #endif
+#if HAS_PARALLEL_PORT
+    if (res = lpt_install()) {
+        log_num(LOG_ERROR, "FAILED: LPT installation", res);
+    } else {
+        log(LOG_INFO, "LPT installed.");
+    }
+#endif
 
-// #if HAS_MIDI_PORTS
-//     if (res = midi_install()) {
-//         log_num(LOG_ERROR, "FAILED: MIDI installation", res);
-//     } else {
-//         log(LOG_INFO, "MIDI installed.");
-//     }
-// #endif
+#if HAS_MIDI_PORTS
+    if (res = midi_install()) {
+        log_num(LOG_ERROR, "FAILED: MIDI installation", res);
+    } else {
+        log(LOG_INFO, "MIDI installed.");
+    }
+#endif
 
 //     if (res = uart_install()) {
 //         log_num(LOG_ERROR, "FAILED: serial port initialization", res);

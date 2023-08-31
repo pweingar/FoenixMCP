@@ -47,6 +47,12 @@
 #define GABE_RNG_CTRL_EN		0x01													// Enable the LFSR block
 #define GABE_RNG_CTRL_LD_SEED	0x02													// Toggle after setting seed to load seed
 
+#define GABE_DIP_REG			((volatile __attribute__((far)) uint16_t *)0xafe80e)	// User and boot mode DIP switches
+#define HD_INSTALLED 			0x0080
+#define DIP_BOOT_IDE			0x0000
+#define DIP_BOOT_SDCARD			0x0100
+#define DIP_BOOT_FLOPPY			0x0200
+
 /**
  * @brief Structure to represent the machine ID and expansion card info
  * 
@@ -60,7 +66,7 @@ union gabe_sys_stat_u {
 	uint8_t reg;
 };
 
-#define GABE_SYS_STAT			((volatile __attribute__((far)) unsion gabe_sys_stat_u *)0xafe887)
+#define GABE_SYS_STAT			((volatile __attribute__((far)) union gabe_sys_stat_u *)0xafe887)
 
 /**
  * @brief Structure to respresent the version of the GABE chip

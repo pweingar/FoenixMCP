@@ -1,5 +1,6 @@
 #include "sys_general.h"
 #include "gabe_reg.h"
+#include "exp_reg.h"
 
 /*
  * Fill out a s_MODEL_info structure with the information about the current system
@@ -76,6 +77,58 @@ void sys_get_information(p_sys_info info) {
     info->fpga_model = *FPGA_MODEL_H << 16 | *FPGA_MODEL_L;
     info->fpga_version = *FPGA_VER;
     info->fpga_subver = *FPGA_SUBVER;
+
+#elif MODEL == MODEL_FOENIX_FMX || MODEL == MODEL_FOENIX_C256U || MODEL == MODEL_FOENIX_C256U_PLUS
+	machine_id = GABE_SYS_STAT->machine_id;
+	cpu = CPU_WDC65816;
+	clock_speed = SYSCLK_14MHZ;
+
+	info->has_expansion_card = (GABE_SYS_STAT->no_expansion) ? 1 : 0;
+    info->has_hard_drive = (*GABE_DIP_REG & HD_INSTALLED) ? 0 : 1;
+    info->has_ethernet = 0;
+    info->screens = 1;
+
+	if (info->has_expansion_card) {
+		// If an expansion card is present, find out what it is
+		if (EXP_CARD_INFO->vendor_id == EXP_VENDOR_FOENIX) {
+			switch (EXP_CARD_INFO->card_id) {
+				case EXP_CARD_C100_ESID:
+					// The ESID is plugged in, we add the SIDs and the ethernet port
+					info->has_ethernet = 1;
+					break;
+
+				case EXP_CARD_C200_EVID:
+					// The EVID is plugged in, we add the second screen and the ethernet port
+					info->has_ethernet = 1;
+					info->screens = 2;
+					break;
+
+				default:
+					break;
+			}
+		}
+	}
+
+    info->fpga_model = GABE_VERSION->model;
+    info->fpga_version = GABE_VERSION->version;
+    info->fpga_subver = GABE_VERSION->subversion;
+
+	switch (machine_id) {
+		case MODEL_FOENIX_FMX:
+			info->has_floppy = 1;
+			info->system_ram_size = 4l * 1024l * 1024l;
+			break;
+
+		case MODEL_FOENIX_C256U_PLUS:
+			info->has_floppy = 0;
+			info->system_ram_size = 4l * 1024l * 1024l;
+			break;
+
+		default:
+			info->has_floppy = 0;
+			info->system_ram_size = 2l * 1024l * 1024l;
+			break;
+	}
 
 #else
     machine_id = 0xFF;

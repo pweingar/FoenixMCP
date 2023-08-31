@@ -285,6 +285,7 @@ void log(short level, const char * message, ...) {
     va_end(args);
 
     txt_print(0, buf);
+	txt_print(0, "\n");
 }
 
 void trace(const char * message, ...) {

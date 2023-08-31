@@ -21,12 +21,12 @@ else ifeq ($(UNIT),C256U_PLUS)
 	CPU=w65816
 	SRCS_FOR_UNIT=C256/jumptable.s C256/syscalls.s C256/io_stubs.c
 	CFLAGS_FOR_UNIT=-DMODEL=5 -DCPU=255 --target Foenix --code-model large --data-model large
-	LDFLAGS_FOR_UNIT=C256/ld_lc_c256_fmx.scm clib-lc-ld.a
+	LDFLAGS_FOR_UNIT=C256/ld_lc_c256_fmx.scm clib-lc-ld.a --rtattr printf=medium
 else ifeq ($(UNIT),C256_FMX)
 	CPU=w65816
 	SRCS_FOR_UNIT=
 	CFLAGS_FOR_UNIT=-DMODEL=0 -DCPU=255 --target Foenix --code-model large --data-model large
-	LDFLAGS_FOR_UNIT=C256/ld_lc_c256_fmx.scm clib-lc-ld.a
+	LDFLAGS_FOR_UNIT=C256/ld_lc_c256_fmx.scm clib-lc-ld.a 
 endif
 
 ifeq ($(CPU),w65816)
@@ -41,7 +41,7 @@ CFLAGS=$(INCLUDES) $(CFLAGS_FOR_UNIT)
 ASFLAGS=$(INCLUDES)
 LDFLAGS=--target foenix --output-format s37 $(LDFLAGS_FOR_UNIT)
 
-SRCS = foenixmcp.c log.c memory.c variables.c utilities.c $(SRCS_FOR_UNIT)
+SRCS = foenixmcp.c log.c memory.c sys_general.c variables.c utilities.c $(SRCS_FOR_UNIT)
 OBJS = $(patsubst %.s,%.o,$(patsubst %.c,%.o,$(SRCS)))
 LIBS = dev/devices.a
 

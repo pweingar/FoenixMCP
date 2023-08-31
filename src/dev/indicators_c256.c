@@ -11,7 +11,7 @@
  */
 
 #include "indicators.h"
-#include "C256/gabe.h"
+#include "gabe_reg.h"
 
 /*
  * Set an indicator to the given state
