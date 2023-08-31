@@ -10,18 +10,10 @@
 #include <stdint.h>
 
 #include "log.h"
+#include "C256/exp_c256.h"
 #include "C256/vicky_ii.h"
 #include "dev/txt_evid.h"
 #include "dev/txt_screen.h"
-
-
-#define gabe_sys_stat           ((volatile __attribute__((far)) uint8_t *)0xafe887)
-#define GABE_EXPANSION_FLAG     0x10
-
-#define expn_id_vendor          ((volatile __attribute__((far)) uint16_t *)0xae0010)
-#define EXPN_VENDOR_FOENIX      0xf0e1
-#define expn_id_card            ((volatile __attribute__((far)) uint16_t *)0xae0012)
-#define EXPN_CARD_C200          0x9236
 
 #define evid_font_set           ((volatile __attribute__((far)) uint8_t *)0xae1000)
 #define evid_fg_clut            ((volatile __attribute__((far)) t_color4 *)0xae1b00)
@@ -100,14 +92,11 @@ unsigned long evid_msr_shadow;          /* A shadow register for the Master Cont
  * @return short 0 if not present, any other value means the card is present
  */
 short txt_evid_present() {
-    if ((*gabe_sys_stat & GABE_EXPANSION_FLAG) == 0) {
-        // An expansion card is present check to see if it's a C200 EVID
-        return ((*expn_id_vendor == EXPN_VENDOR_FOENIX) && (*expn_id_card == EXPN_CARD_C200));
-
-    } else {
-        // No card is present...
-        return 0;
-    }
+	if ((EXP_CARD_INFO->vendor_id == EXP_VENDOR_FOENIX) && (EXP_CARD_INFO->card_id == EXP_CARD_C200_EVID)) {
+		return 1;
+	} else {
+		return 0;
+	}
 }
 
 /**
@@ -676,17 +665,7 @@ static void txt_evid_init() {
     txt_evid_fill(' ');
 }
 
-static void txt_evid_test() {
-    const char * message = "Hello, EVID!";
-
-    txt_evid_init();
-    
-    for (const char *x = message; *x; x++) {
-        txt_evid_put(*x);
-    }
-}
-
-// static     t_txt_device device;
+t_txt_device device;
 
 /**
  * Initialize and install the driver
@@ -694,41 +673,37 @@ static void txt_evid_test() {
  * @return 0 on success, any other number is an error
  */
 short txt_evid_install() {
-    if (1) { // txt_evid_present()) {
-        // t_txt_device device;
+	if (txt_evid_present()) {
+		// Only register the EVID driver if the EVID is installed
 
-        // device.number = TXT_SCREEN_EVID;
-        // device.name = "EVID";
+		device.number = TXT_SCREEN_EVID;
+		device.name = "EVID";
 
-        // device.init = txt_evid_init;
-        // device.get_capabilities = txt_evid_get_capabilities;
-        // device.set_mode = txt_evid_set_mode;
-        // device.set_sizes = txt_evid_set_sizes;
-        // device.set_resolution = txt_evid_set_resolution;
-        // device.set_border = txt_evid_set_border;
-        // device.set_border_color = txt_evid_set_border_color;
-        // device.set_font = txt_evid_set_font;
-        // device.set_cursor = txt_evid_set_cursor;
-        // device.set_cursor_visible = txt_evid_set_cursor_visible;
-        // device.get_region = txt_evid_get_region;
-        // device.set_region = txt_evid_set_region;
-        // device.get_color = txt_evid_get_color;
-        // device.set_color = txt_evid_set_color;
-        // device.set_xy = txt_evid_set_xy;
-        // device.get_xy = txt_evid_get_xy;
-        // device.put = txt_evid_put;
-        // device.scroll = txt_evid_scroll;
-        // device.fill = txt_evid_fill;
-        // device.get_sizes = txt_evid_get_sizes;
+		device.init = txt_evid_init;
+		device.get_capabilities = txt_evid_get_capabilities;
+		device.set_mode = txt_evid_set_mode;
+		device.set_sizes = txt_evid_set_sizes;
+		device.set_resolution = txt_evid_set_resolution;
+		device.set_border = txt_evid_set_border;
+		device.set_border_color = txt_evid_set_border_color;
+		device.set_font = txt_evid_set_font;
+		device.set_cursor = txt_evid_set_cursor;
+		device.set_cursor_visible = txt_evid_set_cursor_visible;
+		device.get_region = txt_evid_get_region;
+		device.set_region = txt_evid_set_region;
+		device.get_color = txt_evid_get_color;
+		device.set_color = txt_evid_set_color;
+		device.set_xy = txt_evid_set_xy;
+		device.get_xy = txt_evid_get_xy;
+		device.put = txt_evid_put;
+		device.scroll = txt_evid_scroll;
+		device.fill = txt_evid_fill;
+		device.get_sizes = txt_evid_get_sizes;
 
-        // Card is present... for the moment, just run the test
-        // Normally, we'd install the driver here.
-        txt_evid_test();
-        return 0;
+		return txt_register(&device);
 
-//     return txt_register(&device);
-    } else {
-        // Don't install if the card isn't present, but don't treat it as an error
-        return 0;
-    }
+	} else {
+		// Return an error if the EVID is not present
+		return -1;
+	}
 }

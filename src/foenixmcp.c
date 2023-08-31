@@ -34,6 +34,7 @@
 #include "dev/txt_a2560u.h"
 #elif MODEL == MODEL_FOENIX_C256U || MODEL == MODEL_FOENIX_C256U_PLUS || MODEL == MODEL_FOENIX_FMX
 #include "dev/txt_c256.h"
+#include "dev/txt_evid.h"
 #endif
 
 #include "syscalls.h"
@@ -147,6 +148,9 @@ void initialize() {
     /* Setup logging early */
     log_init();
 
+	/* Fill out the system information */
+	sys_get_information(&info);
+
 	log_setlevel(LOG_INFO);
 
     #if 0
@@ -179,12 +183,22 @@ void initialize() {
     log(LOG_INFO, "Initializing screens...");
     txt_init_screen(TXT_SCREEN_A2560K_A);
     txt_init_screen(TXT_SCREEN_A2560K_B);
+
 #elif MODEL == MODEL_FOENIX_A2560U || MODEL == MODEL_FOENIX_A2560U_PLUS
     txt_a2560u_install();
     txt_init_screen(TXT_SCREEN_A2560U);
+
 #elif MODEL == MODEL_FOENIX_C256U || MODEL == MODEL_FOENIX_C256U_PLUS || MODEL == MODEL_FOENIX_FMX
+	// Install and initialize the main screen text driver
 	txt_c256_install();
 	txt_init_screen(TXT_SCREEN_C256);
+
+	// If the EVID card is plugged in, install and initialize the EVID driver
+	if (info.screens > 1) {
+		short result = txt_evid_install();
+		txt_init_screen(TXT_SCREEN_EVID);
+	}
+
 #else
 #error Cannot identify screen setup
 #endif
@@ -195,7 +209,6 @@ void initialize() {
     ind_init();
     log(LOG_INFO, "Indicators initialized");
 
-	sys_get_information(&info);
 	printf("\nSystem Information:\nModel: %s\n", info.model_name);
 	printf("CPU: %s @ %d kHz\n", info.cpu_name, (unsigned int)info.cpu_clock_khz);
 	printf("FPGA: %04X.%04X.%04X\n", info.fpga_model, info.fpga_version, info.fpga_subver);
