@@ -203,29 +203,15 @@ void initialize() {
 #error Cannot identify screen setup
 #endif
 
-	log(LOG_INFO, "Text system initialized...");
+	INFO("Text system initialized...");
 
     /* Initialize the indicators */
     ind_init();
-    log(LOG_INFO, "Indicators initialized");
+    INFO("Indicators initialized");
 
-	printf("\nSystem Information:\nModel: %s\n", info.model_name);
-	printf("CPU: %s @ %d kHz\n", info.cpu_name, (unsigned int)info.cpu_clock_khz);
-	printf("FPGA: %04X.%04X.%04X\n", info.fpga_model, info.fpga_version, info.fpga_subver);
-	printf("Memory: %d KB\n", (unsigned int)(info.system_ram_size  / 1024l));
-	printf("HD Installed: %s\n", info.has_hard_drive ? "YES" : "NO");
-	printf("Floppy: %s\n", info.has_floppy ? "YES" : "NO");
-	printf("Expansion: %s\n", info.has_expansion_card ? "YES" : "NO");
-	printf("Ethernet: %s\n", info.has_ethernet ? "YES" : "NO");
-	printf("Screens: %d\n", info.screens);
-
-//     /* Initialize the interrupt system */
-//     int_init();
-
-// #if HAS_SUPERIO
-//     /* Initialize the SuperIO chip */
-//     init_superio();
-// #endif
+    /* Initialize the interrupt system */
+    int_init();
+	INFO("Interrupts initialized");
 
 //     /* Mute the PSG */
 //     psg_mute_all();
@@ -260,9 +246,9 @@ void initialize() {
 //     target_jiffies = sys_time_jiffies() + 300;     /* 5 seconds minimum */
 //     DEBUG1("target_jiffies assigned: %d", target_jiffies);
 
-//     /* Enable all interrupts */
-//     int_enable_all();
-//     TRACE("Interrupts enabled");
+    /* Enable all interrupts */
+    int_enable_all();
+    TRACE("Interrupts enabled");
 
 //     /* Play the SID test bong on the Gideon SID implementation */
 //     sid_test_internal();

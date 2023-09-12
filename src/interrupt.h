@@ -6,6 +6,7 @@
 #define __INTERRUPT_H
 
 #include "sys_general.h"
+#include "types.h"
 
 /* Type declaration for an interrupt handler */
 typedef void (*p_int_handler)();
@@ -49,6 +50,28 @@ typedef void (*p_int_handler)();
 #define MASK_GRP0 			((volatile unsigned short *)0x00B00118)
 #define MASK_GRP1 			((volatile unsigned short *)0x00B0011A)
 #define MASK_GRP2 			((volatile unsigned short *)0x00B0011C)
+
+#elif MODEL == MODEL_FOENIX_FMX || MODEL == MODEL_FOENIX_C256U || MODEL == MODEL_FOENIX_C256U_PLUS
+
+#define PENDING_GRP0 		((volatile uint8_t *)0x000140)
+#define PENDING_GRP1 		((volatile uint8_t *)0x000141)
+#define PENDING_GRP2 		((volatile uint8_t *)0x000142)
+#define PENDING_GRP3		((volatile uint8_t *)0x000143)
+
+#define POL_GRP0 			((volatile uint8_t *)0x000144)
+#define POL_GRP1 			((volatile uint8_t *)0x000145)
+#define POL_GRP2 			((volatile uint8_t *)0x000146)
+#define POL_GRP3 			((volatile uint8_t *)0x000147)
+
+#define EDGE_GRP0 			((volatile uint8_t *)0x000148)
+#define EDGE_GRP1 			((volatile uint8_t *)0x000149)
+#define EDGE_GRP2 			((volatile uint8_t *)0x00014a)
+#define EDGE_GRP3 			((volatile uint8_t *)0x00014b)
+
+#define MASK_GRP0 			((volatile uint8_t *)0x00014c)
+#define MASK_GRP1 			((volatile uint8_t *)0x00014d)
+#define MASK_GRP2 			((volatile uint8_t *)0x00014e)
+#define MASK_GRP3 			((volatile uint8_t *)0x00014f)
 
 #endif
 
