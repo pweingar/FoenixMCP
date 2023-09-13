@@ -4,6 +4,7 @@
 
 #include "psg.h"
 #include "sound_reg.h"
+#include "log.h"
 
 /*
  * Mute all voices on the PSG
