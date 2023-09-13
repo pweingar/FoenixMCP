@@ -16,21 +16,21 @@ ifeq ($(UNIT),C256U)
 	AS=as65816
 	AR=nlib
 
-	SRCS_FOR_UNIT=psg.c codec_c256.c
+	SRCS_FOR_UNIT=psg.c sid.c codec_c256.c
 	CFLAGS_FOR_UNIT=-DMODEL=1 -DCPU=255 --target Foenix --code-model large --data-model large
 else ifeq ($(UNIT),C256U_PLUS)
 	CC=cc65816
 	AS=as65816
 	AR=nlib
 
-	SRCS_FOR_UNIT=psg.c codec_c256.c
+	SRCS_FOR_UNIT=psg.c sid.c codec_c256.c
 	CFLAGS_FOR_UNIT=-DMODEL=5 -DCPU=255 --target Foenix --code-model large --data-model large
 else ifeq ($(UNIT),C256_FMX)
 	CC=cc65816
 	AS=as65816
 	AR=nlib
 
-	SRCS_FOR_UNIT=psg.c codec_c256.c
+	SRCS_FOR_UNIT=psg.c sid.c codec_c256.c
 	CFLAGS_FOR_UNIT=-DMODEL=0 -DCPU=255 --target Foenix --code-model large --data-model large
 endif
 

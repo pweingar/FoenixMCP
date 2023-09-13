@@ -216,8 +216,8 @@ void initialize() {
     /* Mute the PSG */
     psg_mute_all();
 
-//     /* Initialize and mute the SID chips */
-//     sid_init_all();
+    /* Initialize and mute the SID chips */
+    sid_init_all();
 
 //     /* Initialize the Yamaha sound chips (well, turn their volume down at least) */
 //     ym_init();

@@ -40,6 +40,7 @@ ASFLAGS=$(INCLUDES)
 
 SRCS = channel.c txt_screen.c $(SRCS_FOR_UNIT)
 OBJS = $(patsubst %.c,%.o,$(SRCS))
+OBJS4RM = $(subst /,\\,$(OBJS))
 
 .PHONY: all clean
 
@@ -56,4 +57,4 @@ devices.a: $(OBJS)
 
 # Clean up after a build
 clean:
-	$(RM) $(OBJS) devices.a
+	$(RM) $(OBJS4RM) devices.a
