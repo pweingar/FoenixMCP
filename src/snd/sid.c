@@ -80,7 +80,7 @@ void sid_init_all() {
 void sid_test_internal() {
 	volatile struct s_sid * sid = 0;
 
-	sid = sid_get_base(0);
+	sid = (struct s_sid *)sid_get_base(0);
 	if (sid)  {
 		sid->v1.attack_decay = 0x29;
 		sid->v2.attack_decay = 0x29;

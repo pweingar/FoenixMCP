@@ -37,9 +37,9 @@ ifeq ($(CPU),w65816)
 endif
 
 INCLUDES=-I. -I./include
-CFLAGS=$(INCLUDES) $(CFLAGS_FOR_UNIT)
+CFLAGS=$(INCLUDES) $(CFLAGS_FOR_UNIT) -l
 ASFLAGS=$(INCLUDES)
-LDFLAGS=--target foenix --output-format s37 $(LDFLAGS_FOR_UNIT)
+LDFLAGS=--target foenix --output-format s37 $(LDFLAGS_FOR_UNIT) --list-file foenixmcp.map
 
 SRCS = foenixmcp.c log.c memory.c sys_general.c variables.c utilities.c $(SRCS_FOR_UNIT)
 OBJS = $(patsubst %.s,%.o,$(patsubst %.c,%.o,$(SRCS)))
@@ -67,6 +67,6 @@ snd/sound.a:
 
 # Clean up after a build
 clean:
-	$(RM) $(OBJS4RM) foenixmcp.s37
+	$(RM) $(OBJS4RM) foenixmcp.s37 *.lst *.map
 	$(MAKE) --directory=dev clean
 	$(MAKE) --directory=snd clean

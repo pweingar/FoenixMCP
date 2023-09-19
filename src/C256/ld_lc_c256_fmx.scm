@@ -15,7 +15,7 @@
             (section zfar zhuge ))
     (memory DirectPage (address (#xf000 . #xf0ff))
             (section (registers ztiny)))
-    (memory Vector (address (#xfff0 . #xffff))
+    (memory Vector (address (#xffe0 . #xffff))
             (section (reset #xfffc)))
     (block stack (size #x1000))
     (block heap (size #x1000))

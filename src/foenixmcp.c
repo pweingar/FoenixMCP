@@ -237,8 +237,9 @@ void initialize() {
 //         INFO("Console installed.");
 //     }
 
-//     /* Initialize the timers the MCP uses */
-//     timers_init();
+    /* Initialize the timers the MCP uses */
+    timers_init();
+	INFO("Timers initialized");
 
 //     /* Initialize the real time clock */
 //     rtc_init();

@@ -16,26 +16,26 @@ ifeq ($(UNIT),C256U)
 	AS=as65816
 	AR=nlib
 
-	SRCS_FOR_UNIT=txt_c256.c txt_evid.c indicators_c256.c interrupts_c256.c
+	SRCS_FOR_UNIT=txt_c256.c txt_evid.c indicators_c256.c interrupts_c256.c timers_c256.c
 	CFLAGS_FOR_UNIT=-DMODEL=1 -DCPU=255 --target Foenix --code-model large --data-model large
 else ifeq ($(UNIT),C256U_PLUS)
 	CC=cc65816
 	AS=as65816
 	AR=nlib
 
-	SRCS_FOR_UNIT=txt_c256.c txt_evid.c indicators_c256.c interrupts_c256.c
+	SRCS_FOR_UNIT=txt_c256.c txt_evid.c indicators_c256.c interrupts_c256.c timers_c256.c
 	CFLAGS_FOR_UNIT=-DMODEL=5 -DCPU=255 --target Foenix --code-model large --data-model large
 else ifeq ($(UNIT),C256_FMX)
 	CC=cc65816
 	AS=as65816
 	AR=nlib
 
-	SRCS_FOR_UNIT=txt_c256.c txt_evid.c indicators_c256.c interrupts_c256.c
+	SRCS_FOR_UNIT=txt_c256.c txt_evid.c indicators_c256.c interrupts_c256.c timers_c256.c
 	CFLAGS_FOR_UNIT=-DMODEL=0 -DCPU=255 --target Foenix --code-model large --data-model large
 endif
 
 INCLUDES=-I.. -I../include
-CFLAGS=$(INCLUDES) $(CFLAGS_FOR_UNIT)
+CFLAGS=$(INCLUDES) $(CFLAGS_FOR_UNIT) -l
 ASFLAGS=$(INCLUDES)
 
 SRCS = channel.c txt_screen.c $(SRCS_FOR_UNIT)
@@ -57,4 +57,4 @@ devices.a: $(OBJS)
 
 # Clean up after a build
 clean:
-	$(RM) $(OBJS4RM) devices.a
+	$(RM) $(OBJS4RM) devices.a *.lst

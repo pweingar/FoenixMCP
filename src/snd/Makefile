@@ -35,7 +35,7 @@ else ifeq ($(UNIT),C256_FMX)
 endif
 
 INCLUDES=-I.. -I../include
-CFLAGS=$(INCLUDES) $(CFLAGS_FOR_UNIT)
+CFLAGS=$(INCLUDES) $(CFLAGS_FOR_UNIT) -l
 ASFLAGS=$(INCLUDES)
 
 SRCS = $(SRCS_FOR_UNIT)
@@ -57,4 +57,4 @@ sound.a: $(OBJS)
 
 # Clean up after a build
 clean:
-	$(RM) $(OBJS4RM) sound.a
+	$(RM) $(OBJS4RM) sound.a *.lst

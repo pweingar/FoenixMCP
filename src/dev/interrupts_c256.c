@@ -7,6 +7,7 @@
 
 #include "features.h"
 #include "interrupt.h"
+#include "log.h"
 
 // FoenixMCP interrupt number -> C256 group and mask:
 
@@ -159,6 +160,13 @@ void int_init() {
 	*MASK_GRP1 = 0xFF;
 	*MASK_GRP2 = 0xFF;
 	*MASK_GRP3 = 0xFF;
+
+	// Clear all the pending flags
+
+	*PENDING_GRP0 = 0xFF;
+	*PENDING_GRP1 = 0xFF;
+	*PENDING_GRP2 = 0xFF;
+	*PENDING_GRP3 = 0xFF;
 }
 
 /*
@@ -233,6 +241,8 @@ void int_enable(unsigned short n) {
 
 	/* Find the mask for the interrupt */
 	unsigned short mask = int_mask(n);
+
+	printf("Enable interrupt %d => group: %d, mask: %d\n", n, group, mask);
 
 	if ((group != 0xff) && (mask != 0xff)) {
 		// Only set the mask if the mask and group numbers are valid
@@ -379,20 +389,23 @@ void int_clear(unsigned short n) {
  * NOTE: this routine might not be fast enough in C and have to be replaced by hand written
  *       assembly code... but we will try it this way first.
  */
-__attribute__((interrupt(0xfffe))) void int_handle_irq() {
+__attribute__((interrupt(0xffee))) void int_handle_irq() {
 	uint8_t mask_bits = 0;
+
+	volatile __attribute__((far)) char * text = (char *)0xafa001;
+	*text = *text + 1;
 
 	// Process any pending interrupts in group 0
 	mask_bits = *PENDING_GRP0;
 	if (mask_bits) {
-		if (mask_bits & 0x01) int_handle_00();	// Start of frame
-		if (mask_bits & 0x02) int_handle_01();	// Start of line
-		if (mask_bits & 0x04) int_handle_02();	// Timer 0
-		if (mask_bits & 0x08) int_handle_03();	// Timer 1
-		if (mask_bits & 0x10) int_handle_04();	// Timer 2
-		if (mask_bits & 0x20) int_handle_05();	// Realtime Clock
-		if (mask_bits & 0x40) int_handle_06();	// Floppy Disk Controller
-		if (mask_bits & 0x80) int_handle_07();	// PS/2 Mouse
+		if ((mask_bits & 0x01) && int_handle_00) int_handle_00();	// Start of frame
+		if ((mask_bits & 0x02) && int_handle_01) int_handle_01();	// Start of line
+		if ((mask_bits & 0x04) && int_handle_02) int_handle_02();	// Timer 0
+		if ((mask_bits & 0x08) && int_handle_03) int_handle_03();	// Timer 1
+		if ((mask_bits & 0x10) && int_handle_04) int_handle_04();	// Timer 2
+		if ((mask_bits & 0x20) && int_handle_05) int_handle_05();	// Realtime Clock
+		if ((mask_bits & 0x40) && int_handle_06) int_handle_06();	// Floppy Disk Controller
+		if ((mask_bits & 0x80) && int_handle_07) int_handle_07();	// PS/2 Mouse
 
 		// Clear the pending bits for group 0
 		*PENDING_GRP0 = mask_bits;
@@ -401,14 +414,14 @@ __attribute__((interrupt(0xfffe))) void int_handle_irq() {
 	// Process any pending interrupts in group 1
 	mask_bits = *PENDING_GRP1;
 	if (mask_bits) {
-		if (mask_bits & 0x01) int_handle_10();	// PS/2 Keyboard
-		if (mask_bits & 0x02) int_handle_11();	// VICKY II Sprite Collision
-		if (mask_bits & 0x04) int_handle_12();	// VICKY II Bitmap Collision
-		if (mask_bits & 0x08) int_handle_13();	// Serial Port #2
-		if (mask_bits & 0x10) int_handle_14();	// Serial Port #1
-		if (mask_bits & 0x20) int_handle_15();	// MIDI Controller
-		if (mask_bits & 0x40) int_handle_16();	// Parallel Port
-		if (mask_bits & 0x80) int_handle_17();	// SD Controller
+		if ((mask_bits & 0x01) && int_handle_10) int_handle_10();	// PS/2 Keyboard
+		if ((mask_bits & 0x02) && int_handle_11) int_handle_11();	// VICKY II Sprite Collision
+		if ((mask_bits & 0x04) && int_handle_12) int_handle_12();	// VICKY II Bitmap Collision
+		if ((mask_bits & 0x08) && int_handle_13) int_handle_13();	// Serial Port #2
+		if ((mask_bits & 0x10) && int_handle_14)int_handle_14();	// Serial Port #1
+		if ((mask_bits & 0x20) && int_handle_15) int_handle_15();	// MIDI Controller
+		if ((mask_bits & 0x40) && int_handle_16) int_handle_16();	// Parallel Port
+		if ((mask_bits & 0x80) && int_handle_17) int_handle_17();	// SD Controller
 
 		// Clear the pending bits for group 1
 		*PENDING_GRP1 = mask_bits;
@@ -417,14 +430,14 @@ __attribute__((interrupt(0xfffe))) void int_handle_irq() {
 	// Process any pending interrupts in group 2
 	mask_bits = *PENDING_GRP2;
 	if (mask_bits) {
-		if (mask_bits & 0x01) int_handle_20();	// OPL3
+		if ((mask_bits & 0x01) && int_handle_20) int_handle_20();	// OPL3
 		// if (mask_bits & 0x02) int_handle_21(); // Currently unused
 		// if (mask_bits & 0x04) int_handle_22(); // Currently unused
-		if (mask_bits & 0x08) int_handle_23();	// VICKY II VDMA
-		if (mask_bits & 0x10) int_handle_24();	// VICKY II Tile Collision
+		if ((mask_bits & 0x08) && int_handle_23) int_handle_23();	// VICKY II VDMA
+		if ((mask_bits & 0x10) && int_handle_24) int_handle_24();	// VICKY II Tile Collision
 		// if (mask_bits & 0x20) int_handle_25(); // Currently unused
-		if (mask_bits & 0x40) int_handle_26();	// External Expansion
-		if (mask_bits & 0x80) int_handle_27();	// SD Insert
+		if ((mask_bits & 0x40) && int_handle_26) int_handle_26();	// External Expansion
+		if ((mask_bits & 0x80) && int_handle_27) int_handle_27();	// SD Insert
 
 		// Clear the pending bits for group 2
 		*PENDING_GRP2 = mask_bits;
@@ -433,14 +446,14 @@ __attribute__((interrupt(0xfffe))) void int_handle_irq() {
 	// Process any pending interrupts in group 3
 	mask_bits = *PENDING_GRP3;
 	if (mask_bits) {
-		if (mask_bits & 0x01) int_handle_30();	// OPN2
-		if (mask_bits & 0x02) int_handle_31();	// OPM
-		if (mask_bits & 0x04) int_handle_32();	// IDE
-		// if (mask_bits & 0x08) int_handle_33(); // Currently unused
-		// if (mask_bits & 0x10) int_handle_34(); // Currently unused
-		// if (mask_bits & 0x20) int_handle_35(); // Currently unused
-		// if (mask_bits & 0x40) int_handle_36(); // Currently unused
-		// if (mask_bits & 0x80) int_handle_37(); // Currently unused
+		if ((mask_bits & 0x01) && int_handle_30) int_handle_30();	// OPN2
+		if ((mask_bits & 0x02) && int_handle_31) int_handle_31();	// OPM
+		if ((mask_bits & 0x04) && int_handle_32) int_handle_32();	// IDE
+		// // if (mask_bits & 0x08) int_handle_33(); // Currently unused
+		// // if (mask_bits & 0x10) int_handle_34(); // Currently unused
+		// // if (mask_bits & 0x20) int_handle_35(); // Currently unused
+		// // if (mask_bits & 0x40) int_handle_36(); // Currently unused
+		// // if (mask_bits & 0x80) int_handle_37(); // Currently unused
 
 		// Clear the pending bits for group 3
 		*PENDING_GRP3 = mask_bits;
@@ -448,10 +461,7 @@ __attribute__((interrupt(0xfffe))) void int_handle_irq() {
 }
 
 /**
- * @brief Handle incoming NMI signal
- * 
- * NOTE: NMI should never be asserted on a C256, so we do nothing here.
- * 
+ * @brief Handle incomming NMI signal
  */
-__attribute__((interrupt(0xfffa))) void int_handle_nmi() {
+__attribute__((interrupt(0xffea))) void int_handle_nmi() {
 }
