@@ -18,6 +18,12 @@
 	.public sys_chan_close
 	.public sys_chan_swap
 	.public sys_chan_device
+	.public sys_bdev_register
+	.public sys_bdev_read
+	.public sys_bdev_write
+	.public sys_bdev_status
+	.public sys_bdev_flush
+	.public sys_bdev_ioctrl
 	.public sys_mem_get_ramtop
 	.public sys_mem_reserve
 	.public sys_err_message
@@ -60,6 +66,12 @@
 	.extern sjt_chan_close
 	.extern sjt_chan_swap
 	.extern sjt_chan_device
+	.extern sjt_bdev_register
+	.extern sjt_bdev_read
+	.extern sjt_bdev_write
+	.extern sjt_bdev_status
+	.extern sjt_bdev_flush
+	.extern sjt_bdev_ioctrl
 	.extern sjt_mem_get_ramtop
 	.extern sjt_mem_reserve
 	.extern sjt_err_message
@@ -104,6 +116,12 @@ sys_chan_open:                	jmp long:sjt_chan_open
 sys_chan_close:               	jmp long:sjt_chan_close
 sys_chan_swap:                	jmp long:sjt_chan_swap
 sys_chan_device:              	jmp long:sjt_chan_device
+sys_bdev_register:            	jmp long:sjt_bdev_register
+sys_bdev_read:                	jmp long:sjt_bdev_read
+sys_bdev_write:               	jmp long:sjt_bdev_write
+sys_bdev_status:              	jmp long:sjt_bdev_status
+sys_bdev_flush:               	jmp long:sjt_bdev_flush
+sys_bdev_ioctrl:              	jmp long:sjt_bdev_ioctrl
 sys_mem_get_ramtop:           	jmp long:sjt_mem_get_ramtop
 sys_mem_reserve:              	jmp long:sjt_mem_reserve
 sys_err_message:              	jmp long:sjt_err_message

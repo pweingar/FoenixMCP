@@ -67,8 +67,8 @@ typedef struct tvky_border_ctrl_s {
  */
 typedef struct tvky_crsr_ctrl_s {
     uint8_t control;
+	uint8_t start_address;
     char character;
-    uint8_t rsvd;
     uint8_t color;
     uint16_t column;
     uint16_t row;

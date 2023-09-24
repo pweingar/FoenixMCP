@@ -225,17 +225,17 @@ void initialize() {
     /* Initialize the CODEC */
     init_codec();
 
-//     cdev_init_system();   // Initialize the channel device system
-//     INFO("Channel device system ready.");
+    cdev_init_system();   // Initialize the channel device system
+    INFO("Channel device system ready.");
 
-//     bdev_init_system();   // Initialize the channel device system
-//     INFO("Block device system ready.");
+    bdev_init_system();   // Initialize the channel device system
+    INFO("Block device system ready.");
 
-//     if (res = con_install()) {
-//         log_num(LOG_ERROR, "FAILED: Console installation", res);
-//     } else {
-//         INFO("Console installed.");
-//     }
+    // if ((res = con_install())) {
+    //     log_num(LOG_ERROR, "FAILED: Console installation", res);
+    // } else {
+    //     INFO("Console installed.");
+    // }
 
     /* Initialize the timers the MCP uses */
     timers_init();

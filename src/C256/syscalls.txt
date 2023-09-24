@@ -24,12 +24,12 @@ chan_close
 chan_swap
 chan_device
 
-# bdev_register
-# bdev_read
-# bdev_write
-# bdev_status
-# bdev_flush
-# bdev_ioctrl
+bdev_register
+bdev_read
+bdev_write
+bdev_status
+bdev_flush
+bdev_ioctrl
 
 # fsys_open
 # fsys_close
