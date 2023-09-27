@@ -4,6 +4,7 @@
 	.public sys_int_enable
 	.public sys_int_register
 	.public sys_int_pending
+	.public sys_get_info
 	.public sys_int_clear
 	.public sys_chan_read_b
 	.public sys_chan_read
@@ -26,7 +27,12 @@
 	.public sys_bdev_ioctrl
 	.public sys_mem_get_ramtop
 	.public sys_mem_reserve
+	.public sys_time_jiffies
+	.public sys_rtc_set_time
+	.public sys_rtc_get_time
+	.public sys_kbd_scancode
 	.public sys_err_message
+	.public sys_kbd_layout
 	.public sys_var_set
 	.public sys_var_get
 	.public sys_txt_get_capabilities
@@ -52,6 +58,7 @@
 	.extern sjt_int_enable
 	.extern sjt_int_register
 	.extern sjt_int_pending
+	.extern sjt_get_info
 	.extern sjt_int_clear
 	.extern sjt_chan_read_b
 	.extern sjt_chan_read
@@ -74,7 +81,12 @@
 	.extern sjt_bdev_ioctrl
 	.extern sjt_mem_get_ramtop
 	.extern sjt_mem_reserve
+	.extern sjt_time_jiffies
+	.extern sjt_rtc_set_time
+	.extern sjt_rtc_get_time
+	.extern sjt_kbd_scancode
 	.extern sjt_err_message
+	.extern sjt_kbd_layout
 	.extern sjt_var_set
 	.extern sjt_var_get
 	.extern sjt_txt_get_capabilities
@@ -102,6 +114,7 @@ sys_int_disable:              	jmp long:sjt_int_disable
 sys_int_enable:               	jmp long:sjt_int_enable
 sys_int_register:             	jmp long:sjt_int_register
 sys_int_pending:              	jmp long:sjt_int_pending
+sys_get_info:                 	jmp long:sjt_get_info
 sys_int_clear:                	jmp long:sjt_int_clear
 sys_chan_read_b:              	jmp long:sjt_chan_read_b
 sys_chan_read:                	jmp long:sjt_chan_read
@@ -124,7 +137,12 @@ sys_bdev_flush:               	jmp long:sjt_bdev_flush
 sys_bdev_ioctrl:              	jmp long:sjt_bdev_ioctrl
 sys_mem_get_ramtop:           	jmp long:sjt_mem_get_ramtop
 sys_mem_reserve:              	jmp long:sjt_mem_reserve
+sys_time_jiffies:             	jmp long:sjt_time_jiffies
+sys_rtc_set_time:             	jmp long:sjt_rtc_set_time
+sys_rtc_get_time:             	jmp long:sjt_rtc_get_time
+sys_kbd_scancode:             	jmp long:sjt_kbd_scancode
 sys_err_message:              	jmp long:sjt_err_message
+sys_kbd_layout:               	jmp long:sjt_kbd_layout
 sys_var_set:                  	jmp long:sjt_var_set
 sys_var_get:                  	jmp long:sjt_var_get
 sys_txt_get_capabilities:     	jmp long:sjt_txt_get_capabilities

@@ -7,7 +7,7 @@ int_disable
 int_enable
 int_register
 int_pending
-# get_info
+get_info
 int_clear
 
 chan_read_b
@@ -51,12 +51,12 @@ bdev_ioctrl
 
 mem_get_ramtop
 mem_reserve
-# time_jiffies
-# rtc_set_time
-# rtc_get_time
-# kbd_scancode
+time_jiffies
+rtc_set_time
+rtc_get_time
+kbd_scancode
 err_message
-# kbd_layout
+kbd_layout
 # proc_run
 var_set
 var_get

@@ -169,8 +169,8 @@ void initialize() {
     /* Initialize the memory system */
     mem_init(0x3d0000);
 
-    // /* Hide the mouse */
-    // TODO: mouse_set_visible(0);
+    /* Hide the mouse */
+    mouse_set_visible(0);
 
     /* Initialize the variable system */
     var_init();
@@ -231,21 +231,22 @@ void initialize() {
     bdev_init_system();   // Initialize the channel device system
     INFO("Block device system ready.");
 
-    // if ((res = con_install())) {
-    //     log_num(LOG_ERROR, "FAILED: Console installation", res);
-    // } else {
-    //     INFO("Console installed.");
-    // }
+    if ((res = con_install())) {
+        log_num(LOG_ERROR, "FAILED: Console installation", res);
+    } else {
+        INFO("Console installed.");
+    }
 
     /* Initialize the timers the MCP uses */
     timers_init();
 	INFO("Timers initialized");
 
-//     /* Initialize the real time clock */
-//     rtc_init();
+    /* Initialize the real time clock */
+    rtc_init();
+	INFO("Real time clock initialized");
 
-//     target_jiffies = sys_time_jiffies() + 300;     /* 5 seconds minimum */
-//     DEBUG1("target_jiffies assigned: %d", target_jiffies);
+    target_jiffies = sys_time_jiffies() + 300;     /* 5 seconds minimum */
+    DEBUG1("target_jiffies assigned: %d", target_jiffies);
 
     /* Enable all interrupts */
     int_enable_all();
@@ -267,23 +268,23 @@ void initialize() {
 //     }
 
 #if HAS_FLOPPY
-    if (res = fdc_install()) {
+    if ((res = fdc_install())) {
         ERROR1("FAILED: Floppy drive initialization %d", res);
     } else {
         INFO("Floppy drive initialized.");
     }
 #endif
 
-//     // At this point, we should be able to call into to console to print to the screens
+    // At this point, we should be able to call into to console to print to the screens
 
-//     if (res = ps2_init()) {
-//         print_error(0, "FAILED: PS/2 keyboard initialization", res);
-//     } else {
-//         log(LOG_INFO, "PS/2 keyboard initialized.");
-//     }
+    if ((res = ps2_init())) {
+        print_error(0, "FAILED: PS/2 keyboard initialization", res);
+    } else {
+        log(LOG_INFO, "PS/2 keyboard initialized.");
+    }
 
 #if MODEL == MODEL_FOENIX_A2560K
-    if (res = kbdmo_init()) {
+    if ((res = kbdmo_init())) {
         log_num(LOG_ERROR, "FAILED: A2560K built-in keyboard initialization", res);
     } else {
         log(LOG_INFO, "A2560K built-in keyboard initialized.");
@@ -291,7 +292,7 @@ void initialize() {
 #endif
 
 #if HAS_PARALLEL_PORT
-    if (res = lpt_install()) {
+    if ((res = lpt_install())) {
         log_num(LOG_ERROR, "FAILED: LPT installation", res);
     } else {
         log(LOG_INFO, "LPT installed.");
@@ -299,7 +300,7 @@ void initialize() {
 #endif
 
 #if HAS_MIDI_PORTS
-    if (res = midi_install()) {
+    if ((res = midi_install())) {
         log_num(LOG_ERROR, "FAILED: MIDI installation", res);
     } else {
         log(LOG_INFO, "MIDI installed.");
@@ -334,7 +335,7 @@ int main(int argc, char * argv[]) {
 
     initialize();
 
-	printf("\nFoenix/MCP v0.0.0\n\n");
+	printf("\nFoenix/MCP v%d.%04d.%04d\n\n", VER_MAJOR, VER_MINOR, VER_BUILD);
 	printf("Type HELP or ? for help.\n");
 
     // // Make sure the command path is set to the default before we get started

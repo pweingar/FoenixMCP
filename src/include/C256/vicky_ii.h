@@ -120,6 +120,16 @@ typedef volatile __attribute__((far24)) uint8_t *p_far24;
 #define bm1_control         ((volatile __attribute__((far)) uint8_t *)0xaf0108)
 #define bm1_address         ((volatile __attribute__((far)) uint8_t *)0xaf0109)
 
+#define MousePointer_Mem_A	((volatile uint8_t *)0xaf0500)
+#define MousePtr_A_CTRL_Reg	((volatile uint16_t *)0xaf0700)
+#define MousePtr_En         0x0001
+
+#define MousePtr_A_X_Pos	((volatile uint16_t *)0xaf0702)
+#define MousePtr_A_Y_Pos	((volatile uint16_t *)0xaf0704)
+#define MousePtr_A_Mouse0	((volatile uint8_t *)0xaf0706)
+#define MousePtr_A_Mouse1	((volatile uint8_t *)0xaf0707)
+#define MousePtr_A_Mouse2	((volatile uint8_t *)0xaf0708)
+
 //
 // Video RAM
 //

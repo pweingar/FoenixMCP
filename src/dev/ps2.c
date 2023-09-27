@@ -1220,8 +1220,8 @@ short ps2_init() {
 
     if (mouse_present) {
         /* Initialize the mouse */
-        if (mouse_error = mouse_init()) {
-            log_num(LOG_INFO, "Unable to initialize mouse", res);
+        if ((mouse_error = mouse_init())) {
+            log_num(LOG_INFO, "Unable to initialize mouse", mouse_error);
         }
     }
 

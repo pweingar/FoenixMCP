@@ -4,6 +4,7 @@
 	.public sjt_int_enable
 	.public sjt_int_register
 	.public sjt_int_pending
+	.public sjt_get_info
 	.public sjt_int_clear
 	.public sjt_chan_read_b
 	.public sjt_chan_read
@@ -26,7 +27,12 @@
 	.public sjt_bdev_ioctrl
 	.public sjt_mem_get_ramtop
 	.public sjt_mem_reserve
+	.public sjt_time_jiffies
+	.public sjt_rtc_set_time
+	.public sjt_rtc_get_time
+	.public sjt_kbd_scancode
 	.public sjt_err_message
+	.public sjt_kbd_layout
 	.public sjt_var_set
 	.public sjt_var_get
 	.public sjt_txt_get_capabilities
@@ -52,6 +58,7 @@
 	.extern int_enable
 	.extern int_register
 	.extern int_pending
+	.extern get_info
 	.extern int_clear
 	.extern chan_read_b
 	.extern chan_read
@@ -74,7 +81,12 @@
 	.extern bdev_ioctrl
 	.extern mem_get_ramtop
 	.extern mem_reserve
+	.extern time_jiffies
+	.extern rtc_set_time
+	.extern rtc_get_time
+	.extern kbd_scancode
 	.extern err_message
+	.extern kbd_layout
 	.extern var_set
 	.extern var_get
 	.extern txt_get_capabilities
@@ -102,6 +114,7 @@ sjt_int_disable:              	jmp long:int_disable
 sjt_int_enable:               	jmp long:int_enable
 sjt_int_register:             	jmp long:int_register
 sjt_int_pending:              	jmp long:int_pending
+sjt_get_info:                 	jmp long:get_info
 sjt_int_clear:                	jmp long:int_clear
 sjt_chan_read_b:              	jmp long:chan_read_b
 sjt_chan_read:                	jmp long:chan_read
@@ -124,7 +137,12 @@ sjt_bdev_flush:               	jmp long:bdev_flush
 sjt_bdev_ioctrl:              	jmp long:bdev_ioctrl
 sjt_mem_get_ramtop:           	jmp long:mem_get_ramtop
 sjt_mem_reserve:              	jmp long:mem_reserve
+sjt_time_jiffies:             	jmp long:time_jiffies
+sjt_rtc_set_time:             	jmp long:rtc_set_time
+sjt_rtc_get_time:             	jmp long:rtc_get_time
+sjt_kbd_scancode:             	jmp long:kbd_scancode
 sjt_err_message:              	jmp long:err_message
+sjt_kbd_layout:               	jmp long:kbd_layout
 sjt_var_set:                  	jmp long:var_set
 sjt_var_get:                  	jmp long:var_get
 sjt_txt_get_capabilities:     	jmp long:txt_get_capabilities
