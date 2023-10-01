@@ -3,10 +3,7 @@
  */
 
 #include "log_level.h"
-#ifndef DEFAULT_LOG_LEVEL
-    #define DEFAULT_LOG_LEVEL LOG_TRACE
-#endif
-
+#define DEFAULT_LOG_LEVEL LOG_DEBUG
 #define LOG_CHANNEL LOG_CHANNEL_CHANNEL_A
 
 #include <stdio.h>
@@ -147,11 +144,10 @@ void initialize() {
 
     /* Setup logging early */
     log_init();
+	log_setlevel(DEFAULT_LOG_LEVEL);
 
 	/* Fill out the system information */
 	sys_get_information(&info);
-
-	log_setlevel(LOG_INFO);
 
     #if 0
     char msg[] = "This is some text to test that the debug to UART works ok\r\n";
@@ -350,5 +346,11 @@ int main(int argc, char * argv[]) {
     // log(LOG_INFO, "Stopping.");
 
     /* Infinite loop... */
-    while (1) {};
+	printf("> ");
+    while (1) {
+		char c = (char)sys_chan_read_b(0); // kbd_getc_poll();
+		// if (c) {
+		// 	printf("%c", c);
+		// }
+	};
 }

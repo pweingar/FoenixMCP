@@ -52,8 +52,10 @@
 #define PS2_CTRL_ENABLE_2   0xA9    /* Enable the second (mouse) port */
 #define PS2_CTRL_DISABLE_2  0xA7    /* Disable the second (mouse) port */
 
+#define KBD_CMD_ID			0xF2	/* Keyboard command: identify */
 #define KBD_CMD_RESET       0xFF    /* Keyboard command: reset the keyboard */
 #define KBD_CMD_ENABLE      0xF4    /* Keyboard command: enable to keyboard */
+#define KBD_CMD_DISABLE		0xF5	/* Keyboard command: disable scanning */
 #define KBD_CMD_SET_LED     0xED    /* Keyboard command: set the LEDs */
 
 #define MOUSE_CMD_PREFIX    0xD4    /* Controller code to prefix all mouse commands */

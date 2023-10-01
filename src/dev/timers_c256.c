@@ -12,8 +12,6 @@ long jiffy_count;
  * 
  */
 void timer_0_handler() {
-	volatile __attribute__((far)) char * text = (char *)0xafa000;
-	*text = *text + 1;
 	jiffy_count++;
 }
 

@@ -26,7 +26,7 @@
  * -1: UART. 
  */
 static short log_channel = LOG_CHANNEL;
-static short log_level;
+short log_level;
 
 // do_log either points to log_to_uart or log_to_screen.
 static void (*do_log)(const char* message);

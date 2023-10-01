@@ -128,12 +128,12 @@ extern void log_c(short log_level, char c);
 
 
 #if DEFAULT_LOG_LEVEL >= LOG_INFO
-# define INFO(m)    log(LOG_INFO, m)
-# define INFO1(a,b)     log(LOG_INFO, a, b)
-# define INFO2(a,b,c)     log(LOG_INFO, a, b, c)
-# define INFO3(a,b,c,d)     log(LOG_INFO, a, b, c, d)
-# define INFO4(a,b,c,d,e)     log(LOG_INFO, a, b, c, d, e)
-# define INFO5(a,b,c,d,e,f)     log(LOG_INFO, a, b, c, d, e, f)
+# define INFO(m)    log(LOG_INFO, m);
+# define INFO1(a,b)     log(LOG_INFO, a, b);
+# define INFO2(a,b,c)     log(LOG_INFO, a, b, c);
+# define INFO3(a,b,c,d)     log(LOG_INFO, a, b, c, d);
+# define INFO4(a,b,c,d,e)     log(LOG_INFO, a, b, c, d, e);
+# define INFO5(a,b,c,d,e,f)     log(LOG_INFO, a, b, c, d, e, f);
 #else
 # define INFO(m)
 # define INFO1(a,b)

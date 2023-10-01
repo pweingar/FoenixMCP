@@ -300,7 +300,7 @@ static int int_group_mask_to_offset(unsigned short group, unsigned short mask) {
 				break;
 		}
 
-		return group * 8 + mask;
+		return group * 8 + position;
 	} else {
 		return -1;
 	}
@@ -317,22 +317,148 @@ static int int_group_mask_to_offset(unsigned short group, unsigned short mask) {
  * the pointer to the previous interrupt handler
  */
 p_int_handler int_register(unsigned short n, p_int_handler handler) {
+	p_int_handler * handler_ref = 0;
+	p_int_handler old_handler = 0;
+
 	/* Find the group (the relevant interrupt mask register) for the interrupt */
 	unsigned short group = int_group(n);
 
 	/* Find the mask for the interrupt */
 	unsigned short mask = int_mask(n);
 
-	int index = int_group_mask_to_offset(group, mask);
-	if (index > -1) {
-		p_int_handler * int_handlers = &int_handle_00;
-		p_int_handler old_handler = int_handlers[n];
-		int_handlers[n] = handler;
-		return old_handler;
+	switch(group) {
+		case 0:
+			switch(mask) {
+				case 1:
+					handler_ref = &int_handle_00;
+					break;
+				case 2:
+					handler_ref = &int_handle_01;
+					break;
+				case 4:
+					handler_ref = &int_handle_02;
+					break;
+				case 8:
+					handler_ref = &int_handle_03;
+					break;
+				case 16:
+					handler_ref = &int_handle_04;
+					break;
+				case 32:
+					handler_ref = &int_handle_05;
+					break;
+				case 64:
+					handler_ref = &int_handle_06;
+					break;
+				case 128:
+					handler_ref = &int_handle_07;
+					break;
+				default:
+					return 0;
+			}
+			break;
 
-	} else {
-		return 0;
+		case 1:
+			switch(mask) {
+				case 1:
+					handler_ref = &int_handle_10;
+					break;
+				case 2:
+					handler_ref = &int_handle_11;
+					break;
+				case 4:
+					handler_ref = &int_handle_12;
+					break;
+				case 8:
+					handler_ref = &int_handle_13;
+					break;
+				case 16:
+					handler_ref = &int_handle_14;
+					break;
+				case 32:
+					handler_ref = &int_handle_15;
+					break;
+				case 64:
+					handler_ref = &int_handle_16;
+					break;
+				case 128:
+					handler_ref = &int_handle_17;
+					break;
+				default:
+					return  0;
+			}
+			break;
+
+		case 2:
+			switch(mask) {
+				case 1:
+					handler_ref = &int_handle_20;
+					break;
+				case 2:
+					handler_ref = &int_handle_21;
+					break;
+				case 4:
+					handler_ref = &int_handle_22;
+					break;
+				case 8:
+					handler_ref = &int_handle_23;
+					break;
+				case 16:
+					handler_ref = &int_handle_24;
+					break;
+				case 32:
+					handler_ref = &int_handle_25;
+					break;
+				case 64:
+					handler_ref = &int_handle_26;
+					break;
+				case 128:
+					handler_ref = &int_handle_27;
+					break;
+				default:
+					return 0;
+			}
+			break;
+
+		case 3:
+			switch(mask) {
+				case 1:
+					handler_ref = &int_handle_30;
+					break;
+				case 2:
+					handler_ref = &int_handle_31;
+					break;
+				case 4:
+					handler_ref = &int_handle_32;
+					break;
+				case 8:
+					handler_ref = &int_handle_33;
+					break;
+				case 16:
+					handler_ref = &int_handle_34;
+					break;
+				case 32:
+					handler_ref = &int_handle_35;
+					break;
+				case 64:
+					handler_ref = &int_handle_36;
+					break;
+				case 128:
+					handler_ref = &int_handle_37;
+					break;
+				default:
+					return 0;
+			}
+			break;
+
+		default:
+			return 0;
 	}
+
+	old_handler = *handler_ref;
+	*handler_ref = handler;
+
+	return old_handler;
 }
 
 /*
@@ -392,9 +518,6 @@ void int_clear(unsigned short n) {
 __attribute__((interrupt(0xffee))) void int_handle_irq() {
 	uint8_t mask_bits = 0;
 
-	volatile __attribute__((far)) char * text = (char *)0xafa001;
-	*text = *text + 1;
-
 	// Process any pending interrupts in group 0
 	mask_bits = *PENDING_GRP0;
 	if (mask_bits) {
@@ -414,11 +537,18 @@ __attribute__((interrupt(0xffee))) void int_handle_irq() {
 	// Process any pending interrupts in group 1
 	mask_bits = *PENDING_GRP1;
 	if (mask_bits) {
-		if ((mask_bits & 0x01) && int_handle_10) int_handle_10();	// PS/2 Keyboard
+		volatile __attribute__((far)) char * text = (char *)0xafa000;
+		*text = *text + 1;
+
+		if ((mask_bits & 0x01) && int_handle_10) {
+			volatile __attribute__((far)) char * text = (char *)0xafa001;
+			*text = *text + 1;
+			int_handle_10();	// PS/2 Keyboard
+		} 
 		if ((mask_bits & 0x02) && int_handle_11) int_handle_11();	// VICKY II Sprite Collision
 		if ((mask_bits & 0x04) && int_handle_12) int_handle_12();	// VICKY II Bitmap Collision
 		if ((mask_bits & 0x08) && int_handle_13) int_handle_13();	// Serial Port #2
-		if ((mask_bits & 0x10) && int_handle_14)int_handle_14();	// Serial Port #1
+		if ((mask_bits & 0x10) && int_handle_14) int_handle_14();	// Serial Port #1
 		if ((mask_bits & 0x20) && int_handle_15) int_handle_15();	// MIDI Controller
 		if ((mask_bits & 0x40) && int_handle_16) int_handle_16();	// Parallel Port
 		if ((mask_bits & 0x80) && int_handle_17) int_handle_17();	// SD Controller
