@@ -38,7 +38,7 @@ INCLUDES=-I.. -I../include
 CFLAGS=$(INCLUDES) $(CFLAGS_FOR_UNIT) -l
 ASFLAGS=$(INCLUDES)
 
-SRCS = block.c channel.c console.c ps2.c rtc.c txt_screen.c $(SRCS_FOR_UNIT)
+SRCS = block.c channel.c console.c pata.c ps2.c sdc.c rtc.c txt_screen.c $(SRCS_FOR_UNIT)
 OBJS = $(patsubst %.c,%.o,$(SRCS))
 OBJS4RM = $(subst /,\\,$(OBJS))
 

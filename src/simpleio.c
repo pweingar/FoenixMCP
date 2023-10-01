@@ -270,9 +270,7 @@ void dump_buffer(short channel, const unsigned char * buffer, short size, short 
         c = buffer[i];
 
         if (i % 16 == 0) {
-            print(channel, " ");
-            print(channel, ascii_buffer);
-            print(channel, "\n");
+			printf(" %s\n", ascii_buffer);
 
             for (j = 0; j < 17; j++) {
                 ascii_buffer[j] = 0;
@@ -281,11 +279,9 @@ void dump_buffer(short channel, const unsigned char * buffer, short size, short 
             ascii_idx = 0;
 
             if (labels == 1) {
-                print_hex_16(channel, i);
-                print(channel, ":");
+				printf("%04X:", i);
             } else if (labels == 2) {
-                print_hex_32(channel, (unsigned long)buffer + i);
-                print(channel, ":");
+				printf("%024lX:", (unsigned long)buffer + 1);
             }
         }
 
@@ -296,15 +292,13 @@ void dump_buffer(short channel, const unsigned char * buffer, short size, short 
         }
 
         if ((i % 8) == 0) {
-            print(channel, " ");
+            printf(" ");
         }
 
-        print_hex_8(channel, c);
+		printf("%02X", c);
     }
 
-    print(channel, " ");
-    print(channel, ascii_buffer);
-    print(channel, "\n");
+	printf(" %s\n", ascii_buffer);
 }
 
 /**

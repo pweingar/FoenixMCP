@@ -251,17 +251,17 @@ void initialize() {
 //     /* Play the SID test bong on the Gideon SID implementation */
 //     sid_test_internal();
 
-//     if (res = pata_install()) {
-//         log_num(LOG_ERROR, "FAILED: PATA driver installation", res);
-//     } else {
-//         INFO("PATA driver installed.");
-//     }
+    if ((res = pata_install())) {
+        log_num(LOG_ERROR, "FAILED: PATA driver installation", res);
+    } else {
+        INFO("PATA driver installed.");
+    }
 
-//     if (res = sdc_install()) {
-//         ERROR1("FAILED: SDC driver installation %d", res);
-//     } else {
-//         INFO("SDC driver installed.");
-//     }
+    if ((res = sdc_install())) {
+        ERROR1("FAILED: SDC driver installation %d", res);
+    } else {
+        INFO("SDC driver installed.");
+    }
 
 #if HAS_FLOPPY
     if ((res = fdc_install())) {
@@ -324,15 +324,14 @@ void initialize() {
 
 #define BOOT_DEFAULT    -1  // User chose default, or the time to over-ride has passed
 
+unsigned char buffer[512];
+
 int main(int argc, char * argv[]) {
     short result;
     short i;
 	char message[256];
 
     initialize();
-
-	printf("\nFoenix/MCP v%d.%04d.%04d\n\n", VER_MAJOR, VER_MINOR, VER_BUILD);
-	printf("Type HELP or ? for help.\n");
 
     // // Make sure the command path is set to the default before we get started
     // cli_command_set("");
@@ -345,12 +344,15 @@ int main(int argc, char * argv[]) {
 
     // log(LOG_INFO, "Stopping.");
 
+	short size = bdev_read(BDEV_SDC, 0, buffer, 512);
+	if (size > 0) {
+		printf("Read %d bytes...\n", size);
+		dump_buffer(0, buffer, size, 1);
+	} else {
+		printf("Didn't read anything...\n");
+	}
+
     /* Infinite loop... */
-	printf("> ");
     while (1) {
-		char c = (char)sys_chan_read_b(0); // kbd_getc_poll();
-		// if (c) {
-		// 	printf("%c", c);
-		// }
 	};
 }
