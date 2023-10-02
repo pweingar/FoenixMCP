@@ -315,16 +315,16 @@ void initialize() {
 //         INFO("CLI initialized.");
 //     }
 
-//     if (res = fsys_init()) {
-//         log_num(LOG_ERROR, "FAILED: file system initialization", res);
-//     } else {
-//         INFO("File system initialized.");
-//     }
+    if ((res = fsys_init())) {
+        log_num(LOG_ERROR, "FAILED: file system initialization", res);
+    } else {
+        INFO("File system initialized.");
+    }
 }
 
 #define BOOT_DEFAULT    -1  // User chose default, or the time to over-ride has passed
 
-unsigned char buffer[512];
+t_file_info file;
 
 int main(int argc, char * argv[]) {
     short result;
@@ -344,13 +344,26 @@ int main(int argc, char * argv[]) {
 
     // log(LOG_INFO, "Stopping.");
 
-	short size = bdev_read(BDEV_SDC, 0, buffer, 512);
-	if (size > 0) {
-		printf("Read %d bytes...\n", size);
-		dump_buffer(0, buffer, size, 1);
-	} else {
-		printf("Didn't read anything...\n");
+	printf("\n\nSDC directory:\n");
+	int directory = fsys_opendir("/sd/");
+	while (fsys_readdir(directory, &file) == 0) {
+		if (file.name[0] == 0) {
+			break;
+		}
+		printf("%s\n", file.name);
 	}
+	fsys_closedir(directory);
+
+	printf("\n\nHDC directory:\n");
+	directory = fsys_opendir("/hd/");
+	while (fsys_readdir(directory, &file) == 0) {
+		if (file.name[0] == 0) {
+			break;
+		}
+		printf("%s\n", file.name);
+	}
+	fsys_closedir(directory);
+
 
     /* Infinite loop... */
     while (1) {

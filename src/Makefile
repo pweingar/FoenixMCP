@@ -44,7 +44,7 @@ LDFLAGS=--target foenix --output-format s37 $(LDFLAGS_FOR_UNIT) --list-file foen
 SRCS = foenixmcp.c log.c memory.c ring_buffer.c simpleio.c sys_general.c variables.c utilities.c $(SRCS_FOR_UNIT)
 OBJS = $(patsubst %.s,%.o,$(patsubst %.c,%.o,$(SRCS)))
 OBJS4RM = $(subst /,\\,$(OBJS))
-LIBS = dev/devices.a snd/sound.a
+LIBS = dev/devices.a snd/sound.a fatfs/fatfs.a
 
 .PHONY: clean
 
@@ -56,6 +56,9 @@ dev/devices.a:
 
 snd/sound.a:
 	$(MAKE) --directory=snd
+
+fatfs/fatfs.a:
+	$(MAKE) --directory=fatfs
 
 # Build the object files from C
 %.o: %.c
@@ -70,3 +73,4 @@ clean:
 	$(RM) $(OBJS4RM) foenixmcp.s37 *.lst *.map
 	$(MAKE) --directory=dev clean
 	$(MAKE) --directory=snd clean
+	$(MAKE) --directory=fatfs clean
