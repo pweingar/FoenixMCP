@@ -92,15 +92,15 @@ typedef struct tvky_crsr_ctrl_s {
 //
 // Text Fonts Sets 0 and 1
 //
-#define tvky_font_set_0 ((volatile __attribute__((far)) uint8_t *)0xaf8000)
+#define tvky_font_set_0 	((volatile __attribute__((far)) uint8_t *)0xaf8000)
 
 //
 // Graphics Color Lookup Tables
 //
-#define tvky_gr0_color ((volatile __attribute__((far)) p_color4)0xaf2000)
-#define tvky_gr1_color ((volatile __attribute__((far)) p_color4)0xaf2400)
-#define tvky_gr2_color ((volatile __attribute__((far)) p_color4)0xaf2800)
-#define tvky_gr3_color ((volatile __attribute__((far)) p_color4)0xaf2c00)
+#define VKY_GR_CLUT_0		((volatile __attribute__((far)) uint8_t *)0xaf2000)
+#define VKY_GR_CLUT_1		((volatile __attribute__((far)) uint8_t *)0xaf2400)
+#define VKY_GR_CLUT_2		((volatile __attribute__((far)) uint8_t *)0xaf2800)
+#define VKY_GR_CLUT_3		((volatile __attribute__((far)) uint8_t *)0xaf2c00)
 
 //
 // Text mode text and color matrixes
@@ -116,9 +116,13 @@ typedef volatile __attribute__((far24)) uint8_t *p_far24;
 
 #define bm0_control         ((volatile __attribute__((far)) uint8_t *)0xaf0100)
 #define bm0_address         ((volatile __attribute__((far)) uint8_t *)0xaf0101)
+#define bm0_offset_x		((volatile __attribute__((far)) uint16_t *)0xaf0104)
+#define bm0_offset_y		((volatile __attribute__((far)) uint16_t *)0xaf0106)
 
 #define bm1_control         ((volatile __attribute__((far)) uint8_t *)0xaf0108)
 #define bm1_address         ((volatile __attribute__((far)) uint8_t *)0xaf0109)
+#define bm1_offset_x		((volatile __attribute__((far)) uint16_t *)0xaf010c)
+#define bm1_offset_y		((volatile __attribute__((far)) uint16_t *)0xaf010d)
 
 #define MousePointer_Mem_A	((volatile uint8_t *)0xaf0500)
 #define MousePtr_A_CTRL_Reg	((volatile uint16_t *)0xaf0700)

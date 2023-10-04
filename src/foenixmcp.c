@@ -37,6 +37,7 @@
 #include "syscalls.h"
 #include "timers.h"
 #include "boot.h"
+#include "dev/bitmap.h"
 #include "memory.h"
 #include "dev/block.h"
 #include "dev/channel.h"
@@ -60,6 +61,7 @@
 #include "fatfs/ff.h"
 #include "cli/cli.h"
 #include "rsrc/font/MSX_CP437_8x8.h"
+#include "rsrc/bitmaps/splash_c256_u.h"
 
 const char* VolumeStr[FF_VOLUMES] = { "sd", "fd", "hd" };
 
@@ -200,6 +202,10 @@ void initialize() {
 #endif
 
 	INFO("Text system initialized...");
+
+	// Initialize the bitmap system
+	bm_init();
+	INFO("Bitmap system initialized...");
 
     /* Initialize the indicators */
     ind_init();
@@ -364,6 +370,12 @@ int main(int argc, char * argv[]) {
 	}
 	fsys_closedir(directory);
 
+	txt_clear(0, 2);
+	bm_fill((uint8_t *)0xb00000, 0, 640, 480);
+	bm_load_clut(0, splashscreen_lut);
+	bm_load_rle((uint8_t *)0xb00000, splashscreen_pix, 640, 480);
+	bm_set_data(0, (uint8_t *)0xb00000);
+	bm_set_visibility(0, 0, 1);
 
     /* Infinite loop... */
     while (1) {
