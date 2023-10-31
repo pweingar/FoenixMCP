@@ -9,6 +9,7 @@
  */
 void sys_get_information(p_sys_info info) {
     unsigned long gabe_id = 0;
+    unsigned short gabe_id_Genx = 0;    // Needs to be a 16bits for access to the CPLD registers. (0xFEC005xx Region)
     unsigned short genx_model_id = 0;
     unsigned short clock_speed = 0;
     unsigned short cpu = 0;
@@ -26,7 +27,13 @@ void sys_get_information(p_sys_info info) {
     gabe_id = *GABE_SUBVER_ID;
     clock_speed = (gabe_id & 0xE0) >> 5;
     cpu = (gabe_id & 0xF000) >> 12;
+
+#if ( MODEL == MODEL_FOENIX_GENX || MODEL == MODEL_FOENIX_A2560X )
+    gabe_id_Genx = *GABE_SUB_MODEL_ID;  // diffent register inside the CPLD - not the FPGA - The FPGA will report a reserved code 0101
+    machine_id = (gabe_id_Genx & 0x000F);
+#else 
     machine_id = (gabe_id & 0x0F);
+#endif 
 
     info->has_floppy = 1;
     info->has_expansion_card = 0;
@@ -34,12 +41,13 @@ void sys_get_information(p_sys_info info) {
     info->has_ethernet = 1;
     info->screens = 2;
 
+
 #if MODEL == MODEL_FOENIX_GENX || MODEL == MODEL_FOENIX_A2560X
-    genx_model_id = *GABE_SUB_MODEL_ID; // This gets the MID on the board that tells us if it is a PB/LB/CU
+    genx_model_id = *GABE_SUB_MODEL_FF_ID; // This gets the MID on the board that tells us if it is a PB/LB/CU
                                         // Now, that doesn't tell us if it is stuffed with audio chip or not
                                         // However, those will tell us about if there is a Floppy or not
                                         // This of course is good also for the A2560X
-    genx_model_id = genx_model_id & GABE_SUB_MOD_MASK;  // This isolate 2 bits, 
+    genx_model_id = genx_model_id & GABE_SUB_FF_MASK;  // This isolate 2 bits, 
     // 00 = PB
     // 01 = LB
     // 10 = CU
@@ -182,6 +190,10 @@ void sys_get_information(p_sys_info info) {
 
         case CPU_486DX4:
             info->cpu_name = "i486DX4";
+            break;
+
+        case CPU_MC68060:
+            info->cpu_name = "MC68xx060"
             break;
 
         default:

@@ -13,34 +13,9 @@
 ;
 ; Interrupt registers for A2560U and U+
 ;
-; Don't try to use semething like "if MODEL=6 || MODEL=9", that doesn't work work in vasm 1.8 :/
-            if MODEL==6 	; A2560U
-PENDING_GRP0 equ $00B00100
-PENDING_GRP1 equ $00B00102
-PENDING_GRP2 equ $00B00104
-            else if MODEL==9    ; A2560U+
-PENDING_GRP0 equ $00B00100
-PENDING_GRP1 equ $00B00102
-PENDING_GRP2 equ $00B00104
-    	    else if MODEL==11	; A2560K
-PENDING_GRP0 equ $00C00100
-PENDING_GRP1 equ $00C00102
-PENDING_GRP2 equ $00C00104
-            else fail MODEL not recognized !
-            endif
-
-;
-; Interrupt Vector 0x1F -- Real Time Clock
-;
-    if MODEL==6
-RTC_FLAGS   equ $00B0009A       ; A2560U
-    else if MODEL==9
-RTC_FLAGS   equ $00B0009A       ; A2560U+
-    else if MODEL==11
-RTC_FLAGS   equ $FEC0008D       ; A2560K
-    else    fail Cannot set RTC_FLAGs: Unknown model
-    endif
-
+PENDING_GRP0 = $00B00100
+PENDING_GRP1 = $00B00102
+PENDING_GRP2 = $00B00104
 
             section "VECTORS",code
 
@@ -144,25 +119,28 @@ RTC_FLAGS   equ $FEC0008D       ; A2560K
 
             code
 
-coldboot:   move.w #$2700,SR        ; Supervisor mode, disable all interrupts
-            lea ___STACK,sp
+coldboot:   lea ___STACK,sp
             bsr _int_disable_all
 
-
-            lea	___BSSSTART,a0
+            ; Clear BSS segment
+            lea	   ___BSSSTART,a0
             move.l #___BSSSIZE,d0
-            beq	callmain
-            
-            moveq.l #0,d1
+            beq.s  callmain
+
+            move.l #0,d1
+
 clrloop:    ; We don't use clr.l because it's a read-modify-write operation
             ; that is not yet supported by the FPGA's bus logic for now.
             ; So we use a move instead.
             ; clr.l  (a0)+
             move.l d1,(a0)+
             subq.l #4,d0
-            bpl.s  clrloop
+            bne.s  clrloop
 
-            move.l #trap_save_area,trap_save_area
+            ; Set TRAP #15 vector handler
+            lea h_trap_15,a0        ; Address of the handler
+            move.l #(13+32)<<2,a1   ; TRAP#15 vector address
+            move.l a0,(a1)          ; Set the vector
 
 callmain:   jsr ___main             ; call __main to transfer to the C code
 
@@ -170,7 +148,6 @@ callmain:   jsr ___main             ; call __main to transfer to the C code
 ___exit:
             bra	___exit
 
-            if MODEL==11	; A2560K
 ;
 ; Autovector #1: Used by VICKY III Channel B interrupts
 ;
@@ -178,7 +155,6 @@ autovec1:   movem.l d0-d7/a0-a6,-(a7)
             jsr _int_vicky_channel_b        ; Call the dispatcher for Channel B interrupts
             movem.l (a7)+,d0-d7/a0-a6
             rte
-            endif
 
 ;
 ; Autovector #1: Used by VICKY III Channel A interrupts
@@ -240,9 +216,7 @@ interrupt_x1B:  inthandler $1B, $0800, PENDING_GRP1     ; Interrupt Vector 0x1B 
 interrupt_x1C:  inthandler $1C, $1000, PENDING_GRP1     ; Interrupt Vector 0x1C -- Timer 4
 interrupt_x1D:  inthandler $1D, $2000, PENDING_GRP1     ; Interrupt Vector 0x1D -- Reserved
 interrupt_x1E:  inthandler $1E, $4000, PENDING_GRP1     ; Interrupt Vector 0x1E -- Reserved
-interrupt_x1F:  
-    tst.b   RTC_FLAGS               ; Acknowledge interrupt by reading the flags. Because of this we can't use the inthandler macro.
-    inthandler $1F, $8000, PENDING_GRP1     ; Interrupt Vector 0x1F -- Real Time Clock
+interrupt_x1F:  inthandler $1F, $8000, PENDING_GRP1     ; Interrupt Vector 0x1F -- Real Time Clock
 
 ;
 ; Group 2 Interrupt Handlers
@@ -383,54 +357,38 @@ panic_lock:         bra panic_lock
 ; int32_t syscall(int32_t number, int32_t p0, int32_t p1, int32_t p2, int32_t p3, int32_t p4, int32_t p5)
 ;
 _syscall:
-            ; Repush the parameters
-            move.l  28(sp),-(sp)
-            move.l  28(sp),-(sp)
-            move.l  28(sp),-(sp)
-            move.l  28(sp),-(sp)
-            move.l  28(sp),-(sp)
-            move.l  28(sp),-(sp)
-            move.l  28(sp),-(sp)
-            trap    #15                 ; Call into the kernel
-            lea     28(sp),sp
+            movem.l d1-d7,-(sp)         ; Save caller's registers
+            move.l (56,sp),d6           ; Parameter 5 to D6
+            move.l (52,sp),d5           ; Parameter 4 to D5
+            move.l (48,sp),d4           ; Parameter 3 to D4
+            move.l (44,sp),d3           ; Parameter 2 to D3
+            move.l (40,sp),d2           ; Parameter 1 to D2
+            move.l (36,sp),d1           ; Parameter 0 to D1
+            move.l (32,sp),d0           ; Function number to D0
+
+            TRAP #15                    ; Call into the kernel
+
+            movem.l (sp)+,d1-d7         ; Restore caller's registers
             rts
 
 ;
 ; TRAP#15 handler... transfer control to the C dispatcher
 ;
-KFN_ELEVATE equ $43
 h_trap_15:
-            ; Save sr, return address and non-scratch registers into our save area
-            ; TODO we should guard this if we want to allow system calls from interrupts.
-            move.l  trap_save_area,a0
-            move.w  (sp)+,d0            ; Status register
-            move.w  d0,-(a0)
-            move.l  (sp)+,-(a0)         ; Return address
-            movem.l d2-d7/a2-a7,-(a0)
-            move.l  a0,trap_save_area   ; TODO should we check if we're beyond the end of that area ? As we'd be corrupting data.
-            
-            ; Fix stack if necessary so it points to the arguments for the dispatcher
-            btst    #13,d0              ; Check supervisor bit from caller's status register to see if were we called from user mode
-            bne.s   syscall_stack_set   ; If yes, sp already points to the arguments
-            move.l  usp,sp              ; If not, the argument are on the user stack, so use it
-syscall_stack_set:
+            move.l d6,-(sp)             ; Push the parameters to the stack for the C call
+            move.l d5,-(sp)
+            move.l d4,-(sp)
+            move.l d3,-(sp)
+            move.l d2,-(sp)
+            move.l d1,-(sp)
+            move.l d0,-(sp)
 
-            cmpi.w  #KFN_ELEVATE,(sp)   ; Is this a sys_proc_elevate call?
-            beq.s   h_trap_elev         ; Yes, just handle it here
+            jsr _syscall_dispatch       ; Call the C routine to do the dispatch
+                                        ; Note: the C routine depends upon the register push order
 
-            jsr     _syscall_dispatch   ; Call the C routine to do the dispatch
+            add.l #28,sp                ; Remove parameters from the stack
 
-            ; Restore context from our save area
-            move.l  trap_save_area,a0
-            movem.l (a0)+,d2-d7/a2-a7
-            move.l  (a0)+,-(sp)         ; Return address
-            move.w  (a0)+,-(sp)         ; Status register
-            move.l  a0,trap_save_area
-    
             rte                         ; Return to the caller
-
-h_trap_elev ori #$2000,(a7)             ; Change the caller's privilege to supervisor
-            rte                         ; And return to it
 
 ;
 ; Jump into a user mode code
@@ -440,29 +398,18 @@ h_trap_elev ori #$2000,(a7)             ; Change the caller's privilege to super
 ; a1 = location to set user stack pointer
 ;
 _call_user:
-            ; Set up the user stack
-            move.l #$00010000,a0        ; Get the pointer to the process's stack
-            move.l (12,a7),d1           ; Get the number of parameters passed
-            move.l (16,a7),a1           ; Get the pointer to the parameters
-            move.l a1,-(a0)             ; Push the parameters list
-            move.w d1,-(a0)             ; Push the parameter count
-            move.l a0,usp               ; Set the User Stack Pointer
-
-
-            ; Set up the system stack
             move.l (4,a7),a0            ; Get the pointer to the code to start
-            move.w #0,-(a7)             ; Push the fake vector offset
-            move.l a0,-(a7)             ; Push it as the starting address
-            move.w #$0000,-(a7)         ; Push the user's initial SR (to switch to user mode)
-            rte                         ; Start the user process
+            move.l (8,a7),a1            ; Get the pointer to the process's stack
+            move.l (12,a7),d0           ; Get the number of parameters passed
+            move.l (16,a7),a2           ; Get the pointer to the parameters
+            ; andi #$dfff,sr              ; Drop into user mode
+            movea.l a1,a7               ; Set the stack
+
+            move.l a2,-(a7)             ; Push the parameters list
+            move.l d0,-(a7)             ; Push the parameter count
+            jsr (a0)
 
 _restart_cli:
             lea ___STACK,sp
             jsr _cli_rerepl
             bra _restart_cli
-
-    section BSS
-
-TRAP_MAX_REENTRANCY EQU 4  ; Max number of reentrant calls to the trap handler
-    ds.b (6+12*4)*TRAP_MAX_REENTRANCY ; Each time we save status register .w and return address .l, so 6 bytes, + the saved registers (non-scratch) d2-d7/a2-a7 according to VBCC doc
-trap_save_area: ds.l 1

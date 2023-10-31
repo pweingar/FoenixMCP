@@ -11,9 +11,8 @@
             xdef _restart_cli
 
 ;
-; Interrupt registers for A2560U and U+
+; Interrupt registers for A2560X/K and GenX
 ;
-
 PENDING_GRP0 = $FEC00100
 PENDING_GRP1 = $FEC00102
 PENDING_GRP2 = $FEC00104
@@ -85,11 +84,7 @@ PENDING_GRP2 = $FEC00104
             dc.l not_impl           ; 62 - Reserved
             dc.l not_impl           ; 63 - Reserved
             dc.l interrupt_x10      ; 64 - Interrupt 0x10 - SuperIO - PS/2 Keyboard
-            if MODEL==11	; A2560K
             dc.l interrupt_x11      ; 65 - Interrupt 0x11 - A2560K Built-in Keyboard (Mo)
-            else
-            dc.l not_impl           ; 65 - Reserved
-            endif
             dc.l interrupt_x12      ; 66 - Interrupt 0x12 - SuperIO - PS/2 Mouse
             dc.l interrupt_x13      ; 67 - Interrupt 0x13 - SuperIO - COM1
             dc.l interrupt_x14      ; 68 - Interrupt 0x14 - SuperIO - COM2
@@ -125,7 +120,7 @@ PENDING_GRP2 = $FEC00104
             code
 
 coldboot:   move.w #$2700,SR        ; Supervisor mode, Interrupt mode (68040), disable all interrupts
-
+            
             moveq #0,d0   ; Disable 040's MMU
             movec d0,TC
 
@@ -136,15 +131,10 @@ coldboot:   move.w #$2700,SR        ; Supervisor mode, Interrupt mode (68040), d
             lea	___BSSSTART,a0
             move.l #___BSSSIZE,d0
             beq	callmain
-            moveq #0,d1
-            ; Be save in case BSS is not long word-aligned
-clrloop:    move.b d1,(a0)+
-            subq.l #1,d0
-            bpl.s  clrloop
 
-;clrloop:    move.l d1,(a0)+ ; faster but requires BSS to be 4bytes aligned
-;            subq.l #4,d0
-;            bpl.s  clrloop
+clrloop:    move.l #0,(a0)+
+            subq.l #4,d0
+            bne	clrloop
 
   move.l #$ffffff00,$fec80008 ; change border color
 callmain:   jsr ___main             ; call __main to transfer to the C code

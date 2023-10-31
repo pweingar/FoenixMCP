@@ -1,11 +1,11 @@
 /**
- * @file gabe_a2560k.h
+ * @file gabe_a2560x.h
  *
  * Define miscellaneous GABE registers
  */
 
-#ifndef __GABE_A2560K_H
-#define __GABE_A2560K_H
+#ifndef __GABE_A2560X_H
+#define __GABE_A2560X_H
 
 // These are 32bits Wide Registers since they are internal to the VICKY III
 #define GABE_CTRL_REG		((volatile unsigned int *)0xFEC00000)
@@ -35,14 +35,18 @@
 #define GABE_FIRMWARE_DATE_MONTH_MASK 0x0000FF00
 #define GABE_FIRMWARE_DATE_DAY_MASK   0x00FF0000
 
+// This applies to GenX and A2560X ONLY
+#define GABE_SUB_MODEL_FF_ID   ((volatile unsigned short *)0xFEC00514)    
+#define GABE_SUB_FF_MASK  0x0003  /* Mask for the sub-model: PB, LB, CU*/
+
+#define GABE_SUB_MODEL_ID   ((volatile unsigned short *)0xFEC00516)
+#define GABE_SUB_MOD_MODEL 0x000F  /* This indicate What is the Model of the Unit*/
+
 // Those registers in the GenX/A2560X are 16bits Wide.
 #define GABE_DIP_REG        ((volatile unsigned short *)0xFEC00518)
 #define GABE_DIP_BOOT_MASK  0x0003  /* Mask for the boot mode: */
 #define GABE_DIP_USER_MASK  0x0300  /* Mask for the user switches: */
 
-// This applies to GenX and A2560X ONLY
-#define GABE_SUB_MODEL_ID   ((volatile unsigned short *)0xFEC00514)    
-#define GABE_SUB_MOD_MASK  0x0003  /* Mask for the sub-model: PB, LB, CU*/
 
 #define GABE_GENX_STAT_LEDS        ((volatile unsigned long *)0xFEC0000C)
 #define GABE_GENX_STAT_LED_0_B     0x00000001  /* LED 0 (Close to DEL key) -- Blue ON */

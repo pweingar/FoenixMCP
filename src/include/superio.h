@@ -9,6 +9,9 @@
 #ifndef __SUPERIO_H
 #define __SUPERIO_H
 
+#define CONFIG_0x2E_REG ((volatile unsigned char *)0xFEC0202E)
+#define CONFIG_0x2F_REG ((volatile unsigned char *)0xFEC0202F)
+
 #define PME_STS_REG 	((volatile unsigned char *)0xFEC02100)
 #define PME_EN_REG 		((volatile unsigned char *)0xFEC02102)
 

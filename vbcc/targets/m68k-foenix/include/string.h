@@ -34,8 +34,8 @@ size_t strxfrm(char *,const char *,size_t);
 
 #ifndef __NOINLINE__
 #if defined(__M68000) || defined(__M68010)
-void *__asm_memcpy(__reg("a0") void *, __reg("a1") const void *,
-                   __reg("d2") size_t) =
+void *memcpy(__reg("a0") void *, __reg("a1") const void *,
+             __reg("d2") size_t) =
         "\tinline\n"
         "\tmove.l\ta0,d0\n"
         "\tcmp.l\t#16,d2\n"
@@ -73,8 +73,8 @@ void *__asm_memcpy(__reg("a0") void *, __reg("a1") const void *,
         "\tdbf\td2,.l6\n"
         ".l7\n"
         "\teinline";
-void *__asm_memcpy_desc(__reg("a0") void *, __reg("a1") const void *,
-                        __reg("d2") size_t) =
+void *__memcpy_desc(__reg("a0") void *, __reg("a1") const void *,
+                    __reg("d2") size_t) =
         "\tinline\n"
         "\tcmp.l\t#16,d2\n"
         "\tblo\t.l5\n"
@@ -113,7 +113,7 @@ void *__asm_memcpy_desc(__reg("a0") void *, __reg("a1") const void *,
         ".l7\n"
         "\tmove.l\ta0,d0\n"
         "\teinline";
-void *__asm_memset(__reg("a0") void *, __reg("d0") int, __reg("d2") size_t) =
+void *memset(__reg("a0") void *, __reg("d0") int, __reg("d2") size_t) =
         "\tinline\n"
         "\tmove.l\ta0,a1\n"
         "\tcmp.l\t#16,d2\n"
@@ -149,8 +149,7 @@ void *__asm_memset(__reg("a0") void *, __reg("d0") int, __reg("d2") size_t) =
         "\teinline";
 
 #else /* 68020+ */
-void *__asm_memcpy(__reg("a0") void *, __reg("a1") const void *,
-                   __reg("d2") size_t) =
+void *memcpy(__reg("a0") void *, __reg("a1") const void *, __reg("d2") size_t) =
         "\tinline\n"
         "\tmove.l\ta0,d0\n"
         "\tsubq.l\t#4,d2\n"
@@ -180,8 +179,8 @@ void *__asm_memcpy(__reg("a0") void *, __reg("a1") const void *,
         "\tdbf\td2,.l4\n"
         ".l5\n"
         "\teinline";
-void *__asm_memcpy_desc(__reg("a0") void *, __reg("a1") const void *,
-                        __reg("d2") size_t) =
+void *__memcpy_desc(__reg("a0") void *, __reg("a1") const void *,
+                    __reg("d2") size_t) =
         "\tinline\n"
         "\tsubq.l\t#4,d2\n"
         "\tbcs\t.l3\n"
@@ -210,7 +209,7 @@ void *__asm_memcpy_desc(__reg("a0") void *, __reg("a1") const void *,
         ".l5\n"
         "\tmove.l\ta0,d0\n"
         "\teinline";
-void *__asm_memset(__reg("a0") void *, __reg("d0") int, __reg("d2") size_t) =
+void *memset(__reg("a0") void *, __reg("d0") int, __reg("d2") size_t) =
         "\tinline\n"
         "\tmove.l\ta0,a1\n"
         "\tsubq.l\t#8,d2\n"
@@ -252,7 +251,7 @@ void *__asm_memset(__reg("a0") void *, __reg("d0") int, __reg("d2") size_t) =
 
 #endif /* 68020+ */
 
-__regsused("d0/a0") size_t __asm_strlen(__reg("a0") const char *) =
+size_t strlen(__reg("a0") const char *) =
         "\tinline\n"
         "\tmove.l\ta0,d0\n"
         ".l1\n"
@@ -261,15 +260,15 @@ __regsused("d0/a0") size_t __asm_strlen(__reg("a0") const char *) =
         "\tsub.l\ta0,d0\n"
         "\tnot.l\td0\n"
         "\teinline";
-__regsused("d0/a0/a1") char *__asm_strcpy(__reg("a0") char *, __reg("a1") const char *) =
+char *strcpy(__reg("a0") char *, __reg("a1") const char *) =
         "\tinline\n"
         "\tmove.l\ta0,d0\n"
         ".l1\n"
         "\tmove.b\t(a1)+,(a0)+\n"
         "\tbne\t.l1\n"
         "\teinline";
-char *__asm_strncpy(__reg("a0") char *, __reg("a1") const char *,
-                    __reg("d1") size_t) =
+char *strncpy(__reg("a0") char *, __reg("a1") const char *,
+              __reg("d1") size_t) =
         "\tinline\n"
         "\tmove.l\ta0,d0\n"
         "\tbra\t.l2\n"
@@ -281,7 +280,7 @@ char *__asm_strncpy(__reg("a0") char *, __reg("a1") const char *,
         "\tsubq.l\t#1,d1\n"
         "\tbpl\t.l1\n"
         "\teinline";
-int __asm_strcmp(__reg("a0") const char *, __reg("a1") const char *) =
+int strcmp(__reg("a0") const char *, __reg("a1") const char *) =
         "\tinline\n"
         "\tmoveq\t#0,d0\n"
         "\tmoveq\t#0,d1\n"
@@ -295,8 +294,8 @@ int __asm_strcmp(__reg("a0") const char *, __reg("a1") const char *) =
         ".l2\n"
         "\tsub.l\td1,d0\n"
         "\teinline";
-int __asm_strncmp(__reg("a0") const char *, __reg("a1") const char *,
-                  __reg("d2") size_t) =
+int strncmp(__reg("a0") const char *, __reg("a1") const char *,
+            __reg("d2") size_t) =
         "\tinline\n"
         "\tmoveq\t#0,d0\n"
         "\tmoveq\t#0,d1\n"
@@ -313,7 +312,7 @@ int __asm_strncmp(__reg("a0") const char *, __reg("a1") const char *,
         "\tsub.l\td1,d0\n"
         ".l3\n"
         "\teinline";
-__regsused("d0/a0/a1") char *__asm_strcat(__reg("a0") char *, __reg("a1") const char *) =
+char *strcat(__reg("a0") char *, __reg("a1") const char *) =
         "\tinline\n"
         "\tmove.l\ta0,d0\n"
         ".l1\n"
@@ -324,12 +323,12 @@ __regsused("d0/a0/a1") char *__asm_strcat(__reg("a0") char *, __reg("a1") const 
         "\tmove.b\t(a1)+,(a0)+\n"
         "\tbne\t.l2\n"
         "\teinline";
-char *__asm_strncat(__reg("a0") char *, __reg("a1") const char *,
-                    __reg("d1") size_t) =
+char *strncat(__reg("a0") char *, __reg("a1") const char *,
+              __reg("d1") size_t) =
         "\tinline\n"
         "\tmove.l\ta0,d0\n"
         "\ttst.l\td1\n"
-        "\tbeq\t.l4\n"
+        "\tbeq\t.l3\n"
         ".l1\n"
         "\ttst.b\t(a0)+\n"
         "\tbne\t.l1\n"
@@ -340,10 +339,8 @@ char *__asm_strncat(__reg("a0") char *, __reg("a1") const char *,
         "\tsubq.l\t#1,d1\n"
         "\tbne\t.l2\n"
         ".l3\n"
-        "\tclr.b\t(a0)\n"
-        ".l4\n"
         "\teinline";
-__regsused("d0/d1/a0") char *__asm_strrchr(__reg("a0") const char *, __reg("d1") int) =
+char *strrchr(__reg("a0") const char *, __reg("d1") int) =
         "\tinline\n"
         "\tmoveq\t#0,d0\n"
         ".l1\n"
@@ -355,20 +352,8 @@ __regsused("d0/d1/a0") char *__asm_strrchr(__reg("a0") const char *, __reg("d1")
         "\tbne\t.l1\n"
         "\teinline";
 
-#ifdef __OPTSPEED__
-#define memmove(d,s,n) ((d)<=(s) ? __asm_memcpy(d,s,n) : \
-                                   __asm_memcpy_desc((char *)(d)+(n),(char *)(s)+(n),n))
-#endif
-#define memcpy(d,s,n) __asm_memcpy(d,s,n)
-#define memset(p,f,n) __asm_memset(p,f,n)
-#define strlen(p) __asm_strlen(p)
-#define strcpy(d,s) __asm_strcpy(d,s)
-#define strncpy(d,s,n) __asm_strncpy(d,s,n)
-#define strcmp(s1,s2) __asm_strcmp(s1,s2)
-#define strncmp(s1,s2,n) __asm_strncmp(s1,s2,n)
-#define strcat(d,s) __asm_strcat(d,s)
-#define strncat(d,s,n) __asm_strncat(d,s,n)
-#define strrchr(s,n) __asm_strrchr(s,n)
+#define memmove(d,s,n) ((d)<=(s) ? memcpy(d,s,n) : \
+                                   __memcpy_desc((char *)(d)+(n),(char *)(s)+(n),n))
 #endif /* __NOINLINE__ */
 
 #endif /* __STRING_H */

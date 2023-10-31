@@ -5,7 +5,6 @@
 #ifndef __SYS_GENERAL_H
 #define __SYS_GENERAL_H
 
-#include "features.h"
 #include "version.h"
 #include "types.h"
 
@@ -35,7 +34,7 @@
 #define CPU_486DX2_50               0x08  /* Intel 486 chips... */
 #define CPU_486DX2_60               0x09
 #define CPU_486DX4                  0x0A
-#define CPU_MC68EC060               0x0B  /* New things Coming... */
+#define CPU_MC68060                 0x0B  /* New things Coming... */
 
 /* Clock speeds */
 
@@ -61,7 +60,7 @@ typedef struct s_sys_info {
     unsigned short cpu;             /* Code to say which CPU is running */
     const char * cpu_name;          /* Human readable name for the CPU */
     unsigned int cpu_clock_khz;     /* Speed of the CPU clock in KHz */
-    unsigned long fpga_date;        /* YYYYMMDD */    
+    unsigned long fpga_date;        /* YYYYMMDD */ 
     unsigned long fpga_model;       /* FPGA model number */
     unsigned short fpga_version;    /* FPGA version */
     unsigned short fpga_subver;     /* FPGA sub-version */
