@@ -56,10 +56,12 @@ void log_init(void) {
         do_log = log_to_uart;
 
         break;
+#if (MODEL == MODEL_FOENIX_A2560K || MODEL == MODEL_FOENIX_GENX || MODEL == MODEL_FOENIX_A2560X)
     case LOG_CHANNEL_CHANNEL_A_LOW_LEVEL:
         channel_A_logger_init();
         do_log = log_to_channel_A_low_level;
         break;
+#endif
     default:
         do_log = log_to_screen;
     }
@@ -265,11 +267,12 @@ static void log_to_screen(const char *message) {
     txt_print(log_channel, "\n");
 }
 
+#if (MODEL == MODEL_FOENIX_A2560K || MODEL == MODEL_FOENIX_GENX || MODEL == MODEL_FOENIX_A2560X)
 static void log_to_channel_A_low_level(const char *message) {
     channel_A_write(message);
     channel_A_write("\n");
 }
-
+#endif
 
 /*
  * Log a message to the console.
