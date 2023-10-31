@@ -879,7 +879,7 @@ void cli_setup_screen(short channel, const char * path, short is_active) {
 
     print_banner(channel, cli_sys_info.model);
 
-    sprintf(message, "\nFoenix/MCP v%02u.%02u.%04u\n\n", (unsigned int)cli_sys_info.mcp_version, (unsigned int)cli_sys_info.mcp_rev, (unsigned int)cli_sys_info.mcp_build);
+    sprintf(message, "\nFoenix/MCP (Vincent's fork) v%02u.%02u.%04u\n\n", (unsigned int)cli_sys_info.mcp_version, (unsigned int)cli_sys_info.mcp_rev, (unsigned int)cli_sys_info.mcp_build);
     print(channel, message);
     print(channel, "Type HELP or ? for help.\n");
 }
