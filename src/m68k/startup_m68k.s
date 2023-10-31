@@ -149,14 +149,6 @@ ___exit:
             bra	___exit
 
 ;
-; Autovector #1: Used by VICKY III Channel B interrupts
-;
-autovec1:   movem.l d0-d7/a0-a6,-(a7)
-            jsr _int_vicky_channel_b        ; Call the dispatcher for Channel B interrupts
-            movem.l (a7)+,d0-d7/a0-a6
-            rte
-
-;
 ; Autovector #1: Used by VICKY III Channel A interrupts
 ;
 autovec2:   movem.l d0-d7/a0-a6,-(a7)
