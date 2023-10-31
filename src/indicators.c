@@ -46,9 +46,9 @@ void ind_set_power(short state) {
 #if MODEL == MODEL_FOENIX_A2560K
             *RGB_LED = 0x00004000;
 #elif MODEL == MODEL_FOENIX_GENX
-            *RGB_LED = 0x00200020;
+            *RGB_LED = 0x0000DD00;
 #elif MODEL == MODEL_FOENIX_A2560X
-            *RGB_LED = 0x00202000;
+            *RGB_LED = 0x00D42E00;
 #else
             *RGB_LED = 0x00004020;
 #endif
