@@ -80,7 +80,7 @@ short cli_test_ps2(short channel, int argc, const char * argv[]) {
     } while (
 #if MODEL == MODEL_FOENIX_A2560K
         // Not totally sure what this is supposed to test. Doesn't seem related to PS/2 anyway.
-        sys_chan_ioctrl(channel, 0x05, 0, 0) == 0)
+        sys_chan_ioctrl(channel, 0x05, 0, 0) == 0
 #else
         (scancode = kbd_get_scancode()) || 1
 #endif
