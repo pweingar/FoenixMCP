@@ -33,7 +33,7 @@ int toupper(int);
 int tolower(int);
 
 #ifndef __NOINLINE__
-__regsused("d0/a0") int __asm_toupper(__reg("d0") int) =
+int toupper(__reg("d0") int) =
         "\tinline\n"
         "\txref\t___ctype\n"
         "\tlea\t___ctype,a0\n"
@@ -42,7 +42,7 @@ __regsused("d0/a0") int __asm_toupper(__reg("d0") int) =
         "\tand.b\t#$df,d0\n"
         ".skip\n"
         "\teinline";
-__regsused("d0/a0") int __asm_tolower(__reg("d0") int) =
+int tolower(__reg("d0") int) =
         "\tinline\n"
         "\txref\t___ctype\n"
         "\tlea\t___ctype,a0\n"
@@ -51,8 +51,6 @@ __regsused("d0/a0") int __asm_tolower(__reg("d0") int) =
         "\tor.b\t#$20,d0\n"
         ".skip\n"
         "\teinline";
-#define toupper(c) __asm_toupper(c)
-#define tolower(c) __asm_tolower(c)
 #endif /* __NOINLINE__ */
 
 #endif /* __CTYPE_H */

@@ -40,33 +40,33 @@ int feupdateenv(const fenv_t *);
 #if defined(__M68881) || defined(__M68882)
 /* direct FPU support */
 
-__regsused("d0/a0") int __asm_fegetenv(__reg("a0")fenv_t *) =
+int fegetenv(__reg("a0")fenv_t *) =
         "\tinline\n"
         "\tfmove.l\tfpcr,(a0)\n"
         "\tmoveq\t#0,d0\n"
         "\teinline";
-__regsused("d0/d1") int __asm_fegetround() =
+int fegetround(void) =
         "\tinline\n"
         "\tfmove.l\tfpcr,d1\n"
         "\tmoveq\t#$30,d0\n"
         "\tand.l\td1,d0\n"
         "\teinline";
-__regsused("d0") int __asm_fegetprec() =
+int fegetprec(void) =
         "\tinline\n"
         "\tfmove.l\tfpcr,d0\n"
         "\tand.l\t#$c0,d0\n"
         "\teinline";
-__regsused("d0/a0") int __asm_feholdexcept(__reg("a0")fenv_t *) =
+int feholdexcept(__reg("a0")fenv_t *) =
         "\tinline\n"
         "\tfmove.l\tfpcr,(a0)\n"
         "\tmoveq\t#0,d0\n"
         "\teinline";
-__regsused("d0/a0") int __asm_fesetenv(__reg("a0")const fenv_t *) =
+int fesetenv(__reg("a0")const fenv_t *) =
         "\tinline\n"
         "\tfmove.l\t(a0),fpcr\n"
         "\tmoveq\t#0,d0\n"
         "\teinline";
-__regsused("d0/d1") int __asm_fesetround(__reg("d0")int) =
+int fesetround(__reg("d0")int) =
         "\tinline\n"
         "\tfmove.l\tfpcr,d1\n"
         "\tand.w\t#$ffcf,d1\n"
@@ -74,7 +74,7 @@ __regsused("d0/d1") int __asm_fesetround(__reg("d0")int) =
         "\tfmove.l\td1,fpcr\n"
         "\tmoveq\t#0,d0\n"
         "\teinline";
-__regsused("d0/d1") int __asm_fesetprec(__reg("d0")int) =
+int fesetprec(__reg("d0")int) =
         "\tinline\n"
         "\tfmove.l\tfpcr,d1\n"
         "\tand.w\t#$ff3f,d1\n"
@@ -86,77 +86,62 @@ __regsused("d0/d1") int __asm_fesetprec(__reg("d0")int) =
 #else
 /* IEEE or software floating-point */
 
-__regsused("d0") int __asm_fegetenv(__reg("a0")fenv_t *) =
+int fegetenv(__reg("a0")fenv_t *) =
         "\tinline\n"
         "\tmoveq\t#-1,d0\n"
         "\teinline";
-__regsused("d0") int __asm_fegetround() =
+int fegetround(void) =
         "\tinline\n"
         "\tmoveq\t#-1,d0\n"
         "\teinline";
-__regsused("d0") int __asm_fegetprec() =
+int fegetprec(void) =
         "\tinline\n"
         "\tmoveq\t#-1,d0\n"
         "\teinline";
-__regsused("d0") int __asm_feholdexcept(__reg("a0")fenv_t *) =
+int feholdexcept(__reg("a0")fenv_t *) =
         "\tinline\n"
         "\tmoveq\t#-1,d0\n"
         "\teinline";
-__regsused("d0") int __asm_fesetenv(__reg("a0")const fenv_t *) =
+int fesetenv(__reg("a0")const fenv_t *) =
         "\tinline\n"
         "\tmoveq\t#-1,d0\n"
         "\teinline";
-__regsused("d0") int __asm_fesetround(__reg("d0")int) =
+int fesetround(__reg("d0")int) =
         "\tinline\n"
         "\tmoveq\t#-1,d0\n"
         "\teinline";
-__regsused("d0") int __asm_fesetprec(__reg("d0")int) =
+int fesetprec(__reg("d0")int) =
         "\tinline\n"
         "\tmoveq\t#-1,d0\n"
         "\teinline";
 
 #endif
 
-__regsused("d0") int __asm_feclearexcept(__reg("d0")int) =
+int feclearexcept(__reg("d0")int) =
         "\tinline\n"
         "\tmoveq\t#0,d0\n"
         "\teinline";
-__regsused("d0") int __asm_fegetexceptflag(__reg("a0")fexcept_t *,
-                                           __reg("d0")int) =
+int fegetexceptflag(__reg("a0")fexcept_t *, __reg("d0")int) =
         "\tinline\n"
         "\tmoveq\t#-1,d0\n"
         "\teinline";
-__regsused("d0") int __asm_feraiseexcept(__reg("d0")int) =
+int feraiseexcept(__reg("d0")int) =
         "\tinline\n"
         "\tmoveq\t#-1,d0\n"
         "\teinline";
-__regsused("d0") int __asm_fesetexceptflag(__reg("a0")const fexcept_t *,
-                                           __reg("d0")int) =
+int fesetexceptflag(__reg("a0")const fexcept_t *, __reg("d0")int) =
         "\tinline\n"
         "\tmoveq\t#-1,d0\n"
         "\teinline";
-__regsused("d0") int __asm_fetestexcept(__reg("d0")int) =
+int fetestexcept(__reg("d0")int) =
         "\tinline\n"
         "\tmoveq\t#0,d0\n"
         "\teinline";
-__regsused("d0") int __asm_feupdateenv(__reg("a0")const fenv_t *) =
+int feupdateenv(__reg("a0")const fenv_t *) =
         "\tinline\n"
         "\tmoveq\t#-1,d0\n"
         "\teinline";
 
-#define feclearexcept(x) __asm_feclearexcept(x)
-#define fegetenv(x) __asm_fegetenv(x)
-#define fegetexceptflag(x,y) __asm_fegetexceptflag(x,y)
-#define fegetround() __asm_fegetround()
-#define fegetprec() __asm_fegetprec()
-#define feholdexcept(x) __asm_feholdexcept(x)
-#define feraiseexcept(x) __asm_feraiseexcept(x)
-#define fesetenv(x) __asm_fesetenv(x)
-#define fesetexceptflag(x,y) __asm_fesetexceptflag(x,y)
-#define fesetround(x) __asm_fesetround(x)
-#define fesetprec(x) __asm_fesetprec(x)
-#define fetestexcept(x) __asm_fetestexcept(x)
-#define feupdateenv(x) __asm_feupdateenv(x)
 #endif /* __NOINLINE__ */
 
 #endif /* __FENV_H */
