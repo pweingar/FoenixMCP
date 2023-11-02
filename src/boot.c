@@ -33,6 +33,8 @@
 #include "rsrc/bitmaps/splash_a2560k.h"
 #elif MODEL == MODEL_FOENIX_A2560X || MODEL == MODEL_FOENIX_GENX
 #include "rsrc/bitmaps/splash_a2560x.h"
+#elif MODEL == MODEL_FOENIX_C256U || MODEL == MODEL_FOENIX_C256U_PLUS || MODEL == MODEL_FOENIX_FMX
+#include "rsrc/bitmaps/image.h"
 #endif
 
 #if MODEL == MODEL_FOENIX_A2560K

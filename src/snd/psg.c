@@ -4,6 +4,7 @@
 
 #include "psg.h"
 #include "sound_reg.h"
+#include "log.h"
 
 /*
  * Mute all voices on the PSG
@@ -28,7 +29,7 @@ void psg_mute_all() {
  * voice = the number of the voice (0 - 3)
  * frequency = the frequency
  */
-void psg_tone(short chip, unsigned short voice, int frequency) {
+void psg_tone(short chip, unsigned short voice, unsigned long frequency) {
     volatile unsigned char * port = PSG_PORT;     /* By default: external */
 
     if (voice < 3) {

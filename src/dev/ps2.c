@@ -6,6 +6,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include "errors.h"
+#include "log_level.h"
+#define DEFAULT_LOG_LEVEL LOG_DEBUG
 #include "log.h"
 #include "types.h"
 #include "ring_buffer.h"
@@ -339,7 +341,7 @@ short ps2_wait_out() {
     target_ticks = rtc_get_jiffies() + PS2_TIMEOUT_JF;
     while ((*PS2_STATUS & PS2_STAT_OBF) == 0) {
         if (rtc_get_jiffies() > target_ticks) {
-            return -1;
+			return -1;
         }
     }
 
@@ -374,11 +376,34 @@ short ps2_wait_in() {
  *  The response from the PS/2 controller, -1 if there was a timeout
  */
 short ps2_controller_cmd(unsigned char cmd) {
-    if (ps2_wait_in()) return -1;
+    if (ps2_wait_in()) {
+		INFO("ps2_controller_cmd: ps2_wait_in timeout");
+		return -1;
+	}
     *PS2_CMD_BUF = cmd;
 
-    if (ps2_wait_out()) return -1;
-    return (short)*PS2_DATA_BUF;
+    if (ps2_wait_out()) {
+		INFO("ps2_controller_cmd: ps2_wait_out timeout");
+ 		return -1;
+	}
+
+	short result = (short)*PS2_DATA_BUF;
+	// DEBUG2("PS/2: ps2_controller_cmd(%02X) = %02X", cmd, result);
+    return result;
+}
+
+/*
+ * Send a command to the controller and wait for a response.
+ *
+ * Returns: 0 on success, -1 on timeout
+ */
+short ps2_controller_cmd_noreply(unsigned char cmd) {
+    if (ps2_wait_in()) {
+		INFO("ps2_controller_cmd_noreply: ps2_wait_in timeout");
+		return -1;
+	}
+    *PS2_CMD_BUF = cmd;
+    return 0;
 }
 
 /*
@@ -388,10 +413,16 @@ short ps2_controller_cmd(unsigned char cmd) {
  *  The response from the PS/2 controller, -1 if there was a timeout
  */
 short ps2_controller_cmd_param(unsigned char cmd, unsigned char parameter) {
-    if (ps2_wait_in()) return -1;
+    if (ps2_wait_in()) {
+		DEBUG("ps2_controller_cmd_param: ps2_wait_in #1 timeout.");
+		return -1;
+	}
     *PS2_CMD_BUF = cmd;
 
-    if (ps2_wait_in()) return -1;
+    if (ps2_wait_in())  {
+		DEBUG("ps2_controller_cmd_param: ps2_wait_in #2 timeout.");
+		return -1;
+	}
     *PS2_DATA_BUF = parameter;
 
     return 0;
@@ -404,12 +435,18 @@ short ps2_controller_cmd_param(unsigned char cmd, unsigned char parameter) {
  *  The response from the PS/2 controller, -1 if there was a timeout
  */
 short ps2_kbd_cmd_p(unsigned char cmd, unsigned char parameter) {
-    if (ps2_wait_in()) return -1;
+    if (ps2_wait_in()) {
+		DEBUG("ps2_kbd_cmd_p: ps2_wait_in #1 timeout.");
+		return -1;
+	}
     *PS2_DATA_BUF = cmd;
 
     // May need a delay here
 
-    if (ps2_wait_in()) return -1;
+    if (ps2_wait_in()) {
+		DEBUG("ps2_kbd_cmd_p: ps2_wait_in #2 timeout.");
+		return -1;
+	}
     *PS2_DATA_BUF = parameter;
 
     // Return 0 by default... maybe read DATA?
@@ -540,6 +577,11 @@ void kbd_handle_irq() {
 
     /* Clear the pending flag */
     int_clear(INT_KBD_PS2);
+
+#if MODEL == MODEL_FOENIX_C256U || MODEL == MODEL_FOENIX_C256U_PLUS || MODEL == MODEL_FOENIX_FMX
+	volatile __attribute__((far)) char * text = (char *)0xafa002;
+	*text = *text + 1;
+#endif
 
     if (scan_code) {
         // Make sure the scan code isn't 0 or 128, which are invalid make/break codes
@@ -1143,6 +1185,47 @@ short kbd_layout(const char * tables) {
     return 0;
 }
 
+/**
+ * @brief Attempt to identify the device on the given PS/2 port
+ * 
+ * @param port 1 (keyboard port), or 2 (mouse port)
+ */
+void ps2_identify(short port) {
+	short res = 0;
+	short byte0 = 0;
+	short byte1 = 0;
+
+	switch(port) {
+		case 1:
+			res = ps2_kbd_cmd(KBD_CMD_DISABLE, 100);
+			res = ps2_kbd_cmd(KBD_CMD_ID, 100);
+
+			if (ps2_wait_in()) {
+				ERROR("PS/2: ps2_identify timeout #1.");
+			} else {
+				byte0 = (short)*PS2_DATA_BUF;
+			}
+
+			if (ps2_wait_in()) {
+				ERROR("PS/2: ps2_identify timeout #2.");
+			} else {
+				byte1 = (short)*PS2_DATA_BUF;
+			}
+
+			if (byte1 >= 0) {
+				INFO2("PS/2: ps2_identification: %02X %02X.", byte0, byte1);
+			}  else {
+				INFO1("PS/2: ps2_identification: %02X.", byte0);
+			}
+
+			res = ps2_kbd_cmd(KBD_CMD_ENABLE, 0);
+			break;
+
+		default:
+			break;
+	}
+}
+
 /*
  * Initialize the PS2 controller and any attached devices
  * Enable keyboard and mouse interrupts as appropriate.
@@ -1151,10 +1234,12 @@ short kbd_layout(const char * tables) {
  *  Status code indicating if either the mouse or the keyboard is missing.
  */
 short ps2_init() {
-    unsigned char x;
-    short mouse_present;
-    short mouse_error;
-    short res;
+    unsigned char x = 0;
+    short mouse_present = 0;
+    short mouse_error = 0;
+    short res = 0;
+
+	DEBUG("PS/2: ps2_init entered.");
 
     // Initialize the keyboard controller variables
 
@@ -1178,55 +1263,66 @@ short ps2_init() {
 
     int_disable(INT_MOUSE);     /* Disable mouse interrupts */
     int_disable(INT_KBD_PS2);   /* Disable keyboar interrupts */
+	INFO("PS/2: Interrupts disabled.");
 
     // Prevent the keyboard and mouse from sending events
-    ps2_controller_cmd(PS2_CTRL_DISABLE_1);
-    ps2_controller_cmd(PS2_CTRL_DISABLE_2);
+    ps2_controller_cmd_noreply(PS2_CTRL_DISABLE_1);
+    ps2_controller_cmd_noreply(PS2_CTRL_DISABLE_2);
 
     // Read and clear out the controller's output buffer
     ps2_flush_out();
 
     // // Controller selftest...
     if (ps2_controller_cmd(PS2_CTRL_SELFTEST) != PS2_RESP_OK) {
+		INFO("PS/2: FAILED controller self test.");
         ; // return PS2_FAIL_SELFTEST;
-    }
+    } else {
+		DEBUG("PS/2: PASSED controller self test.");
+	}
 
     // Keyboard test
     if (ps2_controller_cmd(PS2_CTRL_KBDTEST) != 0) {
+		INFO("PS/2: FAILED port #1 test.");
         ; // return PS2_FAIL_KBDTEST;
-    }
+    } else {
+		DEBUG("PS/2: PASSED port #1 test.");
+	}
 
     /* Test if the mouse is working */
-    if (ps2_controller_cmd(PS2_CTRL_MOUSETEST) == 0) {
-        mouse_present = 1;
-    } else {
+    if (ps2_controller_cmd(PS2_CTRL_MOUSETEST) != 0) {
+		INFO("PS/2: FAILED port #2 test.");
         mouse_present = 0;
+    } else {
+		DEBUG("PS/2: PASSED port #2 test.");
+        mouse_present = 1;
     }
 
     // Set scancode translation to set1, enable interrupts on mouse and keyboard
     ps2_controller_cmd_param(PS2_CTRL_WRITECMD, 0x43);  /* %01000011 */
 
-    // Enable the keyboard, don't check response
-    ps2_wait_in();
-    *PS2_CMD_BUF = PS2_CTRL_ENABLE_1;
+    // Enable the port #1, don't check response
+	ps2_controller_cmd_noreply(PS2_CTRL_ENABLE_1);
+	INFO("PS/2: port #1 enabled.");
 
     // Reset the keyboard... waiting a bit before we check for a result
     ps2_kbd_cmd(KBD_CMD_RESET, 1000);
+	INFO("PS/2: Keyboard reset.");
 
     // Ideally, we would attempt a re-enable several times, but this doesn't work on the U/U+ for some keyboards
     ps2_kbd_cmd(KBD_CMD_ENABLE, 0);
+	INFO("PS/2: Keyboard enabled.");
 
     // TODO: set the keyboard LEDs
 
     if (mouse_present) {
         /* Initialize the mouse */
-        if (mouse_error = mouse_init()) {
-            log_num(LOG_INFO, "Unable to initialize mouse", res);
+        if ((mouse_error = mouse_init())) {
+            log_num(LOG_INFO, "Unable to initialize mouse", mouse_error);
         }
     }
 
-    ps2_wait_in();
-    *PS2_CMD_BUF = PS2_CTRL_ENABLE_2;
+	ps2_controller_cmd_noreply(PS2_CTRL_ENABLE_2);
+	INFO("PS/2: port #2 enabled.");
 
     // Make sure everything is read
     ps2_flush_out();
@@ -1239,9 +1335,10 @@ short ps2_init() {
 
     // Enable the keyboard interrupt
     int_enable(INT_KBD_PS2);
+	INFO("PS/2: Keyboard interrupt enabled.");
 
     if (mouse_present && (mouse_error == 0)) {
-        log(LOG_TRACE, "mouse enabled");
+        DEBUG("mouse enabled");
 
         // Register the interrupt handler for the mouse
         int_register(INT_MOUSE, mouse_handle_irq);

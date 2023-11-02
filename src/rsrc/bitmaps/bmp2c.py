@@ -16,7 +16,7 @@ def emit(output, count, pixel_count, last_pixel):
 
 parser = OptionParser()
 parser.add_option("-i", "--input", dest="input", help="Source image file")
-parser.add_option("-o", "--output", dest="output", default="image.h", help="Destination for image and color data.")
+parser.add_option("-o", "--output", dest="output", default="image.c", help="Destination for image and color data.")
 
 (options, args) = parser.parse_args()
 

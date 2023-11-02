@@ -92,6 +92,7 @@ short rtc_register_periodic(short rate, FUNC_V_2_V handler) {
         int_enable(INT_RTC);
     }
 
+	return 0;
 }
 
 /*
@@ -260,3 +261,4 @@ void rtc_get_time(p_time time) {
 long rtc_get_jiffies() {
     return timers_jiffies();
 }
+

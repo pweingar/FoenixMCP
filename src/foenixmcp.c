@@ -7,7 +7,6 @@
     #define DEFAULT_LOG_LEVEL LOG_TRACE
 #endif
 
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -31,11 +30,15 @@
 #include "dev/txt_a2560k_b.h"
 #elif MODEL == MODEL_FOENIX_A2560U || MODEL == MODEL_FOENIX_A2560U_PLUS
 #include "dev/txt_a2560u.h"
+#elif MODEL == MODEL_FOENIX_C256U || MODEL == MODEL_FOENIX_C256U_PLUS || MODEL == MODEL_FOENIX_FMX
+#include "dev/txt_c256.h"
+#include "dev/txt_evid.h"
 #endif
 
 #include "syscalls.h"
 #include "timers.h"
 #include "boot.h"
+#include "dev/bitmap.h"
 #include "memory.h"
 #include "dev/block.h"
 #include "dev/channel.h"
@@ -59,6 +62,7 @@
 #include "fatfs/ff.h"
 #include "cli/cli.h"
 #include "rsrc/font/MSX_CP437_8x8.h"
+#include "rsrc/bitmaps/image.h"
 
 const char* VolumeStr[FF_VOLUMES] = { "sd", "fd", "hd" };
 
@@ -296,6 +300,8 @@ void print_error(short channel, char * message, short code) {
     print(channel, "\n");
 }
 
+t_sys_info info;
+
 /*
  * Initialize the kernel systems.
  */
@@ -306,6 +312,11 @@ void initialize() {
 
     /* Setup logging early */
     log_init();
+	log_setlevel(DEFAULT_LOG_LEVEL);
+
+	/* Fill out the system information */
+	sys_get_information(&info);
+
     #if 0
     char msg[] = "This is some text to test that the debug to UART works ok\r\n";
     {
@@ -336,36 +347,60 @@ void initialize() {
     log(LOG_INFO, "Initializing screens...");
     txt_init_screen(TXT_SCREEN_A2560K_A);
     txt_init_screen(TXT_SCREEN_A2560K_B);
+
 #elif MODEL == MODEL_FOENIX_A2560U || MODEL == MODEL_FOENIX_A2560U_PLUS
     txt_a2560u_install();
     txt_init_screen(TXT_SCREEN_A2560U);
+
+#elif MODEL == MODEL_FOENIX_C256U || MODEL == MODEL_FOENIX_C256U_PLUS || MODEL == MODEL_FOENIX_FMX
+	// Install and initialize the main screen text driver
+	txt_c256_install();
+	txt_init_screen(TXT_SCREEN_C256);
+
+	// If the EVID card is plugged in, install and initialize the EVID driver
+	if (info.screens > 1) {
+		short result = txt_evid_install();
+		txt_init_screen(TXT_SCREEN_EVID);
+	}
+
 #else
 #error Cannot identify screen setup
 #endif
 
-    log(LOG_INFO, "Text system initialized");
+	INFO("Text system initialized...");
+
+#if MODEL == MODEL_FOENIX_C256U || MODEL == MODEL_FOENIX_C256U_PLUS || MODEL == MODEL_FOENIX_FMX
+	// Initialize the bitmap system
+	bm_init();
+	INFO("Bitmap system initialized...");
+#endif
 
     /* Initialize the indicators */
     ind_init();
-    log(LOG_INFO, "Indicators initialized");
+    INFO("Indicators initialized");
 
     /* Initialize the interrupt system */
     int_init();
+    INFO("Interrupts initialized");
 
 #if HAS_SUPERIO
     /* Initialize the SuperIO chip */
     init_SuperIO_config_zones(); // This Init used to be done by the FPGA. 
     init_superio();
+    INFO("SuperIO initialized");
 #endif
 
     /* Mute the PSG */
     psg_mute_all();
+    INFO("PSGs muted");
 
     /* Initialize and mute the SID chips */
     sid_init_all();
+    INFO("SIDs initialized");
 
     /* Initialize the Yamaha sound chips (well, turn their volume down at least) */
     ym_init();
+    INFO("Yamaha soundchips initialized");
 
     /* Initialize the CODEC */
     init_codec();
@@ -376,7 +411,7 @@ void initialize() {
     bdev_init_system();   // Initialize the channel device system
     INFO("Block device system ready.");
 
-    if (res = con_install()) {
+    if ((res = con_install())) {
         log_num(LOG_ERROR, "FAILED: Console installation", res);
     } else {
         INFO("Console installed.");
@@ -384,9 +419,11 @@ void initialize() {
 
     /* Initialize the timers the MCP uses */
     timers_init();
+	INFO("Timers initialized");
 
     /* Initialize the real time clock */
     rtc_init();
+	INFO("Real time clock initialized");
 
     target_jiffies = sys_time_jiffies() + 300;     /* 5 seconds minimum */
     DEBUG1("target_jiffies assigned: %d", target_jiffies);
@@ -397,21 +434,22 @@ void initialize() {
 
     /* Play the SID test bong on the Gideon SID implementation */
     sid_test_internal();
+    TRACE("Internal SID tested");
 
-    if (res = pata_install()) {
+    if ((res = pata_install())) {
         log_num(LOG_ERROR, "FAILED: PATA driver installation", res);
     } else {
         INFO("PATA driver installed.");
     }
 
-    if (res = sdc_install()) {
+    if ((res = sdc_install())) {
         ERROR1("FAILED: SDC driver installation %d", res);
     } else {
         INFO("SDC driver installed.");
     }
 
 #if HAS_FLOPPY
-    if (res = fdc_install()) {
+    if ((res = fdc_install())) {
         ERROR1("FAILED: Floppy drive initialization %d", res);
     } else {
         INFO("Floppy drive initialized.");
@@ -420,14 +458,14 @@ void initialize() {
 
     // At this point, we should be able to call into to console to print to the screens
 
-    if (res = ps2_init()) {
+    if ((res = ps2_init())) {
         print_error(0, "FAILED: PS/2 keyboard initialization", res);
     } else {
         log(LOG_INFO, "PS/2 keyboard initialized.");
     }
 
 #if MODEL == MODEL_FOENIX_A2560K
-    if (res = kbdmo_init()) {
+    if ((res = kbdmo_init())) {
         log_num(LOG_ERROR, "FAILED: A2560K built-in keyboard initialization", res);
     } else {
         log(LOG_INFO, "A2560K built-in keyboard initialized.");
@@ -435,7 +473,7 @@ void initialize() {
 #endif
 
 #if HAS_PARALLEL_PORT
-    if (res = lpt_install()) {
+    if ((res = lpt_install())) {
         log_num(LOG_ERROR, "FAILED: LPT installation", res);
     } else {
         log(LOG_INFO, "LPT installed.");
@@ -443,7 +481,7 @@ void initialize() {
 #endif
 
 #if HAS_MIDI_PORTS
-    if (res = midi_install()) {
+    if ((res = midi_install())) {
         log_num(LOG_ERROR, "FAILED: MIDI installation", res);
     } else {
         log(LOG_INFO, "MIDI installed.");
@@ -462,7 +500,7 @@ void initialize() {
         INFO("CLI initialized.");
     }
 
-    if (res = fsys_init()) {
+    if ((res = fsys_init())) {
         log_num(LOG_ERROR, "FAILED: file system initialization", res);
     } else {
         INFO("File system initialized.");
@@ -471,15 +509,14 @@ void initialize() {
 
 #define BOOT_DEFAULT    -1  // User chose default, or the time to over-ride has passed
 
+t_file_info file;
+
 int main(int argc, char * argv[]) {
     short result;
     short i;
-//*((volatile uint32_t*const)0xfec80008) = 0xff99ff22L;
 
     initialize();
-
-//*((volatile uint32_t*const)0xfec00000) = 0x16;
-
+#if MODEL == MODEL_FOENIX_A2560U || MODEL == MODEL_FOENIX_A2560U_PLUS
     // Make sure the command path is set to the default before we get started
     cli_command_set("");
 
@@ -490,7 +527,36 @@ int main(int argc, char * argv[]) {
     boot_from_bdev(boot_dev);
 
     log(LOG_INFO, "Stopping.");
+#elif MODEL == MODEL_FOENIX_C256U || MODEL == MODEL_FOENIX_C256U_PLUS || MODEL == MODEL_FOENIX_FMX
+	printf("\n\nSDC directory:\n");
+	int directory = fsys_opendir("/sd/");
+	while (fsys_readdir(directory, &file) == 0) {
+		if (file.name[0] == 0) {
+			break;
+		}
+		printf("%s\n", file.name);
+	}
+	fsys_closedir(directory);
+
+	printf("\n\nHDC directory:\n");
+	directory = fsys_opendir("/hd/");
+	while (fsys_readdir(directory, &file) == 0) {
+		if (file.name[0] == 0) {
+			break;
+		}
+		printf("%s\n", file.name);
+	}
+	fsys_closedir(directory);
+
+	txt_clear(0, 2);
+	bm_fill((uint8_t *)0xb00000, 0, 640, 480);
+	bm_load_clut(0, splashscreen_lut);
+	bm_load_rle((uint8_t *)0xb00000, splashscreen_pix, 640, 480);
+	bm_set_data(0, (uint8_t *)0xb00000);
+	bm_set_visibility(0, 0, 1);
+#endif
 
     /* Infinite loop... */
-    while (1) {};
+    while (1) {
+	};
 }

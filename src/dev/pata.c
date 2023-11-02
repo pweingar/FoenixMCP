@@ -161,7 +161,7 @@ char g_buffer[512];
 //  0 on success, any negative number is an error code
 //
 short pata_identity(p_drive_info drive_info) {
-    char * buffer;
+    char * buffer = 0;
     unsigned short *wptr;
     char * cptr;
     short i;
@@ -198,7 +198,6 @@ short pata_identity(p_drive_info drive_info) {
 
     TRACE("data copied");
 
-    wptr = (unsigned short *)buffer;
     drive_info->flags = g_buffer[1] << 16 | g_buffer[0];
     drive_info->lba_enabled = g_buffer[99] << 16 | g_buffer[98];
     drive_info->l.lbaw.lba_default_lo = g_buffer[121] << 8 | g_buffer[120];

@@ -1,11 +1,17 @@
-
 #
 # User may over-ride the UNIT and MEMORY parameters to specify target machine
 # and where the MCP will run (ram or flash)
 #
-UNIT := a2560x
-MEMORY := flash
+UNIT := C256U_PLUS
+MEMORY := ram
 
+# The script expects the following environment variables to be set:
+# VBCC: path to VBCC distribution 
+
+#UNIT := C256U_PLUS
+#MEMORY := RAM
+
+# The below doesn't seem true !
 # CPU_WDC65816                0x16  /* CPU code for the Western Design Center 65816 */
 # CPU_M68000                  0x20  /* CPU code for the Motorola 68000 */
 # CPU_M68010                  0x21  /* CPU code for the Motorola 68010 */
@@ -23,154 +29,234 @@ MEMORY := flash
 # MODEL_FOENIX_A2560U         9
 # MODEL_FOENIX_A2560K         11
 
-# Determine target CPU and MODEL based on the UNIT
-# The comments are on a separate line to avoid inserting white space in the commande line where these variables are used
+# Unit-specific properties ----------------------------------------------------
 
 ifeq ($(UNIT),a2560k)
-# M68040V
-export CPU_NUMBER = 6
-# VASM CPU flag
-export VASM_CPU = -m68040
-# VBCC CPU flag
-export VBCC_CPU = 68040
-# A2560K
-export MODEL_NUMBER = 11
-export cpu = m68040
+	MODEL_NUMBER = 11
+	CPU = m68040
 
 else ifeq ($(UNIT),genx)
-# M68040V
-export CPU_NUMBER = 6
-# VASM CPU flag
-export VASM_CPU = -m68040
-# VBCC CPU flag
-export VBCC_CPU = 68040
-# GenX
-export MODEL_NUMBER = 4
-export cpu = m68040
+	MODEL_NUMBER = 4
+	CPU = m68040
 
 else ifeq ($(UNIT),a2560x)
-# M68040V
-export CPU_NUMBER = 6
-# VASM CPU flag
-export VASM_CPU = -m68040
-# VBCC CPU flag
-export VBCC_CPU = 68040
-# A2560X
-export MODEL_NUMBER = 8
-export cpu = m68040
+	MODEL_NUMBER = 8
+	CPU = m68040
 
 else ifeq ($(UNIT),a2560u)
-# M680SEC00
-export CPU_NUMBER = 0
-# VASM CPU flag
-export VASM_CPU = -m68000
-# VBCC CPU flag
-export VBCC_CPU = 68000
-export MODEL_NUMBER = 9
-export cpu = m68k
+	MODEL_NUMBER = 9
+	CPU = m68k
+
+else ifeq ($(UNIT),C256U)
+	CPU = w65816
+	MODEL_NUMBER = 1
+	SRCS_FOR_UNIT =
+	LDFLAGS_FOR_UNIT = C256/ld_lc_c256_u.scm clib-lc-ld.a
+
+else ifeq ($(UNIT),C256U_PLUS)
+	MODEL_NUMBER = 5
+	CPU = w65816
+	SRCS_FOR_UNIT = C256/jumptable.s C256/syscalls.s C256/syscalls_c256.c C256/io_stubs.c
+	LDFLAGS_FOR_UNIT = C256/ld_lc_c256_fmx.scm clib-lc-ld.a --rtattr printf=medium
+
+else ifeq ($(UNIT),C256_FMX)
+	CPU = w65816
+	MODEL_NUMBER = 0
+	SRCS_FOR_UNIT =
+	LDFLAGS_FOR_UNIT = C256/ld_lc_c256_fmx.scm clib-lc-ld.a
 endif
 
-# Determine the correct configuration file (barring OS)
 
-ifeq ($(MEMORY),ram)
-export CFG_FILE = $(VBCC)/config/$(UNIT)_ram
-else
-export CFG_FILE = $(VBCC)/config/$(UNIT)_flash
+
+# Common defines and includes -------------------------------------------------
+DEFINES = # -DKBD_POLLED
+ifeq ("$(CPU)","w65816")
+	CPU_NUMBER = 255
+else ifeq ("$(CPU)","m68040") # M68040V or 68040
+	CPU_NUMBER = 6
+else ifeq ("$(CPU)","m68000") # M68000 or 68SEC000
+	CPU_NUMBER = 0
 endif
-
-export AS = vasmm68k_mot
-export ASFLAGS = $(VASM_CPU) -quiet -Fvobj -nowarn=62 -DMODEL=$(MODEL_NUMBER)
-export CC = vc
-DEFINES = -DCPU=$(CPU_NUMBER) -DMODEL=$(MODEL_NUMBER)  # -DKBD_POLLED
-
-# Logging level
+DEFINES := $(DEFINES) -DCPU=$(CPU_NUMBER) -DMODEL=$(MODEL_NUMBER)
 ifeq ("$(DEFAULT_LOG_LEVEL)","")
 else
- DEFINES := $(DEFINES) -DDEFAULT_LOG_LEVEL=$(DEFAULT_LOG_LEVEL)
+	DEFINES := $(DEFINES) -DDEFAULT_LOG_LEVEL=$(DEFAULT_LOG_LEVEL)
+endif
+INCLUDES = -I. -I$(CURDIR)/include -I$(CURDIR)
+
+
+# Toolchain selection ---------------------------------------------------------
+ifeq ($(CPU),w65816)
+	TOOLCHAIN = calypsi
+else
+	TOOLCHAIN = vbcc
 endif
 
-export DEFINES:=$(DEFINES)
 
-# When compiling an image for flash, size to which the image must be padded
-PAD_FLASH_SIZE=524288
+# Toolchain specific settings -------------------------------------------------
+ifeq ($(TOOLCHAIN),calypsi)
+	CC = cc65816
+	AS = as65816
+	LD = ln65816
+	AR = nlib
+	
+	# Determine the correct configuration file (barring OS)
+	ifeq ($(MEMORY),ram)
+		LD_OUTPUT_TYPE = s37
+	else
+		LD_OUTPUT_TYPE = # TODO
+	endif
+	
+	CFLAGS = -l --target Foenix --code-model large --data-model large
+	LDFLAGS=--target foenix --output-format $(LD_OUTPUT_TYPE) --list-file foenixmcp.map
+else
+	CC = vc
+	AS = vasmm68k_mot
 
+	# VBCC
+	ifeq ("$(CPU)","m68000")
+		VASM_CPU = -m68000
+		VBCC_CPU = m68000
+	else ifeq ("$(CPU)","m68040")
+		VASM_CPU = -m68040
+		VBCC_CPU = 68040
+	endif
+
+	# Determine the correct configuration file (barring OS)
+	ifeq ($(MEMORY),ram)
+		CFG_FILE = $(VBCC)/config/$(UNIT)_ram
+	else
+		CFG_FILE = $(VBCC)/config/$(UNIT)_flash
+	endif
+	ifneq ($(OS),Windows_NT)
+		CFG_FILE := $(CFG_FILE)_linux
+	endif
+
+	ASFLAGS = -Fvobj -nowarn=62 $(VASM_CPU) -quiet
+	CFLAGS =-c -S -cpu=$(VBCC_CPU) +$(CFG_FILE)
+	LDFLAGS = +$(CFG_FILE)
+endif
+
+
+
+
+# Define OS-dependent tools ---------------------------------------------------
+ifeq ("$(PAD_FLASH_SIZE)","")
+    # When compiling an image for flash, size to which the image must be padded
+	PAD_FLASH_SIZE = 524288
+endif
 ifeq ($(OS),Windows_NT)
-	export CFLAGS = -cpu=$(VBCC_CPU) +$(CFG_FILE) -I. -I$(CURDIR)/include -I$(CURDIR)
-	export RM = cmd /C del /Q /F
+	RM = del /F/Q
 	PAD_CMD = fsutil seteof $@ $(PAD_FLASH_SIZE)
 else
-	export CFLAGS = -cpu=$(VBCC_CPU) +$(CFG_FILE)_linux -I. -I$(CURDIR)/include -I$(CURDIR)
-	export RM = rm -f
+	RM = rm -f
 	PAD_CMD = truncate -s $(PAD_FLASH_SIZE) $@
 endif
 
-cpu_assembly_src := $(wildcard $(cpu)/*.s)
-cpu_c_src := $(wildcard $(cpu)/*.c)
-cpu_assembly_obj := $(subst .s,.o,$(cpu_assembly_src))
-cpu_c_obj := $(subst .c,.o,$(cpu_c_src))
+ASFLAGS := $(ASFLAGS) $(DEFINES) $(INCLUDES)
+CFLAGS  := $(CFLAGS) $(DEFINES) $(INCLUDES)
+LDFLAGS := $(LDFLAGS) $(LDFLAGS_FOR_UNIT)
 
-dev_base_sources = dev/block.c dev/channel.c dev/console.c dev/fsys.c dev/pata.c dev/ps2.c dev/rtc.c dev/sdc.c dev/txt_screen.c dev/uart.c
+# New make file (calypsu/makefile per folder)
+SRCS = foenixmcp.c log.c memory.c ring_buffer.c simpleio.c sys_general.c variables.c utilities.c $(SRCS_FOR_UNIT)
+OBJS = $(patsubst %.s,%.o,$(patsubst %.c,%.o,$(SRCS)))
+OBJS_TO_CLEAN = $(subst /,\\,$(OBJS))
+LIBS = dev/devices.a snd/sound.a fatfs/fatfs.a
+
+# Old makefile (VBCC)
+cpu_s_src := $(wildcard $(CPU)/*.s)
+cpu_c_src := $(wildcard $(CPU)/*.c)
+cpu_c_obj := $(subst .c,.o,$(cpu_c_src)) $(subst .s,.o,$(cpu_s_src))
+
+# Device drivers
+dev_c_src = block.c channel.c console.c fsys.c pata.c ps2.c rtc.c sdc.c txt_screen.c uart.c
+dev_s_src =
 ifeq ($(UNIT),a2560k)
-dev_c_src := $(dev_base_sources) dev/fdc.c dev/kbd_mo.c dev/lpt.c dev/midi.c dev/txt_a2560k_a.o dev/txt_a2560k_b.o m68040/fdc_m68040.o
+	dev_c_src := $(dev_c_src) fdc.c kbd_mo.c lpt.c midi.c txt_a2560k_a.c txt_a2560k_b.c m68040/fdc_m68040.c
+	dev_s_src := $(dev_s_src) 
 else ifeq ($(UNIT),genx)
-dev_c_src := $(dev_base_sources) dev/fdc.c dev/lpt.c dev/midi.c dev/txt_a2560k_a.o dev/txt_a2560k_b.o m68040/fdc_m68040.o
+	dev_c_src := $(dev_c_src) fdc.c lpt.c midi.c txt_a2560k_a.c txt_a2560k_b.c #m68040/fdc_m68040.c
 else ifeq ($(UNIT),a2560x)
-dev_c_src := $(dev_base_sources) dev/fdc.c dev/lpt.c dev/midi.c dev/txt_a2560k_a.o dev/txt_a2560k_b.o m68040/fdc_m68040.o
+	dev_c_src := $(dev_c_src) fdc.c lpt.c midi.c txt_a2560k_a.c txt_a2560k_b.c #m68040/fdc_m68040.c
 else ifeq ($(UNIT),a2560u)
-dev_c_src := $(dev_base_sources) dev/txt_a2560u.o
-else
-dev_c_src := $(dev_base_sources)
+	dev_c_src := $(dev_c_src) txt_a2560u.o
 endif
-dev_c_obj := $(subst .c,.o,$(dev_c_src))
+dev_obj := $(addprefix dev/, $(subst .c,.o,$(dev_c_src))) $(addprefix dev/, $(subst .s,.o,$(dev_s_src)))
 
-snd_c_src := $(wildcard snd/*.c)
-snd_c_obj := $(subst .c,.o,$(snd_c_src))
+# Sound drivers
+snd_c_src = codec.c psg.c sid.c yamaha.c
+ifeq ($(UNIT),C256_FMX)
+	snd_c_src = $(snd_c_src) codec_c256.c
+endif
+snd_obj := $(addprefix snd/, $(subst .c,.o,$(snd_c_src)))
+
+# File system
 fat_c_src := $(wildcard fatfs/*.c)
-fat_c_obj := $(subst .c,.o,$(fat_c_src))
+fatfs_obj := $(subst .c,.o,$(fat_c_src))
+
+# Command Line Interface
 cli_c_src := $(wildcard cli/*.c)
-cli_c_obj := $(subst .c,.o,$(cli_c_src))
+cli_obj := $(subst .c,.o,$(cli_c_src))
+
+# Base MCP files
 c_src :=  $(wildcard *.c)
 c_obj := $(subst .c,.o,$(c_src))
 
-.PHONY: all $(cpu) dev fatfs snd cli
+.PHONY: all clean $(CPU) dev fatfs snd cli
 
+# Target selection ------------------------------------------------------------
 ifeq ($(MEMORY),ram)
-all: foenixmcp.s68 $(cpu) dev snd cli
+#	ifeq ($(CPU),"w65816")
+#all:foenixmcp.s37
+#	else
+all: foenixmcp.s68 $(CPU) dev snd cli
+#	endif
 else
-all: foenixmcp.bin $(cpu) dev snd cli
+all: foenixmcp.bin $(CPU) dev snd cli
 endif
 
-$(cpu):
-	$(MAKE) --directory=$@
+# Per-folder libraries (used by Calypsi)
+foenixmcp.s37: $(OBJS) $(LIBS)
+	@echo Making $@
+	$(LD) $(LDFLAGS) -o $@ $^
 
-dev:
-	$(MAKE) --directory=dev
 
-fatfs:
-	$(MAKE) --directory=fatfs
+DEPS = $(c_obj) $(dev_obj) $(fatfs_obj) $(snd_obj) $(cli_obj) $(cpu_c_obj)
 
-snd:
-	$(MAKE) --directory=snd
+# The startup file is already specified in the linker script, so we should not include it in the list of files to link
+STARTUP_OBJ=$(CPU)/startup_$(CPU).o
 
-cli:
-	$(MAKE) --directory=cli
+foenixmcp.s68: $(DEPS)
+	$(CC) $(LDFLAGS) -o $@ $(subst $(STARTUP_OBJ),,$^)
 
-foenixmcp.s68: $(c_obj) $(cpu) dev fatfs snd cli
-	$(CC) $(CFLAGS) $(DEFINES) -o foenixmcp.s68 $(c_obj) $(cpu_c_obj) $(dev_c_obj) $(fat_c_obj) $(snd_c_obj) $(cli_c_obj)
+foenixmcp.bin: $(DEPS)
+	@echo Making $@
 
-foenixmcp.bin: $(c_obj) $(cpu) dev fatfs snd cli
-	$(CC) $(CFLAGS) $(DEFINES) -o foenixmcp.bin $(c_obj) $(cpu_c_obj) $(dev_c_obj) $(fat_c_obj) $(snd_c_obj) $(cli_c_obj)
+	$(CC) $(LDFLAGS) -o $@ $^
 	$(PAD_CMD)
 
-%.o: %.c $(DEPS)
-	$(CC) -S -c -o $@ $< $(CFLAGS) $(DEFINES)
 
-.PHONEY: clean
+ifeq ($(TOOLCHAIN),calypsi)
+# Build the object files from C
+%.o: %.c
+	$(CC) -o $@ $^ $(CFLAGS)
 
+# Build the object files from assembly
+%.o: %.s
+	$(AS) -o $@ $(ASFLAGS) $^
+else
+%.o: %.c
+	$(CC) -o $@ $< $(CFLAGS)
+
+%.o: %.s
+	$(AS) -o $@ $< $(ASFLAGS)
+endif
+
+# Clean up after a build
 clean:
-	$(RM) *.s68 *.o *.asm
-	$(MAKE) --directory=$(cpu) clean
+	$(RM) $(OBJS_TO_CLEAN) foenixmcp.s37 *.lst *.map
+	$(MAKE) --directory=$(CPU) clean
+	$(MAKE) --directory=cli clean
 	$(MAKE) --directory=dev clean
 	$(MAKE) --directory=fatfs clean
 	$(MAKE) --directory=snd clean
-	$(MAKE) --directory=cli clean

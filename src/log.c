@@ -19,6 +19,8 @@
 #include "A2560U/gabe_a2560u.h"
 #elif (MODEL == MODEL_FOENIX_A2560K || MODEL == MODEL_FOENIX_GENX || MODEL == MODEL_FOENIX_A2560X)
 #include "A2560K/gabe_a2560k.h"
+#elif MODEL == MODEL_FOENIX_C256U || MODEL == MODEL_FOENIX_C256U_PLUS || MODEL == MODEL_FOENIX_FMX
+#include "C256/gabe_c256.h"
 #endif
 
 /* Channel to which the logging output should go.
@@ -159,7 +161,7 @@ void panic(void) {
     t_rect region;
 TRACE("PANIC------------------------------------------");
     /* Shut off all interrupts */
-    int_disable_all();
+    // TODO: int_disable_all();
 
     /* Re-initialize the text screen */
     txt_init_screen(0);
@@ -255,11 +257,12 @@ void log_setlevel(short level) {
 
 
 static void log_to_uart(const char *message) {
-    char *c = (char*)message;
-    while (*c)
-        uart_put(UART_COM1, *c++);
-    uart_put(UART_COM1,'\r');
-    uart_put(UART_COM1,'\n');
+	// TODO: bring back
+    // char *c = (char*)message;
+    // while (*c)
+    //     uart_put(UART_COM1, *c++);
+    // uart_put(UART_COM1,'\r');
+    // uart_put(UART_COM1,'\n');
 }
 
 static void log_to_screen(const char *message) {
@@ -295,7 +298,8 @@ void log(short level, const char * message, ...) {
     vsprintf(buf, message, args);
     va_end(args);
 
-    (*do_log)(buf);
+    txt_print(0, buf);
+	txt_print(0, "\n");
 }
 
 void trace(const char * message, ...) {
