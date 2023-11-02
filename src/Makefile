@@ -157,18 +157,19 @@ ASFLAGS := $(ASFLAGS) $(DEFINES) $(INCLUDES)
 CFLAGS  := $(CFLAGS) $(DEFINES) $(INCLUDES)
 LDFLAGS := $(LDFLAGS) $(LDFLAGS_FOR_UNIT)
 
-# New make file (Calypsi / 1_makefile per folder)
+# New make file (Calypsi / 1_makefile per folder). This needs adaptation (removal?)
 SRCS = foenixmcp.c log.c memory.c ring_buffer.c simpleio.c sys_general.c variables.c utilities.c $(SRCS_FOR_UNIT)
 OBJS = $(patsubst %.s,%.o,$(patsubst %.c,%.o,$(SRCS)))
 OBJS_TO_CLEAN = $(subst /,\\,$(OBJS))
 LIBS = dev/devices.a snd/sound.a fatfs/fatfs.a
 
-# Old makefile (VBCC)
+
+# CPU-specific files
 cpu_s_src := $(wildcard $(CPU)/*.s)
 cpu_c_src := $(wildcard $(CPU)/*.c)
 cpu_c_obj := $(subst .c,.o,$(cpu_c_src)) $(subst .s,.o,$(cpu_s_src))
 
-# Device drivers
+# Device drivers (common to all Foenix)
 dev_c_src = block.c channel.c console.c fsys.c pata.c ps2.c rtc.c sdc.c txt_screen.c uart.c
 dev_s_src =
 ifeq ($(UNIT),a2560k)
@@ -229,12 +230,8 @@ foenixmcp.s68: $(DEPS)
 	$(CC) $(LDFLAGS) -o $@ $(subst $(STARTUP_OBJ),,$^)
 
 foenixmcp.bin: $(DEPS)
-	@echo Making $@
-
-	$(CC) $(LDFLAGS) -o $@ $^
+	$(CC) $(LDFLAGS) -o $@ $(subst $(STARTUP_OBJ),,$^)
 	$(PAD_CMD)
-
-
 
 
 # Clean up after a build
