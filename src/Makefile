@@ -74,7 +74,7 @@ ifeq ("$(CPU)","w65816")
 	CPU_NUMBER = 255
 else ifeq ("$(CPU)","m68040") # M68040V or 68040
 	CPU_NUMBER = 6
-else ifeq ("$(CPU)","m68000") # M68000 or 68SEC000
+else ifeq ("$(CPU)","m68k") # M68000 or 68SEC000
 	CPU_NUMBER = 0
 endif
 DEFINES := $(DEFINES) -DCPU=$(CPU_NUMBER) -DMODEL=$(MODEL_NUMBER)
@@ -114,9 +114,9 @@ else
 	AS = vasmm68k_mot
 
 	# VBCC
-	ifeq ("$(CPU)","m68000")
+	ifeq ("$(CPU)","m68k")
 		VASM_CPU = -m68000
-		VBCC_CPU = m68000
+		VBCC_CPU = 68000
 	else ifeq ("$(CPU)","m68040")
 		VASM_CPU = -m68040
 		VBCC_CPU = 68040
@@ -157,7 +157,7 @@ ASFLAGS := $(ASFLAGS) $(DEFINES) $(INCLUDES)
 CFLAGS  := $(CFLAGS) $(DEFINES) $(INCLUDES)
 LDFLAGS := $(LDFLAGS) $(LDFLAGS_FOR_UNIT)
 
-# New make file (calypsu/makefile per folder)
+# New make file (Calypsi / 1_makefile per folder)
 SRCS = foenixmcp.c log.c memory.c ring_buffer.c simpleio.c sys_general.c variables.c utilities.c $(SRCS_FOR_UNIT)
 OBJS = $(patsubst %.s,%.o,$(patsubst %.c,%.o,$(SRCS)))
 OBJS_TO_CLEAN = $(subst /,\\,$(OBJS))
@@ -173,7 +173,6 @@ dev_c_src = block.c channel.c console.c fsys.c pata.c ps2.c rtc.c sdc.c txt_scre
 dev_s_src =
 ifeq ($(UNIT),a2560k)
 	dev_c_src := $(dev_c_src) fdc.c kbd_mo.c lpt.c midi.c txt_a2560k_a.c txt_a2560k_b.c m68040/fdc_m68040.c
-	dev_s_src := $(dev_s_src) 
 else ifeq ($(UNIT),genx)
 	dev_c_src := $(dev_c_src) fdc.c lpt.c midi.c txt_a2560k_a.c txt_a2560k_b.c #m68040/fdc_m68040.c
 else ifeq ($(UNIT),a2560x)
@@ -236,21 +235,7 @@ foenixmcp.bin: $(DEPS)
 	$(PAD_CMD)
 
 
-ifeq ($(TOOLCHAIN),calypsi)
-# Build the object files from C
-%.o: %.c
-	$(CC) -o $@ $^ $(CFLAGS)
 
-# Build the object files from assembly
-%.o: %.s
-	$(AS) -o $@ $(ASFLAGS) $^
-else
-%.o: %.c
-	$(CC) -o $@ $< $(CFLAGS)
-
-%.o: %.s
-	$(AS) -o $@ $< $(ASFLAGS)
-endif
 
 # Clean up after a build
 clean:
