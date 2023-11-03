@@ -61,7 +61,7 @@ typedef struct s_sys_info {
     const char * cpu_name;          /* Human readable name for the CPU */
     uint32_t cpu_clock_khz;     	/* Speed of the CPU clock in KHz */
     uint32_t fpga_date;             /* YYYYMMDD */
-    uint16_t fpga_model;       		/* FPGA model number */
+    uint32_t fpga_model;       		/* FPGA model number */
     uint16_t fpga_version;    		/* FPGA version */
     uint16_t fpga_subver;     		/* FPGA sub-version */
     uint32_t system_ram_size;		/* The number of bytes of system RAM on the board */
