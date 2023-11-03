@@ -27,7 +27,7 @@
  * Positive: screen number
  * -1: UART. 
  */
-static short log_channel = LOG_CHANNEL;
+static short log_channel;
 static short log_level;
 
 // do_log either points to log_to_uart or log_to_screen.
@@ -51,11 +51,12 @@ void buzzer_off(void) {
 
 void log_init(void) {
     log_setlevel(DEFAULT_LOG_LEVEL);
+    log_channel = LOG_CHANNEL;
 
     switch (log_channel) {
-    case LOG_CHANNEL_UART0:
-        uart_init(UART_COM1);
+    case LOG_CHANNEL_UART1:
         do_log = log_to_uart;
+        uart_init(UART_COM1);
 
         break;
 #if (MODEL == MODEL_FOENIX_A2560K || MODEL == MODEL_FOENIX_GENX || MODEL == MODEL_FOENIX_A2560X)
@@ -67,7 +68,7 @@ void log_init(void) {
     default:
         do_log = log_to_screen;
     }
-    log(LOG_INFO,"FOENIX DEBUG OUTPUT------------");
+    INFO("FOENIX DEBUG OUTPUT------------");
 }
 
 unsigned short panic_number;        /* The number of the kernel panic */
@@ -257,12 +258,14 @@ void log_setlevel(short level) {
 
 
 static void log_to_uart(const char *message) {
-	// TODO: bring back
-    // char *c = (char*)message;
-    // while (*c)
-    //     uart_put(UART_COM1, *c++);
-    // uart_put(UART_COM1,'\r');
-    // uart_put(UART_COM1,'\n');
+    char *c = (char*)message;
+    while (*c) {
+        if (*c == '\n')
+            uart_put(UART_COM1,'\r');
+        uart_put(UART_COM1, *c++);
+    }
+     uart_put(UART_COM1,'\r');
+     uart_put(UART_COM1,'\n');
 }
 
 static void log_to_screen(const char *message) {
@@ -298,8 +301,7 @@ void log(short level, const char * message, ...) {
     vsprintf(buf, message, args);
     va_end(args);
 
-    txt_print(0, buf);
-	txt_print(0, "\n");
+    do_log(buf);
 }
 
 void trace(const char * message, ...) {

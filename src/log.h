@@ -6,23 +6,31 @@
 #define __LOG_H
 
 #include <stdio.h> /* Not used here but convenience: there is every chance log messages will use sprintf */
-#include "log_level.h"
 
-#define LOG_CHANNEL_UART0 -1
+#include "log_level.h"
+#include "sys_general.h"
+
 #define LOG_CHANNEL_CHANNEL_A 0
 #define LOG_CHANNEL_CHANNEL_B 1
 #define LOG_CHANNEL_CHANNEL_A_LOW_LEVEL 10 // low-level routines (doesn't use MCP's console stuff)
+#define LOG_CHANNEL_UART1 20
 
 /*
- * Settings
+ * Default settings
  */
 #ifndef DEFAULT_LOG_LEVEL
-  #define DEFAULT_LOG_LEVEL LOG_ERROR
+  #define DEFAULT_LOG_LEVEL LOG_INFO
 #endif
 
 #ifndef LOG_CHANNEL
-#define LOG_CHANNEL LOG_CHANNEL_CHANNEL_A_LOW_LEVEL
+  #if MODEL == MODEL_FOENIX_A2560K || MODEL == MODEL_FOENIX_A2560X || MODEL == MODEL_FOENIX_GENX
+    #define LOG_CHANNEL LOG_CHANNEL_CHANNEL_A_LOW_LEVEL
+  #else
+    #define LOG_CHANNEL LOG_CHANNEL_UART1
+  #endif
+#else
 #endif
+
 
 /*
  * Return human readable message for an error number

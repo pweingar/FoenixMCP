@@ -46,7 +46,9 @@ else ifeq ($(UNIT),a2560x)
 else ifeq ($(UNIT),a2560u)
 	MODEL_NUMBER = 9
 	CPU = m68k
-
+else ifeq ($(UNIT),a2560u_plus)
+	MODEL_NUMBER = 6
+	CPU = m68k
 else ifeq ($(UNIT),C256U)
 	CPU = w65816
 	MODEL_NUMBER = 1
@@ -66,6 +68,17 @@ else ifeq ($(UNIT),C256_FMX)
 	LDFLAGS_FOR_UNIT = C256/ld_lc_c256_fmx.scm clib-lc-ld.a
 endif
 
+
+# Log settings ----------------------------------------------------------------
+# FATAL   0   Log a critical or fatal event
+# ERROR   1   Log an error
+# INFO    2   Log miscellaneous information
+# DEBUG   3   Log a debugging message
+# TRACE   4   Log tracing information (like entry into a subroutine)
+# VERBOSE 5   Log a truly verbose message... the sort you almost never want to bother with
+# Log message above DEFAULT_LOG_LEVEL level will not even be compiled, 
+# ie they will have NO chance of being output even if log_level is high enough.
+DEFAULT_LOG_LEVEL=5
 
 
 # Common defines and includes -------------------------------------------------
@@ -217,7 +230,6 @@ endif
 
 # Per-folder libraries (used by Calypsi)
 foenixmcp.s37: $(OBJS) $(LIBS)
-	@echo Making $@
 	$(LD) $(LDFLAGS) -o $@ $^
 
 
