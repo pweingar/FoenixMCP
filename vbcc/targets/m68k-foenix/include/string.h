@@ -9,30 +9,33 @@ typedef unsigned long size_t;
 #undef NULL
 #define NULL ((void *)0)
 
-//void *memcpy(void *,const void *,size_t);
+
 void *memmove(void *,const void *,size_t);
-//char *strcpy(char *,const char *);
-char *strncpy(char *,const char *,size_t);
-//char *strcat(char *,const char *);
-//char *strncat(char *,const char *,size_t);
+
 int memcmp(const void *,const void *,size_t);
-//int strcmp(const char *,const char *);
-//int strncmp(const char *,const char *,size_t);
 void *memchr(const void *,int,size_t);
 char *strchr(const char *,int);
 size_t strcspn(const char *,const char *);
 char *strpbrk(const char *,const char *);
-//char *strrchr(const char *,int);
 size_t strspn(const char *,const char *);
 char *strstr(const char *,const char *);
-//void *memset(void *,int,size_t);
-//size_t strlen(const char *);
 char *strtok(char *,const char *);
 char *strerror(int);
 int strcoll(const char *,const char *);
 size_t strxfrm(char *,const char *,size_t);
 
-#ifndef __NOINLINE__
+#ifdef __NOINLINE__
+void *memcpy(void *,const void *,size_t);
+char *strcpy(char *,const char *);
+char *strncpy(char *,const char *,size_t);
+char *strcat(char *,const char *);
+char *strncat(char *,const char *,size_t);
+int strcmp(const char *,const char *);
+int strncmp(const char *,const char *,size_t);
+char *strrchr(const char *,int);
+void *memset(void *,int,size_t);
+size_t strlen(const char *);
+#else
 #if defined(__M68000) || defined(__M68010)
 void *memcpy(__reg("a0") void *, __reg("a1") const void *,
              __reg("d2") size_t) =

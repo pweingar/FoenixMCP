@@ -74,13 +74,14 @@ ldiv_t ldiv(long,long);
 lldiv_t lldiv(long long,long long);
 #endif
 
+
+#ifdef __NOINLINE__
 int abs(int);
 long labs(long);
 #if __STDC_VERSION__ >= 199901L
 long long llabs(long long);
 #endif
-
-#ifndef __NOINLINE__
+#else
 int abs(__reg("d0") int) =
                 "\tinline\n"
                 "\ttst.l\td0\n"
