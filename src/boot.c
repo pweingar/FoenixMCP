@@ -193,7 +193,7 @@ void make_key_name(const char * original, char * buffer) {
  *
  * @return boot device selected by user
  */
-short boot_screen() {
+short boot_screen(void) {
     t_rect region;
     short device = BOOT_DEFAULT;
     short screen;
@@ -306,7 +306,7 @@ short boot_screen() {
     str_upcase(info.cpu_name, entry);
     sprintf(buffer, "         CPU: %s\n", entry);
     print(screen, buffer);
-    sprintf(buffer, " CLOCK (KHZ): %u\n", info.cpu_clock_khz);
+    sprintf(buffer, " CLOCK (KHZ): %lu\n", info.cpu_clock_khz);
     print(screen, buffer);
     sprintf(buffer, "      FPGA V: %u.%02u.%04u\n", (unsigned int)info.fpga_model, info.fpga_version, info.fpga_subver);
     print(screen, buffer);

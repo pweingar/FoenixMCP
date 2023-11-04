@@ -173,19 +173,21 @@ void cli_command_set(const char * path) {
             }
             cli_command_path[i] = c;
         }
+        TRACE1("Setting SHELL: %s", cli_command_path);
         result = sys_var_set("SHELL", cli_command_path);
         if (result) {
-            log(LOG_ERROR, "Unable to set SHELL");
+            ERROR("Unable to set SHELL");
         }
+        TRACE("SHELL Set");
 
     } else {
         // Set to the default CLI
         result = sys_var_set("SHELL", 0);
         if (result) {
-            log(LOG_ERROR, "Unable to set SHELL");
+            ERROR("Unable to set SHELL");
         }
-
     }
+    TRACE("Leaving cli_command_set");
 }
 
 /**
@@ -279,7 +281,7 @@ short cmd_sysinfo(short channel, int argc, const char * argv[]) {
     sprintf(buffer, "CPU: %s\n", cli_sys_info.cpu_name);
     print(channel, buffer);
 
-    sprintf(buffer, "Clock (kHz): %u\n", cli_sys_info.cpu_clock_khz);
+    sprintf(buffer, "Clock (kHz): %lu\n", cli_sys_info.cpu_clock_khz);
     print(channel, buffer);
 
     sprintf(buffer, "System Memory: 0x%lX\n", cli_sys_info.system_ram_size);

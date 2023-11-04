@@ -33,7 +33,7 @@
  * Determine the correct system function implementation and call it.
  */
 unsigned long syscall_dispatch(int32_t function, int32_t param0, int32_t param1, int32_t param2, int32_t param3, int32_t param4, int32_t param5) {
-    TRACE7("DISPATCH(%lx,%ld,%ld,%ld,%ld,%ld,%ld)", function, param0, param1, param2, param3, param4, param5);
+    TRACE7("DISPATCH(0x%lx,%ld,%ld,%ld,%ld,%ld,%ld)", function, param0, param1, param2, param3, param4, param5);
     switch (function & 0x00f0) {
         case 0x00:
             /* Core System Calls */
@@ -224,6 +224,7 @@ unsigned long syscall_dispatch(int32_t function, int32_t param0, int32_t param1,
                     return mem_reserve((unsigned long)param0);
 
                 case KFN_VAR_SET:
+                buzzer_on();
                     return var_set((const char *)param0, (const char *)param1);
 
                 case KFN_VAR_GET:
@@ -238,6 +239,7 @@ unsigned long syscall_dispatch(int32_t function, int32_t param0, int32_t param1,
             /* Misc functions */
             switch (function) {
                 case KFN_TIME_JIFFIES:
+                    TRACE("KFN_TIME_JIFFIES");
                     return rtc_get_jiffies();
 
                 case KFN_TIME_SETRTC:

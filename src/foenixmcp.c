@@ -312,7 +312,6 @@ void initialize() {
 
     /* Setup logging early */
     log_init();
-	log_setlevel(DEFAULT_LOG_LEVEL);
 
 	/* Fill out the system information */
 	sys_get_information(&info);
@@ -344,7 +343,7 @@ void initialize() {
 #if HAS_DUAL_SCREEN
     txt_a2560k_a_install();
     txt_a2560k_b_install();
-    log(LOG_INFO, "Initializing screens...");
+    INFO("Initializing screens...");
     txt_init_screen(TXT_SCREEN_A2560K_A);
     txt_init_screen(TXT_SCREEN_A2560K_B);
 
@@ -426,7 +425,7 @@ void initialize() {
 	INFO("Real time clock initialized");
 
     target_jiffies = sys_time_jiffies() + 300;     /* 5 seconds minimum */
-    DEBUG1("target_jiffies assigned: %d", target_jiffies);
+    INFO1("target_jiffies assigned: %ld", target_jiffies);
 
     /* Enable all interrupts */
     int_enable_all();
@@ -519,10 +518,10 @@ int main(int argc, char * argv[]) {
 #if MODEL == MODEL_FOENIX_A2560U || MODEL == MODEL_FOENIX_A2560U_PLUS
     // Make sure the command path is set to the default before we get started
     cli_command_set("");
-
+TRACE("Calling boot_screen()");
     // Display the splash screen and wait for user input
     short boot_dev = boot_screen();
-
+TRACE1("Booting from device %d",boot_dev);
     // Start the boot process
     boot_from_bdev(boot_dev);
 

@@ -82,7 +82,7 @@ DEFAULT_LOG_LEVEL=5
 
 
 # Common defines and includes -------------------------------------------------
-DEFINES = # -DKBD_POLLED
+DEFINES = #-D__NOINLINE__# -DKBD_POLLED
 ifeq ("$(CPU)","w65816")
 	CPU_NUMBER = 255
 else ifeq ("$(CPU)","m68040") # M68040V or 68040

@@ -56,6 +56,9 @@ extern void err_print(short channel, const char * message, short err_number);
 extern void panic(void);
 
 
+void buzzer_on(void);
+void buzzer_off(void);
+
 /*
  * Setup the logging facility (for debugging)
  */
