@@ -79,9 +79,9 @@ export CFG_FILE = $(VBCC)/config/$(UNIT)_flash
 endif
 
 export AS = vasmm68k_mot
-export ASFLAGS = $(VASM_CPU) -quiet -Fvobj -nowarn=62 -DMODEL=$(MODEL_NUMBER)
+export ASFLAGS = $(VASM_CPU) -quiet -Fvobj -nowarn=62 -DMODEL=$(MODEL_NUMBER) 
 export CC = vc
-DEFINES = -DCPU=$(CPU_NUMBER) -DMODEL=$(MODEL_NUMBER)  # -DKBD_POLLED
+DEFINES = -DCPU=$(CPU_NUMBER) -DMODEL=$(MODEL_NUMBER) -D__NOINLINE__ # -DKBD_POLLED 
 
 # Logging level
 ifeq ("$(DEFAULT_LOG_LEVEL)","")
