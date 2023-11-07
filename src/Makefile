@@ -81,9 +81,10 @@ endif
 export AS = vasmm68k_mot
 export ASFLAGS = $(VASM_CPU) -quiet -Fvobj -nowarn=62 -DMODEL=$(MODEL_NUMBER) 
 export CC = vc
-DEFINES = -DCPU=$(CPU_NUMBER) -DMODEL=$(MODEL_NUMBER) -D__NOINLINE__ # -DKBD_POLLED 
+DEFINES = -DCPU=$(CPU_NUMBER) -DMODEL=$(MODEL_NUMBER)# -D__NOINLINE__ # -DKBD_POLLED 
 
-# Logging level
+# Logging level, see log_level.h
+DEFAULT_LOG_LEVEL=
 ifeq ("$(DEFAULT_LOG_LEVEL)","")
 else
  DEFINES := $(DEFINES) -DDEFAULT_LOG_LEVEL=$(DEFAULT_LOG_LEVEL)

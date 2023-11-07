@@ -345,6 +345,7 @@ short cli_exec(short channel, char * command, int argc, const char * argv[]) {
     while ((commands != 0) && (commands->name != 0)) {
         // Does the command match the name?
         if (strcmp(commands->name, command) == 0) {
+            //print(channel,"Executing:");print(channel,commands->name);print(channel,"\r\n");
             // Found it, execute the handler
             return commands->handler(channel, argc, argv);
         } else {
@@ -879,7 +880,7 @@ void cli_setup_screen(short channel, const char * path, short is_active) {
 
     print_banner(channel, cli_sys_info.model);
 
-    sprintf(message, "\nFoenix/MCP (Vincent's fork) v%02u.%02u.%04u\n\n", (unsigned int)cli_sys_info.mcp_version, (unsigned int)cli_sys_info.mcp_rev, (unsigned int)cli_sys_info.mcp_build);
+    sprintf(message, "\nFoenix/MCP v%02u.%02u.%04u\n\n", (unsigned int)cli_sys_info.mcp_version, (unsigned int)cli_sys_info.mcp_rev, (unsigned int)cli_sys_info.mcp_build);
     print(channel, message);
     print(channel, "Type HELP or ? for help.\n");
 }
