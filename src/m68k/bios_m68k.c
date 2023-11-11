@@ -224,7 +224,6 @@ unsigned long syscall_dispatch(int32_t function, int32_t param0, int32_t param1,
                     return mem_reserve((unsigned long)param0);
 
                 case KFN_VAR_SET:
-                buzzer_on();
                     return var_set((const char *)param0, (const char *)param1);
 
                 case KFN_VAR_GET:
