@@ -941,9 +941,7 @@ const t_cli_test_feature cli_test_features[] = {
     {"MIDIRX", "MIDIRX: perform a receive test on the MIDI ports", midi_rx_test},
     {"MIDITX", "MIDITX: send a note to a MIDI keyboard", midi_tx_test},
 #endif
-#if HAS_OPL3
     {"OPL3", "OPL3 <delay>: test the OPL3 sound chip, with some optional delay between bytes", opl3_test},
-#endif
 #if HAS_OPN
     {"OPN", "OPN [EXT|INT]: test the OPN sound chip", opn_test},
 #endif

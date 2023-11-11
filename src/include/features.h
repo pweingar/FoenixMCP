@@ -24,17 +24,15 @@
     #define HAS_OPN 1
     #define HAS_OPM 1
     #define HAS_SNES_GAMEPAD 1
-    #define HAS_OPL3 1
 #elif MODEL == MODEL_FOENIX_A2560U || MODEL == MODEL_FOENIX_A2560U_PLUS
-    #define HAS_OPL3 1
+
 #elif MODEL == MODEL_FOENIX_C256U_PLUS || MODEL == MODEL_FOENIX_C256U
-    #define HAS_OPL3 1
+
 #elif MODEL == MODEL_FOENIX_C256U_FMX
     #define HAS_SUPERIO 1
     #define HAS_PARALLEL_PORT 1
     #define HAS_MIDI_PORTS 1
     #define HAS_EXTERNAL_SIDS 1
-    #define HAS_OPL3 1
 #endif
 
 
@@ -66,10 +64,6 @@
 
 #ifndef HAS_OPM // OPM soundchip presence
     #define HAS_OPM 0
-#endif
-
-#ifndef HAS_OPL3 // YMF262 OPL3 soundchip presence: all Foenix computer have it... we could remove that switch altogether.
-    #define HAS_OPL3 1
 #endif
 
 #ifndef HAS_SNES_GAMEPAD // Super Nintendo gamepad connectors (even if through adapter)
