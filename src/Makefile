@@ -81,14 +81,30 @@ endif
 export AS = vasmm68k_mot
 export ASFLAGS = $(VASM_CPU) -quiet -Fvobj -nowarn=62 -DMODEL=$(MODEL_NUMBER) 
 export CC = vc
-DEFINES = -DCPU=$(CPU_NUMBER) -DMODEL=$(MODEL_NUMBER)# -D__NOINLINE__ # -DKBD_POLLED 
+DEFINES = -DCPU=$(CPU_NUMBER) -DMODEL=$(MODEL_NUMBER) # -D__NOINLINE__ # -DKBD_POLLED 
 
-# Logging level, see log_level.h
-DEFAULT_LOG_LEVEL=
+# Maximum working logging level to compile
+#define LOG_FATAL   0   /* Log a critical or fatal event */
+#define LOG_ERROR   1   /* Log an error */
+#define LOG_INFO    2   /* Log miscellaneous information */
+#define LOG_DEBUG   3   /* Log a debugging message */
+#define LOG_TRACE   4   /* Log tracing information (like entry into a subroutine) */
+#define LOG_VERBOSE 5   /* Log a truly verbose message... the sort you almost never want to bother with */
+DEFAULT_LOG_LEVEL=0
+#define LOG_CHANNEL_UART0 -1
+#define LOG_CHANNEL_CHANNEL_A 0
+#define LOG_CHANNEL_CHANNEL_B 1
+#define LOG_CHANNEL_CHANNEL_A_LOW_LEVEL 10
+LOG_CHANNEL=0
 ifeq ("$(DEFAULT_LOG_LEVEL)","")
 else
  DEFINES := $(DEFINES) -DDEFAULT_LOG_LEVEL=$(DEFAULT_LOG_LEVEL)
 endif
+ifeq ("$(LOG_CHANNEL)","")
+else
+ DEFINES := $(DEFINES) -DLOG_CHANNEL=$(LOG_CHANNEL)
+endif
+
 
 export DEFINES:=$(DEFINES)
 

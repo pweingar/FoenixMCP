@@ -685,11 +685,13 @@ void txt_delete(short screen, short count) {
     t_rect old_region, region;
     short left;
 
-   	TRACE2("txt_delete(%d,%d)", screen, count);
+   	TRACE2("txt_delete(%d,%d)", screen, (int)count);
 	
     if (count > 0) {
         txt_get_xy(screen, &cursor);
         txt_get_region(screen, &old_region);
+
+TRACE4("Got region %d,%d,%d,%d", (int)old_region.origin.x, (int)old_region.origin.y, (int)old_region.size.width, (int)old_region.size.height);
 
         if (count > cursor.x) {
             count = cursor.x;
@@ -699,6 +701,8 @@ void txt_delete(short screen, short count) {
         region.origin.y = old_region.origin.y + cursor.y;
         region.size.width = old_region.size.width - cursor.x;
         region.size.height = 1;
+
+        TRACE4("Setting region %d,%d,%d,%d", (int)region.origin.x, (int)region.origin.y, (int)region.size.width, (int)region.size.height);
         txt_set_region(screen, &region);
         txt_scroll(screen, count, 0);
         txt_set_region(screen, &old_region);

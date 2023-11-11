@@ -25,7 +25,7 @@
     #define HAS_OPM 1
     #define HAS_SNES_GAMEPAD 1
     #define HAS_OPL3 1
-#elif MODEL == MODEL_FOENIX_A2560U
+#elif MODEL == MODEL_FOENIX_A2560U || MODEL == MODEL_FOENIX_A2560U_PLUS
     #define HAS_OPL3 1
 #endif
 
