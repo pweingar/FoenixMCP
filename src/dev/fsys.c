@@ -615,7 +615,7 @@ short fchan_read(t_channel * chan, unsigned char * buffer, short size) {
     FRESULT result;
     int total_read;
 
-    log(LOG_TRACE, "fchan_read");
+    logmsg(LOG_TRACE, "fchan_read");
 
     file = fchan_to_file(chan);
     if (file) {
@@ -660,7 +660,7 @@ short fchan_read_b(t_channel * chan) {
     short total_read;
     char buffer[2];
 
-    log(LOG_TRACE, "fchan_read_b");
+    logmsg(LOG_TRACE, "fchan_read_b");
 
     file = fchan_to_file(chan);
     if (file) {
@@ -1339,11 +1339,11 @@ static short fsys_load_ext(const char * path, const char * extension, long desti
     if (loader == 0) {
         if (destination != 0) {
             /* If a destination was specified, just load it into memory without interpretation */
-            log(LOG_DEBUG, "Setting default loader.");
+            logmsg(LOG_DEBUG, "Setting default loader.");
             loader = fsys_default_loader;
 
         } else {
-            log(LOG_DEBUG, "Returning a bad extension.");
+            logmsg(LOG_DEBUG, "Returning a bad extension.");
             /* Return bad extension */
             return ERR_BAD_EXTENSION;
         }
@@ -1443,7 +1443,7 @@ short fsys_load(const char * path, long destination, long * start) {
             // Found path with valid loader
             fsys_load_ext(spath, extension, destination, start);
         } else {
-            log(LOG_ERROR, "Command not found.");
+            logmsg(LOG_ERROR, "Command not found.");
             return ERR_NOT_FOUND;
         }
     }

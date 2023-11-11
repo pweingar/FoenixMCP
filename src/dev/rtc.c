@@ -138,7 +138,7 @@ void rtc_set_time(p_time time) {
     /* Temporarily disable updates to the clock */
     ctrl = *RTC_CTRL;
     *RTC_CTRL = ctrl | RTC_UTI;
-    log(LOG_INFO, "RTC Disabled");
+    logmsg(LOG_INFO, "RTC Disabled");
     log_num(LOG_INFO, "RTC Rates: ", *RTC_RATES);
     log_num(LOG_INFO, "RTC Enables: ", *RTC_ENABLES);
     log_num(LOG_INFO, "RTC Flags: ", *RTC_FLAGS);
@@ -178,7 +178,7 @@ void rtc_set_time(p_time time) {
 
     /* Re-enable updates to the clock */
     *RTC_CTRL = (ctrl & 0x07) | RTC_STOP;
-    log(LOG_INFO, "RTC Enabled");
+    logmsg(LOG_INFO, "RTC Enabled");
     log_num(LOG_INFO, "RTC Rates: ", *RTC_RATES);
     log_num(LOG_INFO, "RTC Enables: ", *RTC_ENABLES);
     log_num(LOG_INFO, "RTC Flags: ", *RTC_FLAGS);
@@ -199,7 +199,7 @@ void rtc_get_time(p_time time) {
     /* Temporarily disable updates to the clock */
     ctrl = *RTC_CTRL;
     *RTC_CTRL = ctrl | RTC_UTI;
-    log(LOG_INFO, "RTC Disabled");
+    logmsg(LOG_INFO, "RTC Disabled");
     log_num(LOG_INFO, "RTC Rates: ", *RTC_RATES);
     log_num(LOG_INFO, "RTC Enables: ", *RTC_ENABLES);
     log_num(LOG_INFO, "RTC Flags: ", *RTC_FLAGS);
@@ -221,7 +221,7 @@ void rtc_get_time(p_time time) {
 
     /* Re-enable updates to the clock */
     *RTC_CTRL = (ctrl & 0x07) | RTC_STOP;
-    log(LOG_INFO, "RTC Enabled");
+    logmsg(LOG_INFO, "RTC Enabled");
     log_num(LOG_INFO, "RTC Rates: ", *RTC_RATES);
     log_num(LOG_INFO, "RTC Enables: ", *RTC_ENABLES);
     log_num(LOG_INFO, "RTC Flags: ", *RTC_FLAGS);

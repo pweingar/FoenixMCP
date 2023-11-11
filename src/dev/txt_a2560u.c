@@ -172,11 +172,7 @@ static short txt_a2560u_set_resolution(short width, short height) {
         }
     }
 
-{
-    char msg[80];
-    sprintf(msg, "Setting resolution %dx%d", width, height);
-    DEBUG(msg);
-}
+    DEBUG2("Setting resolution %dx%d", width, height);
 
     /* Turn off resolution bits */
     /* TODO: there gotta be a better way to do that */
@@ -239,7 +235,7 @@ static void txt_a2560u_set_border(short width, short height) {
     }
 
     // Recalculate the size of the screen
-    txt_a2560u_set_sizes();    
+    txt_a2560u_set_sizes();
 }
 
 /**
@@ -321,11 +317,7 @@ static short txt_a2560u_get_region(p_rect region) {
     region->size.width = a2560u_region.size.width;
     region->size.height = a2560u_region.size.height;
 
-    {
-        char msg[80];
-        sprintf(msg,"txt_a2560u_get_region %p: x:%d, y:%d, w:%d, h:%d", region, region->origin.x, region->origin.y, region->size.width, region->size.height);
-        DEBUG(msg);
-    }  
+    DEBUG5("txt_a2560u_get_region %p: x:%d, y:%d, w:%d, h:%d", region, region->origin.x, region->origin.y, region->size.width, region->size.height);
 
     return 0;
 }
@@ -339,10 +331,7 @@ static short txt_a2560u_get_region(p_rect region) {
  * @return 0 on success, any other number means the region was invalid
  */
 static short txt_a2560u_set_region(const p_rect region) {    
-        char msg[80];
-        sprintf(msg,"SET REGION %p x:%d, y:%d, w:%d, h:%d (visible:%d,%d)",
-        region, region->origin.x, region->origin.y, region->size.width, region->size.height, a2560u_visible_size.width, a2560u_visible_size.height);
-        DEBUG(msg);
+    DEBUG7("SET REGION %p x:%d, y:%d, w:%d, h:%d (visible:%d,%d)", region, region->origin.x, region->origin.y, region->size.width, region->size.height, a2560u_visible_size.width, a2560u_visible_size.height);
 
     if ((region->size.width == 0) || (region->size.height == 0)) {
         /* Set the region to the default (full screen) */
@@ -360,11 +349,7 @@ static short txt_a2560u_set_region(const p_rect region) {
         //DEBUG(msg);
     }
 
-    {
-        sprintf(msg,"txt_a2560u_set_region: NEW REGION %p x:%d, y:%d, w:%d, h:%d (visible:%d,%d)",
-        region, region->origin.x, region->origin.y, region->size.width, region->size.height, a2560u_visible_size.width, a2560u_visible_size.height);
-        //DEBUG(msg);
-    }  
+    DEBUG7("txt_a2560u_set_region: NEW REGION %p x:%d, y:%d, w:%d, h:%d (visible:%d,%d)", region, region->origin.x, region->origin.y, region->size.width, region->size.height, a2560u_visible_size.width, a2560u_visible_size.height);
 
     return 0;
 }

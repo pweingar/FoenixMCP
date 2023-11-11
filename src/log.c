@@ -290,7 +290,7 @@ static void log_to_channel_A_low_level(const char *message) {
  * Caveat:
  * The total length should not exceed 512 chars.
  */
-void log(short level, const char * message, ...) {
+void logmsg(short level, const char * message, ...) {
     if (level > log_level)
         return;
 
@@ -330,7 +330,7 @@ void log2(short level, const char * message1, const char * message2) {
     if (level <= log_level) {
         char line[80];
         sprintf(line, "%s%s\n", message1, message2);
-        log(level, line);
+        logmsg(level, line);
     }
 }
 
@@ -347,7 +347,7 @@ void log3(short level, const char * message1, const char * message2, const char 
     if (level <= log_level) {
         char line[80];
         sprintf(line, "%s%s%s\n", message1, message2, message3);
-        log(level, line);
+        logmsg(level, line);
     }
 }
 
@@ -364,7 +364,7 @@ void log_num(short level, char * message, int n) {
 
     if (level <= log_level) {
         sprintf(line, "%s%08X", message, n);
-        log(level, line);
+        logmsg(level, line);
     }
 }
 
@@ -375,5 +375,5 @@ void log_c(short level, char c) {
     char line[2];
     line[0] = c;
     line[1] = '\0';
-    log(level, line);
+    logmsg(level, line);
 }

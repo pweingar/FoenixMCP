@@ -396,14 +396,14 @@ void boot_from_bdev(short device) {
                 case 0x0000:
                     // Boot from IDE
                     device = BDEV_HDC;
-                    log(LOG_INFO, "Boot DIP set for IDE");
+                    logmsg(LOG_INFO, "Boot DIP set for IDE");
                     strcpy(initial_path, "/hd");
                     break;
 
                 case 0x0001:
                     // Boot from SDC
                     device = BDEV_SDC;
-                    log(LOG_INFO, "Boot DIP set for SDC");
+                    logmsg(LOG_INFO, "Boot DIP set for SDC");
                     strcpy(initial_path, "/sd");
                     break;
 
@@ -411,13 +411,13 @@ void boot_from_bdev(short device) {
                 case 0x0002:
                     // Boot from Floppy
                     device = BDEV_FDC;
-                    log(LOG_INFO, "Boot DIP set for FDC");
+                    logmsg(LOG_INFO, "Boot DIP set for FDC");
                     strcpy(initial_path, "/fd");
                     break;
 #endif
                 default:
                     // Boot straight to REPL
-                    log(LOG_INFO, "Boot DIP set for REPL");
+                    logmsg(LOG_INFO, "Boot DIP set for REPL");
                     strcpy(initial_path, "/sd");
                     device = -1;
                     break;

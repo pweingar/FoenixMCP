@@ -80,7 +80,7 @@ extern void log_setlevel(short level);
  * level = the severity of the message... the logging level will filter messages displayed
  * message = the message to log
  */
-extern void log(short level, const char * message, ...);
+extern void logmsg(short level, const char * message, ...);
 extern void trace(const char * message, ...);
 /*
  * Log a message to the console
@@ -123,12 +123,12 @@ extern void log_c(short log_level, char c);
  */
 
 #if DEFAULT_LOG_LEVEL >= LOG_ERROR
-# define ERROR(m)    log(LOG_ERROR, m)
-# define ERROR1(a,b)     log(LOG_ERROR, a, b)
-# define ERROR2(a,b,c)     log(LOG_ERROR, a, b, c)
-# define ERROR3(a,b,c,d)     log(LOG_ERROR, a, b, c, d)
-# define ERROR4(a,b,c,d,e)     log(LOG_ERROR, a, b, c, d, e)
-# define ERROR5(a,b,c,d,e,f)     log(LOG_ERROR, a, b, c, d, e, f)
+# define ERROR(m)    logmsg(LOG_ERROR, m)
+# define ERROR1(a,b)     logmsg(LOG_ERROR, a, b)
+# define ERROR2(a,b,c)     logmsg(LOG_ERROR, a, b, c)
+# define ERROR3(a,b,c,d)     logmsg(LOG_ERROR, a, b, c, d)
+# define ERROR4(a,b,c,d,e)     logmsg(LOG_ERROR, a, b, c, d, e)
+# define ERROR5(a,b,c,d,e,f)     logmsg(LOG_ERROR, a, b, c, d, e, f)
 #else
 # define ERROR(m)
 # define ERROR1(a,b)
@@ -140,12 +140,12 @@ extern void log_c(short log_level, char c);
 
 
 #if DEFAULT_LOG_LEVEL >= LOG_INFO
-# define INFO(m)    log(LOG_INFO, m);
-# define INFO1(a,b)     log(LOG_INFO, a, b);
-# define INFO2(a,b,c)     log(LOG_INFO, a, b, c);
-# define INFO3(a,b,c,d)     log(LOG_INFO, a, b, c, d);
-# define INFO4(a,b,c,d,e)     log(LOG_INFO, a, b, c, d, e);
-# define INFO5(a,b,c,d,e,f)     log(LOG_INFO, a, b, c, d, e, f);
+# define INFO(m)    logmsg(LOG_INFO, m);
+# define INFO1(a,b)     logmsg(LOG_INFO, a, b);
+# define INFO2(a,b,c)     logmsg(LOG_INFO, a, b, c);
+# define INFO3(a,b,c,d)     logmsg(LOG_INFO, a, b, c, d);
+# define INFO4(a,b,c,d,e)     logmsg(LOG_INFO, a, b, c, d, e);
+# define INFO5(a,b,c,d,e,f)     logmsg(LOG_INFO, a, b, c, d, e, f);
 #else
 # define INFO(m)
 # define INFO1(a,b)
@@ -156,12 +156,14 @@ extern void log_c(short log_level, char c);
 #endif
 
 #if DEFAULT_LOG_LEVEL >= LOG_DEBUG
-# define DEBUG(m)    log(LOG_DEBUG, m)
-# define DEBUG1(a,b)     log(LOG_DEBUG, a, b)
-# define DEBUG2(a,b,c)     log(LOG_DEBUG, a, b, c)
-# define DEBUG3(a,b,c,d)     log(LOG_DEBUG, a, b, c, d)
-# define DEBUG4(a,b,c,d,e)     log(LOG_DEBUG, a, b, c, d, e)
-# define DEBUG5(a,b,c,d,e,f)     log(LOG_DEBUG, a, b, c, d, e, f)
+# define DEBUG(m)    logmsg(LOG_DEBUG, m)
+# define DEBUG1(a,b)     logmsg(LOG_DEBUG, a, b)
+# define DEBUG2(a,b,c)     logmsg(LOG_DEBUG, a, b, c)
+# define DEBUG3(a,b,c,d)     logmsg(LOG_DEBUG, a, b, c, d)
+# define DEBUG4(a,b,c,d,e)     logmsg(LOG_DEBUG, a, b, c, d, e)
+# define DEBUG5(a,b,c,d,e,f)     logmsg(LOG_DEBUG, a, b, c, d, e, f)
+# define DEBUG6(a,b,c,d,e,f,g)     logmsg(LOG_DEBUG, a, b, c, d, e, f, g)
+# define DEBUG7(a,b,c,d,e,f,g,h)     logmsg(LOG_DEBUG, a, b, c, d, e, f, g, h)
 #else
 # define DEBUG(m)
 # define DEBUG1(a,b)
@@ -169,6 +171,8 @@ extern void log_c(short log_level, char c);
 # define DEBUG3(a,b,c,d)
 # define DEBUG4(a,b,c,d,e)
 # define DEBUG5(a,b,c,d,e,f)
+# define DEBUG6(a,b,c,d,e,f,g)
+# define DEBUG7(a,b,c,d,e,f,g,h)
 #endif
 
 #if DEFAULT_LOG_LEVEL >= LOG_TRACE

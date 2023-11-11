@@ -460,14 +460,14 @@ void initialize() {
     if ((res = ps2_init())) {
         print_error(0, "FAILED: PS/2 keyboard initialization", res);
     } else {
-        log(LOG_INFO, "PS/2 keyboard initialized.");
+        logmsg(LOG_INFO, "PS/2 keyboard initialized.");
     }
 
 #if MODEL == MODEL_FOENIX_A2560K
     if ((res = kbdmo_init())) {
         log_num(LOG_ERROR, "FAILED: A2560K built-in keyboard initialization", res);
     } else {
-        log(LOG_INFO, "A2560K built-in keyboard initialized.");
+        logmsg(LOG_INFO, "A2560K built-in keyboard initialized.");
     }
 #endif
 
@@ -475,7 +475,7 @@ void initialize() {
     if ((res = lpt_install())) {
         log_num(LOG_ERROR, "FAILED: LPT installation", res);
     } else {
-        log(LOG_INFO, "LPT installed.");
+        logmsg(LOG_INFO, "LPT installed.");
     }
 #endif
 
@@ -483,14 +483,14 @@ void initialize() {
     if ((res = midi_install())) {
         log_num(LOG_ERROR, "FAILED: MIDI installation", res);
     } else {
-        log(LOG_INFO, "MIDI installed.");
+        logmsg(LOG_INFO, "MIDI installed.");
     }
 #endif
 
     if (res = uart_install()) {
         log_num(LOG_ERROR, "FAILED: serial port initialization", res);
     } else {
-        log(LOG_INFO, "Serial ports initialized.");
+        logmsg(LOG_INFO, "Serial ports initialized.");
     }
 
     if (res = cli_init()) {
@@ -525,7 +525,7 @@ TRACE1("Booting from device %d",boot_dev);
     // Start the boot process
     boot_from_bdev(boot_dev);
 
-    log(LOG_INFO, "Stopping.");
+    logmsg(LOG_INFO, "Stopping.");
 #elif MODEL == MODEL_FOENIX_C256U || MODEL == MODEL_FOENIX_C256U_PLUS || MODEL == MODEL_FOENIX_FMX
 	printf("\n\nSDC directory:\n");
 	int directory = fsys_opendir("/sd/");

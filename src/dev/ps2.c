@@ -335,7 +335,7 @@ const char g_us_sc_alt_shift[] = {
 short ps2_wait_out() {
     long target_ticks;
 
-    // log(LOG_TRACE, "ps2_wait_out");
+    // logmsg(LOG_TRACE, "ps2_wait_out");
 
     target_ticks = rtc_get_jiffies() + PS2_TIMEOUT_JF;
     while ((*PS2_STATUS & PS2_STAT_OBF) == 0) {
@@ -356,7 +356,7 @@ short ps2_wait_out() {
 short ps2_wait_in() {
     long target_ticks;
 
-    // log(LOG_TRACE, "ps2_wait_in");
+    // logmsg(LOG_TRACE, "ps2_wait_in");
 
     target_ticks = rtc_get_jiffies() + PS2_TIMEOUT_JF;
     while ((*PS2_STATUS & PS2_STAT_IBF) != 0) {

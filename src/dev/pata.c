@@ -51,7 +51,7 @@ short pata_wait_not_busy() {
     } while ((status & PATA_STAT_BSY) && (target_ticks > ticks));
 
     if (target_ticks <= ticks) {
-        log(LOG_ERROR, "pata_wait_not_busy: timeout");
+        logmsg(LOG_ERROR, "pata_wait_not_busy: timeout");
         log_num(LOG_ERROR, "target_ticks: ", (int)target_ticks);
         log_num(LOG_ERROR, "ticks: ", (int)ticks);
         return DEV_TIMEOUT;
@@ -80,7 +80,7 @@ short pata_wait_ready() {
     } while (((status & PATA_STAT_DRDY) == 0) && (target_ticks > ticks));
 
     if (target_ticks <= ticks) {
-        log(LOG_ERROR, "pata_wait_ready: timeout");
+        logmsg(LOG_ERROR, "pata_wait_ready: timeout");
         return DEV_TIMEOUT;
     } else {
         return 0;
@@ -112,7 +112,7 @@ short pata_wait_ready_not_busy() {
     } while (((*PATA_CMD_STAT & PATA_STAT_BSY) == PATA_STAT_BSY) && (target_ticks > ticks));
 
     if (target_ticks <= ticks) {
-        log(LOG_ERROR, "pata_wait_ready_not_busy: timeout");
+        logmsg(LOG_ERROR, "pata_wait_ready_not_busy: timeout");
         log_num(LOG_ERROR, "target_ticks: ", (int)target_ticks);
         log_num(LOG_ERROR, "ticks: ", (int)ticks);
 
@@ -142,7 +142,7 @@ short pata_wait_data_request() {
     } while (((status & PATA_STAT_DRQ) != PATA_STAT_DRQ) && (target_ticks > ticks));
 
     if (target_ticks <= ticks) {
-        log(LOG_ERROR, "pata_wait_data_request: timeout");
+        logmsg(LOG_ERROR, "pata_wait_data_request: timeout");
         return DEV_TIMEOUT;
     } else {
         return 0;
@@ -354,12 +354,12 @@ short pata_flush_cache() {
 
     status = *PATA_CMD_STAT;
     if ((status & PATA_STAT_DF) != 0){
-        log(LOG_ERROR, "pata_flush_cache: device fault");
+        logmsg(LOG_ERROR, "pata_flush_cache: device fault");
         return -1;
     }
 
     if ((status & PATA_STAT_ERR) != 0) {
-        log(LOG_ERROR, "pata_flush_cache: error");
+        logmsg(LOG_ERROR, "pata_flush_cache: error");
         return -1;
     }
 
@@ -390,7 +390,7 @@ short pata_write(long lba, const unsigned char * buffer, short size) {
     if (pata_wait_ready_not_busy()) {
         /* Turn off the HDD LED */
         ind_set(IND_HDC, IND_OFF);
-        log(LOG_ERROR, "pata_write: pata_wait_ready_not_busy timeout 1");
+        logmsg(LOG_ERROR, "pata_write: pata_wait_ready_not_busy timeout 1");
         return DEV_TIMEOUT;
     }
 
@@ -399,7 +399,7 @@ short pata_write(long lba, const unsigned char * buffer, short size) {
     if (pata_wait_ready_not_busy()) {
         /* Turn off the HDD LED */
         ind_set(IND_HDC, IND_OFF);
-        log(LOG_ERROR, "pata_write: pata_wait_ready_not_busy timeout 2");
+        logmsg(LOG_ERROR, "pata_write: pata_wait_ready_not_busy timeout 2");
         return DEV_TIMEOUT;
     }
 
@@ -417,7 +417,7 @@ short pata_write(long lba, const unsigned char * buffer, short size) {
     if (pata_wait_ready_not_busy()) {
         /* Turn off the HDD LED */
         ind_set(IND_HDC, IND_OFF);
-        log(LOG_ERROR, "pata_write: pata_wait_ready_not_busy timeout 3");
+        logmsg(LOG_ERROR, "pata_write: pata_wait_ready_not_busy timeout 3");
         return DEV_TIMEOUT;
     }
 
@@ -432,7 +432,7 @@ short pata_write(long lba, const unsigned char * buffer, short size) {
     if (pata_wait_ready_not_busy()) {
         /* Turn off the HDD LED */
         ind_set(IND_HDC, IND_OFF);
-        log(LOG_ERROR, "pata_write: pata_wait_ready_not_busy timeout 4");
+        logmsg(LOG_ERROR, "pata_write: pata_wait_ready_not_busy timeout 4");
         return DEV_TIMEOUT;
     }
 
@@ -441,7 +441,7 @@ short pata_write(long lba, const unsigned char * buffer, short size) {
 
     status = *PATA_CMD_STAT;
     if ((status & PATA_STAT_DF) != 0){
-        log(LOG_ERROR, "pata_write: device fault");
+        logmsg(LOG_ERROR, "pata_write: device fault");
 
         /* Turn off the HDD LED */
         ind_set(IND_HDC, IND_OFF);
@@ -450,7 +450,7 @@ short pata_write(long lba, const unsigned char * buffer, short size) {
     }
 
     if ((status & PATA_STAT_ERR) != 0) {
-        log(LOG_ERROR, "pata_write: error");
+        logmsg(LOG_ERROR, "pata_write: error");
 
         /* Turn off the HDD LED */
         ind_set(IND_HDC, IND_OFF);

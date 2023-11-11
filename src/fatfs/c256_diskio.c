@@ -78,10 +78,10 @@ DRESULT disk_read (
 		if (result < 0) {
 			log_num(LOG_ERROR, "disk_read error: ", result);
 			if (result == ERR_MEDIA_CHANGE) {
-				log(LOG_ERROR, "disk changed.");
+				logmsg(LOG_ERROR, "disk changed.");
 				return RES_NOTRDY;
 			} else {
-				log(LOG_ERROR, "gerneral error");
+				logmsg(LOG_ERROR, "gerneral error");
 				return RES_PARERR;
 			}
 		} else {

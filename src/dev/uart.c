@@ -297,7 +297,7 @@ short uart_open(p_channel chan, const char * spec, short mode) {
                     break;
 
                 default:
-                    log(LOG_ERROR, "uart_open: Bad data word length");
+                    logmsg(LOG_ERROR, "uart_open: Bad data word length");
                     return ERR_BAD_ARGUMENT;
             }
 
@@ -311,7 +311,7 @@ short uart_open(p_channel chan, const char * spec, short mode) {
                 } else if (i == 2) {
                     lcr_code |= LCR_STOPBIT_2;
                 } else {
-                    log(LOG_ERROR, "uart_open: Bad stop bits");
+                    logmsg(LOG_ERROR, "uart_open: Bad stop bits");
                     return ERR_BAD_ARGUMENT;
                 }
 
@@ -330,7 +330,7 @@ short uart_open(p_channel chan, const char * spec, short mode) {
                     } else if (strcmp(token, "SPACE") == 0) {
                         lcr_code |= LCR_PARITY_SPACE;
                     } else {
-                        log(LOG_ERROR, "uart_open: Bad parity");
+                        logmsg(LOG_ERROR, "uart_open: Bad parity");
                         return ERR_BAD_ARGUMENT;
                     }
 
@@ -339,19 +339,19 @@ short uart_open(p_channel chan, const char * spec, short mode) {
                     return 0;
 
                 } else {
-                    log(LOG_ERROR, "uart_open: no parity token");
+                    logmsg(LOG_ERROR, "uart_open: no parity token");
                     return ERR_BAD_ARGUMENT;
                 }
             } else {
-                log(LOG_ERROR, "uart_open: no stop bit token");
+                logmsg(LOG_ERROR, "uart_open: no stop bit token");
                 return ERR_BAD_ARGUMENT;
             }
         } else {
-            log(LOG_ERROR, "uart_open: no data length token");
+            logmsg(LOG_ERROR, "uart_open: no data length token");
             return ERR_BAD_ARGUMENT;
         }
     } else {
-        log(LOG_ERROR, "uart_open: no BPS token");
+        logmsg(LOG_ERROR, "uart_open: no BPS token");
         return ERR_BAD_ARGUMENT;
     }
 

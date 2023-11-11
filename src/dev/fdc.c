@@ -252,7 +252,7 @@ short fdc_in(unsigned char *ptr) {
     long target_ticks = timers_jiffies() + fdc_timeout;
     while ((*FDC_MSR & FDC_MSR_RQM) != FDC_MSR_RQM) {
         if (timers_jiffies() >= target_ticks) {
-            log(LOG_ERROR, "fdc_in: timeout waiting for RQM");
+            logmsg(LOG_ERROR, "fdc_in: timeout waiting for RQM");
             return DEV_TIMEOUT;
         }
     }
@@ -272,7 +272,7 @@ short fdc_out(unsigned char x) {
     long target_ticks = timers_jiffies() + fdc_timeout;
     while ((*FDC_MSR & FDC_MSR_RQM) != FDC_MSR_RQM) {
         if (timers_jiffies() >= target_ticks) {
-            log(LOG_ERROR, "fdc_out: timeout waiting for RQM");
+            logmsg(LOG_ERROR, "fdc_out: timeout waiting for RQM");
             return DEV_TIMEOUT;
         }
     }
@@ -296,7 +296,7 @@ short fdc_motor_on() {
 
         if (fdc_wait_rqm()) {
             /* Got a timeout after trying to turn on the motor */
-            log(LOG_ERROR, "fdc_motor_on timeout");
+            logmsg(LOG_ERROR, "fdc_motor_on timeout");
             return DEV_TIMEOUT;
         }
 
@@ -384,13 +384,13 @@ short fdc_sense_interrupt_status(unsigned char *st0, unsigned char *pcn) {
 
     if (fdc_wait_while_busy()) {
         /* Timed out waiting for the FDC to be free */
-        log(LOG_ERROR, "fdc_sense_interrupt_status: fdc_wait_while_busy timeout");
+        logmsg(LOG_ERROR, "fdc_sense_interrupt_status: fdc_wait_while_busy timeout");
         return DEV_TIMEOUT;
     }
 
     if (fdc_wait_write()) {
         /* Timed out waiting for permission to write a command byte */
-        log(LOG_ERROR, "fdc_sense_interrupt_status: fdc_wait_write timeout");
+        logmsg(LOG_ERROR, "fdc_sense_interrupt_status: fdc_wait_write timeout");
         return DEV_TIMEOUT;
     }
 
@@ -399,13 +399,13 @@ short fdc_sense_interrupt_status(unsigned char *st0, unsigned char *pcn) {
 
     if (fdc_wait_rqm()) {
         /* Timed out waiting to receive data */
-        log(LOG_ERROR, "fdc_sense_interrupt_status: fdc_wait_rqm timeout 1");
+        logmsg(LOG_ERROR, "fdc_sense_interrupt_status: fdc_wait_rqm timeout 1");
         return DEV_TIMEOUT;
     }
 
     if (fdc_wait_read()) {
         /* Timed out waiting to receive data */
-        log(LOG_ERROR, "fdc_sense_interrupt_status: fdc_wait_read timeout 1");
+        logmsg(LOG_ERROR, "fdc_sense_interrupt_status: fdc_wait_read timeout 1");
         return DEV_TIMEOUT;
     }
 
@@ -415,13 +415,13 @@ short fdc_sense_interrupt_status(unsigned char *st0, unsigned char *pcn) {
 
     if (fdc_wait_rqm()) {
         /* Timed out waiting to receive data */
-        log(LOG_ERROR, "fdc_sense_interrupt_status: fdc_wait_rqm timeout 1");
+        logmsg(LOG_ERROR, "fdc_sense_interrupt_status: fdc_wait_rqm timeout 1");
         return DEV_TIMEOUT;
     }
 
     if (fdc_wait_read()) {
         /* Timed out waiting for permission to transfer another byte */
-        log(LOG_ERROR, "fdc_sense_interrupt_status: fdc_wait_read timeout 2");
+        logmsg(LOG_ERROR, "fdc_sense_interrupt_status: fdc_wait_read timeout 2");
         return DEV_TIMEOUT;
     }
 
@@ -444,13 +444,13 @@ short fdc_specify() {
 
     if (fdc_wait_while_busy()) {
         /* Timed out waiting for the FDC to be free */
-        log(LOG_ERROR, "fdc_specify: fdc_wait_while_busy timeout");
+        logmsg(LOG_ERROR, "fdc_specify: fdc_wait_while_busy timeout");
         return DEV_TIMEOUT;
     }
 
     if (fdc_wait_write() < 0) {
         /* Timed out waiting for permission to write a command byte */
-        log(LOG_ERROR, "fdc_specify: fdc_wait_write timeout 1");
+        logmsg(LOG_ERROR, "fdc_specify: fdc_wait_write timeout 1");
         return DEV_TIMEOUT;
     }
 
@@ -459,7 +459,7 @@ short fdc_specify() {
 
     if (fdc_wait_write() < 0) {
         /* Timed out waiting for permission to write a command byte */
-        log(LOG_ERROR, "fdc_specify: fdc_wait_write timeout 2");
+        logmsg(LOG_ERROR, "fdc_specify: fdc_wait_write timeout 2");
         return DEV_TIMEOUT;
     }
 
@@ -468,7 +468,7 @@ short fdc_specify() {
 
     if (fdc_wait_write() < 0) {
         /* Timed out waiting for permission to write a command byte */
-        log(LOG_ERROR, "fdc_specify: fdc_wait_write timeout 3");
+        logmsg(LOG_ERROR, "fdc_specify: fdc_wait_write timeout 3");
         return DEV_TIMEOUT;
     }
 
@@ -498,13 +498,13 @@ short fdc_configure() {
 
     if (fdc_wait_while_busy()) {
         /* Timed out waiting for the FDC to be free */
-        log(LOG_ERROR, "fdc_configure: fdc_wait_while_busy timeout");
+        logmsg(LOG_ERROR, "fdc_configure: fdc_wait_while_busy timeout");
         return DEV_TIMEOUT;
     }
 
     if (fdc_wait_write()) {
         /* Timed out waiting for the FDC to be free */
-        log(LOG_ERROR, "fdc_configure: fdc_wait_write timeout 1");
+        logmsg(LOG_ERROR, "fdc_configure: fdc_wait_write timeout 1");
         return DEV_TIMEOUT;
     }
 
@@ -513,7 +513,7 @@ short fdc_configure() {
 
     if (fdc_wait_write()) {
         /* Timed out waiting for the FDC to be free */
-        log(LOG_ERROR, "fdc_configure: fdc_wait_write timeout 2");
+        logmsg(LOG_ERROR, "fdc_configure: fdc_wait_write timeout 2");
         return DEV_TIMEOUT;
     }
 
@@ -522,7 +522,7 @@ short fdc_configure() {
 
     if (fdc_wait_write()) {
         /* Timed out waiting for the FDC to be free */
-        log(LOG_ERROR, "fdc_configure: fdc_wait_write timeout 3");
+        logmsg(LOG_ERROR, "fdc_configure: fdc_wait_write timeout 3");
         return DEV_TIMEOUT;
     }
 
@@ -531,7 +531,7 @@ short fdc_configure() {
 
     if (fdc_wait_write()) {
         /* Timed out waiting for the FDC to be free */
-        log(LOG_ERROR, "fdc_configure: fdc_wait_write timeout 4");
+        logmsg(LOG_ERROR, "fdc_configure: fdc_wait_write timeout 4");
         return DEV_TIMEOUT;
     }
 
@@ -555,13 +555,13 @@ short fdc_version(unsigned char *version) {
 
     if (fdc_wait_while_busy()) {
         /* Timed out waiting for the FDC to be free */
-        log(LOG_ERROR, "fdc_version: fdc_wait_while_busy timeout");
+        logmsg(LOG_ERROR, "fdc_version: fdc_wait_while_busy timeout");
         return DEV_TIMEOUT;
     }
 
     if (fdc_wait_write()) {
         /* Timed out waiting for the FDC to be free */
-        log(LOG_ERROR, "fdc_version: fdc_wait_write timeout 1");
+        logmsg(LOG_ERROR, "fdc_version: fdc_wait_write timeout 1");
         return DEV_TIMEOUT;
     }
 
@@ -570,7 +570,7 @@ short fdc_version(unsigned char *version) {
 
     if (fdc_wait_write()) {
         /* Timed out waiting for the FDC to be free */
-        log(LOG_ERROR, "fdc_version: fdc_wait_write timeout 2");
+        logmsg(LOG_ERROR, "fdc_version: fdc_wait_write timeout 2");
         return DEV_TIMEOUT;
     }
 
@@ -621,7 +621,7 @@ short fdc_reset() {
         pcn = 0;
         if (fdc_sense_interrupt_status(&st0, &pcn) < 0) {
             /* Time out on sense interrupt */
-            log(LOG_ERROR, "fdc_sense_interrupt_status timeout");
+            logmsg(LOG_ERROR, "fdc_sense_interrupt_status timeout");
             return DEV_TIMEOUT;
         }
 
@@ -636,14 +636,14 @@ short fdc_reset() {
     /* Configure the FDC */
     if (fdc_configure() < 0) {
         /* Timeout on sense interrupt */
-        log(LOG_ERROR, "fdc_configure timeout");
+        logmsg(LOG_ERROR, "fdc_configure timeout");
         return DEV_TIMEOUT;
     }
 
     /* Specify seek and head times, and turn off DMA */
     if (fdc_specify() < 0) {
         /* Timeout on sense interrupt */
-        log(LOG_ERROR, "fdc_specify timeout");
+        logmsg(LOG_ERROR, "fdc_specify timeout");
         return DEV_TIMEOUT;
     }
 
@@ -698,19 +698,19 @@ short fdc_command_dma(p_fdc_trans transaction) {
 
     if (fdc_wait_while_busy()) {
         /* Timed out waiting for the FDC to be free */
-        log(LOG_ERROR, "fdc_command: fdc_wait_while_busy timeout");
+        logmsg(LOG_ERROR, "fdc_command: fdc_wait_while_busy timeout");
         return DEV_TIMEOUT;
     }
 
     result = fdc_out(transaction->command);      /* Send the command byte */
     if (result < 0) {
-        log(LOG_ERROR, "fdc_command: timeout sending command");
+        logmsg(LOG_ERROR, "fdc_command: timeout sending command");
         return result;
     }
 
     for (i = 0; i < transaction->parameter_count; i++) {
         if ((result = fdc_out(transaction->parameters[i])) < 0) {
-            log(LOG_ERROR, "fdc_command: timeout sending parameters");
+            logmsg(LOG_ERROR, "fdc_command: timeout sending parameters");
             return result;
         }
     }
@@ -749,7 +749,7 @@ short fdc_command_dma(p_fdc_trans transaction) {
 
     for (i = 0; i < transaction->result_count; i++) {
         if ((result = fdc_in(&transaction->results[i])) < 0) {
-            log(LOG_ERROR, "fdc_command: timeout getting results");
+            logmsg(LOG_ERROR, "fdc_command: timeout getting results");
             return result;
         }
     }
@@ -788,19 +788,19 @@ short fdc_command(p_fdc_trans transaction) {
 
     if (fdc_wait_while_busy()) {
         /* Timed out waiting for the FDC to be free */
-        log(LOG_ERROR, "fdc_command: fdc_wait_while_busy timeout");
+        logmsg(LOG_ERROR, "fdc_command: fdc_wait_while_busy timeout");
         return DEV_TIMEOUT;
     }
 
     result = fdc_out(transaction->command);      /* Send the command byte */
     if (result < 0) {
-        log(LOG_ERROR, "fdc_command: timeout sending command");
+        logmsg(LOG_ERROR, "fdc_command: timeout sending command");
         return result;
     }
 
     for (i = 0; i < transaction->parameter_count; i++) {
         if ((result = fdc_out(transaction->parameters[i])) < 0) {
-            log(LOG_ERROR, "fdc_command: timeout sending parameters");
+            logmsg(LOG_ERROR, "fdc_command: timeout sending parameters");
             return result;
         }
     }
@@ -815,7 +815,7 @@ short fdc_command(p_fdc_trans transaction) {
             if (*FDC_MSR & FDC_MSR_NONDMA) {
                 for (i = 0; (i < transaction->data_count); i++) {
                     if ((result = fdc_out(transaction->data[i])) < 0) {
-                        log(LOG_ERROR, "fdc_command: timeout writing data");
+                        logmsg(LOG_ERROR, "fdc_command: timeout writing data");
                         return result;
                     }
                 }
@@ -826,7 +826,7 @@ short fdc_command(p_fdc_trans transaction) {
             /* We're reading from the FDC */
             for (i = 0; (i < transaction->data_count); i++) {
                 if ((result = fdc_in(&transaction->data[i])) < 0) {
-                    log(LOG_ERROR, "fdc_command: timeout getting data");
+                    logmsg(LOG_ERROR, "fdc_command: timeout getting data");
                     return result;
                 }
             }
@@ -842,7 +842,7 @@ short fdc_command(p_fdc_trans transaction) {
 
     for (i = 0; i < transaction->result_count; i++) {
         if ((result = fdc_in(&transaction->results[i])) < 0) {
-            log(LOG_ERROR, "fdc_command: timeout getting results");
+            logmsg(LOG_ERROR, "fdc_command: timeout getting results");
             return result;
         }
     }
@@ -1067,12 +1067,12 @@ short fdc_read(long lba, unsigned char * buffer, short size) {
         if ((result == 0)) { //} && ((trans.results[0] & 0xC0) == 0)) {
             sprintf(message, "fdc_read: success? ST0=%02X ST1=%02X ST2=%02X C=%02X H=%02X R=%02X N=%02X",
                 trans.results[0], trans.results[1], trans.results[2], trans.results[3], trans.results[4], trans.results[5], trans.results[6]);
-            log(LOG_INFO, message);
+            logmsg(LOG_INFO, message);
             return size;
         } else {
             sprintf(message, "fdc_read: retry ST0=%02X ST1=%02X ST2=%02X C=%02X H=%02X R=%02X N=%02X",
                 trans.results[0], trans.results[1], trans.results[2], trans.results[3], trans.results[4], trans.results[5], trans.results[6]);
-            log(LOG_ERROR, message);
+            logmsg(LOG_ERROR, message);
         }
         fdc_init();
         trans.retries--;
@@ -1135,7 +1135,7 @@ short fdc_write(long lba, const unsigned char * buffer, short size) {
         }
 
         if ((trans.results[1] & 0x02) != 0) {
-            log(LOG_ERROR, "Disk is write protected");
+            logmsg(LOG_ERROR, "Disk is write protected");
             g_fdc_stat |= FDC_STAT_PROTECTED;
             return DEV_WRITEPROT;
         }
@@ -1143,12 +1143,12 @@ short fdc_write(long lba, const unsigned char * buffer, short size) {
         if ((result == 0)) { //} && ((trans.results[0] & 0xC0) == 0)) {
             sprintf(message, "fdc_write: success? ST0=%02X ST1=%02X ST2=%02X C=%02X H=%02X R=%02X N=%02X",
                 trans.results[0], trans.results[1], trans.results[2], trans.results[3], trans.results[4], trans.results[5], trans.results[6]);
-            log(LOG_INFO, message);
+            logmsg(LOG_INFO, message);
             return size;
         } else {
             sprintf(message, "fdc_write: retry ST0=%02X ST1=%02X ST2=%02X C=%02X H=%02X R=%02X N=%02X",
                 trans.results[0], trans.results[1], trans.results[2], trans.results[3], trans.results[4], trans.results[5], trans.results[6]);
-            log(LOG_ERROR, message);
+            logmsg(LOG_ERROR, message);
         }
         fdc_init();
         trans.retries--;
@@ -1228,13 +1228,13 @@ short fdc_ioctrl(short command, unsigned char * buffer, short size) {
  */
 short fdc_init() {
     if (fdc_reset() < 0) {
-        log(LOG_ERROR, "Unable to reset the FDC");
+        logmsg(LOG_ERROR, "Unable to reset the FDC");
         return DEV_TIMEOUT;
     }
 
     // Recalibrate the drive
     if (fdc_recalibrate()) {
-        log(LOG_ERROR, "Unable to recalibrate the drive");
+        logmsg(LOG_ERROR, "Unable to recalibrate the drive");
         return ERR_GENERAL;
     }
 
