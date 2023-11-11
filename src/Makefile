@@ -78,7 +78,7 @@ endif
 # VERBOSE 5   Log a truly verbose message... the sort you almost never want to bother with
 # Log message above DEFAULT_LOG_LEVEL level will not even be compiled, 
 # ie they will have NO chance of being output even if log_level is high enough.
-DEFAULT_LOG_LEVEL=5
+DEFAULT_LOG_LEVEL=0
 
 
 # Common defines and includes -------------------------------------------------
