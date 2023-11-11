@@ -34,7 +34,10 @@ static short log_level;
 static void (*do_log)(const char* message);
 static void log_to_uart(const char* message);
 static void log_to_screen(const char* message);
+
+#if MODEL == MODEL_FOENIX_A2560K || MODEL == MODEL_FOENIX_GENX || MODEL == MODEL_FOENIX_A2560X
 static void log_to_channel_A_low_level(const char *message);
+#endif
 
 #define UART_COM1 0
 
