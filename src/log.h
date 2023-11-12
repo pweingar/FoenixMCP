@@ -31,6 +31,10 @@
 #else
 #endif
 
+#define LOGBUF_SIZE 200;
+extern short log_level;
+extern void (*do_log)(const char* message);
+extern char logbuf[];
 
 /*
  * Return human readable message for an error number
@@ -119,16 +123,17 @@ extern void log_num(short level, char * message, int n);
 extern void log_c(short log_level, char c);
 
 /*
- * Send a message to the debugging channel
+ * Send a message to the debugging channel.
+ * We are inling calls to snprintf and do_log because there are problems when using a proxy function to vsnprintf
  */
 
 #if DEFAULT_LOG_LEVEL >= LOG_ERROR
-# define ERROR(m)    logmsg(LOG_ERROR, m)
-# define ERROR1(a,b)     logmsg(LOG_ERROR, a, b)
-# define ERROR2(a,b,c)     logmsg(LOG_ERROR, a, b, c)
-# define ERROR3(a,b,c,d)     logmsg(LOG_ERROR, a, b, c, d)
-# define ERROR4(a,b,c,d,e)     logmsg(LOG_ERROR, a, b, c, d, e)
-# define ERROR5(a,b,c,d,e,f)     logmsg(LOG_ERROR, a, b, c, d, e, f)
+#define ERROR(a) if (log_level >= LOG_ERROR) { do_log(a); }
+#define ERROR1(a,b) if (log_level >= LOG_ERROR) { snprintf(logbuf,200,a,b);do_log(logbuf); }
+#define ERROR2(a,b,c) if (log_level >= LOG_ERROR) { snprintf(logbuf,200,a,b,c);do_log(logbuf); }
+#define ERROR3(a,b,c,d) if (log_level >= LOG_ERROR) { snprintf(logbuf,200,a,b,c,d);do_log(logbuf); }
+#define ERROR4(a,b,c,d,e) if (log_level >= LOG_ERROR) { snprintf(logbuf,200,a,b,c,d,e);do_log(logbuf); }
+#define ERROR5(a,b,c,d,e,f) if (log_level >= LOG_ERROR) { snprintf(logbuf,200,a,b,c,d,e,f);do_log(logbuf); }
 #else
 # define ERROR(m)
 # define ERROR1(a,b)
@@ -140,12 +145,12 @@ extern void log_c(short log_level, char c);
 
 
 #if DEFAULT_LOG_LEVEL >= LOG_INFO
-# define INFO(m)    logmsg(LOG_INFO, m);
-# define INFO1(a,b)     logmsg(LOG_INFO, a, b);
-# define INFO2(a,b,c)     logmsg(LOG_INFO, a, b, c);
-# define INFO3(a,b,c,d)     logmsg(LOG_INFO, a, b, c, d);
-# define INFO4(a,b,c,d,e)     logmsg(LOG_INFO, a, b, c, d, e);
-# define INFO5(a,b,c,d,e,f)     logmsg(LOG_INFO, a, b, c, d, e, f);
+#define INFO(a) if (log_level >= LOG_INFO) { do_log(a); }
+#define INFO1(a,b) if (log_level >= LOG_INFO) { snprintf(logbuf,200,a,b);do_log(logbuf); }
+#define INFO2(a,b,c) if (log_level >= LOG_INFO) { snprintf(logbuf,200,a,b,c);do_log(logbuf); }
+#define INFO3(a,b,c,d) if (log_level >= LOG_INFO) { snprintf(logbuf,200,a,b,c,d);do_log(logbuf); }
+#define INFO4(a,b,c,d,e) if (log_level >= LOG_INFO) { snprintf(logbuf,200,a,b,c,d,e);do_log(logbuf); }
+#define INFO5(a,b,c,d,e,f) if (log_level >= LOG_INFO) { snprintf(logbuf,200,a,b,c,d,e,f);do_log(logbuf); }
 #else
 # define INFO(m)
 # define INFO1(a,b)
@@ -156,14 +161,14 @@ extern void log_c(short log_level, char c);
 #endif
 
 #if DEFAULT_LOG_LEVEL >= LOG_DEBUG
-# define DEBUG(m)    logmsg(LOG_DEBUG, m)
-# define DEBUG1(a,b)     logmsg(LOG_DEBUG, a, b)
-# define DEBUG2(a,b,c)     logmsg(LOG_DEBUG, a, b, c)
-# define DEBUG3(a,b,c,d)     logmsg(LOG_DEBUG, a, b, c, d)
-# define DEBUG4(a,b,c,d,e)     logmsg(LOG_DEBUG, a, b, c, d, e)
-# define DEBUG5(a,b,c,d,e,f)     logmsg(LOG_DEBUG, a, b, c, d, e, f)
-# define DEBUG6(a,b,c,d,e,f,g)     logmsg(LOG_DEBUG, a, b, c, d, e, f, g)
-# define DEBUG7(a,b,c,d,e,f,g,h)     logmsg(LOG_DEBUG, a, b, c, d, e, f, g, h)
+#define DEBUG(a) if (log_level >= LOG_DEBUG) { do_log(a); }
+#define DEBUG1(a,b) if (log_level >= LOG_DEBUG) { snprintf(logbuf,200,a,b);do_log(logbuf); }
+#define DEBUG2(a,b,c) if (log_level >= LOG_DEBUG) { snprintf(logbuf,200,a,b,c);do_log(logbuf); }
+#define DEBUG3(a,b,c,d) if (log_level >= LOG_DEBUG) { snprintf(logbuf,200,a,b,c,d);do_log(logbuf); }
+#define DEBUG4(a,b,c,d,e) if (log_level >= LOG_DEBUG) { snprintf(logbuf,200,a,b,c,d,e);do_log(logbuf); }
+#define DEBUG5(a,b,c,d,e,f) if (log_level >= LOG_DEBUG) { snprintf(logbuf,200,a,b,c,d,e,f);do_log(logbuf); }
+#define DEBUG6(a,b,c,d,e,f,g) if (log_level >= LOG_DEBUG) { snprintf(logbuf,200,a,b,c,d,e,f,g);do_log(logbuf); }
+#define DEBUG7(a,b,c,d,e,f,g,h) if (log_level >= LOG_DEBUG) { snprintf(logbuf,200,a,b,c,d,e,f,g,h);do_log(logbuf); }
 #else
 # define DEBUG(m)
 # define DEBUG1(a,b)
@@ -175,15 +180,15 @@ extern void log_c(short log_level, char c);
 # define DEBUG7(a,b,c,d,e,f,g,h)
 #endif
 
-#if DEFAULT_LOG_LEVEL >= LOG_TRACE
-# define TRACE(m)    logmsg(LOG_TRACE, m)
-# define TRACE1(a,b)     logmsg(LOG_TRACE, a, b)
-# define TRACE2(a,b,c)     logmsg(LOG_TRACE, a, b, c)
-# define TRACE3(a,b,c,d)     logmsg(LOG_TRACE, a, b, c, d)
-# define TRACE4(a,b,c,d,e)     logmsg(LOG_TRACE, a, b, c, d, e)
-# define TRACE5(a,b,c,d,e,f)     logmsg(LOG_TRACE, a, b, c, d, e, f)
-# define TRACE6(a,b,c,d,e,f,g)     logmsg(LOG_TRACE, a, b, c, d, e, f, g)
-# define TRACE7(a,b,c,d,e,f,g,h)     logmsg(LOG_TRACE, a, b, c, d, e, f, g, h)
+#if 0 && DEFAULT_LOG_LEVEL >= LOG_TRACE
+#define TRACE(a) if (log_level >= LOG_TRACE) { do_log(a); }
+#define TRACE1(a,b) if (log_level >= LOG_TRACE) { snprintf(logbuf,200,a,b);do_log(logbuf); }
+#define TRACE2(a,b,c) if (log_level >= LOG_TRACE) { snprintf(logbuf,200,a,b,c);do_log(logbuf); }
+#define TRACE3(a,b,c,d) if (log_level >= LOG_TRACE) { snprintf(logbuf,200,a,b,c,d);do_log(logbuf); }
+#define TRACE4(a,b,c,d,e) if (log_level >= LOG_TRACE) { snprintf(logbuf,200,a,b,c,d,e);do_log(logbuf); }
+#define TRACE5(a,b,c,d,e,f) if (log_level >= LOG_TRACE) { snprintf(logbuf,200,a,b,c,d,e,f);do_log(logbuf); }
+#define TRACE6(a,b,c,d,e,f,g) if (log_level >= LOG_TRACE) { snprintf(logbuf,200,a,b,c,d,e,f,g);do_log(logbuf); }
+#define TRACE7(a,b,c,d,e,f,g,h) if (log_level >= LOG_TRACE) { snprintf(logbuf,200,a,b,c,d,e,f,g,h);do_log(logbuf); }
 #else
 # define TRACE(m)
 # define TRACE1(a,b)

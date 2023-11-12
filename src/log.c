@@ -28,10 +28,15 @@
  * -1: UART. 
  */
 static short log_channel;
-static short log_level;
 
+
+short log_level;
+#if DEFAULT_LOG_LEVEL >= 0
+char logbuf[LOGBUF_SIZE]; // Should hopefully be long enough ! It's here so we don't require more stack space
+#endif
 // do_log either points to log_to_uart or log_to_screen.
-static void (*do_log)(const char* message);
+void (*do_log)(const char* message);
+
 static void log_to_uart(const char* message);
 static void log_to_screen(const char* message);
 
@@ -293,9 +298,6 @@ static void log_to_channel_A_low_level(const char *message) {
  * Caveat:
  * The total length should not exceed 512 chars.
  */
-#if DEFAULT_LOG_LEVEL >= 0
-static char logbuf[200]; // Should hopefully be long enough ! It's here so we don't require more stack space
-#endif
 void logmsg(short level, const char * message, ...) {
     if (level > log_level)
         return;
