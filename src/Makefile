@@ -248,7 +248,7 @@ foenixmcp.bin: $(DEPS)
 
 # Clean up after a build
 clean:
-	$(RM) $(OBJS_TO_CLEAN) foenixmcp.s37 *.lst *.map
+	$(RM) $(OBJS_TO_CLEAN) foenixmcp.s37 *.lst *.map *.o
 	$(MAKE) --directory=$(CPU) clean
 	$(MAKE) --directory=cli clean
 	$(MAKE) --directory=dev clean
