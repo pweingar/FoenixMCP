@@ -29,7 +29,6 @@
 #include "rsrc/bitmaps/image.h" /* Splashscreen */
 
 #if MODEL == MODEL_FOENIX_A2560U || MODEL == MODEL_FOENIX_A2560U_PLUS
-#include "dev/txt_a2560u.h"
 #elif MODEL == MODEL_FOENIX_A2560K
 //#include "rsrc/bitmaps/splash_a2560k.h"
 #elif MODEL == MODEL_FOENIX_A2560X || MODEL == MODEL_FOENIX_GENX
@@ -282,7 +281,7 @@ short boot_screen(void) {
     make_key_name("RETURN", cr_text);
 
 #if HAS_FLOPPY
-    sprintf(buffer, "BOOT: %s=SD CARD, %s=HARD DRIVE, s=FLOPPY, %s=DEFAULT, %s=SAFE", f1, f2, f3, space, cr_text);
+    sprintf(buffer, "BOOT: %s=SD CARD, %s=HARD DRIVE, %s=FLOPPY, %s=DEFAULT, %s=SAFE", f1, f2, f3, space, cr_text);
 #else
     sprintf(buffer, "BOOT: %s=SD CARD, %s=HARD DRIVE, %s=DEFAULT, %s=SAFE", f1, f2, space, cr_text);
 #endif
