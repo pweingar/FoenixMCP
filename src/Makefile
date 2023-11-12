@@ -160,7 +160,7 @@ ifeq ("$(PAD_FLASH_SIZE)","")
 endif
 ifeq ($(OS),Windows_NT)
 	RM = del /F/Q
-	PAD_CMD = fsutil seteof $@ $(PAD_FLASH_SIZE)
+	PAD_CMD = fsutil file seteof $@ $(PAD_FLASH_SIZE)
 else
 	RM = rm -f
 	PAD_CMD = truncate -s $(PAD_FLASH_SIZE) $@
