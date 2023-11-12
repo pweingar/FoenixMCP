@@ -30,7 +30,7 @@ if options.input:
                 g = palette.pop(0)
                 b = palette.pop(0)
                 output_file.write("\t0x{0:02X}, 0x{1:02X}, 0x{2:02X}, 0x00,\n".format(b, g, r))
-            output_file.write("}\n\n")
+            output_file.write("};\n\n")
 
             last_pixel = -1
             pixel_count = 0
