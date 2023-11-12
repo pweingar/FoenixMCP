@@ -81,7 +81,7 @@ extern void log_setlevel(short level);
  * message = the message to log
  */
 extern void logmsg(short level, const char * message, ...);
-extern void trace(const char * message, ...);
+
 /*
  * Log a message to the console
  *
@@ -176,14 +176,14 @@ extern void log_c(short log_level, char c);
 #endif
 
 #if DEFAULT_LOG_LEVEL >= LOG_TRACE
-# define TRACE(m)    trace(m)
-# define TRACE1(a,b)     trace(a, b)
-# define TRACE2(a,b,c)     trace(a, b, c)
-# define TRACE3(a,b,c,d)     trace(a, b, c, d)
-# define TRACE4(a,b,c,d,e)     trace(a, b, c, d, e)
-# define TRACE5(a,b,c,d,e,f)     trace(a, b, c, d, e, f)
-# define TRACE6(a,b,c,d,e,f,g)     trace(a, b, c, d, e, f, g)
-# define TRACE7(a,b,c,d,e,f,g,h)     trace(a, b, c, d, e, f, g, h)
+# define TRACE(m)    logmsg(LOG_TRACE, m)
+# define TRACE1(a,b)     logmsg(LOG_TRACE, a, b)
+# define TRACE2(a,b,c)     logmsg(LOG_TRACE, a, b, c)
+# define TRACE3(a,b,c,d)     logmsg(LOG_TRACE, a, b, c, d)
+# define TRACE4(a,b,c,d,e)     logmsg(LOG_TRACE, a, b, c, d, e)
+# define TRACE5(a,b,c,d,e,f)     logmsg(LOG_TRACE, a, b, c, d, e, f)
+# define TRACE6(a,b,c,d,e,f,g)     logmsg(LOG_TRACE, a, b, c, d, e, f, g)
+# define TRACE7(a,b,c,d,e,f,g,h)     logmsg(LOG_TRACE, a, b, c, d, e, f, g, h)
 #else
 # define TRACE(m)
 # define TRACE1(a,b)

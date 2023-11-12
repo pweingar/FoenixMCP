@@ -293,32 +293,19 @@ static void log_to_channel_A_low_level(const char *message) {
  * Caveat:
  * The total length should not exceed 512 chars.
  */
+#if DEFAULT_LOG_LEVEL >= 0
+static char logbuf[200]; // Should hopefully be long enough ! It's here so we don't require more stack space
+#endif
 void logmsg(short level, const char * message, ...) {
     if (level > log_level)
         return;
 
-    char buf[80]; // Should hopefully be long enough !
-
     va_list args;
     va_start(args, message);
-    vsprintf(buf, message, args);
+    vsnprintf(logbuf, sizeof(logbuf), message, args);
     va_end(args);
 
-    do_log(buf);
-}
-
-void trace(const char * message, ...) {
-    if (LOG_TRACE > log_level)
-        return;
-
-    char buf[80]; // Should hopefully be long enough !
-
-    va_list args;
-    va_start(args, message);
-    vsprintf(buf, message, args);
-    va_end(args);
-
-    (*do_log)(buf);
+    do_log(logbuf);
 }
 
 /*

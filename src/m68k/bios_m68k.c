@@ -238,7 +238,6 @@ unsigned long syscall_dispatch(int32_t function, int32_t param0, int32_t param1,
             /* Misc functions */
             switch (function) {
                 case KFN_TIME_JIFFIES:
-                    TRACE("KFN_TIME_JIFFIES");
                     return rtc_get_jiffies();
 
                 case KFN_TIME_SETRTC:
