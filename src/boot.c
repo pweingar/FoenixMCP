@@ -26,15 +26,15 @@
 #include "dev/txt_screen.h"
 
 #include "rsrc/font/quadrotextFONT.h"
+#include "rsrc/bitmaps/image.h" /* Splashscreen */
+
 #if MODEL == MODEL_FOENIX_A2560U || MODEL == MODEL_FOENIX_A2560U_PLUS
-#include "rsrc/bitmaps/splash_a2560u.h"
 #include "dev/txt_a2560u.h"
 #elif MODEL == MODEL_FOENIX_A2560K
-#include "rsrc/bitmaps/splash_a2560k.h"
+//#include "rsrc/bitmaps/splash_a2560k.h"
 #elif MODEL == MODEL_FOENIX_A2560X || MODEL == MODEL_FOENIX_GENX
-#include "rsrc/bitmaps/splash_a2560x.h"
+//#include "rsrc/bitmaps/splash_a2560x.h"
 #elif MODEL == MODEL_FOENIX_C256U || MODEL == MODEL_FOENIX_C256U_PLUS || MODEL == MODEL_FOENIX_FMX
-#include "rsrc/bitmaps/image.h"
 #endif
 
 #if MODEL == MODEL_FOENIX_A2560K
@@ -215,10 +215,10 @@ short boot_screen(void) {
     screen = 0;
 
     /* Turn off the screen */
-    txt_set_mode(screen, 0);
+    txt_set_mode(screen, TXT_MODE_SLEEP);
 
     for (i = 0; i < 256; i++) {
-        LUT_0[4*i] = splashscreen_lut[4*i];
+        LUT_0[4*i+0] = splashscreen_lut[4*i+0]; 
         LUT_0[4*i+1] = splashscreen_lut[4*i+1];
         LUT_0[4*i+2] = splashscreen_lut[4*i+2];
         LUT_0[4*i+3] = splashscreen_lut[4*i+3];
@@ -227,10 +227,10 @@ short boot_screen(void) {
 #if 1
     /* Copy the bitmap to video RAM, it has simple RLE compression */
     for (pixels = splashscreen_pix; *pixels != 0;) {
-        unsigned char count = *pixels++;
-        unsigned char pixel = *pixels++;
+        uint8_t count = *pixels++;
+        uint8_t color = *pixels++;
         for (i = 0; i < count; i++) {
-            *vram++ = pixel;
+            *vram++ = color;
         }
     }
 #else
@@ -246,7 +246,7 @@ short boot_screen(void) {
 #endif
     /* Set up the bitmap */
     *BM0_Addy_Pointer_Reg = 0; /* Start of VRAM */
-    *BM0_Control_Reg = 1;
+    *BM0_Control_Reg = 1; /* Enable bitmap layer, use LUT 0 */
 
     /* Set a background color for the bitmap mode */
 #if HAS_DUAL_SCREEN
@@ -396,14 +396,14 @@ void boot_from_bdev(short device) {
                 case 0x0000:
                     // Boot from IDE
                     device = BDEV_HDC;
-                    logmsg(LOG_INFO, "Boot DIP set for IDE");
+                    INFO("Boot DIP set for IDE");
                     strcpy(initial_path, "/hd");
                     break;
 
                 case 0x0001:
                     // Boot from SDC
                     device = BDEV_SDC;
-                    logmsg(LOG_INFO, "Boot DIP set for SDC");
+                    INFO("Boot DIP set for SDC");
                     strcpy(initial_path, "/sd");
                     break;
 
@@ -411,13 +411,13 @@ void boot_from_bdev(short device) {
                 case 0x0002:
                     // Boot from Floppy
                     device = BDEV_FDC;
-                    logmsg(LOG_INFO, "Boot DIP set for FDC");
+                    INFO("Boot DIP set for FDC");
                     strcpy(initial_path, "/fd");
                     break;
 #endif
                 default:
                     // Boot straight to REPL
-                    logmsg(LOG_INFO, "Boot DIP set for REPL");
+                    INFO("Boot DIP set for REPL");
                     strcpy(initial_path, "/sd");
                     device = -1;
                     break;

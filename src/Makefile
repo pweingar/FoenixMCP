@@ -176,6 +176,8 @@ OBJS = $(patsubst %.s,%.o,$(patsubst %.c,%.o,$(SRCS)))
 OBJS_TO_CLEAN = $(subst /,\\,$(OBJS))
 LIBS = dev/devices.a snd/sound.a fatfs/fatfs.a
 
+# Splashscreen
+SPLASHSCREEN = rsrc/bitmaps/splash_$(UNIT).o
 
 # CPU-specific files
 cpu_s_src := $(wildcard $(CPU)/*.s)
@@ -233,22 +235,32 @@ foenixmcp.s37: $(OBJS) $(LIBS)
 	$(LD) $(LDFLAGS) -o $@ $^
 
 
-DEPS = $(c_obj) $(dev_obj) $(fatfs_obj) $(snd_obj) $(cli_obj) $(cpu_c_obj)
+DEPS = $(cpu_c_obj) $(c_obj) $(dev_obj) $(fatfs_obj) $(snd_obj) $(cli_obj) $(SPLASHSCREEN)
 
-# The startup file is already specified in the linker script, so we should not include it in the list of files to link
+# We don't want to link:
+# - the startup file (because the linker script does it)
+# - the splashscreen because it's #included from somewhere (boot.c)
+# So we remove them from the string of files to link.
 STARTUP_OBJ=$(CPU)/startup_$(CPU).o
+FILES_TO_LINK=$(subst $(STARTUP_OBJ),,$(DEPS))
 
 foenixmcp.s68: $(DEPS)
-	$(CC) $(LDFLAGS) -o $@ $(subst $(STARTUP_OBJ),,$^)
+	$(CC) $(LDFLAGS) -o $@ $(FILES_TO_LINK)
 
 foenixmcp.bin: $(DEPS)
-	$(CC) $(LDFLAGS) -o $@ $(subst $(STARTUP_OBJ),,$^)
+	$(CC) $(LDFLAGS) -o $@ $(FILES_TO_LINK)
 	$(PAD_CMD)
 
+# Rule for generating include file containing RLE-compressed version of BMP splashscreen
+# You need python3 installed obviously, and install some extra packages you can install with:
+# pip3 install Image
+# pip3 install pillow  
+rsrc/bitmaps/splash_%.c: rsrc/bitmaps/splash_%.bmp
+	python3 rsrc/bitmaps/bmp2c.py -i $^ -o $@
 
 # Clean up after a build
 clean:
-	$(RM) $(OBJS_TO_CLEAN) foenixmcp.s37 *.lst *.map *.o
+	$(RM) $(OBJS_TO_CLEAN) $(DEPS) foenixmcp.s37 *.lst *.map
 	$(MAKE) --directory=$(CPU) clean
 	$(MAKE) --directory=cli clean
 	$(MAKE) --directory=dev clean
