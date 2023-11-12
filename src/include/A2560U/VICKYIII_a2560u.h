@@ -25,7 +25,7 @@
 #define VKY3_MCR_640x400            0x00000300
 #define VKY3_MCR_DOUBLE_EN          0x00000400  /* Doubling Pixel */
 #define VKY3_MCR_RES_MASK (VKY3_MCR_800x600|VKY3_MCR_1024x768|VKY3_MCR_DOUBLE_EN) /* Bits used to set the resolution */
-#define VKY3_MCR_GAMMA_EN           0x00010000  /* GAMMA Enable */
+#define VKY3_MCR_GAMMA_EN           0x00010000  /* GAMMA source: 0: DIP switch, 1: VKY3_MCR_MANUAL_GAMMA_EN */
 #define VKY3_MCR_MANUAL_GAMMA_EN    0x00020000  /* Enable Manual GAMMA Enable */
 #define VKY3_MCR_BLANK_EN           0x00040000  /* Turn OFF sync (to monitor in sleep mode) */
 
@@ -62,10 +62,10 @@
 #define MousePtr_A_Mouse1		    ((volatile unsigned short *)0x00B40C0C)
 #define MousePtr_A_Mouse2		    ((volatile unsigned short *)0x00B40C0E)
 
-#define ScreenText_A			    ((volatile char *)0x00B60000)	    /* Text matrix */
-#define ColorText_A				    ((volatile unsigned char *)0x00B68000)	/* Color matrix */
-#define FG_CLUT_A 				    ((volatile unsigned short *)0x00B6C400)	/* Foreground LUT */
-#define BG_CLUT_A 				    ((volatile unsigned short *)0x00B6C440)	/* Background LUT */
+#define ScreenText_A			    ((volatile char * const)0x00B60000)	    /* Text matrix */
+#define ColorText_A				    ((volatile unsigned char * const)0x00B68000)	/* Color matrix */
+#define FG_CLUT_A 				    ((volatile unsigned short *const)0x00B6C400)	/* Foreground LUT */
+#define BG_CLUT_A 				    ((volatile unsigned short *const)0x00B6C440)	/* Background LUT */
 
 #define BM0_Control_Reg			    ((volatile unsigned long *)0x00B40100)
 #define BM0_Addy_Pointer_Reg	    ((volatile unsigned long *)0x00B40104)
