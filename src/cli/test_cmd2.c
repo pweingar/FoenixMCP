@@ -920,8 +920,34 @@ static short cli_test_textscroll (short screen, int argc, const char * argv[]) {
     return 0;
 }
 
+
+static short cli_test_background (short screen, int argc, const char * argv[]) {
+    if (argc != 2) {
+        print (screen, "AARRGGBB color code missing.");
+        return 0;
+    }
+    
+    uint32_t jiffies = sys_time_jiffies() + 60*3;
+
+    uint32_t old_ctrl = *MasterControlReg_A;
+    uint32_t old_rgb = *BackGroundControlReg_A;
+    uint32_t rgb = (uint32_t)cli_eval_number(argv[1]);
+
+    *MasterControlReg_A = (old_ctrl & 0xfffffff0) | (VKY3_MCR_TEXT_EN|VKY3_MCR_TEXT_OVRLY|VKY3_MCR_GRAPH_EN);
+    *BackGroundControlReg_A = rgb;
+
+    // Wait a bit
+    while (sys_time_jiffies() < jiffies);
+
+    *MasterControlReg_A = old_ctrl; // Bitmap+screen overlay
+    *BackGroundControlReg_A = old_rgb;
+
+    return 0;
+}
+
 const t_cli_test_feature cli_test_features[] = {
     {"ANSI", "ANSI: test the ANSI escape codes", cmd_test_ansi},
+    {"BACKGROUND", "BACKGROUND <0xaarrggbb>: set the background color to the give RGB color", cli_test_background},
     {"BITMAP", "BITMAP: test the bitmap screen", cli_test_bitmap},
     {"CREATE", "CREATE <path>: test creating a file", cli_test_create},
     {"IDE", "IDE: test reading the MBR of the IDE drive", cli_test_ide},
