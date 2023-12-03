@@ -62,459 +62,38 @@
 #include "fatfs/ff.h"
 #include "cli/cli.h"
 #include "rsrc/font/MSX_CP437_8x8.h"
-#include "rsrc/bitmaps/image.h"
+//#include "rsrc/bitmaps/image.h"
 
-const char* VolumeStr[FF_VOLUMES] = { "sd", "fd", "hd" };
+/* Performs all hardware initializations */
+static void hw_initialize(void);
 
-extern unsigned long __memory_start;
+/* Install OS drivers */
+static void os_devices_initialize(void);
 
-#if HAS_SUPERIO
-/*
- * Initialize the SuperIO registers
- */
- void init_superio(void) {
-    *GP10_REG = 0x01;
-    *GP11_REG = 0x01;
-    *GP12_REG = 0x01;
-    *GP13_REG = 0x01;
-    *GP14_REG = 0x05;
-    *GP15_REG = 0x05;
-    *GP16_REG = 0x05;
-    *GP17_REG = 0x05;
 
- 	*GP20_REG = 0x00;
- 	*GP24_REG = 0x01;
- 	*GP25_REG = 0x05;
- 	*GP26_REG = 0x84;
-
- 	*GP30_REG = 0x01;
- 	*GP31_REG = 0x01;
- 	*GP32_REG = 0x01;
- 	*GP33_REG = 0x04; // FAN1 GPIO Config
- 	*GP34_REG = 0x01;
- 	*GP35_REG = 0x01;
- 	*GP36_REG = 0x01;
- 	*GP37_REG = 0x01;
-
- 	*GP42_REG = 0x01;
- 	*GP43_REG = 0x01;
-
- 	*GP50_REG = 0x05;
- 	*GP51_REG = 0x05;
- 	*GP52_REG = 0x05;
- 	*GP53_REG = 0x04;
- 	*GP54_REG = 0x05;
- 	*GP55_REG = 0x04;
- 	*GP56_REG = 0x05;
- 	*GP57_REG = 0x04;
-
- 	*GP60_REG = 0x84;
- 	*GP61_REG = 0x84;
-
- 	*GP1_REG = 0x00;
- 	*GP2_REG = 0x01;
- 	*GP3_REG = 0x00;
- 	*GP4_REG = 0x00;
- 	*GP5_REG = 0x00;
- 	*GP6_REG = 0x00;
-
- 	*LED1_REG = 0x01;
- 	*LED2_REG = 0x02;
-
-    *FAN1_REG = 0xE0;       // <= Value to change to Get the Fan running.
-                            // See doc for more options, need to set $80 to get it started and use other bits to change the PWN...
-    *FAN_CTRL_REG = 0x01;
- }
-
- void init_SuperIO_config_zones(void) {
- 	
-    // First step is to get into the Configuration Mode
-    *CONFIG_0x2E_REG = 0x55;    // We need to Get into the Config Mode with 0x55
-
-    // Setting Up Device 0 - Floppy 
-    // {8'h06,16'h03F0,8'h00};
-    // LD
-    *CONFIG_0x2E_REG = 0x07;
-    *CONFIG_0x2F_REG = 0x00;
-    // BA_H (Base address)
-    *CONFIG_0x2E_REG = 0x60;
-    *CONFIG_0x2F_REG = 0x03;
-    // BA_L
-    *CONFIG_0x2E_REG = 0x61;
-    *CONFIG_0x2F_REG = 0xF0;
-    // INT 
-    *CONFIG_0x2E_REG = 0x70;
-    *CONFIG_0x2F_REG = 0x06;
-    // Enable the Zone
-    *CONFIG_0x2E_REG = 0x30;
-    *CONFIG_0x2F_REG = 0x01;   
-
-    // Setting Up Device 3 - Parallel Port 
-    // {8'h07,16'h0378,8'h03};
-    // LD
-    *CONFIG_0x2E_REG = 0x07;
-    *CONFIG_0x2F_REG = 0x03;
-    // BA_H (Base address)
-    *CONFIG_0x2E_REG = 0x60;
-    *CONFIG_0x2F_REG = 0x03;
-    // BA_L
-    *CONFIG_0x2E_REG = 0x61;
-    *CONFIG_0x2F_REG = 0x78;
-    // INT0 
-    *CONFIG_0x2E_REG = 0x70;
-    *CONFIG_0x2F_REG = 0x07;
-    // Parallel Mode 
-    *CONFIG_0x2E_REG = 0xF0;
-    *CONFIG_0x2F_REG = 0x3A;
-    // Enable the Zone
-    *CONFIG_0x2E_REG = 0x30;
-    *CONFIG_0x2F_REG = 0x01;    
-
-    // Setting Up Device 4 - Serial Port 1 
-    // {8'h04,16'h03F8,8'h04};
-    // LD
-    *CONFIG_0x2E_REG = 0x07;
-    *CONFIG_0x2F_REG = 0x04;
-    // BA_H (Base address)
-    *CONFIG_0x2E_REG = 0x60;
-    *CONFIG_0x2F_REG = 0x03;
-    // BA_L
-    *CONFIG_0x2E_REG = 0x61;
-    *CONFIG_0x2F_REG = 0xF8;
-    // INT0 
-    *CONFIG_0x2E_REG = 0x70;
-    *CONFIG_0x2F_REG = 0x04;
-    // Enable the Zone
-    *CONFIG_0x2E_REG = 0x30;
-    *CONFIG_0x2F_REG = 0x01;
-
-     // Setting Up Device 5 - Serial Port 2 
-    // {8'h03,16'h02F8,8'h05};
-    // LD
-    *CONFIG_0x2E_REG = 0x07;
-    *CONFIG_0x2F_REG = 0x05;
-    // BA_H (Base address)
-    *CONFIG_0x2E_REG = 0x60;
-    *CONFIG_0x2F_REG = 0x02;
-    // BA_L
-    *CONFIG_0x2E_REG = 0x61;
-    *CONFIG_0x2F_REG = 0xF8;
-    // INT0 
-    *CONFIG_0x2E_REG = 0x70;
-    *CONFIG_0x2F_REG = 0x03;
-    // Enable the Zone
-    *CONFIG_0x2E_REG = 0x30;
-    *CONFIG_0x2F_REG = 0x01;  
-
-     // Setting Up Device 7 - Keyboard 
-    // {8'h01, 16'h0060,8'h07};
-    // LD
-    *CONFIG_0x2E_REG = 0x07;
-    *CONFIG_0x2F_REG = 0x07;
-    // BA_H (Base address)
-    *CONFIG_0x2E_REG = 0x60;
-    *CONFIG_0x2F_REG = 0x00;
-    // BA_L
-    *CONFIG_0x2E_REG = 0x61;
-    *CONFIG_0x2F_REG = 0x60;
-    // INT0 (Keyboard)
-    *CONFIG_0x2E_REG = 0x70;
-    *CONFIG_0x2F_REG = 0x01;
-    // INT1 (mouse)
-    *CONFIG_0x2E_REG = 0x72;
-    *CONFIG_0x2F_REG = 0x02;    
-    // Enable the Zone
-    *CONFIG_0x2E_REG = 0x30;
-    *CONFIG_0x2F_REG = 0x01;
-
-      // Setting Up Device 9 - Game Port
-    // {8'h00, 16'h0200,8'h09};
-    // LD
-    *CONFIG_0x2E_REG = 0x07;
-    *CONFIG_0x2F_REG = 0x09;
-    // BA_H (Base address)
-    *CONFIG_0x2E_REG = 0x60;
-    *CONFIG_0x2F_REG = 0x02;
-    // BA_L
-    *CONFIG_0x2E_REG = 0x61;
-    *CONFIG_0x2F_REG = 0x00;
-    // INT0
-    *CONFIG_0x2E_REG = 0x70;
-    *CONFIG_0x2F_REG = 0x00; 
-    // Enable the Zone
-    *CONFIG_0x2E_REG = 0x30;
-    *CONFIG_0x2F_REG = 0x01;
-
-      // Setting Up Device 10 - PME (Power Management)
-    // {8'h00, 16'h0100,8'h0A};
-    // LD
-    *CONFIG_0x2E_REG = 0x07;
-    *CONFIG_0x2F_REG = 0x0A;
-    // BA_H (Base address)
-    *CONFIG_0x2E_REG = 0x60;
-    *CONFIG_0x2F_REG = 0x01;
-    // BA_L
-    *CONFIG_0x2E_REG = 0x61;
-    *CONFIG_0x2F_REG = 0x00;
-    // INT0
-    *CONFIG_0x2E_REG = 0x70;
-    *CONFIG_0x2F_REG = 0x00; 
-    // Enable the Zone
-    *CONFIG_0x2E_REG = 0x30;
-    *CONFIG_0x2F_REG = 0x01;
-
-    // Setting Up Device 11 - PME (Power Management)
-    // {8'h05,16'h0330,8'h0B};
-    // LD
-    *CONFIG_0x2E_REG = 0x07;
-    *CONFIG_0x2F_REG = 0x0B;
-    // BA_H (Base address)
-    *CONFIG_0x2E_REG = 0x60;
-    *CONFIG_0x2F_REG = 0x03;
-    // BA_L
-    *CONFIG_0x2E_REG = 0x61;
-    *CONFIG_0x2F_REG = 0x30;
-    // INT0
-    *CONFIG_0x2E_REG = 0x70;
-    *CONFIG_0x2F_REG = 0x05; 
-    // Enable the Zone
-    *CONFIG_0x2E_REG = 0x30;
-    *CONFIG_0x2F_REG = 0x01;
-
-    // Supplemental Settings
-     // Power On Device 
-    *CONFIG_0x2E_REG = 0x22;
-    *CONFIG_0x2F_REG = 0xFF;   
-    // We are done with config. 
-    *CONFIG_0x2E_REG = 0xAA;    // We need to Get into the Config Mode with 0x55     
-
-    *GP60_REG = 0x84;           // THis is to replicate the FPGA behavior when it did the config.
-    *LED1_REG = 0x01;           // THis is to replace the FPGA behavior when it did the config in hardware.
- }
-#endif
-
-void print_error(short channel, char * message, short code) {
-    print(channel, message);
-    print(channel, ": ");
-    print_hex_16(channel, code);
-    print(channel, "\n");
+void mcp_init(void) {
+    hw_initialize();
+	os_devices_initialize();
 }
 
-t_sys_info info;
-
-/*
- * Initialize the kernel systems.
- */
-void initialize() {
-    long target_jiffies;
-    int i;
-    short res;
-
-    /* Setup logging early */
-    log_init();
-
-	/* Fill out the system information */
-	sys_get_information(&info);
-
-    #if 0
-    char msg[] = "This is some text to test that the debug to UART works ok\r\n";
-    {
-        char *c = (char*)msg;
-        while (*c) {
-            uart_put(1, *c++);
-        }
-    }
-
-    // The text below gets corrupted. VBCC libc's not being properly initialized if we didn't call ___main ?
-    //DEBUG("This is some text to test that the debug to UART works ok");
-    #endif
-
-    /* Initialize the memory system */
-    mem_init(0x3d0000);
-
-    /* Hide the mouse */
-    mouse_set_visible(0);
-
-    /* Initialize the variable system */
-    var_init();
-
-    /* Initialize the text channels */
-    txt_init();
-#if HAS_DUAL_SCREEN
-    txt_a2560k_a_install();
-    txt_a2560k_b_install();
-    INFO("Initializing screens...");
-    txt_init_screen(TXT_SCREEN_A2560K_A);
-    txt_init_screen(TXT_SCREEN_A2560K_B);
-
-#elif MODEL == MODEL_FOENIX_A2560U || MODEL == MODEL_FOENIX_A2560U_PLUS
-    txt_a2560u_install();
-    txt_init_screen(TXT_SCREEN_A2560U);
-
-#elif MODEL == MODEL_FOENIX_C256U || MODEL == MODEL_FOENIX_C256U_PLUS || MODEL == MODEL_FOENIX_FMX
-	// Install and initialize the main screen text driver
-	txt_c256_install();
-	txt_init_screen(TXT_SCREEN_C256);
-
-	// If the EVID card is plugged in, install and initialize the EVID driver
-	if (info.screens > 1) {
-		short result = txt_evid_install();
-		txt_init_screen(TXT_SCREEN_EVID);
-	}
-
-#else
-#error Cannot identify screen setup
-#endif
-
-	INFO("Text system initialized...");
-
-#if MODEL == MODEL_FOENIX_C256U || MODEL == MODEL_FOENIX_C256U_PLUS || MODEL == MODEL_FOENIX_FMX
-	// Initialize the bitmap system
-	bm_init();
-	INFO("Bitmap system initialized...");
-#endif
-
-    /* Initialize the indicators */
-    ind_init();
-    INFO("Indicators initialized");
-
-    /* Initialize the interrupt system */
-    int_init();
-    INFO("Interrupts initialized");
-
-#if HAS_SUPERIO
-    /* Initialize the SuperIO chip */
-    init_SuperIO_config_zones(); // This Init used to be done by the FPGA. 
-    init_superio();
-    INFO("SuperIO initialized");
-#endif
-
-    /* Mute the PSG */
-    psg_mute_all();
-    INFO("PSGs muted");
-
-    /* Initialize and mute the SID chips */
-    sid_init_all();
-    INFO("SIDs initialized");
-
-    /* Initialize the Yamaha sound chips (well, turn their volume down at least) */
-    ym_init();
-    INFO("Yamaha soundchips initialized");
-
-    /* Initialize the CODEC */
-    init_codec();
-
-    cdev_init_system();   // Initialize the channel device system
-    INFO("Channel device system ready.");
-
-    bdev_init_system();   // Initialize the channel device system
-    INFO("Block device system ready.");
-
-    if ((res = con_install())) {
-        log_num(LOG_ERROR, "FAILED: Console installation", res);
-    } else {
-        INFO("Console installed.");
-    }
-
-    /* Initialize the timers the MCP uses */
-    timers_init();
-	INFO("Timers initialized");
-
-    /* Initialize the real time clock */
-    rtc_init();
-	INFO("Real time clock initialized");
-
-    target_jiffies = sys_time_jiffies() + 300;     /* 5 seconds minimum */
-    INFO1("target_jiffies assigned: %ld", target_jiffies);
-
-    /* Enable all interrupts */
-    int_enable_all();
-    TRACE("Interrupts enabled");
-
-    /* Play the SID test bong on the Gideon SID implementation */
-    sid_test_internal();
-    TRACE("Internal SID tested");
-
-    if ((res = pata_install())) {
-        log_num(LOG_ERROR, "FAILED: PATA driver installation", res);
-    } else {
-        INFO("PATA driver installed.");
-    }
-
-    if ((res = sdc_install())) {
-        ERROR1("FAILED: SDC driver installation %d", res);
-    } else {
-        INFO("SDC driver installed.");
-    }
-
-#if HAS_FLOPPY
-    if ((res = fdc_install())) {
-        ERROR1("FAILED: Floppy drive initialization %d", res);
-    } else {
-        INFO("Floppy drive initialized.");
-    }
-#endif
-
-    // At this point, we should be able to call into to console to print to the screens
-
-    if ((res = ps2_init())) {
-        print_error(0, "FAILED: PS/2 keyboard initialization", res);
-    } else {
-        logmsg(LOG_INFO, "PS/2 keyboard initialized.");
-    }
-
-#if MODEL == MODEL_FOENIX_A2560K
-    if ((res = kbdmo_init())) {
-        log_num(LOG_ERROR, "FAILED: A2560K built-in keyboard initialization", res);
-    } else {
-        logmsg(LOG_INFO, "A2560K built-in keyboard initialized.");
-    }
-#endif
-
-#if HAS_PARALLEL_PORT
-    if ((res = lpt_install())) {
-        log_num(LOG_ERROR, "FAILED: LPT installation", res);
-    } else {
-        logmsg(LOG_INFO, "LPT installed.");
-    }
-#endif
-
-#if HAS_MIDI_PORTS
-    if ((res = midi_install())) {
-        log_num(LOG_ERROR, "FAILED: MIDI installation", res);
-    } else {
-        logmsg(LOG_INFO, "MIDI installed.");
-    }
-#endif
-
-    if (res = uart_install()) {
-        log_num(LOG_ERROR, "FAILED: serial port initialization", res);
-    } else {
-        logmsg(LOG_INFO, "Serial ports initialized.");
-    }
-
-    if (res = cli_init()) {
-        log_num(LOG_ERROR, "FAILED: CLI initialization", res);
-    } else {
-        INFO("CLI initialized.");
-    }
-
-    if ((res = fsys_init())) {
-        log_num(LOG_ERROR, "FAILED: file system initialization", res);
-    } else {
-        INFO("File system initialized.");
-    }
-}
-
-#define BOOT_DEFAULT    -1  // User chose default, or the time to over-ride has passed
-
-t_file_info file;
 
 int main(int argc, char * argv[]) {
     short result;
     short i;
 
-    initialize();
+	mcp_init();
+	
+    // At this point, we should be able to call into to console to print to the screens
+    /* Play the SID test bong on the Gideon SID implementation */
+    sid_test_internal();
+    TRACE("Internal SID tested");
+
+    if (result = cli_init()) {
+        ERROR1("FAILED: CLI initialization (%d)", result);
+    } else {
+        INFO("CLI initialized.");
+    }
+	
 #if MODEL == MODEL_FOENIX_A2560U || MODEL == MODEL_FOENIX_A2560U_PLUS
     // Make sure the command path is set to the default before we get started
     cli_command_set("");
@@ -525,7 +104,7 @@ TRACE1("Booting from device %d",boot_dev);
     // Start the boot process
     boot_from_bdev(boot_dev);
 
-    logmsg(LOG_INFO, "Stopping.");
+    INFO("Stopping.");
 #elif MODEL == MODEL_FOENIX_C256U || MODEL == MODEL_FOENIX_C256U_PLUS || MODEL == MODEL_FOENIX_FMX
 	printf("\n\nSDC directory:\n");
 	int directory = fsys_opendir("/sd/");
@@ -555,7 +134,215 @@ TRACE1("Booting from device %d",boot_dev);
 	bm_set_visibility(0, 0, 1);
 #endif
 
-    /* Infinite loop... */
+    /* Infinite loop... TODO: we could STOP the processor. */
     while (1) {
 	};
+}
+
+
+const char* VolumeStr[FF_VOLUMES] = { "sd", "fd", "hd" };
+
+t_sys_info info;
+
+/*
+ * Initialize the hardware.
+ */
+static void hw_initialize(void) {
+    int i;
+    short res;
+	
+    /* Setup logging early to facilitate troubleshooting. This may require the UART to be
+	 * functional (e.g. if debugging to the serial port) so it may call uart_init. */
+    log_init();
+
+	/* Fill out the system information */
+	sys_get_information(&info);
+
+    #if 0
+    char msg[] = "This is some text to test that the debug to UART works ok\r\n";
+    {
+        char *c = (char*)msg;
+        while (*c) {
+            uart_put(1, *c++);
+        }
+    }
+
+    // The text below gets corrupted. VBCC libc's not being properly initialized if we didn't call ___main ?
+    //DEBUG("This is some text to test that the debug to UART works ok");
+    #endif
+
+    /* Initialize the memory system.
+     * TODO: The amount of RAM should depend on the machine! E.g; U only has 2MB. */
+    mem_init(0x3d0000);
+
+    /* Initialize the indicators */
+    ind_init();
+    INFO("Indicators initialized");
+
+    /* Initialize the interrupt system */
+    int_init();
+    INFO("Interrupts initialized");
+
+    /* Initialize the timers the MCP uses */
+    timers_init();
+	INFO("Timers initialized");
+
+    /* Initialize the real time clock */
+    rtc_init();
+	INFO("Real time clock initialized");
+
+	
+#if HAS_SUPERIO
+    /* Initialize the SuperIO chip */
+    init_superio();
+    INFO("SuperIO initialized");
+#endif
+	
+	/* Mute the PSG */
+    psg_mute_all();
+    INFO("PSGs muted");
+
+    /* Initialize and mute the SID chips */
+    sid_init_all();
+    INFO("SIDs initialized");
+
+    /* Initialize the Yamaha sound chips (well, turn their volume down at least) */
+    ym_init();
+    INFO("Yamaha soundchips initialized");
+
+    /* Initialize the CODEC (mixer chip) */
+    init_codec();
+
+	/* PS/2 keyboard and mouse */
+    if ((res = ps2_init())) {
+        ERROR1("FAILED: PS/2 keyboard initialization (%d)", res);
+    } else {
+        INFO("PS/2 keyboard initialized.");
+    }
+
+#if MODEL == MODEL_FOENIX_A2560K
+	/* A2560K's special keyboard controller */
+    if ((res = kbdmo_init())) {
+        ERROR1("FAILED: A2560K built-in keyboard initialization (%d)", res);
+    } else {
+        INFO("A2560K built-in keyboard initialized.");
+    }
+#endif
+
+#if MODEL == MODEL_FOENIX_C256U || MODEL == MODEL_FOENIX_C256U_PLUS || MODEL == MODEL_FOENIX_FMX
+	// Initialize the bitmap system
+	bm_init();
+	INFO("Bitmap system initialized...");
+#endif
+
+	/* Initialize the text channels */
+    txt_init();
+
+    /* Enable all interrupts */
+    int_enable_all();
+    TRACE("Interrupts enabled");
+
+	/* Hide the mouse */
+    mouse_set_visible(0);
+
+	/* Other devices are not directly initialized. They are initialized through their OS "device",
+	 * either eagerly or lazyly (i.e whenever the device opened). */	
+}
+
+
+/* Install OS devices */
+static void os_devices_initialize(void) {
+	short res;
+
+#if HAS_PARALLEL_PORT
+	/* Parallel port */
+    if ((res = lpt_install())) {
+        ERROR1("FAILED: LPT installation (%d)", res);
+    } else {
+        INFO("LPT installed.");
+    }
+#endif
+
+#if HAS_MIDI_PORTS
+	/* MIDI ports */
+    if ((res = midi_install())) {
+        ERROR1("FAILED: MIDI installation (%d)", res);
+    } else {
+        INFO("MIDI installed.");
+    }
+#endif
+
+    if (res = uart_install()) {
+        ERROR1("FAILED: serial port initialization (%d)", res);
+    } else {
+        INFO("Serial ports initialized.");
+    }
+	
+    /* Initialize the variable system */
+    var_init();
+	
+    /* Initialize the text channels: register the driver for the screens, then use txt_init_screen. */
+#if HAS_DUAL_SCREEN
+    txt_a2560k_a_install();
+    txt_a2560k_b_install();
+    INFO("Initializing screens...");
+    txt_init_screen(TXT_SCREEN_A2560K_A);
+    txt_init_screen(TXT_SCREEN_A2560K_B);
+
+#elif MODEL == MODEL_FOENIX_A2560U || MODEL == MODEL_FOENIX_A2560U_PLUS
+    txt_a2560u_install();
+    txt_init_screen(TXT_SCREEN_A2560U);
+
+#elif MODEL == MODEL_FOENIX_C256U || MODEL == MODEL_FOENIX_C256U_PLUS || MODEL == MODEL_FOENIX_FMX
+	// Install and initialize the main screen text driver
+	txt_c256_install();
+	txt_init_screen(TXT_SCREEN_C256);
+
+	// If the EVID card is plugged in, install and initialize the EVID driver
+	if (info.screens > 1) {
+		short result = txt_evid_install();
+		txt_init_screen(TXT_SCREEN_EVID);
+	}
+#else
+#error Cannot identify screen setup
+#endif
+	INFO("Text system initialized...");
+
+    cdev_init_system();   // Initialize the channel device system
+    INFO("Channel device system ready.");
+
+    bdev_init_system();   // Initialize the block device system
+    INFO("Block device system ready.");
+
+    if ((res = con_install())) {
+        ERROR1("FAILED: Console installation (%d)", res);
+    } else {
+        INFO("Console installed.");
+    }
+
+    if ((res = pata_install())) {
+        ERROR1("FAILED: PATA driver installation (%d)", res);
+    } else {
+        INFO("PATA driver installed.");
+    }
+
+    if ((res = sdc_install())) {
+        ERROR1("FAILED: SDC driver installation (%d)", res);
+    } else {
+        INFO("SDC driver installed.");
+    }
+
+#if HAS_FLOPPY
+    if ((res = fdc_install())) {
+        ERROR1("FAILED: Floppy drive initialization (%d)", res);
+    } else {
+        INFO("Floppy drive initialized.");
+    }
+#endif
+
+    if ((res = fsys_init())) {
+        ERROR1("FAILED: file system initialization (%d)", res);
+    } else {
+        INFO("File system initialized.");
+    }
 }
