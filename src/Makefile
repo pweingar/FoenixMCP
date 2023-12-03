@@ -78,7 +78,7 @@ endif
 # VERBOSE 5   Log a truly verbose message... the sort you almost never want to bother with
 # Log message above DEFAULT_LOG_LEVEL level will not even be compiled, 
 # ie they will have NO chance of being output even if log_level is high enough.
-DEFAULT_LOG_LEVEL=0
+DEFAULT_LOG_LEVEL=1
 
 
 # Common defines and includes -------------------------------------------------
@@ -151,8 +151,6 @@ else
 endif
 
 
-
-
 # Define OS-dependent tools ---------------------------------------------------
 ifeq ("$(PAD_FLASH_SIZE)","")
     # When compiling an image for flash, size to which the image must be padded
@@ -166,6 +164,7 @@ else
 	PAD_CMD = truncate -s $(PAD_FLASH_SIZE) $@
 endif
 
+# Flags (are automatically used by make) --------------------------------------
 ASFLAGS := $(ASFLAGS) $(DEFINES) $(INCLUDES)
 CFLAGS  := $(CFLAGS) $(DEFINES) $(INCLUDES)
 LDFLAGS := $(LDFLAGS) $(LDFLAGS_FOR_UNIT)
@@ -188,11 +187,11 @@ cpu_c_obj := $(subst .c,.o,$(cpu_c_src)) $(subst .s,.o,$(cpu_s_src))
 dev_c_src = block.c channel.c console.c fsys.c pata.c ps2.c rtc.c sdc.c txt_screen.c uart.c
 dev_s_src =
 ifeq ($(UNIT),a2560k)
-	dev_c_src := $(dev_c_src) fdc.c kbd_mo.c lpt.c midi.c txt_a2560k_a.c txt_a2560k_b.c m68040/fdc_m68040.c
+	dev_c_src := $(dev_c_src) fdc.c kbd_mo.c lpt.c midi.c txt_a2560k_a.c txt_a2560k_b.c m68040/fdc_m68040.c superio.c
 else ifeq ($(UNIT),genx)
-	dev_c_src := $(dev_c_src) fdc.c lpt.c midi.c txt_a2560k_a.c txt_a2560k_b.c #m68040/fdc_m68040.c
+	dev_c_src := $(dev_c_src) fdc.c lpt.c midi.c txt_a2560k_a.c txt_a2560k_b.c #m68040/fdc_m68040.c superio.c
 else ifeq ($(UNIT),a2560x)
-	dev_c_src := $(dev_c_src) fdc.c lpt.c midi.c txt_a2560k_a.c txt_a2560k_b.c #m68040/fdc_m68040.c
+	dev_c_src := $(dev_c_src) fdc.c lpt.c midi.c txt_a2560k_a.c txt_a2560k_b.c #m68040/fdc_m68040.c superio.c
 else ifeq ($(UNIT),a2560u)
 	dev_c_src := $(dev_c_src) txt_a2560u.o
 endif
@@ -249,6 +248,7 @@ foenixmcp.s68: $(DEPS)
 
 foenixmcp.bin: $(DEPS)
 	$(CC) $(LDFLAGS) -o $@ $(FILES_TO_LINK)
+# TODO Test that the file is <= PAD_FLASH_SIZE bytes otherwise'll be slashing the OS !
 	$(PAD_CMD)
 
 # Rule for generating include file containing RLE-compressed version of BMP splashscreen
