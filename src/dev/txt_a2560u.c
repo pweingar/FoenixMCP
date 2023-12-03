@@ -392,7 +392,7 @@ static short txt_a2560u_set_color(unsigned char foreground, unsigned char backgr
 
 
 /* This works around a bug in the A2560U's FPGA where reading bytes of text memory
- * (possibly color as well ?) are inverted. Ie if the memory contains AB, A beint on an
+ * (possibly color as well ?) are inverted. Ie if the memory contains AB, A being on an
  * even address,  then when reading A you'll get B and reading B you'll get A. This
  * functions can be removed if the FPGA is corrected. */
 static char read_swapped_byte(const uint8_t *addr) {
