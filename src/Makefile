@@ -114,7 +114,7 @@ PAD_FLASH_SIZE=524288
 ifeq ($(OS),Windows_NT)
 	export CFLAGS = -cpu=$(VBCC_CPU) +$(CFG_FILE) -I. -I$(CURDIR)/include -I$(CURDIR)
 	export RM = cmd /C del /Q /F
-	PAD_CMD = fsutil seteof $@ $(PAD_FLASH_SIZE)
+	PAD_CMD = fsutil file setEOF $@ $(PAD_FLASH_SIZE)
 else
 	export CFLAGS = -cpu=$(VBCC_CPU) +$(CFG_FILE)_linux -I. -I$(CURDIR)/include -I$(CURDIR)
 	export RM = rm -f
