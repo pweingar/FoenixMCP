@@ -211,7 +211,7 @@ short uart_status(p_channel chan) {
  * @param mode an unused parameter
  * @return 0 on success, any other number is an error
  */
-short uart_open(p_channel chan, const char * spec, short mode) {
+short uart_open(p_channel chan, const uint8_t * spec, short mode) {
     unsigned short bps = 0, lcr = 0;
     char * saveptr;
     char spec_copy[80];
@@ -376,7 +376,7 @@ short uart_read_b(p_channel chan) {
  * @param size the size of the buffer.
  * @return number of bytes read, any negative number is an error code
  */
-short uart_read(p_channel chan, char * buffer, short size) {
+short uart_read(p_channel chan, uint8_t * buffer, short size) {
     short i = 0, count = 0;
     for (i = 0; i < size; i++) {
         buffer[i] = uart_get(cdev_to_uart(chan->dev));
@@ -394,7 +394,7 @@ short uart_read(p_channel chan, char * buffer, short size) {
  * @param size the size of the buffer.
  * @returns number of bytes read, any negative number is an error code
  */
-short uart_readline(p_channel chan, char * buffer, short size) {
+short uart_readline(p_channel chan, uint8_t * buffer, short size) {
     short i = 0, count = 0;
     for (i = 0; i < size; i++) {
         char c = uart_get(cdev_to_uart(chan->dev));
@@ -428,7 +428,7 @@ short uart_write_b(p_channel chan, unsigned char c) {
  * @param size the size of the buffer.
  * @return number of bytes written, any negative number is an error code
  */
-short uart_write(p_channel chan, const char * buffer, short size) {
+short uart_write(p_channel chan, const uint8_t * buffer, short size) {
     int i;
     for (i = 0; i < size; i++) {
         uart_put(cdev_to_uart(chan->dev), buffer[i]);
