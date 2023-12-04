@@ -988,7 +988,7 @@ short cli_start_repl(short channel, const char * init_cwd) {
         result = sys_fsys_set_cwd(init_cwd);
         if (result) {
             char message[80];
-            sprintf(message, "Unable to set startup directory: %s\n", err_message(result));
+            sprintf(message, "Unable to set startup directory: %s\n", sys_err_message(result));
             print(g_current_channel, message);
         }
     }
@@ -1004,7 +1004,7 @@ short cli_start_repl(short channel, const char * init_cwd) {
             print(0, "Unable to start ");
             print(0, cli_command_path);
             print(0, ": ");
-            print(0, err_message(result));
+            print(0, sys_err_message(result));
             while (1) ;
         }
         return 0;
@@ -1038,7 +1038,7 @@ void cli_rerepl() {
             print(0, "Unable to start ");
             print(0, cli_command_path);
             print(0, ": ");
-            print(0, err_message(result));
+            print(0, sys_err_message(result));
             while (1) ;
         }
 
