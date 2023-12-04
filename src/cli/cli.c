@@ -347,6 +347,7 @@ short cli_exec(short channel, char * command, int argc, const char * argv[]) {
     while ((commands != 0) && (commands->name != 0)) {
         // Does the command match the name?
         if (strcmp(commands->name, command) == 0) {
+            //print(channel,"Executing:");print(channel,commands->name);print(channel,"\r\n");
             // Found it, execute the handler
             return commands->handler(channel, argc, argv);
         } else {

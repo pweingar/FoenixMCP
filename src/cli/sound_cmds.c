@@ -801,7 +801,7 @@ short midi_tx_test(short channel, int argc, const char * argv[]) {
 
         sys_chan_close(midi);
     } else {
-        sprintf(message, "Couldn't open MIDI port: %s\n", err_message(midi));
+        sprintf(message, "Couldn't open MIDI port: %s\n", sys_err_message(midi));
         print(channel, message);
         return 0;
     }
@@ -827,7 +827,7 @@ short midi_rx_test(short channel, int argc, const char * argv[]) {
         while (scancode != 0x01) {
             short input = sys_chan_read_b(midi);
             if (input < 0) {
-                sprintf(message, "Could not read from MIDI port: %s\n", err_message(input));
+                sprintf(message, "Could not read from MIDI port: %s\n", sys_err_message(input));
                 print(channel, message);
                 return 0;
             }
@@ -850,7 +850,7 @@ short midi_rx_test(short channel, int argc, const char * argv[]) {
         print_c(channel, '\n');
         sys_chan_close(midi);
     } else {
-        sprintf(message, "Couldn't open MIDI port: %s\n", err_message(midi));
+        sprintf(message, "Couldn't open MIDI port: %s\n", sys_err_message(midi));
         print(channel, message);
         return 0;
     }
@@ -879,7 +879,7 @@ short midi_loop_test(short channel, int argc, const char * argv[]) {
             print(channel, "Sending: ");
             result = sys_chan_write_b(midi, output);
             if (result) {
-                sprintf(message, "Unable to write a byte to the MIDI ports: %s\n", err_message(result));
+                sprintf(message, "Unable to write a byte to the MIDI ports: %s\n", sys_err_message(result));
                 print(channel, message);
                 return 0;
             }
@@ -888,7 +888,7 @@ short midi_loop_test(short channel, int argc, const char * argv[]) {
 
             short input = sys_chan_read_b(midi);
             if (input < 0) {
-                sprintf(message, "Unable to read a byte to the MIDI ports: %s\n", err_message(input));
+                sprintf(message, "Unable to read a byte to the MIDI ports: %s\n", sys_err_message(input));
                 print(channel, message);
                 return 0;
             }
@@ -906,7 +906,7 @@ short midi_loop_test(short channel, int argc, const char * argv[]) {
         sys_chan_write(channel, "\n", 1);
         sys_chan_close(midi);
     } else {
-        sprintf(message, "Couldn't open MIDI port: %s\n", err_message(midi));
+        sprintf(message, "Couldn't open MIDI port: %s\n", sys_err_message(midi));
         print(channel, message);
         return 0;
     }

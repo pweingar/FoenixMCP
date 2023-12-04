@@ -1,5 +1,6 @@
 /* Functions for the SuperIO */
 
+#include "features.h"
 #include "superio.h"
 
 #if HAS_SUPERIO

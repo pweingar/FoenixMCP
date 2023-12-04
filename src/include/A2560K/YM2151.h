@@ -1,496 +1,498 @@
 #ifndef YM2151_H_   /* Include guard */
 #define YM2151_H_
 
-//;--------------------------------------------------------------------------------------
-//;--------------------------------------------------------------------------------------
-//;--------------------------------------------------------------------------------------
-// External OPM
-unsigned char * EXT_OPM_01_TEST						= (void *) 0xFEC20601;
-unsigned char * EXT_OPM_08_KEY_ON_OFF				= (void *) 0xFEC20608;
-unsigned char * EXT_OPM_0F_NE_NFREQ					= (void *) 0xFEC2060F;
-unsigned char * EXT_OPM_10_CLK_A1					= (void *) 0xFEC20610;
-unsigned char * EXT_OPM_11_CLK_A2					= (void *) 0xFEC20611;
-unsigned char * EXT_OPM_12_CLK_B					= (void *) 0xFEC20612;
-unsigned char * EXT_OPM_14_CMS_FLAG_RST_IRQEN_LD	= (void *) 0xFEC20614;
-unsigned char * EXT_OPM_18_LFRQ						= (void *) 0xFEC20618;
-unsigned char * EXT_OPM_19_PMD_AMD					= (void *) 0xFEC20619;
-unsigned char * EXT_OPM_1B_CT_W						= (void *) 0xFEC2061B;
+#include <stdint.h>
 
-unsigned char * EXT_OPM_20_A_RL_FR_CONNECT		= (void *) 0xFEC20620;
-unsigned char * EXT_OPM_21_B_RL_FR_CONNECT		= (void *) 0xFEC20621;
-unsigned char * EXT_OPM_22_C_RL_FR_CONNECT		= (void *) 0xFEC20622;
-unsigned char * EXT_OPM_23_D_RL_FR_CONNECT		= (void *) 0xFEC20623;
-unsigned char * EXT_OPM_24_E_RL_FR_CONNECT		= (void *) 0xFEC20624;
-unsigned char * EXT_OPM_25_F_RL_FR_CONNECT		= (void *) 0xFEC20625;
-unsigned char * EXT_OPM_26_G_RL_FR_CONNECT		= (void *) 0xFEC20626;
-unsigned char * EXT_OPM_27_H_RL_FR_CONNECT		= (void *) 0xFEC20627;
-unsigned char * EXT_OPM_28_A_KC					= (void *) 0xFEC20628;
-unsigned char * EXT_OPM_29_B_KC					= (void *) 0xFEC20629;
-unsigned char * EXT_OPM_2A_C_KC					= (void *) 0xFEC2062A;
-unsigned char * EXT_OPM_2B_D_KC					= (void *) 0xFEC2062B;
-unsigned char * EXT_OPM_2C_E_KC					= (void *) 0xFEC2062C;
-unsigned char * EXT_OPM_2D_F_KC					= (void *) 0xFEC2062D;
-unsigned char * EXT_OPM_2E_G_KC					= (void *) 0xFEC2062E;
-unsigned char * EXT_OPM_2F_H_KC					= (void *) 0xFEC2062F;
-unsigned char * EXT_OPM_30_A_KF					= (void *) 0xFEC20630;
-unsigned char * EXT_OPM_31_B_KF					= (void *) 0xFEC20631;
-unsigned char * EXT_OPM_32_C_KF					= (void *) 0xFEC20632;
-unsigned char * EXT_OPM_33_D_KF					= (void *) 0xFEC20633;
-unsigned char * EXT_OPM_34_E_KF					= (void *) 0xFEC20634;
-unsigned char * EXT_OPM_35_F_KF					= (void *) 0xFEC20635;
-unsigned char * EXT_OPM_36_G_KF					= (void *) 0xFEC20636;	
-unsigned char * EXT_OPM_37_H_KF					= (void *) 0xFEC20637;
-unsigned char * EXT_OPM_38_A_PMS_AMS			= (void *) 0xFEC20638;
-unsigned char * EXT_OPM_39_B_PMS_AMS			= (void *) 0xFEC20639;
-unsigned char * EXT_OPM_3A_C_PMS_AMS			= (void *) 0xFEC2063A;
-unsigned char * EXT_OPM_3B_D_PMS_AMS			= (void *) 0xFEC2063B;
-unsigned char * EXT_OPM_3C_E_PMS_AMS			= (void *) 0xFEC2063C;
-unsigned char * EXT_OPM_3D_F_PMS_AMS			= (void *) 0xFEC2063D;
-unsigned char * EXT_OPM_3E_G_PMS_AMS			= (void *) 0xFEC2063E;
-unsigned char * EXT_OPM_3F_H_PMS_AMS			= (void *) 0xFEC2063F;
-unsigned char * EXT_OPM_40_A_M1_DT1_MUL			= (void *) 0xFEC20640;
-unsigned char * EXT_OPM_41_B_M1_DT1_MUL			= (void *) 0xFEC20641;
-unsigned char * EXT_OPM_42_C_M1_DT1_MUL			= (void *) 0xFEC20642;
-unsigned char * EXT_OPM_43_D_M1_DT1_MUL			= (void *) 0xFEC20643;
-unsigned char * EXT_OPM_44_E_M1_DT1_MUL			= (void *) 0xFEC20644;
-unsigned char * EXT_OPM_45_F_M1_DT1_MUL			= (void *) 0xFEC20645;
-unsigned char * EXT_OPM_46_G_M1_DT1_MUL			= (void *) 0xFEC20646;
-unsigned char * EXT_OPM_47_H_M1_DT1_MUL			= (void *) 0xFEC20647;
-unsigned char * EXT_OPM_48_A_M2_DT1_MUL			= (void *) 0xFEC20648;
-unsigned char * EXT_OPM_49_B_M2_DT1_MUL			= (void *) 0xFEC20649;
-unsigned char * EXT_OPM_4A_C_M2_DT1_MUL			= (void *) 0xFEC2064A;
-unsigned char * EXT_OPM_4B_D_M2_DT1_MUL			= (void *) 0xFEC2064B;
-unsigned char * EXT_OPM_4C_E_M2_DT1_MUL			= (void *) 0xFEC2064C;
-unsigned char * EXT_OPM_4D_F_M2_DT1_MUL			= (void *) 0xFEC2064D;
-unsigned char * EXT_OPM_4E_G_M2_DT1_MUL			= (void *) 0xFEC2064E;
-unsigned char * EXT_OPM_4F_H_M2_DT1_MUL			= (void *) 0xFEC2064F;
-unsigned char * EXT_OPM_50_A_C1_DT1_MUL			= (void *) 0xFEC20650;
-unsigned char * EXT_OPM_51_B_C1_DT1_MUL			= (void *) 0xFEC20651;
-unsigned char * EXT_OPM_52_C_C1_DT1_MUL			= (void *) 0xFEC20652;
-unsigned char * EXT_OPM_53_D_C1_DT1_MUL			= (void *) 0xFEC20653;
-unsigned char * EXT_OPM_54_E_C1_DT1_MUL			= (void *) 0xFEC20654;
-unsigned char * EXT_OPM_55_F_C1_DT1_MUL			= (void *) 0xFEC20655;
-unsigned char * EXT_OPM_56_G_C1_DT1_MUL			= (void *) 0xFEC20656;
-unsigned char * EXT_OPM_57_H_C1_DT1_MUL			= (void *) 0xFEC20657;
-unsigned char * EXT_OPM_58_A_C2_DT1_MUL			= (void *) 0xFEC20658;
-unsigned char * EXT_OPM_59_B_C2_DT1_MUL			= (void *) 0xFEC20659;
-unsigned char * EXT_OPM_5A_C_C2_DT1_MUL			= (void *) 0xFEC2065A;
-unsigned char * EXT_OPM_5B_D_C2_DT1_MUL			= (void *) 0xFEC2065B;
-unsigned char * EXT_OPM_5C_E_C2_DT1_MUL			= (void *) 0xFEC2065C;
-unsigned char * EXT_OPM_5D_F_C2_DT1_MUL			= (void *) 0xFEC2065D;
-unsigned char * EXT_OPM_5E_G_C2_DT1_MUL			= (void *) 0xFEC2065E;
-unsigned char * EXT_OPM_5F_H_C2_DT1_MUL			= (void *) 0xFEC2065F;
-unsigned char * EXT_OPM_60_A_M1_TL				= (void *) 0xFEC20660;
-unsigned char * EXT_OPM_61_B_M1_TL				= (void *) 0xFEC20661;
-unsigned char * EXT_OPM_62_C_M1_TL				= (void *) 0xFEC20662;
-unsigned char * EXT_OPM_63_D_M1_TL				= (void *) 0xFEC20663;
-unsigned char * EXT_OPM_64_E_M1_TL				= (void *) 0xFEC20664;
-unsigned char * EXT_OPM_65_F_M1_TL				= (void *) 0xFEC20665;
-unsigned char * EXT_OPM_66_G_M1_TL				= (void *) 0xFEC20666;
-unsigned char * EXT_OPM_67_H_M1_TL				= (void *) 0xFEC20667;
-unsigned char * EXT_OPM_68_A_M2_TL				= (void *) 0xFEC20668;
-unsigned char * EXT_OPM_69_B_M2_TL				= (void *) 0xFEC20669;
-unsigned char * EXT_OPM_6A_C_M2_TL				= (void *) 0xFEC2066A;
-unsigned char * EXT_OPM_6B_D_M2_TL				= (void *) 0xFEC2066B;
-unsigned char * EXT_OPM_6C_E_M2_TL				= (void *) 0xFEC2066C;
-unsigned char * EXT_OPM_6D_F_M2_TL				= (void *) 0xFEC2066D;
-unsigned char * EXT_OPM_6E_G_M2_TL				= (void *) 0xFEC2066E;
-unsigned char * EXT_OPM_6F_H_M2_TL				= (void *) 0xFEC2066F;
-unsigned char * EXT_OPM_70_A_C1_TL				= (void *) 0xFEC20670;
-unsigned char * EXT_OPM_71_B_C1_TL				= (void *) 0xFEC20671;
-unsigned char * EXT_OPM_72_C_C1_TL				= (void *) 0xFEC20672;
-unsigned char * EXT_OPM_73_D_C1_TL				= (void *) 0xFEC20673;
-unsigned char * EXT_OPM_74_E_C1_TL				= (void *) 0xFEC20674;
-unsigned char * EXT_OPM_75_F_C1_TL				= (void *) 0xFEC20675;
-unsigned char * EXT_OPM_76_G_C1_TL				= (void *) 0xFEC20676;
-unsigned char * EXT_OPM_77_H_C1_TL				= (void *) 0xFEC20677;
-unsigned char * EXT_OPM_78_A_C2_TL				= (void *) 0xFEC20678;
-unsigned char * EXT_OPM_79_B_C2_TL				= (void *) 0xFEC20679;
-unsigned char * EXT_OPM_7A_C_C2_TL				= (void *) 0xFEC2067A;
-unsigned char * EXT_OPM_7B_D_C2_TL				= (void *) 0xFEC2067B;
-unsigned char * EXT_OPM_7C_E_C2_TL				= (void *) 0xFEC2067C;
-unsigned char * EXT_OPM_7D_F_C2_TL				= (void *) 0xFEC2067D;
-unsigned char * EXT_OPM_7E_G_C2_TL				= (void *) 0xFEC2067E;
-unsigned char * EXT_OPM_7F_H_C2_TL				= (void *) 0xFEC2067F;
-unsigned char * EXT_OPM_80_A_M1_KS_AR			= (void *) 0xFEC20680;
-unsigned char * EXT_OPM_81_B_M1_KS_AR			= (void *) 0xFEC20681;
-unsigned char * EXT_OPM_82_C_M1_KS_AR			= (void *) 0xFEC20682;
-unsigned char * EXT_OPM_83_D_M1_KS_AR			= (void *) 0xFEC20683;
-unsigned char * EXT_OPM_84_E_M1_KS_AR			= (void *) 0xFEC20684;
-unsigned char * EXT_OPM_85_F_M1_KS_AR			= (void *) 0xFEC20685;
-unsigned char * EXT_OPM_86_G_M1_KS_AR			= (void *) 0xFEC20686;
-unsigned char * EXT_OPM_87_H_M1_KS_AR			= (void *) 0xFEC20687;
-unsigned char * EXT_OPM_88_A_M2_KS_AR			= (void *) 0xFEC20688;
-unsigned char * EXT_OPM_89_B_M2_KS_AR			= (void *) 0xFEC20689;
-unsigned char * EXT_OPM_8A_C_M2_KS_AR			= (void *) 0xFEC2068A;
-unsigned char * EXT_OPM_8B_D_M2_KS_AR			= (void *) 0xFEC2068B;
-unsigned char * EXT_OPM_8C_E_M2_KS_AR			= (void *) 0xFEC2068C;
-unsigned char * EXT_OPM_8D_F_M2_KS_AR			= (void *) 0xFEC2068D;
-unsigned char * EXT_OPM_8E_G_M2_KS_AR			= (void *) 0xFEC2068E;
-unsigned char * EXT_OPM_8F_H_M2_KS_AR			= (void *) 0xFEC2068F;
-unsigned char * EXT_OPM_90_A_C1_KS_AR			= (void *) 0xFEC20690;
-unsigned char * EXT_OPM_91_B_C1_KS_AR			= (void *) 0xFEC20691;
-unsigned char * EXT_OPM_92_C_C1_KS_AR			= (void *) 0xFEC20692;
-unsigned char * EXT_OPM_93_D_C1_KS_AR			= (void *) 0xFEC20693;
-unsigned char * EXT_OPM_94_E_C1_KS_AR			= (void *) 0xFEC20694;
-unsigned char * EXT_OPM_95_F_C1_KS_AR			= (void *) 0xFEC20695;
-unsigned char * EXT_OPM_96_G_C1_KS_AR			= (void *) 0xFEC20696;
-unsigned char * EXT_OPM_97_H_C1_KS_AR			= (void *) 0xFEC20697;
-unsigned char * EXT_OPM_98_A_C2_KS_AR			= (void *) 0xFEC20698;
-unsigned char * EXT_OPM_99_B_C2_KS_AR			= (void *) 0xFEC20699;
-unsigned char * EXT_OPM_9A_C_C2_KS_AR			= (void *) 0xFEC2069A;
-unsigned char * EXT_OPM_9B_D_C2_KS_AR			= (void *) 0xFEC2069B;
-unsigned char * EXT_OPM_9C_E_C2_KS_AR			= (void *) 0xFEC2069C;
-unsigned char * EXT_OPM_9D_F_C2_KS_AR			= (void *) 0xFEC2069D;
-unsigned char * EXT_OPM_9E_G_C2_KS_AR			= (void *) 0xFEC2069E;
-unsigned char * EXT_OPM_9F_H_C2_KS_AR			= (void *) 0xFEC2069F;
-unsigned char * EXT_OPM_A0_A_M1_AMS_EN_D1R		= (void *) 0xFEC206A0;
-unsigned char * EXT_OPM_A1_B_M1_AMS_EN_D1R		= (void *) 0xFEC206A1;
-unsigned char * EXT_OPM_A2_C_M1_AMS_EN_D1R		= (void *) 0xFEC206A2;
-unsigned char * EXT_OPM_A3_D_M1_AMS_EN_D1R		= (void *) 0xFEC206A3;
-unsigned char * EXT_OPM_A4_E_M1_AMS_EN_D1R		= (void *) 0xFEC206A4;
-unsigned char * EXT_OPM_A5_F_M1_AMS_EN_D1R		= (void *) 0xFEC206A5;
-unsigned char * EXT_OPM_A6_G_M1_AMS_EN_D1R		= (void *) 0xFEC206A6;
-unsigned char * EXT_OPM_A7_H_M1_AMS_EN_D1R		= (void *) 0xFEC206A7;
-unsigned char * EXT_OPM_A8_A_M2_AMS_EN_D1R		= (void *) 0xFEC206A8;
-unsigned char * EXT_OPM_A9_B_M2_AMS_EN_D1R		= (void *) 0xFEC206A9;
-unsigned char * EXT_OPM_AA_C_M2_AMS_EN_D1R		= (void *) 0xFEC206AA;
-unsigned char * EXT_OPM_AB_D_M2_AMS_EN_D1R		= (void *) 0xFEC206AB;
-unsigned char * EXT_OPM_AC_E_M2_AMS_EN_D1R		= (void *) 0xFEC206AC;
-unsigned char * EXT_OPM_AD_F_M2_AMS_EN_D1R		= (void *) 0xFEC206AD;
-unsigned char * EXT_OPM_AE_G_M2_AMS_EN_D1R		= (void *) 0xFEC206AE;
-unsigned char * EXT_OPM_AF_H_M2_AMS_EN_D1R		= (void *) 0xFEC206AF;
-unsigned char * EXT_OPM_B0_A_C1_AMS_EN_D1R		= (void *) 0xFEC206B0;
-unsigned char * EXT_OPM_B1_B_C1_AMS_EN_D1R		= (void *) 0xFEC206B1;
-unsigned char * EXT_OPM_B2_C_C1_AMS_EN_D1R		= (void *) 0xFEC206B2;
-unsigned char * EXT_OPM_B3_D_C1_AMS_EN_D1R		= (void *) 0xFEC206B3;
-unsigned char * EXT_OPM_B4_E_C1_AMS_EN_D1R		= (void *) 0xFEC206B4;
-unsigned char * EXT_OPM_B5_F_C1_AMS_EN_D1R		= (void *) 0xFEC206B5;
-unsigned char * EXT_OPM_B6_G_C1_AMS_EN_D1R		= (void *) 0xFEC206B6;
-unsigned char * EXT_OPM_B7_H_C1_AMS_EN_D1R		= (void *) 0xFEC206B7;
-unsigned char * EXT_OPM_B8_A_C2_AMS_EN_D1R		= (void *) 0xFEC206B8;
-unsigned char * EXT_OPM_B9_B_C2_AMS_EN_D1R		= (void *) 0xFEC206B9;
-unsigned char * EXT_OPM_BA_C_C2_AMS_EN_D1R		= (void *) 0xFEC206BA;
-unsigned char * EXT_OPM_BB_D_C2_AMS_EN_D1R		= (void *) 0xFEC206BB;
-unsigned char * EXT_OPM_BC_E_C2_AMS_EN_D1R		= (void *) 0xFEC206BC;
-unsigned char * EXT_OPM_BD_F_C2_AMS_EN_D1R		= (void *) 0xFEC206BD;
-unsigned char * EXT_OPM_BE_G_C2_AMS_EN_D1R		= (void *) 0xFEC206BE;
-unsigned char * EXT_OPM_BF_H_C2_AMS_EN_D1R		= (void *) 0xFEC206BF;
-unsigned char * EXT_OPM_C0_A_M1_DT2_D2R			= (void *) 0xFEC206C0;
-unsigned char * EXT_OPM_C1_B_M1_DT2_D2R			= (void *) 0xFEC206C1;
-unsigned char * EXT_OPM_C2_C_M1_DT2_D2R			= (void *) 0xFEC206C2;
-unsigned char * EXT_OPM_C3_D_M1_DT2_D2R			= (void *) 0xFEC206C3;
-unsigned char * EXT_OPM_C4_E_M1_DT2_D2R			= (void *) 0xFEC206C4;
-unsigned char * EXT_OPM_C5_F_M1_DT2_D2R			= (void *) 0xFEC206C5;
-unsigned char * EXT_OPM_C6_G_M1_DT2_D2R			= (void *) 0xFEC206C6;
-unsigned char * EXT_OPM_C7_H_M1_DT2_D2R			= (void *) 0xFEC206C7;
-unsigned char * EXT_OPM_C8_A_M2_DT2_D2R			= (void *) 0xFEC206C8;
-unsigned char * EXT_OPM_C9_B_M2_DT2_D2R			= (void *) 0xFEC206C9;
-unsigned char * EXT_OPM_CA_C_M2_DT2_D2R			= (void *) 0xFEC206CA;
-unsigned char * EXT_OPM_CB_D_M2_DT2_D2R			= (void *) 0xFEC206CB;
-unsigned char * EXT_OPM_CC_E_M2_DT2_D2R			= (void *) 0xFEC206CC;
-unsigned char * EXT_OPM_CD_F_M2_DT2_D2R			= (void *) 0xFEC206CD;
-unsigned char * EXT_OPM_CE_G_M2_DT2_D2R			= (void *) 0xFEC206CE;
-unsigned char * EXT_OPM_CF_H_M2_DT2_D2R			= (void *) 0xFEC206CF;
-unsigned char * EXT_OPM_D0_A_C1_DT2_D2R			= (void *) 0xFEC206D0;
-unsigned char * EXT_OPM_D1_B_C1_DT2_D2R			= (void *) 0xFEC206D1;
-unsigned char * EXT_OPM_D2_C_C1_DT2_D2R			= (void *) 0xFEC206D2;
-unsigned char * EXT_OPM_D3_D_C1_DT2_D2R			= (void *) 0xFEC206D3;
-unsigned char * EXT_OPM_D4_E_C1_DT2_D2R			= (void *) 0xFEC206D4;
-unsigned char * EXT_OPM_D5_F_C1_DT2_D2R			= (void *) 0xFEC206D5;
-unsigned char * EXT_OPM_D6_G_C1_DT2_D2R			= (void *) 0xFEC206D6;
-unsigned char * EXT_OPM_D7_H_C1_DT2_D2R			= (void *) 0xFEC206D7;
-unsigned char * EXT_OPM_D8_A_C2_DT2_D2R			= (void *) 0xFEC206D8;
-unsigned char * EXT_OPM_D9_B_C2_DT2_D2R			= (void *) 0xFEC206D9;
-unsigned char * EXT_OPM_DA_C_C2_DT2_D2R			= (void *) 0xFEC206DA;
-unsigned char * EXT_OPM_DB_D_C2_DT2_D2R			= (void *) 0xFEC206DB;
-unsigned char * EXT_OPM_DC_E_C2_DT2_D2R			= (void *) 0xFEC206DC;
-unsigned char * EXT_OPM_DD_F_C2_DT2_D2R			= (void *) 0xFEC206DD;
-unsigned char * EXT_OPM_DE_G_C2_DT2_D2R			= (void *) 0xFEC206DE;
-unsigned char * EXT_OPM_DF_H_C2_DT2_D2R			= (void *) 0xFEC206DF;
-unsigned char * EXT_OPM_E0_A_M1_D1L_RR			= (void *) 0xFEC206E0;
-unsigned char * EXT_OPM_E1_B_M1_D1L_RR			= (void *) 0xFEC206E1;
-unsigned char * EXT_OPM_E2_C_M1_D1L_RR			= (void *) 0xFEC206E2;
-unsigned char * EXT_OPM_E3_D_M1_D1L_RR			= (void *) 0xFEC206E3;
-unsigned char * EXT_OPM_E4_E_M1_D1L_RR			= (void *) 0xFEC206E4;
-unsigned char * EXT_OPM_E5_F_M1_D1L_RR			= (void *) 0xFEC206E5;
-unsigned char * EXT_OPM_E6_G_M1_D1L_RR			= (void *) 0xFEC206E6;
-unsigned char * EXT_OPM_E7_H_M1_D1L_RR			= (void *) 0xFEC206E7;
-unsigned char * EXT_OPM_E8_A_M2_D1L_RR			= (void *) 0xFEC206E8;
-unsigned char * EXT_OPM_E9_B_M2_D1L_RR			= (void *) 0xFEC206E9;
-unsigned char * EXT_OPM_EA_C_M2_D1L_RR			= (void *) 0xFEC206EA;
-unsigned char * EXT_OPM_EB_D_M2_D1L_RR			= (void *) 0xFEC206EB;
-unsigned char * EXT_OPM_EC_E_M2_D1L_RR			= (void *) 0xFEC206EC;
-unsigned char * EXT_OPM_ED_F_M2_D1L_RR			= (void *) 0xFEC206ED;
-unsigned char * EXT_OPM_EE_G_M2_D1L_RR			= (void *) 0xFEC206EE;
-unsigned char * EXT_OPM_EF_H_M2_D1L_RR			= (void *) 0xFEC206EF;
-unsigned char * EXT_OPM_F0_A_C1_D1L_RR			= (void *) 0xFEC206F0;
-unsigned char * EXT_OPM_F1_B_C1_D1L_RR			= (void *) 0xFEC206F1;
-unsigned char * EXT_OPM_F2_C_C1_D1L_RR			= (void *) 0xFEC206F2;
-unsigned char * EXT_OPM_F3_D_C1_D1L_RR			= (void *) 0xFEC206F3;
-unsigned char * EXT_OPM_F4_E_C1_D1L_RR			= (void *) 0xFEC206F4;
-unsigned char * EXT_OPM_F5_F_C1_D1L_RR			= (void *) 0xFEC206F5;
-unsigned char * EXT_OPM_F6_G_C1_D1L_RR			= (void *) 0xFEC206F6;
-unsigned char * EXT_OPM_F7_H_C1_D1L_RR			= (void *) 0xFEC206F7;
-unsigned char * EXT_OPM_F8_A_C2_D1L_RR			= (void *) 0xFEC206F8;
-unsigned char * EXT_OPM_F9_B_C2_D1L_RR			= (void *) 0xFEC206F9;
-unsigned char * EXT_OPM_FA_C_C2_D1L_RR			= (void *) 0xFEC206FA;
-unsigned char * EXT_OPM_FB_D_C2_D1L_RR			= (void *) 0xFEC206FB;
-unsigned char * EXT_OPM_FC_E_C2_D1L_RR			= (void *) 0xFEC206FC;
-unsigned char * EXT_OPM_FD_F_C2_D1L_RR			= (void *) 0xFEC206FD;
-unsigned char * EXT_OPM_FE_G_C2_D1L_RR			= (void *) 0xFEC206FE;
-unsigned char * EXT_OPM_FF_H_C2_D1L_RR			= (void *) 0xFEC206FF;
+//)--------------------------------------------------------------------------------------
+//)--------------------------------------------------------------------------------------
+//)--------------------------------------------------------------------------------------
+// External OPM
+#define EXT_OPM_01_TEST						((uint8_t*) 0xFEC20601)
+#define EXT_OPM_08_KEY_ON_OFF				((uint8_t*) 0xFEC20608)
+#define EXT_OPM_0F_NE_NFREQ					((uint8_t*) 0xFEC2060F)
+#define EXT_OPM_10_CLK_A1					((uint8_t*) 0xFEC20610)
+#define EXT_OPM_11_CLK_A2					((uint8_t*) 0xFEC20611)
+#define EXT_OPM_12_CLK_B					((uint8_t*) 0xFEC20612)
+#define EXT_OPM_14_CMS_FLAG_RST_IRQEN_LD	((uint8_t*) 0xFEC20614)
+#define EXT_OPM_18_LFRQ						((uint8_t*) 0xFEC20618)
+#define EXT_OPM_19_PMD_AMD					((uint8_t*) 0xFEC20619)
+#define EXT_OPM_1B_CT_W						((uint8_t*) 0xFEC2061B)
+
+#define EXT_OPM_20_A_RL_FR_CONNECT		((uint8_t*) 0xFEC20620)
+#define EXT_OPM_21_B_RL_FR_CONNECT		((uint8_t*) 0xFEC20621)
+#define EXT_OPM_22_C_RL_FR_CONNECT		((uint8_t*) 0xFEC20622)
+#define EXT_OPM_23_D_RL_FR_CONNECT		((uint8_t*) 0xFEC20623)
+#define EXT_OPM_24_E_RL_FR_CONNECT		((uint8_t*) 0xFEC20624)
+#define EXT_OPM_25_F_RL_FR_CONNECT		((uint8_t*) 0xFEC20625)
+#define EXT_OPM_26_G_RL_FR_CONNECT		((uint8_t*) 0xFEC20626)
+#define EXT_OPM_27_H_RL_FR_CONNECT		((uint8_t*) 0xFEC20627)
+#define EXT_OPM_28_A_KC					((uint8_t*) 0xFEC20628)
+#define EXT_OPM_29_B_KC					((uint8_t*) 0xFEC20629)
+#define EXT_OPM_2A_C_KC					((uint8_t*) 0xFEC2062A)
+#define EXT_OPM_2B_D_KC					((uint8_t*) 0xFEC2062B)
+#define EXT_OPM_2C_E_KC					((uint8_t*) 0xFEC2062C)
+#define EXT_OPM_2D_F_KC					((uint8_t*) 0xFEC2062D)
+#define EXT_OPM_2E_G_KC					((uint8_t*) 0xFEC2062E)
+#define EXT_OPM_2F_H_KC					((uint8_t*) 0xFEC2062F)
+#define EXT_OPM_30_A_KF					((uint8_t*) 0xFEC20630)
+#define EXT_OPM_31_B_KF					((uint8_t*) 0xFEC20631)
+#define EXT_OPM_32_C_KF					((uint8_t*) 0xFEC20632)
+#define EXT_OPM_33_D_KF					((uint8_t*) 0xFEC20633)
+#define EXT_OPM_34_E_KF					((uint8_t*) 0xFEC20634)
+#define EXT_OPM_35_F_KF					((uint8_t*) 0xFEC20635)
+#define EXT_OPM_36_G_KF					((uint8_t*) 0xFEC20636)	
+#define EXT_OPM_37_H_KF					((uint8_t*) 0xFEC20637)
+#define EXT_OPM_38_A_PMS_AMS			((uint8_t*) 0xFEC20638)
+#define EXT_OPM_39_B_PMS_AMS			((uint8_t*) 0xFEC20639)
+#define EXT_OPM_3A_C_PMS_AMS			((uint8_t*) 0xFEC2063A)
+#define EXT_OPM_3B_D_PMS_AMS			((uint8_t*) 0xFEC2063B)
+#define EXT_OPM_3C_E_PMS_AMS			((uint8_t*) 0xFEC2063C)
+#define EXT_OPM_3D_F_PMS_AMS			((uint8_t*) 0xFEC2063D)
+#define EXT_OPM_3E_G_PMS_AMS			((uint8_t*) 0xFEC2063E)
+#define EXT_OPM_3F_H_PMS_AMS			((uint8_t*) 0xFEC2063F)
+#define EXT_OPM_40_A_M1_DT1_MUL			((uint8_t*) 0xFEC20640)
+#define EXT_OPM_41_B_M1_DT1_MUL			((uint8_t*) 0xFEC20641)
+#define EXT_OPM_42_C_M1_DT1_MUL			((uint8_t*) 0xFEC20642)
+#define EXT_OPM_43_D_M1_DT1_MUL			((uint8_t*) 0xFEC20643)
+#define EXT_OPM_44_E_M1_DT1_MUL			((uint8_t*) 0xFEC20644)
+#define EXT_OPM_45_F_M1_DT1_MUL			((uint8_t*) 0xFEC20645)
+#define EXT_OPM_46_G_M1_DT1_MUL			((uint8_t*) 0xFEC20646)
+#define EXT_OPM_47_H_M1_DT1_MUL			((uint8_t*) 0xFEC20647)
+#define EXT_OPM_48_A_M2_DT1_MUL			((uint8_t*) 0xFEC20648)
+#define EXT_OPM_49_B_M2_DT1_MUL			((uint8_t*) 0xFEC20649)
+#define EXT_OPM_4A_C_M2_DT1_MUL			((uint8_t*) 0xFEC2064A)
+#define EXT_OPM_4B_D_M2_DT1_MUL			((uint8_t*) 0xFEC2064B)
+#define EXT_OPM_4C_E_M2_DT1_MUL			((uint8_t*) 0xFEC2064C)
+#define EXT_OPM_4D_F_M2_DT1_MUL			((uint8_t*) 0xFEC2064D)
+#define EXT_OPM_4E_G_M2_DT1_MUL			((uint8_t*) 0xFEC2064E)
+#define EXT_OPM_4F_H_M2_DT1_MUL			((uint8_t*) 0xFEC2064F)
+#define EXT_OPM_50_A_C1_DT1_MUL			((uint8_t*) 0xFEC20650)
+#define EXT_OPM_51_B_C1_DT1_MUL			((uint8_t*) 0xFEC20651)
+#define EXT_OPM_52_C_C1_DT1_MUL			((uint8_t*) 0xFEC20652)
+#define EXT_OPM_53_D_C1_DT1_MUL			((uint8_t*) 0xFEC20653)
+#define EXT_OPM_54_E_C1_DT1_MUL			((uint8_t*) 0xFEC20654)
+#define EXT_OPM_55_F_C1_DT1_MUL			((uint8_t*) 0xFEC20655)
+#define EXT_OPM_56_G_C1_DT1_MUL			((uint8_t*) 0xFEC20656)
+#define EXT_OPM_57_H_C1_DT1_MUL			((uint8_t*) 0xFEC20657)
+#define EXT_OPM_58_A_C2_DT1_MUL			((uint8_t*) 0xFEC20658)
+#define EXT_OPM_59_B_C2_DT1_MUL			((uint8_t*) 0xFEC20659)
+#define EXT_OPM_5A_C_C2_DT1_MUL			((uint8_t*) 0xFEC2065A)
+#define EXT_OPM_5B_D_C2_DT1_MUL			((uint8_t*) 0xFEC2065B)
+#define EXT_OPM_5C_E_C2_DT1_MUL			((uint8_t*) 0xFEC2065C)
+#define EXT_OPM_5D_F_C2_DT1_MUL			((uint8_t*) 0xFEC2065D)
+#define EXT_OPM_5E_G_C2_DT1_MUL			((uint8_t*) 0xFEC2065E)
+#define EXT_OPM_5F_H_C2_DT1_MUL			((uint8_t*) 0xFEC2065F)
+#define EXT_OPM_60_A_M1_TL				((uint8_t*) 0xFEC20660)
+#define EXT_OPM_61_B_M1_TL				((uint8_t*) 0xFEC20661)
+#define EXT_OPM_62_C_M1_TL				((uint8_t*) 0xFEC20662)
+#define EXT_OPM_63_D_M1_TL				((uint8_t*) 0xFEC20663)
+#define EXT_OPM_64_E_M1_TL				((uint8_t*) 0xFEC20664)
+#define EXT_OPM_65_F_M1_TL				((uint8_t*) 0xFEC20665)
+#define EXT_OPM_66_G_M1_TL				((uint8_t*) 0xFEC20666)
+#define EXT_OPM_67_H_M1_TL				((uint8_t*) 0xFEC20667)
+#define EXT_OPM_68_A_M2_TL				((uint8_t*) 0xFEC20668)
+#define EXT_OPM_69_B_M2_TL				((uint8_t*) 0xFEC20669)
+#define EXT_OPM_6A_C_M2_TL				((uint8_t*) 0xFEC2066A)
+#define EXT_OPM_6B_D_M2_TL				((uint8_t*) 0xFEC2066B)
+#define EXT_OPM_6C_E_M2_TL				((uint8_t*) 0xFEC2066C)
+#define EXT_OPM_6D_F_M2_TL				((uint8_t*) 0xFEC2066D)
+#define EXT_OPM_6E_G_M2_TL				((uint8_t*) 0xFEC2066E)
+#define EXT_OPM_6F_H_M2_TL				((uint8_t*) 0xFEC2066F)
+#define EXT_OPM_70_A_C1_TL				((uint8_t*) 0xFEC20670)
+#define EXT_OPM_71_B_C1_TL				((uint8_t*) 0xFEC20671)
+#define EXT_OPM_72_C_C1_TL				((uint8_t*) 0xFEC20672)
+#define EXT_OPM_73_D_C1_TL				((uint8_t*) 0xFEC20673)
+#define EXT_OPM_74_E_C1_TL				((uint8_t*) 0xFEC20674)
+#define EXT_OPM_75_F_C1_TL				((uint8_t*) 0xFEC20675)
+#define EXT_OPM_76_G_C1_TL				((uint8_t*) 0xFEC20676)
+#define EXT_OPM_77_H_C1_TL				((uint8_t*) 0xFEC20677)
+#define EXT_OPM_78_A_C2_TL				((uint8_t*) 0xFEC20678)
+#define EXT_OPM_79_B_C2_TL				((uint8_t*) 0xFEC20679)
+#define EXT_OPM_7A_C_C2_TL				((uint8_t*) 0xFEC2067A)
+#define EXT_OPM_7B_D_C2_TL				((uint8_t*) 0xFEC2067B)
+#define EXT_OPM_7C_E_C2_TL				((uint8_t*) 0xFEC2067C)
+#define EXT_OPM_7D_F_C2_TL				((uint8_t*) 0xFEC2067D)
+#define EXT_OPM_7E_G_C2_TL				((uint8_t*) 0xFEC2067E)
+#define EXT_OPM_7F_H_C2_TL				((uint8_t*) 0xFEC2067F)
+#define EXT_OPM_80_A_M1_KS_AR			((uint8_t*) 0xFEC20680)
+#define EXT_OPM_81_B_M1_KS_AR			((uint8_t*) 0xFEC20681)
+#define EXT_OPM_82_C_M1_KS_AR			((uint8_t*) 0xFEC20682)
+#define EXT_OPM_83_D_M1_KS_AR			((uint8_t*) 0xFEC20683)
+#define EXT_OPM_84_E_M1_KS_AR			((uint8_t*) 0xFEC20684)
+#define EXT_OPM_85_F_M1_KS_AR			((uint8_t*) 0xFEC20685)
+#define EXT_OPM_86_G_M1_KS_AR			((uint8_t*) 0xFEC20686)
+#define EXT_OPM_87_H_M1_KS_AR			((uint8_t*) 0xFEC20687)
+#define EXT_OPM_88_A_M2_KS_AR			((uint8_t*) 0xFEC20688)
+#define EXT_OPM_89_B_M2_KS_AR			((uint8_t*) 0xFEC20689)
+#define EXT_OPM_8A_C_M2_KS_AR			((uint8_t*) 0xFEC2068A)
+#define EXT_OPM_8B_D_M2_KS_AR			((uint8_t*) 0xFEC2068B)
+#define EXT_OPM_8C_E_M2_KS_AR			((uint8_t*) 0xFEC2068C)
+#define EXT_OPM_8D_F_M2_KS_AR			((uint8_t*) 0xFEC2068D)
+#define EXT_OPM_8E_G_M2_KS_AR			((uint8_t*) 0xFEC2068E)
+#define EXT_OPM_8F_H_M2_KS_AR			((uint8_t*) 0xFEC2068F)
+#define EXT_OPM_90_A_C1_KS_AR			((uint8_t*) 0xFEC20690)
+#define EXT_OPM_91_B_C1_KS_AR			((uint8_t*) 0xFEC20691)
+#define EXT_OPM_92_C_C1_KS_AR			((uint8_t*) 0xFEC20692)
+#define EXT_OPM_93_D_C1_KS_AR			((uint8_t*) 0xFEC20693)
+#define EXT_OPM_94_E_C1_KS_AR			((uint8_t*) 0xFEC20694)
+#define EXT_OPM_95_F_C1_KS_AR			((uint8_t*) 0xFEC20695)
+#define EXT_OPM_96_G_C1_KS_AR			((uint8_t*) 0xFEC20696)
+#define EXT_OPM_97_H_C1_KS_AR			((uint8_t*) 0xFEC20697)
+#define EXT_OPM_98_A_C2_KS_AR			((uint8_t*) 0xFEC20698)
+#define EXT_OPM_99_B_C2_KS_AR			((uint8_t*) 0xFEC20699)
+#define EXT_OPM_9A_C_C2_KS_AR			((uint8_t*) 0xFEC2069A)
+#define EXT_OPM_9B_D_C2_KS_AR			((uint8_t*) 0xFEC2069B)
+#define EXT_OPM_9C_E_C2_KS_AR			((uint8_t*) 0xFEC2069C)
+#define EXT_OPM_9D_F_C2_KS_AR			((uint8_t*) 0xFEC2069D)
+#define EXT_OPM_9E_G_C2_KS_AR			((uint8_t*) 0xFEC2069E)
+#define EXT_OPM_9F_H_C2_KS_AR			((uint8_t*) 0xFEC2069F)
+#define EXT_OPM_A0_A_M1_AMS_EN_D1R		((uint8_t*) 0xFEC206A0)
+#define EXT_OPM_A1_B_M1_AMS_EN_D1R		((uint8_t*) 0xFEC206A1)
+#define EXT_OPM_A2_C_M1_AMS_EN_D1R		((uint8_t*) 0xFEC206A2)
+#define EXT_OPM_A3_D_M1_AMS_EN_D1R		((uint8_t*) 0xFEC206A3)
+#define EXT_OPM_A4_E_M1_AMS_EN_D1R		((uint8_t*) 0xFEC206A4)
+#define EXT_OPM_A5_F_M1_AMS_EN_D1R		((uint8_t*) 0xFEC206A5)
+#define EXT_OPM_A6_G_M1_AMS_EN_D1R		((uint8_t*) 0xFEC206A6)
+#define EXT_OPM_A7_H_M1_AMS_EN_D1R		((uint8_t*) 0xFEC206A7)
+#define EXT_OPM_A8_A_M2_AMS_EN_D1R		((uint8_t*) 0xFEC206A8)
+#define EXT_OPM_A9_B_M2_AMS_EN_D1R		((uint8_t*) 0xFEC206A9)
+#define EXT_OPM_AA_C_M2_AMS_EN_D1R		((uint8_t*) 0xFEC206AA)
+#define EXT_OPM_AB_D_M2_AMS_EN_D1R		((uint8_t*) 0xFEC206AB)
+#define EXT_OPM_AC_E_M2_AMS_EN_D1R		((uint8_t*) 0xFEC206AC)
+#define EXT_OPM_AD_F_M2_AMS_EN_D1R		((uint8_t*) 0xFEC206AD)
+#define EXT_OPM_AE_G_M2_AMS_EN_D1R		((uint8_t*) 0xFEC206AE)
+#define EXT_OPM_AF_H_M2_AMS_EN_D1R		((uint8_t*) 0xFEC206AF)
+#define EXT_OPM_B0_A_C1_AMS_EN_D1R		((uint8_t*) 0xFEC206B0)
+#define EXT_OPM_B1_B_C1_AMS_EN_D1R		((uint8_t*) 0xFEC206B1)
+#define EXT_OPM_B2_C_C1_AMS_EN_D1R		((uint8_t*) 0xFEC206B2)
+#define EXT_OPM_B3_D_C1_AMS_EN_D1R		((uint8_t*) 0xFEC206B3)
+#define EXT_OPM_B4_E_C1_AMS_EN_D1R		((uint8_t*) 0xFEC206B4)
+#define EXT_OPM_B5_F_C1_AMS_EN_D1R		((uint8_t*) 0xFEC206B5)
+#define EXT_OPM_B6_G_C1_AMS_EN_D1R		((uint8_t*) 0xFEC206B6)
+#define EXT_OPM_B7_H_C1_AMS_EN_D1R		((uint8_t*) 0xFEC206B7)
+#define EXT_OPM_B8_A_C2_AMS_EN_D1R		((uint8_t*) 0xFEC206B8)
+#define EXT_OPM_B9_B_C2_AMS_EN_D1R		((uint8_t*) 0xFEC206B9)
+#define EXT_OPM_BA_C_C2_AMS_EN_D1R		((uint8_t*) 0xFEC206BA)
+#define EXT_OPM_BB_D_C2_AMS_EN_D1R		((uint8_t*) 0xFEC206BB)
+#define EXT_OPM_BC_E_C2_AMS_EN_D1R		((uint8_t*) 0xFEC206BC)
+#define EXT_OPM_BD_F_C2_AMS_EN_D1R		((uint8_t*) 0xFEC206BD)
+#define EXT_OPM_BE_G_C2_AMS_EN_D1R		((uint8_t*) 0xFEC206BE)
+#define EXT_OPM_BF_H_C2_AMS_EN_D1R		((uint8_t*) 0xFEC206BF)
+#define EXT_OPM_C0_A_M1_DT2_D2R			((uint8_t*) 0xFEC206C0)
+#define EXT_OPM_C1_B_M1_DT2_D2R			((uint8_t*) 0xFEC206C1)
+#define EXT_OPM_C2_C_M1_DT2_D2R			((uint8_t*) 0xFEC206C2)
+#define EXT_OPM_C3_D_M1_DT2_D2R			((uint8_t*) 0xFEC206C3)
+#define EXT_OPM_C4_E_M1_DT2_D2R			((uint8_t*) 0xFEC206C4)
+#define EXT_OPM_C5_F_M1_DT2_D2R			((uint8_t*) 0xFEC206C5)
+#define EXT_OPM_C6_G_M1_DT2_D2R			((uint8_t*) 0xFEC206C6)
+#define EXT_OPM_C7_H_M1_DT2_D2R			((uint8_t*) 0xFEC206C7)
+#define EXT_OPM_C8_A_M2_DT2_D2R			((uint8_t*) 0xFEC206C8)
+#define EXT_OPM_C9_B_M2_DT2_D2R			((uint8_t*) 0xFEC206C9)
+#define EXT_OPM_CA_C_M2_DT2_D2R			((uint8_t*) 0xFEC206CA)
+#define EXT_OPM_CB_D_M2_DT2_D2R			((uint8_t*) 0xFEC206CB)
+#define EXT_OPM_CC_E_M2_DT2_D2R			((uint8_t*) 0xFEC206CC)
+#define EXT_OPM_CD_F_M2_DT2_D2R			((uint8_t*) 0xFEC206CD)
+#define EXT_OPM_CE_G_M2_DT2_D2R			((uint8_t*) 0xFEC206CE)
+#define EXT_OPM_CF_H_M2_DT2_D2R			((uint8_t*) 0xFEC206CF)
+#define EXT_OPM_D0_A_C1_DT2_D2R			((uint8_t*) 0xFEC206D0)
+#define EXT_OPM_D1_B_C1_DT2_D2R			((uint8_t*) 0xFEC206D1)
+#define EXT_OPM_D2_C_C1_DT2_D2R			((uint8_t*) 0xFEC206D2)
+#define EXT_OPM_D3_D_C1_DT2_D2R			((uint8_t*) 0xFEC206D3)
+#define EXT_OPM_D4_E_C1_DT2_D2R			((uint8_t*) 0xFEC206D4)
+#define EXT_OPM_D5_F_C1_DT2_D2R			((uint8_t*) 0xFEC206D5)
+#define EXT_OPM_D6_G_C1_DT2_D2R			((uint8_t*) 0xFEC206D6)
+#define EXT_OPM_D7_H_C1_DT2_D2R			((uint8_t*) 0xFEC206D7)
+#define EXT_OPM_D8_A_C2_DT2_D2R			((uint8_t*) 0xFEC206D8)
+#define EXT_OPM_D9_B_C2_DT2_D2R			((uint8_t*) 0xFEC206D9)
+#define EXT_OPM_DA_C_C2_DT2_D2R			((uint8_t*) 0xFEC206DA)
+#define EXT_OPM_DB_D_C2_DT2_D2R			((uint8_t*) 0xFEC206DB)
+#define EXT_OPM_DC_E_C2_DT2_D2R			((uint8_t*) 0xFEC206DC)
+#define EXT_OPM_DD_F_C2_DT2_D2R			((uint8_t*) 0xFEC206DD)
+#define EXT_OPM_DE_G_C2_DT2_D2R			((uint8_t*) 0xFEC206DE)
+#define EXT_OPM_DF_H_C2_DT2_D2R			((uint8_t*) 0xFEC206DF)
+#define EXT_OPM_E0_A_M1_D1L_RR			((uint8_t*) 0xFEC206E0)
+#define EXT_OPM_E1_B_M1_D1L_RR			((uint8_t*) 0xFEC206E1)
+#define EXT_OPM_E2_C_M1_D1L_RR			((uint8_t*) 0xFEC206E2)
+#define EXT_OPM_E3_D_M1_D1L_RR			((uint8_t*) 0xFEC206E3)
+#define EXT_OPM_E4_E_M1_D1L_RR			((uint8_t*) 0xFEC206E4)
+#define EXT_OPM_E5_F_M1_D1L_RR			((uint8_t*) 0xFEC206E5)
+#define EXT_OPM_E6_G_M1_D1L_RR			((uint8_t*) 0xFEC206E6)
+#define EXT_OPM_E7_H_M1_D1L_RR			((uint8_t*) 0xFEC206E7)
+#define EXT_OPM_E8_A_M2_D1L_RR			((uint8_t*) 0xFEC206E8)
+#define EXT_OPM_E9_B_M2_D1L_RR			((uint8_t*) 0xFEC206E9)
+#define EXT_OPM_EA_C_M2_D1L_RR			((uint8_t*) 0xFEC206EA)
+#define EXT_OPM_EB_D_M2_D1L_RR			((uint8_t*) 0xFEC206EB)
+#define EXT_OPM_EC_E_M2_D1L_RR			((uint8_t*) 0xFEC206EC)
+#define EXT_OPM_ED_F_M2_D1L_RR			((uint8_t*) 0xFEC206ED)
+#define EXT_OPM_EE_G_M2_D1L_RR			((uint8_t*) 0xFEC206EE)
+#define EXT_OPM_EF_H_M2_D1L_RR			((uint8_t*) 0xFEC206EF)
+#define EXT_OPM_F0_A_C1_D1L_RR			((uint8_t*) 0xFEC206F0)
+#define EXT_OPM_F1_B_C1_D1L_RR			((uint8_t*) 0xFEC206F1)
+#define EXT_OPM_F2_C_C1_D1L_RR			((uint8_t*) 0xFEC206F2)
+#define EXT_OPM_F3_D_C1_D1L_RR			((uint8_t*) 0xFEC206F3)
+#define EXT_OPM_F4_E_C1_D1L_RR			((uint8_t*) 0xFEC206F4)
+#define EXT_OPM_F5_F_C1_D1L_RR			((uint8_t*) 0xFEC206F5)
+#define EXT_OPM_F6_G_C1_D1L_RR			((uint8_t*) 0xFEC206F6)
+#define EXT_OPM_F7_H_C1_D1L_RR			((uint8_t*) 0xFEC206F7)
+#define EXT_OPM_F8_A_C2_D1L_RR			((uint8_t*) 0xFEC206F8)
+#define EXT_OPM_F9_B_C2_D1L_RR			((uint8_t*) 0xFEC206F9)
+#define EXT_OPM_FA_C_C2_D1L_RR			((uint8_t*) 0xFEC206FA)
+#define EXT_OPM_FB_D_C2_D1L_RR			((uint8_t*) 0xFEC206FB)
+#define EXT_OPM_FC_E_C2_D1L_RR			((uint8_t*) 0xFEC206FC)
+#define EXT_OPM_FD_F_C2_D1L_RR			((uint8_t*) 0xFEC206FD)
+#define EXT_OPM_FE_G_C2_D1L_RR			((uint8_t*) 0xFEC206FE)
+#define EXT_OPM_FF_H_C2_D1L_RR			((uint8_t*) 0xFEC206FF)
 
 ///////////////////////////////////////////////////
 // Internal OPM 0xFEC20C00
-unsigned char * INT_OPM_01_TEST						= (void *) 0xFEC20C01;
-unsigned char * INT_OPM_08_KEY_ON_OFF				= (void *) 0xFEC20C08;
-unsigned char * INT_OPM_0F_NE_NFREQ					= (void *) 0xFEC20C0F;
-unsigned char * INT_OPM_10_CLK_A1					= (void *) 0xFEC20C10;
-unsigned char * INT_OPM_11_CLK_A2					= (void *) 0xFEC20C11;
-unsigned char * INT_OPM_12_CLK_B					= (void *) 0xFEC20C12;
-unsigned char * INT_OPM_14_CMS_FLAG_RST_IRQEN_LD	= (void *) 0xFEC20C14;
-unsigned char * INT_OPM_18_LFRQ						= (void *) 0xFEC20C18;
-unsigned char * INT_OPM_19_PMD_AMD					= (void *) 0xFEC20C19;
-unsigned char * INT_OPM_1B_CT_W						= (void *) 0xFEC20C1B;
+#define INT_OPM_01_TEST						((uint8_t*) 0xFEC20C01)
+#define INT_OPM_08_KEY_ON_OFF				((uint8_t*) 0xFEC20C08)
+#define INT_OPM_0F_NE_NFREQ					((uint8_t*) 0xFEC20C0F)
+#define INT_OPM_10_CLK_A1					((uint8_t*) 0xFEC20C10)
+#define INT_OPM_11_CLK_A2					((uint8_t*) 0xFEC20C11)
+#define INT_OPM_12_CLK_B					((uint8_t*) 0xFEC20C12)
+#define INT_OPM_14_CMS_FLAG_RST_IRQEN_LD	((uint8_t*) 0xFEC20C14)
+#define INT_OPM_18_LFRQ						((uint8_t*) 0xFEC20C18)
+#define INT_OPM_19_PMD_AMD					((uint8_t*) 0xFEC20C19)
+#define INT_OPM_1B_CT_W						((uint8_t*) 0xFEC20C1B)
 
-unsigned char * INT_OPM_20_A_RL_FR_CONNECT		= (void *) 0xFEC20C20;
-unsigned char * INT_OPM_21_B_RL_FR_CONNECT		= (void *) 0xFEC20C21;
-unsigned char * INT_OPM_22_C_RL_FR_CONNECT		= (void *) 0xFEC20C22;
-unsigned char * INT_OPM_23_D_RL_FR_CONNECT		= (void *) 0xFEC20C23;
-unsigned char * INT_OPM_24_E_RL_FR_CONNECT		= (void *) 0xFEC20C24;
-unsigned char * INT_OPM_25_F_RL_FR_CONNECT		= (void *) 0xFEC20C25;
-unsigned char * INT_OPM_26_G_RL_FR_CONNECT		= (void *) 0xFEC20C26;
-unsigned char * INT_OPM_27_H_RL_FR_CONNECT		= (void *) 0xFEC20C27;
-unsigned char * INT_OPM_28_A_KC					= (void *) 0xFEC20C28;
-unsigned char * INT_OPM_29_B_KC					= (void *) 0xFEC20C29;
-unsigned char * INT_OPM_2A_C_KC					= (void *) 0xFEC20C2A;
-unsigned char * INT_OPM_2B_D_KC					= (void *) 0xFEC20C2B;
-unsigned char * INT_OPM_2C_E_KC					= (void *) 0xFEC20C2C;
-unsigned char * INT_OPM_2D_F_KC					= (void *) 0xFEC20C2D;
-unsigned char * INT_OPM_2E_G_KC					= (void *) 0xFEC20C2E;
-unsigned char * INT_OPM_2F_H_KC					= (void *) 0xFEC20C2F;
+#define INT_OPM_20_A_RL_FR_CONNECT		((uint8_t*) 0xFEC20C20)
+#define INT_OPM_21_B_RL_FR_CONNECT		((uint8_t*) 0xFEC20C21)
+#define INT_OPM_22_C_RL_FR_CONNECT		((uint8_t*) 0xFEC20C22)
+#define INT_OPM_23_D_RL_FR_CONNECT		((uint8_t*) 0xFEC20C23)
+#define INT_OPM_24_E_RL_FR_CONNECT		((uint8_t*) 0xFEC20C24)
+#define INT_OPM_25_F_RL_FR_CONNECT		((uint8_t*) 0xFEC20C25)
+#define INT_OPM_26_G_RL_FR_CONNECT		((uint8_t*) 0xFEC20C26)
+#define INT_OPM_27_H_RL_FR_CONNECT		((uint8_t*) 0xFEC20C27)
+#define INT_OPM_28_A_KC					((uint8_t*) 0xFEC20C28)
+#define INT_OPM_29_B_KC					((uint8_t*) 0xFEC20C29)
+#define INT_OPM_2A_C_KC					((uint8_t*) 0xFEC20C2A)
+#define INT_OPM_2B_D_KC					((uint8_t*) 0xFEC20C2B)
+#define INT_OPM_2C_E_KC					((uint8_t*) 0xFEC20C2C)
+#define INT_OPM_2D_F_KC					((uint8_t*) 0xFEC20C2D)
+#define INT_OPM_2E_G_KC					((uint8_t*) 0xFEC20C2E)
+#define INT_OPM_2F_H_KC					((uint8_t*) 0xFEC20C2F)
                                                                    
-unsigned char * INT_OPM_30_A_KF					= (void *) 0xFEC20C30;
-unsigned char * INT_OPM_31_B_KF					= (void *) 0xFEC20C31;
-unsigned char * INT_OPM_32_C_KF					= (void *) 0xFEC20C32;
-unsigned char * INT_OPM_33_D_KF					= (void *) 0xFEC20C33;
-unsigned char * INT_OPM_34_E_KF					= (void *) 0xFEC20C34;
-unsigned char * INT_OPM_35_F_KF					= (void *) 0xFEC20C35;
-unsigned char * INT_OPM_36_G_KF					= (void *) 0xFEC20C36;
-unsigned char * INT_OPM_37_H_KF					= (void *) 0xFEC20C37;
-unsigned char * INT_OPM_38_A_PMS_AMS			= (void *) 0xFEC20C38;
-unsigned char * INT_OPM_39_B_PMS_AMS			= (void *) 0xFEC20C39;
-unsigned char * INT_OPM_3A_C_PMS_AMS			= (void *) 0xFEC20C3A;
-unsigned char * INT_OPM_3B_D_PMS_AMS			= (void *) 0xFEC20C3B;
-unsigned char * INT_OPM_3C_E_PMS_AMS			= (void *) 0xFEC20C3C;
-unsigned char * INT_OPM_3D_F_PMS_AMS			= (void *) 0xFEC20C3D;
-unsigned char * INT_OPM_3E_G_PMS_AMS			= (void *) 0xFEC20C3E;
-unsigned char * INT_OPM_3F_H_PMS_AMS			= (void *) 0xFEC20C3F;
+#define INT_OPM_30_A_KF					((uint8_t*) 0xFEC20C30)
+#define INT_OPM_31_B_KF					((uint8_t*) 0xFEC20C31)
+#define INT_OPM_32_C_KF					((uint8_t*) 0xFEC20C32)
+#define INT_OPM_33_D_KF					((uint8_t*) 0xFEC20C33)
+#define INT_OPM_34_E_KF					((uint8_t*) 0xFEC20C34)
+#define INT_OPM_35_F_KF					((uint8_t*) 0xFEC20C35)
+#define INT_OPM_36_G_KF					((uint8_t*) 0xFEC20C36)
+#define INT_OPM_37_H_KF					((uint8_t*) 0xFEC20C37)
+#define INT_OPM_38_A_PMS_AMS			((uint8_t*) 0xFEC20C38)
+#define INT_OPM_39_B_PMS_AMS			((uint8_t*) 0xFEC20C39)
+#define INT_OPM_3A_C_PMS_AMS			((uint8_t*) 0xFEC20C3A)
+#define INT_OPM_3B_D_PMS_AMS			((uint8_t*) 0xFEC20C3B)
+#define INT_OPM_3C_E_PMS_AMS			((uint8_t*) 0xFEC20C3C)
+#define INT_OPM_3D_F_PMS_AMS			((uint8_t*) 0xFEC20C3D)
+#define INT_OPM_3E_G_PMS_AMS			((uint8_t*) 0xFEC20C3E)
+#define INT_OPM_3F_H_PMS_AMS			((uint8_t*) 0xFEC20C3F)
                                                                    
-unsigned char * INT_OPM_40_A_M1_DT1_MUL			= (void *) 0xFEC20C40;
-unsigned char * INT_OPM_41_B_M1_DT1_MUL			= (void *) 0xFEC20C41;
-unsigned char * INT_OPM_42_C_M1_DT1_MUL			= (void *) 0xFEC20C42;
-unsigned char * INT_OPM_43_D_M1_DT1_MUL			= (void *) 0xFEC20C43;
-unsigned char * INT_OPM_44_E_M1_DT1_MUL			= (void *) 0xFEC20C44;
-unsigned char * INT_OPM_45_F_M1_DT1_MUL			= (void *) 0xFEC20C45;
-unsigned char * INT_OPM_46_G_M1_DT1_MUL			= (void *) 0xFEC20C46;
-unsigned char * INT_OPM_47_H_M1_DT1_MUL			= (void *) 0xFEC20C47;
-unsigned char * INT_OPM_48_A_M2_DT1_MUL			= (void *) 0xFEC20C48;
-unsigned char * INT_OPM_49_B_M2_DT1_MUL			= (void *) 0xFEC20C49;
-unsigned char * INT_OPM_4A_C_M2_DT1_MUL			= (void *) 0xFEC20C4A;
-unsigned char * INT_OPM_4B_D_M2_DT1_MUL			= (void *) 0xFEC20C4B;
-unsigned char * INT_OPM_4C_E_M2_DT1_MUL			= (void *) 0xFEC20C4C;
-unsigned char * INT_OPM_4D_F_M2_DT1_MUL			= (void *) 0xFEC20C4D;
-unsigned char * INT_OPM_4E_G_M2_DT1_MUL			= (void *) 0xFEC20C4E;
-unsigned char * INT_OPM_4F_H_M2_DT1_MUL			= (void *) 0xFEC20C4F;
+#define INT_OPM_40_A_M1_DT1_MUL			((uint8_t*) 0xFEC20C40)
+#define INT_OPM_41_B_M1_DT1_MUL			((uint8_t*) 0xFEC20C41)
+#define INT_OPM_42_C_M1_DT1_MUL			((uint8_t*) 0xFEC20C42)
+#define INT_OPM_43_D_M1_DT1_MUL			((uint8_t*) 0xFEC20C43)
+#define INT_OPM_44_E_M1_DT1_MUL			((uint8_t*) 0xFEC20C44)
+#define INT_OPM_45_F_M1_DT1_MUL			((uint8_t*) 0xFEC20C45)
+#define INT_OPM_46_G_M1_DT1_MUL			((uint8_t*) 0xFEC20C46)
+#define INT_OPM_47_H_M1_DT1_MUL			((uint8_t*) 0xFEC20C47)
+#define INT_OPM_48_A_M2_DT1_MUL			((uint8_t*) 0xFEC20C48)
+#define INT_OPM_49_B_M2_DT1_MUL			((uint8_t*) 0xFEC20C49)
+#define INT_OPM_4A_C_M2_DT1_MUL			((uint8_t*) 0xFEC20C4A)
+#define INT_OPM_4B_D_M2_DT1_MUL			((uint8_t*) 0xFEC20C4B)
+#define INT_OPM_4C_E_M2_DT1_MUL			((uint8_t*) 0xFEC20C4C)
+#define INT_OPM_4D_F_M2_DT1_MUL			((uint8_t*) 0xFEC20C4D)
+#define INT_OPM_4E_G_M2_DT1_MUL			((uint8_t*) 0xFEC20C4E)
+#define INT_OPM_4F_H_M2_DT1_MUL			((uint8_t*) 0xFEC20C4F)
                                                                    
-unsigned char * INT_OPM_50_A_C1_DT1_MUL			= (void *) 0xFEC20C50;
-unsigned char * INT_OPM_51_B_C1_DT1_MUL			= (void *) 0xFEC20C51;
-unsigned char * INT_OPM_52_C_C1_DT1_MUL			= (void *) 0xFEC20C52;
-unsigned char * INT_OPM_53_D_C1_DT1_MUL			= (void *) 0xFEC20C53;
-unsigned char * INT_OPM_54_E_C1_DT1_MUL			= (void *) 0xFEC20C54;
-unsigned char * INT_OPM_55_F_C1_DT1_MUL			= (void *) 0xFEC20C55;
-unsigned char * INT_OPM_56_G_C1_DT1_MUL			= (void *) 0xFEC20C56;
-unsigned char * INT_OPM_57_H_C1_DT1_MUL			= (void *) 0xFEC20C57;
-unsigned char * INT_OPM_58_A_C2_DT1_MUL			= (void *) 0xFEC20C58;
-unsigned char * INT_OPM_59_B_C2_DT1_MUL			= (void *) 0xFEC20C59;
-unsigned char * INT_OPM_5A_C_C2_DT1_MUL			= (void *) 0xFEC20C5A;
-unsigned char * INT_OPM_5B_D_C2_DT1_MUL			= (void *) 0xFEC20C5B;
-unsigned char * INT_OPM_5C_E_C2_DT1_MUL			= (void *) 0xFEC20C5C;
-unsigned char * INT_OPM_5D_F_C2_DT1_MUL			= (void *) 0xFEC20C5D;
-unsigned char * INT_OPM_5E_G_C2_DT1_MUL			= (void *) 0xFEC20C5E;
-unsigned char * INT_OPM_5F_H_C2_DT1_MUL			= (void *) 0xFEC20C5F;
+#define INT_OPM_50_A_C1_DT1_MUL			((uint8_t*) 0xFEC20C50)
+#define INT_OPM_51_B_C1_DT1_MUL			((uint8_t*) 0xFEC20C51)
+#define INT_OPM_52_C_C1_DT1_MUL			((uint8_t*) 0xFEC20C52)
+#define INT_OPM_53_D_C1_DT1_MUL			((uint8_t*) 0xFEC20C53)
+#define INT_OPM_54_E_C1_DT1_MUL			((uint8_t*) 0xFEC20C54)
+#define INT_OPM_55_F_C1_DT1_MUL			((uint8_t*) 0xFEC20C55)
+#define INT_OPM_56_G_C1_DT1_MUL			((uint8_t*) 0xFEC20C56)
+#define INT_OPM_57_H_C1_DT1_MUL			((uint8_t*) 0xFEC20C57)
+#define INT_OPM_58_A_C2_DT1_MUL			((uint8_t*) 0xFEC20C58)
+#define INT_OPM_59_B_C2_DT1_MUL			((uint8_t*) 0xFEC20C59)
+#define INT_OPM_5A_C_C2_DT1_MUL			((uint8_t*) 0xFEC20C5A)
+#define INT_OPM_5B_D_C2_DT1_MUL			((uint8_t*) 0xFEC20C5B)
+#define INT_OPM_5C_E_C2_DT1_MUL			((uint8_t*) 0xFEC20C5C)
+#define INT_OPM_5D_F_C2_DT1_MUL			((uint8_t*) 0xFEC20C5D)
+#define INT_OPM_5E_G_C2_DT1_MUL			((uint8_t*) 0xFEC20C5E)
+#define INT_OPM_5F_H_C2_DT1_MUL			((uint8_t*) 0xFEC20C5F)
                                                                    
-unsigned char * INT_OPM_60_A_M1_TL				= (void *) 0xFEC20C60;
-unsigned char * INT_OPM_61_B_M1_TL				= (void *) 0xFEC20C61;
-unsigned char * INT_OPM_62_C_M1_TL				= (void *) 0xFEC20C62;
-unsigned char * INT_OPM_63_D_M1_TL				= (void *) 0xFEC20C63;
-unsigned char * INT_OPM_64_E_M1_TL				= (void *) 0xFEC20C64;
-unsigned char * INT_OPM_65_F_M1_TL				= (void *) 0xFEC20C65;
-unsigned char * INT_OPM_66_G_M1_TL				= (void *) 0xFEC20C66;
-unsigned char * INT_OPM_67_H_M1_TL				= (void *) 0xFEC20C67;
-unsigned char * INT_OPM_68_A_M2_TL				= (void *) 0xFEC20C68;
-unsigned char * INT_OPM_69_B_M2_TL				= (void *) 0xFEC20C69;
-unsigned char * INT_OPM_6A_C_M2_TL				= (void *) 0xFEC20C6A;
-unsigned char * INT_OPM_6B_D_M2_TL				= (void *) 0xFEC20C6B;
-unsigned char * INT_OPM_6C_E_M2_TL				= (void *) 0xFEC20C6C;
-unsigned char * INT_OPM_6D_F_M2_TL				= (void *) 0xFEC20C6D;
-unsigned char * INT_OPM_6E_G_M2_TL				= (void *) 0xFEC20C6E;
-unsigned char * INT_OPM_6F_H_M2_TL				= (void *) 0xFEC20C6F;
+#define INT_OPM_60_A_M1_TL				((uint8_t*) 0xFEC20C60)
+#define INT_OPM_61_B_M1_TL				((uint8_t*) 0xFEC20C61)
+#define INT_OPM_62_C_M1_TL				((uint8_t*) 0xFEC20C62)
+#define INT_OPM_63_D_M1_TL				((uint8_t*) 0xFEC20C63)
+#define INT_OPM_64_E_M1_TL				((uint8_t*) 0xFEC20C64)
+#define INT_OPM_65_F_M1_TL				((uint8_t*) 0xFEC20C65)
+#define INT_OPM_66_G_M1_TL				((uint8_t*) 0xFEC20C66)
+#define INT_OPM_67_H_M1_TL				((uint8_t*) 0xFEC20C67)
+#define INT_OPM_68_A_M2_TL				((uint8_t*) 0xFEC20C68)
+#define INT_OPM_69_B_M2_TL				((uint8_t*) 0xFEC20C69)
+#define INT_OPM_6A_C_M2_TL				((uint8_t*) 0xFEC20C6A)
+#define INT_OPM_6B_D_M2_TL				((uint8_t*) 0xFEC20C6B)
+#define INT_OPM_6C_E_M2_TL				((uint8_t*) 0xFEC20C6C)
+#define INT_OPM_6D_F_M2_TL				((uint8_t*) 0xFEC20C6D)
+#define INT_OPM_6E_G_M2_TL				((uint8_t*) 0xFEC20C6E)
+#define INT_OPM_6F_H_M2_TL				((uint8_t*) 0xFEC20C6F)
                                                                    
-unsigned char * INT_OPM_70_A_C1_TL				= (void *) 0xFEC20C70;
-unsigned char * INT_OPM_71_B_C1_TL				= (void *) 0xFEC20C71;
-unsigned char * INT_OPM_72_C_C1_TL				= (void *) 0xFEC20C72;
-unsigned char * INT_OPM_73_D_C1_TL				= (void *) 0xFEC20C73;
-unsigned char * INT_OPM_74_E_C1_TL				= (void *) 0xFEC20C74;
-unsigned char * INT_OPM_75_F_C1_TL				= (void *) 0xFEC20C75;
-unsigned char * INT_OPM_76_G_C1_TL				= (void *) 0xFEC20C76;
-unsigned char * INT_OPM_77_H_C1_TL				= (void *) 0xFEC20C77;
-unsigned char * INT_OPM_78_A_C2_TL				= (void *) 0xFEC20C78;
-unsigned char * INT_OPM_79_B_C2_TL				= (void *) 0xFEC20C79;
-unsigned char * INT_OPM_7A_C_C2_TL				= (void *) 0xFEC20C7A;
-unsigned char * INT_OPM_7B_D_C2_TL				= (void *) 0xFEC20C7B;
-unsigned char * INT_OPM_7C_E_C2_TL				= (void *) 0xFEC20C7C;
-unsigned char * INT_OPM_7D_F_C2_TL				= (void *) 0xFEC20C7D;
-unsigned char * INT_OPM_7E_G_C2_TL				= (void *) 0xFEC20C7E;
-unsigned char * INT_OPM_7F_H_C2_TL				= (void *) 0xFEC20C7F;
+#define INT_OPM_70_A_C1_TL				((uint8_t*) 0xFEC20C70)
+#define INT_OPM_71_B_C1_TL				((uint8_t*) 0xFEC20C71)
+#define INT_OPM_72_C_C1_TL				((uint8_t*) 0xFEC20C72)
+#define INT_OPM_73_D_C1_TL				((uint8_t*) 0xFEC20C73)
+#define INT_OPM_74_E_C1_TL				((uint8_t*) 0xFEC20C74)
+#define INT_OPM_75_F_C1_TL				((uint8_t*) 0xFEC20C75)
+#define INT_OPM_76_G_C1_TL				((uint8_t*) 0xFEC20C76)
+#define INT_OPM_77_H_C1_TL				((uint8_t*) 0xFEC20C77)
+#define INT_OPM_78_A_C2_TL				((uint8_t*) 0xFEC20C78)
+#define INT_OPM_79_B_C2_TL				((uint8_t*) 0xFEC20C79)
+#define INT_OPM_7A_C_C2_TL				((uint8_t*) 0xFEC20C7A)
+#define INT_OPM_7B_D_C2_TL				((uint8_t*) 0xFEC20C7B)
+#define INT_OPM_7C_E_C2_TL				((uint8_t*) 0xFEC20C7C)
+#define INT_OPM_7D_F_C2_TL				((uint8_t*) 0xFEC20C7D)
+#define INT_OPM_7E_G_C2_TL				((uint8_t*) 0xFEC20C7E)
+#define INT_OPM_7F_H_C2_TL				((uint8_t*) 0xFEC20C7F)
                                                                    
-unsigned char * INT_OPM_80_A_M1_KS_AR			= (void *) 0xFEC20C80;
-unsigned char * INT_OPM_81_B_M1_KS_AR			= (void *) 0xFEC20C81;
-unsigned char * INT_OPM_82_C_M1_KS_AR			= (void *) 0xFEC20C82;
-unsigned char * INT_OPM_83_D_M1_KS_AR			= (void *) 0xFEC20C83;
-unsigned char * INT_OPM_84_E_M1_KS_AR			= (void *) 0xFEC20C84;
-unsigned char * INT_OPM_85_F_M1_KS_AR			= (void *) 0xFEC20C85;
-unsigned char * INT_OPM_86_G_M1_KS_AR			= (void *) 0xFEC20C86;
-unsigned char * INT_OPM_87_H_M1_KS_AR			= (void *) 0xFEC20C87;
-unsigned char * INT_OPM_88_A_M2_KS_AR			= (void *) 0xFEC20C88;
-unsigned char * INT_OPM_89_B_M2_KS_AR			= (void *) 0xFEC20C89;
-unsigned char * INT_OPM_8A_C_M2_KS_AR			= (void *) 0xFEC20C8A;
-unsigned char * INT_OPM_8B_D_M2_KS_AR			= (void *) 0xFEC20C8B;
-unsigned char * INT_OPM_8C_E_M2_KS_AR			= (void *) 0xFEC20C8C;
-unsigned char * INT_OPM_8D_F_M2_KS_AR			= (void *) 0xFEC20C8D;
-unsigned char * INT_OPM_8E_G_M2_KS_AR			= (void *) 0xFEC20C8E;
-unsigned char * INT_OPM_8F_H_M2_KS_AR			= (void *) 0xFEC20C8F;
+#define INT_OPM_80_A_M1_KS_AR			((uint8_t*) 0xFEC20C80)
+#define INT_OPM_81_B_M1_KS_AR			((uint8_t*) 0xFEC20C81)
+#define INT_OPM_82_C_M1_KS_AR			((uint8_t*) 0xFEC20C82)
+#define INT_OPM_83_D_M1_KS_AR			((uint8_t*) 0xFEC20C83)
+#define INT_OPM_84_E_M1_KS_AR			((uint8_t*) 0xFEC20C84)
+#define INT_OPM_85_F_M1_KS_AR			((uint8_t*) 0xFEC20C85)
+#define INT_OPM_86_G_M1_KS_AR			((uint8_t*) 0xFEC20C86)
+#define INT_OPM_87_H_M1_KS_AR			((uint8_t*) 0xFEC20C87)
+#define INT_OPM_88_A_M2_KS_AR			((uint8_t*) 0xFEC20C88)
+#define INT_OPM_89_B_M2_KS_AR			((uint8_t*) 0xFEC20C89)
+#define INT_OPM_8A_C_M2_KS_AR			((uint8_t*) 0xFEC20C8A)
+#define INT_OPM_8B_D_M2_KS_AR			((uint8_t*) 0xFEC20C8B)
+#define INT_OPM_8C_E_M2_KS_AR			((uint8_t*) 0xFEC20C8C)
+#define INT_OPM_8D_F_M2_KS_AR			((uint8_t*) 0xFEC20C8D)
+#define INT_OPM_8E_G_M2_KS_AR			((uint8_t*) 0xFEC20C8E)
+#define INT_OPM_8F_H_M2_KS_AR			((uint8_t*) 0xFEC20C8F)
                                                                    
-unsigned char * INT_OPM_90_A_C1_KS_AR			= (void *) 0xFEC20C90;
-unsigned char * INT_OPM_91_B_C1_KS_AR			= (void *) 0xFEC20C91;
-unsigned char * INT_OPM_92_C_C1_KS_AR			= (void *) 0xFEC20C92;
-unsigned char * INT_OPM_93_D_C1_KS_AR			= (void *) 0xFEC20C93;
-unsigned char * INT_OPM_94_E_C1_KS_AR			= (void *) 0xFEC20C94;
-unsigned char * INT_OPM_95_F_C1_KS_AR			= (void *) 0xFEC20C95;
-unsigned char * INT_OPM_96_G_C1_KS_AR			= (void *) 0xFEC20C96;
-unsigned char * INT_OPM_97_H_C1_KS_AR			= (void *) 0xFEC20C97;
-unsigned char * INT_OPM_98_A_C2_KS_AR			= (void *) 0xFEC20C98;
-unsigned char * INT_OPM_99_B_C2_KS_AR			= (void *) 0xFEC20C99;
-unsigned char * INT_OPM_9A_C_C2_KS_AR			= (void *) 0xFEC20C9A;
-unsigned char * INT_OPM_9B_D_C2_KS_AR			= (void *) 0xFEC20C9B;
-unsigned char * INT_OPM_9C_E_C2_KS_AR			= (void *) 0xFEC20C9C;
-unsigned char * INT_OPM_9D_F_C2_KS_AR			= (void *) 0xFEC20C9D;
-unsigned char * INT_OPM_9E_G_C2_KS_AR			= (void *) 0xFEC20C9E;
-unsigned char * INT_OPM_9F_H_C2_KS_AR			= (void *) 0xFEC20C9F;
+#define INT_OPM_90_A_C1_KS_AR			((uint8_t*) 0xFEC20C90)
+#define INT_OPM_91_B_C1_KS_AR			((uint8_t*) 0xFEC20C91)
+#define INT_OPM_92_C_C1_KS_AR			((uint8_t*) 0xFEC20C92)
+#define INT_OPM_93_D_C1_KS_AR			((uint8_t*) 0xFEC20C93)
+#define INT_OPM_94_E_C1_KS_AR			((uint8_t*) 0xFEC20C94)
+#define INT_OPM_95_F_C1_KS_AR			((uint8_t*) 0xFEC20C95)
+#define INT_OPM_96_G_C1_KS_AR			((uint8_t*) 0xFEC20C96)
+#define INT_OPM_97_H_C1_KS_AR			((uint8_t*) 0xFEC20C97)
+#define INT_OPM_98_A_C2_KS_AR			((uint8_t*) 0xFEC20C98)
+#define INT_OPM_99_B_C2_KS_AR			((uint8_t*) 0xFEC20C99)
+#define INT_OPM_9A_C_C2_KS_AR			((uint8_t*) 0xFEC20C9A)
+#define INT_OPM_9B_D_C2_KS_AR			((uint8_t*) 0xFEC20C9B)
+#define INT_OPM_9C_E_C2_KS_AR			((uint8_t*) 0xFEC20C9C)
+#define INT_OPM_9D_F_C2_KS_AR			((uint8_t*) 0xFEC20C9D)
+#define INT_OPM_9E_G_C2_KS_AR			((uint8_t*) 0xFEC20C9E)
+#define INT_OPM_9F_H_C2_KS_AR			((uint8_t*) 0xFEC20C9F)
                                                                    
-unsigned char * INT_OPM_A0_A_M1_AMS_EN_D1R		= (void *) 0xFEC20CA0;
-unsigned char * INT_OPM_A1_B_M1_AMS_EN_D1R		= (void *) 0xFEC20CA1;
-unsigned char * INT_OPM_A2_C_M1_AMS_EN_D1R		= (void *) 0xFEC20CA2;
-unsigned char * INT_OPM_A3_D_M1_AMS_EN_D1R		= (void *) 0xFEC20CA3;
-unsigned char * INT_OPM_A4_E_M1_AMS_EN_D1R		= (void *) 0xFEC20CA4;
-unsigned char * INT_OPM_A5_F_M1_AMS_EN_D1R		= (void *) 0xFEC20CA5;
-unsigned char * INT_OPM_A6_G_M1_AMS_EN_D1R		= (void *) 0xFEC20CA6;
-unsigned char * INT_OPM_A7_H_M1_AMS_EN_D1R		= (void *) 0xFEC20CA7;
-unsigned char * INT_OPM_A8_A_M2_AMS_EN_D1R		= (void *) 0xFEC20CA8;
-unsigned char * INT_OPM_A9_B_M2_AMS_EN_D1R		= (void *) 0xFEC20CA9;
-unsigned char * INT_OPM_AA_C_M2_AMS_EN_D1R		= (void *) 0xFEC20CAA;
-unsigned char * INT_OPM_AB_D_M2_AMS_EN_D1R		= (void *) 0xFEC20CAB;
-unsigned char * INT_OPM_AC_E_M2_AMS_EN_D1R		= (void *) 0xFEC20CAC;
-unsigned char * INT_OPM_AD_F_M2_AMS_EN_D1R		= (void *) 0xFEC20CAD;
-unsigned char * INT_OPM_AE_G_M2_AMS_EN_D1R		= (void *) 0xFEC20CAE;
-unsigned char * INT_OPM_AF_H_M2_AMS_EN_D1R		= (void *) 0xFEC20CAF;
+#define INT_OPM_A0_A_M1_AMS_EN_D1R		((uint8_t*) 0xFEC20CA0)
+#define INT_OPM_A1_B_M1_AMS_EN_D1R		((uint8_t*) 0xFEC20CA1)
+#define INT_OPM_A2_C_M1_AMS_EN_D1R		((uint8_t*) 0xFEC20CA2)
+#define INT_OPM_A3_D_M1_AMS_EN_D1R		((uint8_t*) 0xFEC20CA3)
+#define INT_OPM_A4_E_M1_AMS_EN_D1R		((uint8_t*) 0xFEC20CA4)
+#define INT_OPM_A5_F_M1_AMS_EN_D1R		((uint8_t*) 0xFEC20CA5)
+#define INT_OPM_A6_G_M1_AMS_EN_D1R		((uint8_t*) 0xFEC20CA6)
+#define INT_OPM_A7_H_M1_AMS_EN_D1R		((uint8_t*) 0xFEC20CA7)
+#define INT_OPM_A8_A_M2_AMS_EN_D1R		((uint8_t*) 0xFEC20CA8)
+#define INT_OPM_A9_B_M2_AMS_EN_D1R		((uint8_t*) 0xFEC20CA9)
+#define INT_OPM_AA_C_M2_AMS_EN_D1R		((uint8_t*) 0xFEC20CAA)
+#define INT_OPM_AB_D_M2_AMS_EN_D1R		((uint8_t*) 0xFEC20CAB)
+#define INT_OPM_AC_E_M2_AMS_EN_D1R		((uint8_t*) 0xFEC20CAC)
+#define INT_OPM_AD_F_M2_AMS_EN_D1R		((uint8_t*) 0xFEC20CAD)
+#define INT_OPM_AE_G_M2_AMS_EN_D1R		((uint8_t*) 0xFEC20CAE)
+#define INT_OPM_AF_H_M2_AMS_EN_D1R		((uint8_t*) 0xFEC20CAF)
                                                                    
-unsigned char * INT_OPM_B0_A_C1_AMS_EN_D1R		= (void *) 0xFEC20CB0;
-unsigned char * INT_OPM_B1_B_C1_AMS_EN_D1R		= (void *) 0xFEC20CB1;
-unsigned char * INT_OPM_B2_C_C1_AMS_EN_D1R		= (void *) 0xFEC20CB2;
-unsigned char * INT_OPM_B3_D_C1_AMS_EN_D1R		= (void *) 0xFEC20CB3;
-unsigned char * INT_OPM_B4_E_C1_AMS_EN_D1R		= (void *) 0xFEC20CB4;
-unsigned char * INT_OPM_B5_F_C1_AMS_EN_D1R		= (void *) 0xFEC20CB5;
-unsigned char * INT_OPM_B6_G_C1_AMS_EN_D1R		= (void *) 0xFEC20CB6;
-unsigned char * INT_OPM_B7_H_C1_AMS_EN_D1R		= (void *) 0xFEC20CB7;
-unsigned char * INT_OPM_B8_A_C2_AMS_EN_D1R		= (void *) 0xFEC20CB8;
-unsigned char * INT_OPM_B9_B_C2_AMS_EN_D1R		= (void *) 0xFEC20CB9;
-unsigned char * INT_OPM_BA_C_C2_AMS_EN_D1R		= (void *) 0xFEC20CBA;
-unsigned char * INT_OPM_BB_D_C2_AMS_EN_D1R		= (void *) 0xFEC20CBB;
-unsigned char * INT_OPM_BC_E_C2_AMS_EN_D1R		= (void *) 0xFEC20CBC;
-unsigned char * INT_OPM_BD_F_C2_AMS_EN_D1R		= (void *) 0xFEC20CBD;
-unsigned char * INT_OPM_BE_G_C2_AMS_EN_D1R		= (void *) 0xFEC20CBE;
-unsigned char * INT_OPM_BF_H_C2_AMS_EN_D1R		= (void *) 0xFEC20CBF;
+#define INT_OPM_B0_A_C1_AMS_EN_D1R		((uint8_t*) 0xFEC20CB0)
+#define INT_OPM_B1_B_C1_AMS_EN_D1R		((uint8_t*) 0xFEC20CB1)
+#define INT_OPM_B2_C_C1_AMS_EN_D1R		((uint8_t*) 0xFEC20CB2)
+#define INT_OPM_B3_D_C1_AMS_EN_D1R		((uint8_t*) 0xFEC20CB3)
+#define INT_OPM_B4_E_C1_AMS_EN_D1R		((uint8_t*) 0xFEC20CB4)
+#define INT_OPM_B5_F_C1_AMS_EN_D1R		((uint8_t*) 0xFEC20CB5)
+#define INT_OPM_B6_G_C1_AMS_EN_D1R		((uint8_t*) 0xFEC20CB6)
+#define INT_OPM_B7_H_C1_AMS_EN_D1R		((uint8_t*) 0xFEC20CB7)
+#define INT_OPM_B8_A_C2_AMS_EN_D1R		((uint8_t*) 0xFEC20CB8)
+#define INT_OPM_B9_B_C2_AMS_EN_D1R		((uint8_t*) 0xFEC20CB9)
+#define INT_OPM_BA_C_C2_AMS_EN_D1R		((uint8_t*) 0xFEC20CBA)
+#define INT_OPM_BB_D_C2_AMS_EN_D1R		((uint8_t*) 0xFEC20CBB)
+#define INT_OPM_BC_E_C2_AMS_EN_D1R		((uint8_t*) 0xFEC20CBC)
+#define INT_OPM_BD_F_C2_AMS_EN_D1R		((uint8_t*) 0xFEC20CBD)
+#define INT_OPM_BE_G_C2_AMS_EN_D1R		((uint8_t*) 0xFEC20CBE)
+#define INT_OPM_BF_H_C2_AMS_EN_D1R		((uint8_t*) 0xFEC20CBF)
                                                                    
-unsigned char * INT_OPM_C0_A_M1_DT2_D2R			= (void *) 0xFEC20CC0;
-unsigned char * INT_OPM_C1_B_M1_DT2_D2R			= (void *) 0xFEC20CC1;
-unsigned char * INT_OPM_C2_C_M1_DT2_D2R			= (void *) 0xFEC20CC2;
-unsigned char * INT_OPM_C3_D_M1_DT2_D2R			= (void *) 0xFEC20CC3;
-unsigned char * INT_OPM_C4_E_M1_DT2_D2R			= (void *) 0xFEC20CC4;
-unsigned char * INT_OPM_C5_F_M1_DT2_D2R			= (void *) 0xFEC20CC5;
-unsigned char * INT_OPM_C6_G_M1_DT2_D2R			= (void *) 0xFEC20CC6;
-unsigned char * INT_OPM_C7_H_M1_DT2_D2R			= (void *) 0xFEC20CC7;
-unsigned char * INT_OPM_C8_A_M2_DT2_D2R			= (void *) 0xFEC20CC8;
-unsigned char * INT_OPM_C9_B_M2_DT2_D2R			= (void *) 0xFEC20CC9;
-unsigned char * INT_OPM_CA_C_M2_DT2_D2R			= (void *) 0xFEC20CCA;
-unsigned char * INT_OPM_CB_D_M2_DT2_D2R			= (void *) 0xFEC20CCB;
-unsigned char * INT_OPM_CC_E_M2_DT2_D2R			= (void *) 0xFEC20CCC;
-unsigned char * INT_OPM_CD_F_M2_DT2_D2R			= (void *) 0xFEC20CCD;
-unsigned char * INT_OPM_CE_G_M2_DT2_D2R			= (void *) 0xFEC20CCE;
-unsigned char * INT_OPM_CF_H_M2_DT2_D2R			= (void *) 0xFEC20CCF;
+#define INT_OPM_C0_A_M1_DT2_D2R			((uint8_t*) 0xFEC20CC0)
+#define INT_OPM_C1_B_M1_DT2_D2R			((uint8_t*) 0xFEC20CC1)
+#define INT_OPM_C2_C_M1_DT2_D2R			((uint8_t*) 0xFEC20CC2)
+#define INT_OPM_C3_D_M1_DT2_D2R			((uint8_t*) 0xFEC20CC3)
+#define INT_OPM_C4_E_M1_DT2_D2R			((uint8_t*) 0xFEC20CC4)
+#define INT_OPM_C5_F_M1_DT2_D2R			((uint8_t*) 0xFEC20CC5)
+#define INT_OPM_C6_G_M1_DT2_D2R			((uint8_t*) 0xFEC20CC6)
+#define INT_OPM_C7_H_M1_DT2_D2R			((uint8_t*) 0xFEC20CC7)
+#define INT_OPM_C8_A_M2_DT2_D2R			((uint8_t*) 0xFEC20CC8)
+#define INT_OPM_C9_B_M2_DT2_D2R			((uint8_t*) 0xFEC20CC9)
+#define INT_OPM_CA_C_M2_DT2_D2R			((uint8_t*) 0xFEC20CCA)
+#define INT_OPM_CB_D_M2_DT2_D2R			((uint8_t*) 0xFEC20CCB)
+#define INT_OPM_CC_E_M2_DT2_D2R			((uint8_t*) 0xFEC20CCC)
+#define INT_OPM_CD_F_M2_DT2_D2R			((uint8_t*) 0xFEC20CCD)
+#define INT_OPM_CE_G_M2_DT2_D2R			((uint8_t*) 0xFEC20CCE)
+#define INT_OPM_CF_H_M2_DT2_D2R			((uint8_t*) 0xFEC20CCF)
                                                                    
-unsigned char * INT_OPM_D0_A_C1_DT2_D2R			= (void *) 0xFEC20CD0;
-unsigned char * INT_OPM_D1_B_C1_DT2_D2R			= (void *) 0xFEC20CD1;
-unsigned char * INT_OPM_D2_C_C1_DT2_D2R			= (void *) 0xFEC20CD2;
-unsigned char * INT_OPM_D3_D_C1_DT2_D2R			= (void *) 0xFEC20CD3;
-unsigned char * INT_OPM_D4_E_C1_DT2_D2R			= (void *) 0xFEC20CD4;
-unsigned char * INT_OPM_D5_F_C1_DT2_D2R			= (void *) 0xFEC20CD5;
-unsigned char * INT_OPM_D6_G_C1_DT2_D2R			= (void *) 0xFEC20CD6;
-unsigned char * INT_OPM_D7_H_C1_DT2_D2R			= (void *) 0xFEC20CD7;
-unsigned char * INT_OPM_D8_A_C2_DT2_D2R			= (void *) 0xFEC20CD8;
-unsigned char * INT_OPM_D9_B_C2_DT2_D2R			= (void *) 0xFEC20CD9;
-unsigned char * INT_OPM_DA_C_C2_DT2_D2R			= (void *) 0xFEC20CDA;
-unsigned char * INT_OPM_DB_D_C2_DT2_D2R			= (void *) 0xFEC20CDB;
-unsigned char * INT_OPM_DC_E_C2_DT2_D2R			= (void *) 0xFEC20CDC;
-unsigned char * INT_OPM_DD_F_C2_DT2_D2R			= (void *) 0xFEC20CDD;
-unsigned char * INT_OPM_DE_G_C2_DT2_D2R			= (void *) 0xFEC20CDE;
-unsigned char * INT_OPM_DF_H_C2_DT2_D2R			= (void *) 0xFEC20CDF;
+#define INT_OPM_D0_A_C1_DT2_D2R			((uint8_t*) 0xFEC20CD0)
+#define INT_OPM_D1_B_C1_DT2_D2R			((uint8_t*) 0xFEC20CD1)
+#define INT_OPM_D2_C_C1_DT2_D2R			((uint8_t*) 0xFEC20CD2)
+#define INT_OPM_D3_D_C1_DT2_D2R			((uint8_t*) 0xFEC20CD3)
+#define INT_OPM_D4_E_C1_DT2_D2R			((uint8_t*) 0xFEC20CD4)
+#define INT_OPM_D5_F_C1_DT2_D2R			((uint8_t*) 0xFEC20CD5)
+#define INT_OPM_D6_G_C1_DT2_D2R			((uint8_t*) 0xFEC20CD6)
+#define INT_OPM_D7_H_C1_DT2_D2R			((uint8_t*) 0xFEC20CD7)
+#define INT_OPM_D8_A_C2_DT2_D2R			((uint8_t*) 0xFEC20CD8)
+#define INT_OPM_D9_B_C2_DT2_D2R			((uint8_t*) 0xFEC20CD9)
+#define INT_OPM_DA_C_C2_DT2_D2R			((uint8_t*) 0xFEC20CDA)
+#define INT_OPM_DB_D_C2_DT2_D2R			((uint8_t*) 0xFEC20CDB)
+#define INT_OPM_DC_E_C2_DT2_D2R			((uint8_t*) 0xFEC20CDC)
+#define INT_OPM_DD_F_C2_DT2_D2R			((uint8_t*) 0xFEC20CDD)
+#define INT_OPM_DE_G_C2_DT2_D2R			((uint8_t*) 0xFEC20CDE)
+#define INT_OPM_DF_H_C2_DT2_D2R			((uint8_t*) 0xFEC20CDF)
                                                                    
-unsigned char * INT_OPM_E0_A_M1_D1L_RR			= (void *) 0xFEC20CE0;
-unsigned char * INT_OPM_E1_B_M1_D1L_RR			= (void *) 0xFEC20CE1;
-unsigned char * INT_OPM_E2_C_M1_D1L_RR			= (void *) 0xFEC20CE2;
-unsigned char * INT_OPM_E3_D_M1_D1L_RR			= (void *) 0xFEC20CE3;
-unsigned char * INT_OPM_E4_E_M1_D1L_RR			= (void *) 0xFEC20CE4;
-unsigned char * INT_OPM_E5_F_M1_D1L_RR			= (void *) 0xFEC20CE5;
-unsigned char * INT_OPM_E6_G_M1_D1L_RR			= (void *) 0xFEC20CE6;
-unsigned char * INT_OPM_E7_H_M1_D1L_RR			= (void *) 0xFEC20CE7;
-unsigned char * INT_OPM_E8_A_M2_D1L_RR			= (void *) 0xFEC20CE8;
-unsigned char * INT_OPM_E9_B_M2_D1L_RR			= (void *) 0xFEC20CE9;
-unsigned char * INT_OPM_EA_C_M2_D1L_RR			= (void *) 0xFEC20CEA;
-unsigned char * INT_OPM_EB_D_M2_D1L_RR			= (void *) 0xFEC20CEB;
-unsigned char * INT_OPM_EC_E_M2_D1L_RR			= (void *) 0xFEC20CEC;
-unsigned char * INT_OPM_ED_F_M2_D1L_RR			= (void *) 0xFEC20CED;
-unsigned char * INT_OPM_EE_G_M2_D1L_RR			= (void *) 0xFEC20CEE;
-unsigned char * INT_OPM_EF_H_M2_D1L_RR			= (void *) 0xFEC20CEF;
+#define INT_OPM_E0_A_M1_D1L_RR			((uint8_t*) 0xFEC20CE0)
+#define INT_OPM_E1_B_M1_D1L_RR			((uint8_t*) 0xFEC20CE1)
+#define INT_OPM_E2_C_M1_D1L_RR			((uint8_t*) 0xFEC20CE2)
+#define INT_OPM_E3_D_M1_D1L_RR			((uint8_t*) 0xFEC20CE3)
+#define INT_OPM_E4_E_M1_D1L_RR			((uint8_t*) 0xFEC20CE4)
+#define INT_OPM_E5_F_M1_D1L_RR			((uint8_t*) 0xFEC20CE5)
+#define INT_OPM_E6_G_M1_D1L_RR			((uint8_t*) 0xFEC20CE6)
+#define INT_OPM_E7_H_M1_D1L_RR			((uint8_t*) 0xFEC20CE7)
+#define INT_OPM_E8_A_M2_D1L_RR			((uint8_t*) 0xFEC20CE8)
+#define INT_OPM_E9_B_M2_D1L_RR			((uint8_t*) 0xFEC20CE9)
+#define INT_OPM_EA_C_M2_D1L_RR			((uint8_t*) 0xFEC20CEA)
+#define INT_OPM_EB_D_M2_D1L_RR			((uint8_t*) 0xFEC20CEB)
+#define INT_OPM_EC_E_M2_D1L_RR			((uint8_t*) 0xFEC20CEC)
+#define INT_OPM_ED_F_M2_D1L_RR			((uint8_t*) 0xFEC20CED)
+#define INT_OPM_EE_G_M2_D1L_RR			((uint8_t*) 0xFEC20CEE)
+#define INT_OPM_EF_H_M2_D1L_RR			((uint8_t*) 0xFEC20CEF)
                                                                    
-unsigned char * INT_OPM_F0_A_C1_D1L_RR			= (void *) 0xFEC20CF0;
-unsigned char * INT_OPM_F1_B_C1_D1L_RR			= (void *) 0xFEC20CF1;
-unsigned char * INT_OPM_F2_C_C1_D1L_RR			= (void *) 0xFEC20CF2;
-unsigned char * INT_OPM_F3_D_C1_D1L_RR			= (void *) 0xFEC20CF3;
-unsigned char * INT_OPM_F4_E_C1_D1L_RR			= (void *) 0xFEC20CF4;
-unsigned char * INT_OPM_F5_F_C1_D1L_RR			= (void *) 0xFEC20CF5;
-unsigned char * INT_OPM_F6_G_C1_D1L_RR			= (void *) 0xFEC20CF6;
-unsigned char * INT_OPM_F7_H_C1_D1L_RR			= (void *) 0xFEC20CF7;
-unsigned char * INT_OPM_F8_A_C2_D1L_RR			= (void *) 0xFEC20CF8;
-unsigned char * INT_OPM_F9_B_C2_D1L_RR			= (void *) 0xFEC20CF9;
-unsigned char * INT_OPM_FA_C_C2_D1L_RR			= (void *) 0xFEC20CFA;
-unsigned char * INT_OPM_FB_D_C2_D1L_RR			= (void *) 0xFEC20CFB;
-unsigned char * INT_OPM_FC_E_C2_D1L_RR			= (void *) 0xFEC20CFC;
-unsigned char * INT_OPM_FD_F_C2_D1L_RR			= (void *) 0xFEC20CFD;
-unsigned char * INT_OPM_FE_G_C2_D1L_RR			= (void *) 0xFEC20CFE;
-unsigned char * INT_OPM_FF_H_C2_D1L_RR			= (void *) 0xFEC20CFF;
+#define INT_OPM_F0_A_C1_D1L_RR			((uint8_t*) 0xFEC20CF0)
+#define INT_OPM_F1_B_C1_D1L_RR			((uint8_t*) 0xFEC20CF1)
+#define INT_OPM_F2_C_C1_D1L_RR			((uint8_t*) 0xFEC20CF2)
+#define INT_OPM_F3_D_C1_D1L_RR			((uint8_t*) 0xFEC20CF3)
+#define INT_OPM_F4_E_C1_D1L_RR			((uint8_t*) 0xFEC20CF4)
+#define INT_OPM_F5_F_C1_D1L_RR			((uint8_t*) 0xFEC20CF5)
+#define INT_OPM_F6_G_C1_D1L_RR			((uint8_t*) 0xFEC20CF6)
+#define INT_OPM_F7_H_C1_D1L_RR			((uint8_t*) 0xFEC20CF7)
+#define INT_OPM_F8_A_C2_D1L_RR			((uint8_t*) 0xFEC20CF8)
+#define INT_OPM_F9_B_C2_D1L_RR			((uint8_t*) 0xFEC20CF9)
+#define INT_OPM_FA_C_C2_D1L_RR			((uint8_t*) 0xFEC20CFA)
+#define INT_OPM_FB_D_C2_D1L_RR			((uint8_t*) 0xFEC20CFB)
+#define INT_OPM_FC_E_C2_D1L_RR			((uint8_t*) 0xFEC20CFC)
+#define INT_OPM_FD_F_C2_D1L_RR			((uint8_t*) 0xFEC20CFD)
+#define INT_OPM_FE_G_C2_D1L_RR			((uint8_t*) 0xFEC20CFE)
+#define INT_OPM_FF_H_C2_D1L_RR			((uint8_t*) 0xFEC20CFF)
 
 
 #endif

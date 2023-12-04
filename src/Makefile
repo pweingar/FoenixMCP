@@ -82,7 +82,7 @@ DEFAULT_LOG_LEVEL=1
 
 
 # Common defines and includes -------------------------------------------------
-DEFINES = #-D__NOINLINE__# -DKBD_POLLED
+DEFINES = -DCPU=$(CPU_NUMBER) -DMODEL=$(MODEL_NUMBER) # -DKBD_POLLED 
 ifeq ("$(CPU)","w65816")
 	CPU_NUMBER = 255
 else ifeq ("$(CPU)","m68040") # M68040V or 68040
@@ -90,11 +90,31 @@ else ifeq ("$(CPU)","m68040") # M68040V or 68040
 else ifeq ("$(CPU)","m68k") # M68000 or 68SEC000
 	CPU_NUMBER = 0
 endif
-DEFINES := $(DEFINES) -DCPU=$(CPU_NUMBER) -DMODEL=$(MODEL_NUMBER)
+
+# Maximum working logging level to compile
+#define LOG_FATAL   0   /* Log a critical or fatal event */
+#define LOG_ERROR   1   /* Log an error */
+#define LOG_INFO    2   /* Log miscellaneous information */
+#define LOG_DEBUG   3   /* Log a debugging message */
+#define LOG_TRACE   4   /* Log tracing information (like entry into a subroutine) */
+#define LOG_VERBOSE 5   /* Log a truly verbose message... the sort you almost never want to bother with */
+DEFAULT_LOG_LEVEL=0
+
+#define LOG_CHANNEL_UART0 -1
+#define LOG_CHANNEL_CHANNEL_A 0
+#define LOG_CHANNEL_CHANNEL_B 1
+#define LOG_CHANNEL_CHANNEL_A_LOW_LEVEL 10
+LOG_CHANNEL=0
+
 ifeq ("$(DEFAULT_LOG_LEVEL)","")
 else
-	DEFINES := $(DEFINES) -DDEFAULT_LOG_LEVEL=$(DEFAULT_LOG_LEVEL)
+ DEFINES := $(DEFINES) -DDEFAULT_LOG_LEVEL=$(DEFAULT_LOG_LEVEL)
 endif
+ifeq ("$(LOG_CHANNEL)","")
+else
+ DEFINES := $(DEFINES) -DLOG_CHANNEL=$(LOG_CHANNEL)
+endif
+
 INCLUDES = -I. -I$(CURDIR)/include -I$(CURDIR)
 
 
@@ -112,14 +132,14 @@ ifeq ($(TOOLCHAIN),calypsi)
 	AS = as65816
 	LD = ln65816
 	AR = nlib
-	
+
 	# Determine the correct configuration file (barring OS)
 	ifeq ($(MEMORY),ram)
 		LD_OUTPUT_TYPE = s37
 	else
 		LD_OUTPUT_TYPE = # TODO
 	endif
-	
+
 	CFLAGS = -l --target Foenix --code-model large --data-model large
 	LDFLAGS=--target foenix --output-format $(LD_OUTPUT_TYPE) --list-file foenixmcp.map
 else
@@ -146,7 +166,7 @@ else
 	endif
 
 	ASFLAGS = -Fvobj -nowarn=62 $(VASM_CPU) -quiet
-	CFLAGS =-c -S -cpu=$(VBCC_CPU) +$(CFG_FILE)
+	CFLAGS =-c -S -cpu=$(VBCC_CPU) +$(CFG_FILE) -D__NOINLINE__
 	LDFLAGS = +$(CFG_FILE)
 endif
 
@@ -181,17 +201,17 @@ SPLASHSCREEN = rsrc/bitmaps/splash_$(UNIT).o
 # CPU-specific files
 cpu_s_src := $(wildcard $(CPU)/*.s)
 cpu_c_src := $(wildcard $(CPU)/*.c)
-cpu_c_obj := $(subst .c,.o,$(cpu_c_src)) $(subst .s,.o,$(cpu_s_src))
+cpu_obj := $(subst .c,.o,$(cpu_c_src)) $(subst .s,.o,$(cpu_s_src))
 
 # Device drivers (common to all Foenix)
 dev_c_src = block.c channel.c console.c fsys.c pata.c ps2.c rtc.c sdc.c txt_screen.c uart.c
 dev_s_src =
 ifeq ($(UNIT),a2560k)
-	dev_c_src := $(dev_c_src) fdc.c kbd_mo.c lpt.c midi.c txt_a2560k_a.c txt_a2560k_b.c m68040/fdc_m68040.c superio.c
+	dev_c_src := $(dev_c_src) fdc.c kbd_mo.c lpt.c midi.c txt_a2560k_a.c txt_a2560k_b.c superio.c
 else ifeq ($(UNIT),genx)
-	dev_c_src := $(dev_c_src) fdc.c lpt.c midi.c txt_a2560k_a.c txt_a2560k_b.c #m68040/fdc_m68040.c superio.c
+	dev_c_src := $(dev_c_src) fdc.c lpt.c midi.c txt_a2560k_a.c txt_a2560k_b.c superio.c
 else ifeq ($(UNIT),a2560x)
-	dev_c_src := $(dev_c_src) fdc.c lpt.c midi.c txt_a2560k_a.c txt_a2560k_b.c #m68040/fdc_m68040.c superio.c
+	dev_c_src := $(dev_c_src) fdc.c lpt.c midi.c txt_a2560k_a.c txt_a2560k_b.c superio.c
 else ifeq ($(UNIT),a2560u)
 	dev_c_src := $(dev_c_src) txt_a2560u.o
 endif
@@ -234,7 +254,7 @@ foenixmcp.s37: $(OBJS) $(LIBS)
 	$(LD) $(LDFLAGS) -o $@ $^
 
 
-DEPS = $(cpu_c_obj) $(c_obj) $(dev_obj) $(fatfs_obj) $(snd_obj) $(cli_obj) $(SPLASHSCREEN)
+DEPS = $(cpu_obj) $(c_obj) $(dev_obj) $(fatfs_obj) $(snd_obj) $(cli_obj) $(SPLASHSCREEN)
 
 # We don't want to link:
 # - the startup file (because the linker script does it)
