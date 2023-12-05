@@ -82,7 +82,8 @@ int main(int argc, char * argv[]) {
     short i;
 
 	mcp_init();
-	
+	buzzer_off();
+
     // At this point, we should be able to call into to console to print to the screens
     /* Play the SID test bong on the Gideon SID implementation */
     sid_test_internal();
@@ -94,7 +95,7 @@ int main(int argc, char * argv[]) {
         INFO("CLI initialized.");
     }
 	
-#if MODEL == MODEL_FOENIX_A2560U || MODEL == MODEL_FOENIX_A2560U_PLUS
+#if MODEL == MODEL_FOENIX_A2560U || MODEL == MODEL_FOENIX_A2560U_PLUS || MODEL == MODEL_FOENIX_A2560X
     // Make sure the command path is set to the default before we get started
     cli_command_set("");
 TRACE("Calling boot_screen()");
@@ -153,6 +154,12 @@ static void hw_initialize(void) {
 	
     /* Setup logging early to facilitate troubleshooting. This may require the UART to be
 	 * functional (e.g. if debugging to the serial port) so it may call uart_init. */
+
+#if HAS_SUPERIO
+    /* Initialize the SuperIO chip. We do this early so to have the UARTs available for debug output */
+    superio_init();
+    INFO("SuperIO initialized");
+#endif
     log_init();
 
 	/* Fill out the system information */
@@ -191,13 +198,6 @@ static void hw_initialize(void) {
     rtc_init();
 	INFO("Real time clock initialized");
 
-	
-#if HAS_SUPERIO
-    /* Initialize the SuperIO chip */
-    init_superio();
-    INFO("SuperIO initialized");
-#endif
-	
 	/* Mute the PSG */
     psg_mute_all();
     INFO("PSGs muted");
@@ -277,7 +277,7 @@ static void os_devices_initialize(void) {
     } else {
         INFO("Serial ports initialized.");
     }
-	
+
     /* Initialize the variable system */
     var_init();
 	
