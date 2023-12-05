@@ -460,7 +460,7 @@ short uart_install() {
 
     result = cdev_register(&dev);
 
-    if (result) {
+    if (result != E_OK) {
         return result;
     }
 
@@ -469,7 +469,5 @@ short uart_install() {
 
     result = cdev_register(&dev);
 
-    if (result) {
-        return result;
-    }
+    return result;
 }
