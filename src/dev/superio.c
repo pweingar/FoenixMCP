@@ -5,13 +5,13 @@
 
 #if HAS_SUPERIO
 
-static void init_SuperIO_config_zones(void);
+static void configure_zones(void);
 
 /*
  * Initialize the SuperIO registers
  */
- void init_superio(void) {
-   init_SuperIO_config_zones(); // This Init used to be done by the FPGA.
+ void superio_init(void) {
+   configure_zones(); // This Init used to be done by the FPGA.
    
 	 *GP10_REG = 0x01;
     *GP11_REG = 0x01;
@@ -66,7 +66,7 @@ static void init_SuperIO_config_zones(void);
     *FAN_CTRL_REG = 0x01;
  }
 
-static void init_SuperIO_config_zones(void) { 	
+static void configure_zones(void) {
     // First step is to get into the Configuration Mode
     *CONFIG_0x2E_REG = 0x55;    // We need to Get into the Config Mode with 0x55
 

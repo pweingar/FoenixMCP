@@ -13,6 +13,8 @@
 
 #define SUPERIO_BASE (0xFEC02000)
 
+ void superio_init(void);
+
 
 #define CONFIG_0x2E_REG ((volatile uint8_t *)0xFEC0202E)
 #define CONFIG_0x2F_REG ((volatile uint8_t *)0xFEC0202F)
