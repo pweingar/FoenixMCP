@@ -34,14 +34,17 @@ MEMORY := ram
 ifeq ($(UNIT),a2560k)
 	MODEL_NUMBER = 11
 	CPU = m68040
+	MODEL_FAMILY = GENX32
 
 else ifeq ($(UNIT),genx)
 	MODEL_NUMBER = 4
 	CPU = m68040
+	MODEL_FAMILY = GENX32
 
 else ifeq ($(UNIT),a2560x)
 	MODEL_NUMBER = 8
 	CPU = m68040
+	MODEL_FAMILY = GENX32
 
 else ifeq ($(UNIT),a2560u)
 	MODEL_NUMBER = 9
@@ -100,11 +103,12 @@ endif
 #define LOG_VERBOSE 5   /* Log a truly verbose message... the sort you almost never want to bother with */
 DEFAULT_LOG_LEVEL=0
 
-#define LOG_CHANNEL_UART0 -1
 #define LOG_CHANNEL_CHANNEL_A 0
 #define LOG_CHANNEL_CHANNEL_B 1
-#define LOG_CHANNEL_CHANNEL_A_LOW_LEVEL 10
-LOG_CHANNEL=0
+#define LOG_CHANNEL_CHANNEL_A_LOW_LEVEL 2 // low-level routines (doesn't use MCP's console stuff)
+#define LOG_CHANNEL_COM1 10
+#define LOG_CHANNEL_COM2 11
+LOG_CHANNEL=11
 
 ifeq ("$(DEFAULT_LOG_LEVEL)","")
 else
@@ -166,7 +170,12 @@ else
 	endif
 
 	ASFLAGS = -Fvobj -nowarn=62 $(VASM_CPU) -quiet
-	CFLAGS =-c -S -cpu=$(VBCC_CPU) +$(CFG_FILE) -D__NOINLINE__
+	ifneq ($(MODEL_FAMILY),GENX32)
+		# Inline functions cause problems (at least on the X)
+		CFLAGS_EXTRA=-D__NOINLINE__
+	else
+	endif	
+	CFLAGS =-c -S -cpu=$(VBCC_CPU) +$(CFG_FILE) $(CFLAGS_EXTRA)
 	LDFLAGS = +$(CFG_FILE)
 endif
 

@@ -12,8 +12,9 @@
 
 #define LOG_CHANNEL_CHANNEL_A 0
 #define LOG_CHANNEL_CHANNEL_B 1
-#define LOG_CHANNEL_CHANNEL_A_LOW_LEVEL 10 // low-level routines (doesn't use MCP's console stuff)
-#define LOG_CHANNEL_UART1 20
+#define LOG_CHANNEL_CHANNEL_A_LOW_LEVEL 2 // low-level routines (doesn't use MCP's console stuff)
+#define LOG_CHANNEL_COM1 10
+#define LOG_CHANNEL_COM2 11
 
 /*
  * Default settings
@@ -23,15 +24,16 @@
 #endif
 
 #ifndef LOG_CHANNEL
+  // If the device has a second screen, we default to logging to it
   #if MODEL == MODEL_FOENIX_A2560K || MODEL == MODEL_FOENIX_A2560X || MODEL == MODEL_FOENIX_GENX
     #define LOG_CHANNEL LOG_CHANNEL_CHANNEL_A_LOW_LEVEL
   #else
-    #define LOG_CHANNEL LOG_CHANNEL_UART1
+    #define LOG_CHANNEL LOG_CHANNEL_COM1
   #endif
 #else
 #endif
 
-#define LOGBUF_SIZE 200;
+#define LOGBUF_SIZE 200
 extern short log_level;
 extern void (*do_log)(const char* message);
 extern char logbuf[];
@@ -76,6 +78,14 @@ extern void log_init(void);
  * level = the maximum level of verbosity to log
  */
 extern void log_setlevel(short level);
+
+/*
+ * Tell where the debug output should go. The default is set in the Makefile.
+ * Beware that:
+ * - log channelare not "MCP" channels, see log.h for the valid values.
+ * - changing the log channel may reinitialize of mess up the target device.
+ */
+extern void set_log_channel(short channel);
 
 /*
  * Log a message to the console

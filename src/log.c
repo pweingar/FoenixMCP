@@ -24,8 +24,7 @@
 #endif
 
 /* Channel to which the logging output should go.
- * Positive: screen number
- * -1: UART. 
+ * See log.h
  */
 static short log_channel;
 
@@ -44,11 +43,13 @@ static void log_to_screen(const char* message);
 static void log_to_channel_A_low_level(const char *message);
 #endif
 
+static short uart; // UART id to use with the uart_xxx functions
 #define UART_COM1 0
+#define UART_COM2 1
 
 /* Can use the buzzer as sound clues */
 void buzzer_on(void) {
-    *(GABE_CTRL_REG) = BUZZER_CONTROL;
+    *(GABE_CTRL_REG) |= BUZZER_CONTROL;
 }
 
 
@@ -62,12 +63,19 @@ void log_init(void) {
     log_channel = LOG_CHANNEL;
 
     switch (log_channel) {
-    case LOG_CHANNEL_UART1:
+    case LOG_CHANNEL_COM1:
         do_log = log_to_uart;
-        uart_init(UART_COM1);
-
+        uart = UART_COM1;
+        uart_init(uart);
         break;
+
 #if (MODEL == MODEL_FOENIX_A2560K || MODEL == MODEL_FOENIX_GENX || MODEL == MODEL_FOENIX_A2560X)
+    case LOG_CHANNEL_COM2:
+        do_log = log_to_uart;
+        uart = UART_COM2;
+        uart_init(uart);
+        break;
+
     case LOG_CHANNEL_CHANNEL_A_LOW_LEVEL:
         channel_A_logger_init();
         do_log = log_to_channel_A_low_level;
@@ -264,16 +272,23 @@ void log_setlevel(short level) {
     log_level = level;
 }
 
+/* See do in the .h file */
+void set_log_channel(short channel) {
+    if (log_channel != channel) {
+        log_channel = channel;
+        log_init();
+    }
+}
 
 static void log_to_uart(const char *message) {
     char *c = (char*)message;
     while (*c) {
         if (*c == '\n')
-            uart_put(UART_COM1,'\r');
-        uart_put(UART_COM1, *c++);
+            uart_put(uart,'\r');
+        uart_put(uart, *c++);
     }
-     uart_put(UART_COM1,'\r');
-     uart_put(UART_COM1,'\n');
+    uart_put(uart,'\r');
+    uart_put(uart,'\n');
 }
 
 static void log_to_screen(const char *message) {
