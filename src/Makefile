@@ -8,8 +8,23 @@ MEMORY := ram
 # The script expects the following environment variables to be set:
 # VBCC: path to VBCC distribution 
 
-#UNIT := C256U_PLUS
-#MEMORY := RAM
+# Define OS-dependent tools ---------------------------------------------------
+ifeq ("$(PAD_FLASH_SIZE)","")
+	# When compiling an image for flash, size to which the image must be padded
+	PAD_FLASH_SIZE = 524288
+endif
+ifeq ($(OS),Windows_NT)
+	RM = del /F/Q
+	PAD_CMD = fsutil file seteof $@ $(PAD_FLASH_SIZE)
+	SEP= \$ # Leave this as is, it's a trick
+	PYTHON3=python
+else
+	RM = rm -f
+	PAD_CMD = truncate -s $(PAD_FLASH_SIZE) $@
+	SEP = /
+	PYTHON3=python3
+endif
+
 
 # The below doesn't seem true !
 # CPU_WDC65816                0x16  /* CPU code for the Western Design Center 65816 */
@@ -120,6 +135,9 @@ else
 endif
 
 INCLUDES = -I. -I$(CURDIR)/include -I$(CURDIR)
+ifeq ($(OS),Windows_NT)
+ INCLUDES := $(subst /,$(SEP),$(INCLUDES))
+endif
 
 
 # Toolchain selection ---------------------------------------------------------
@@ -167,6 +185,8 @@ else
 	endif
 	ifneq ($(OS),Windows_NT)
 		CFG_FILE := $(CFG_FILE)_linux
+	else
+		CFG_FILE := $(subst /,$(SEP),$(CFG_FILE))
 	endif
 
 	ASFLAGS = -Fvobj -nowarn=62 $(VASM_CPU) -quiet
@@ -177,24 +197,6 @@ else
 	endif	
 	CFLAGS =-c -S -cpu=$(VBCC_CPU) +$(CFG_FILE) $(CFLAGS_EXTRA)
 	LDFLAGS = +$(CFG_FILE)
-endif
-
-
-# Define OS-dependent tools ---------------------------------------------------
-ifeq ("$(PAD_FLASH_SIZE)","")
-	# When compiling an image for flash, size to which the image must be padded
-	PAD_FLASH_SIZE = 524288
-endif
-ifeq ($(OS),Windows_NT)
-	RM = del /F/Q
-	PAD_CMD = fsutil file seteof $@ $(PAD_FLASH_SIZE)
-	SEP= \$ # Leave this as is, it's a trick
-	PYTHON3=python
-else
-	RM = rm -f
-	PAD_CMD = truncate -s $(PAD_FLASH_SIZE) $@
-	SEP = /
-	PYTHON3=python3
 endif
 
 
