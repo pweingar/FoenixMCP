@@ -4,10 +4,10 @@
 -asv=vasmm68k_mot -Fvobj -nowarn=62 %s -o %s
 -rm=del %s
 -rmv=del %s
--ld=vlink -bsrec28 -x  -Cvbcc m68040\startup_m68040.o %s %s -L%%VBCC%%\targets\m68k-foenix\lib -T%%VBCC%%\targets\m68k-foenix\vlink_ram_a2560k.cmd -lvc -o %s -Mmapfile
--l2=vlink -bsrec28 -x  -Cvbcc %s %s -L%%VBCC%%\targets\m68k-foenix\lib -T%%VBCC%%\targets\m68k-foenix\vlink_ram_a2560k.cmd -o %s -Mmapfile
--ldv=vlink -bsrec28 -t -x -Cvbcc m68040\startup.o %s %s -L%%VBCC%%\targets\m68k-foenix\lib -T%%VBCC%%\targets\m68k-foenix\vlink_ram_a2560k.cmd -lvc -o %s -Mmapfile
--l2v=vlink -bsrec28 -t -x -Cvbcc %s %s -L%%VBCC%%\targets\m68k-foenix\lib -T%%VBCC%%\targets\m68k-foenix\vlink_ram_a2560k.cmd -o %s -Mmapfile
+-ld=vlink -bsrec28 -x  -Cvbcc m68040\startup_m68040.o %s %s -L%%VBCC%%\targets\m68k-foenix\lib -T%%VBCC%%\targets\m68k-foenix\vlink_ram_a2560x.cmd -lvc -o %s -Mmapfile
+-l2=vlink -bsrec28 -x  -Cvbcc %s %s -L%%VBCC%%\targets\m68k-foenix\lib -T%%VBCC%%\targets\m68k-foenix\vlink_ram_a2560x.cmd -o %s -Mmapfile
+-ldv=vlink -bsrec28 -t -x -Cvbcc m68040\startup.o %s %s -L%%VBCC%%\targets\m68k-foenix\lib -T%%VBCC%%\targets\m68k-foenix\vlink_ram_a2560x.cmd -lvc -o %s -Mmapfile
+-l2v=vlink -bsrec28 -t -x -Cvbcc %s %s -L%%VBCC%%\targets\m68k-foenix\lib -T%%VBCC%%\targets\m68k-foenix\vlink_ram_a2560x.cmd -o %s -Mmapfile
 -ul=-l%s
 -cf=-F%s
 -ml=1000
