@@ -189,10 +189,12 @@ ifeq ($(OS),Windows_NT)
 	RM = del /F/Q
 	PAD_CMD = fsutil file seteof $@ $(PAD_FLASH_SIZE)
 	SEP= \$ # Leave this as is, it's a trick
+	PYTHON3=python
 else
 	RM = rm -f
 	PAD_CMD = truncate -s $(PAD_FLASH_SIZE) $@
 	SEP = /
+	PYTHON3=python3
 endif
 
 
@@ -288,7 +290,7 @@ foenixmcp.bin: $(DEPS)
 # pip3 install Image
 # pip3 install pillow  
 rsrc/bitmaps/splash_%.c: rsrc/bitmaps/splash_%.bmp
-	python3 rsrc/bitmaps/bmp2c.py -i $^ -o $@
+	$(PYTHON3) rsrc/bitmaps/bmp2c.py -i $^ -o $@
 
 # Clean up after a build
 clean:
