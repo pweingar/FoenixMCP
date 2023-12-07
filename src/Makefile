@@ -286,7 +286,7 @@ foenixmcp.s68: $(DEPS)
 foenixmcp.bin: $(DEPS)
 	$(CC) $(LDFLAGS) -o $@ $(FILES_TO_LINK)
 # TODO Test that the file is <= PAD_FLASH_SIZE bytes otherwise'll be slashing the OS !
-#	$(PAD_CMD)
+	$(PAD_CMD)
 
 # Rule for generating include file containing RLE-compressed version of BMP splashscreen
 # You need python3 installed obviously, and install some extra packages you can install with:
