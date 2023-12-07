@@ -265,7 +265,7 @@ endif
 
 # Per-folder libraries (used by Calypsi)
 foenixmcp.s37: $(OBJS) $(LIBS)
-	$(LD) $(LDFLAGS) -o $@ $^
+	$(LD) $(LDFLAGS) -o $@  $(subst /,$(SEP),$^)
 
 
 DEPS = $(cpu_obj) $(c_obj) $(dev_obj) $(fatfs_obj) $(snd_obj) $(cli_obj) $(SPLASHSCREEN)
@@ -275,7 +275,8 @@ DEPS = $(cpu_obj) $(c_obj) $(dev_obj) $(fatfs_obj) $(snd_obj) $(cli_obj) $(SPLAS
 # - the splashscreen because it's #included from somewhere (boot.c)
 # So we remove them from the string of files to link.
 STARTUP_OBJ=$(CPU)/startup_$(CPU).o
-FILES_TO_LINK=$(subst $(STARTUP_OBJ),,$(DEPS))
+FILES_TO_LINK= $(subst $(STARTUP_OBJ),,$(DEPS))
+FILE_TO_LINK:=$(subst /,$(SEP),$(FILES_TO_LINK))
 
 foenixmcp.s68: $(DEPS)
 	$(CC) $(LDFLAGS) -o $@ $(FILES_TO_LINK)
