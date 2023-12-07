@@ -182,16 +182,19 @@ endif
 
 # Define OS-dependent tools ---------------------------------------------------
 ifeq ("$(PAD_FLASH_SIZE)","")
-    # When compiling an image for flash, size to which the image must be padded
+	# When compiling an image for flash, size to which the image must be padded
 	PAD_FLASH_SIZE = 524288
 endif
 ifeq ($(OS),Windows_NT)
 	RM = del /F/Q
 	PAD_CMD = fsutil file seteof $@ $(PAD_FLASH_SIZE)
+	SEP= \$ # Leave this as is, it's a trick
 else
 	RM = rm -f
 	PAD_CMD = truncate -s $(PAD_FLASH_SIZE) $@
+	SEP = /
 endif
+
 
 # Flags (are automatically used by make) --------------------------------------
 ASFLAGS := $(ASFLAGS) $(DEFINES) $(INCLUDES)
@@ -289,7 +292,7 @@ rsrc/bitmaps/splash_%.c: rsrc/bitmaps/splash_%.bmp
 
 # Clean up after a build
 clean:
-	$(RM) $(OBJS_TO_CLEAN) $(DEPS) foenixmcp.s37 *.lst *.map
+	$(RM) $(subst /,$(SEP),$(OBJS_TO_CLEAN)) $(subst /,$(SEP),$(DEPS)) foenixmcp.s37 *.lst *.map
 	$(MAKE) --directory=$(CPU) clean
 	$(MAKE) --directory=cli clean
 	$(MAKE) --directory=dev clean
