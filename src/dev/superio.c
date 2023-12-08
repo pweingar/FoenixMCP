@@ -11,8 +11,12 @@ static void configure_zones(void);
  * Initialize the SuperIO registers
  */
  void superio_init(void) {
-   configure_zones(); // This Init used to be done by the FPGA.
-   
+#if MODEL == MODEL_FOENIX_A2560X || MODEL == MODEL_FOENIX_GENX
+     // This initialization used to be done by the FPGA.
+     // Other machines A2560K/C256FMX will have this change soon to.
+     configure_zones(); 
+#endif
+     
 	 *GP10_REG = 0x01;
     *GP11_REG = 0x01;
     *GP12_REG = 0x01;
