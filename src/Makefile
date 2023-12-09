@@ -195,7 +195,7 @@ else
 		CFLAGS_EXTRA=-D__NOINLINE__
 	else
 	endif	
-	CFLAGS =-c -S -cpu=$(VBCC_CPU) +$(CFG_FILE) $(CFLAGS_EXTRA) -O2
+	CFLAGS =-c -S -cpu=$(VBCC_CPU) +$(CFG_FILE) $(CFLAGS_EXTRA)
 	LDFLAGS = +$(CFG_FILE)
 endif
 
