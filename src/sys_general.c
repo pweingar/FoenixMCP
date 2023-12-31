@@ -1,4 +1,5 @@
 #include "sys_general.h"
+#include "version.h"
 #include "gabe_reg.h"
 #include "exp_reg.h"
 
@@ -312,7 +313,7 @@ static short genx_leds = 0;
  * Inputs:
  * colors = color specification, three bits: 0x_____RGB
  */
-void genx_set_fdc_led(short colors) {
+void ind_set_fdc_led(short colors) {
     genx_leds = (genx_leds & 0xFFF8) | (colors & 0x07);
     *GABE_GENX_STAT_LEDS = genx_leds;
 }
@@ -323,7 +324,7 @@ void genx_set_fdc_led(short colors) {
  * Inputs:
  * colors = color specification, three bits: 0x_____RGB
  */
-void genx_set_sdc_led(short colors) {
+void ind_set_sdc_led(short colors) {
     genx_leds = (genx_leds & 0xFFC7) | ((colors & 0x07) << 3);
     *GABE_GENX_STAT_LEDS = genx_leds;
 }
@@ -334,7 +335,7 @@ void genx_set_sdc_led(short colors) {
  * Inputs:
  * colors = color specification, three bits: 0x_____RGB
  */
-void genx_set_hdc_led(short colors)  {
+void ind_set_hdc_led(short colors)  {
     genx_leds = (genx_leds & 0xFE3F) | ((colors & 0x07) << 6);
     *GABE_GENX_STAT_LEDS = genx_leds;
 }

@@ -35,4 +35,31 @@ extern void ind_init();
  */
 extern void ind_set(short ind_number, short state);
 
+#if MODEL == MODEL_FOENIX_GENX || MODEL == MODEL_FOENIX_A2560X
+/*
+ * Set the color of the LED for the floppy drive
+ *
+ * Inputs:
+ * colors = color specification, three bits: 0x_____RGB
+ */
+extern void ind_set_fdc_led(short colors);
+
+/*
+ * Set the color of the LED for the SD card slot
+ *
+ * Inputs:
+ * colors = color specification, three bits: 0x_____RGB
+ */
+extern void ind_set_sdc_led(short colors);
+
+/*
+ * Set the color of the LED for the IDE hard drive
+ *
+ * Inputs:
+ * colors = color specification, three bits: 0x_____RGB
+ */
+extern void ind_set_hdc_led(short colors);
+
+#endif
+
 #endif

@@ -1,33 +1,19 @@
 /*
- * Definitions for the interrupt controls
+ * Definitions for the interrupt controls managed by GAVIN.
  */
 
+#include <stdint.h>
 #include <string.h>
 
 #include "features.h"
 #include "interrupt.h"
 
-#define MAX_HANDLERS 48
+#define MAX_HANDLERS (16*4)
 
-p_int_handler g_int_handler[MAX_HANDLERS];
+p_int_handler g_int_handler[MAX_HANDLERS]; // Public because referenced by the asm interrupt handler.
 
-/*
- * Return the group number for the interrupt number
- *
- * For the m68000 machines, this will just be the high nibble of the number
- */
-unsigned short int_group(unsigned short n) {
-	return ((n >> 4) & 0x0f);
-}
-
-/*
- * Return the mask bit for the interrupt number
- *
- * For the m68000 machines, this will just be the bit corresponding to the lower nibble
- */
-unsigned short int_mask(unsigned short n) {
-	return (1 << (n & 0x0f));
-}
+static uint16_t int_group(uint16_t n);
+static uint16_t int_mask(uint16_t n);
 
 /*
  * Initialize the interrupt registers
@@ -57,13 +43,13 @@ void int_init() {
  * Inputs:
  * n = the number of the interrupt: n[7..4] = group number, n[3..0] = individual number.
  */
-void int_disable(unsigned short n) {
+void int_disable(uint16_t n) {
 	/* Find the group (the relevant interrupt mask register) for the interrupt */
-	unsigned short group = int_group(n);
+	uint16_t group = int_group(n);
 
 	/* Find the mask for the interrupt */
-	unsigned short mask = int_mask(n);
-	unsigned short new_mask = MASK_GRP0[group] | mask;
+	uint16_t mask = int_mask(n);
+	uint16_t new_mask = MASK_GRP0[group] | mask;
 
 	/* Set the mask bit for the interrupt in the correct MASK register */
 	MASK_GRP0[group] = new_mask;
@@ -79,13 +65,13 @@ void int_disable(unsigned short n) {
  * Inputs:
  * n = the number of the interrupt: n[7..4] = group number, n[3..0] = individual number.
  */
-void int_enable(unsigned short n) {
+void int_enable(uint16_t n) {
 	/* Find the group (the relevant interrupt mask register) for the interrupt */
-	unsigned short group = int_group(n);
+	uint16_t group = int_group(n);
 
 	/* Find the mask for the interrupt */
-	unsigned short mask = int_mask(n);
-	unsigned short new_mask = MASK_GRP0[group] & ~mask;
+	uint16_t mask = int_mask(n);
+	uint16_t new_mask = MASK_GRP0[group] & ~mask;
 
 	/* Clear the mask bit for the interrupt in the correct MASK register */
 	MASK_GRP0[group] = new_mask;
@@ -101,7 +87,7 @@ void int_enable(unsigned short n) {
  * Returns:
  * the pointer to the previous interrupt handler
  */
-p_int_handler int_register(unsigned short n, p_int_handler handler) {
+p_int_handler int_register(uint16_t n, p_int_handler handler) {
 	if (n < MAX_HANDLERS) {
 		p_int_handler old_handler = g_int_handler[n];
 		g_int_handler[n] = handler;
@@ -120,12 +106,12 @@ p_int_handler int_register(unsigned short n, p_int_handler handler) {
  * Returns:
  * non-zero if interrupt n is pending, 0 if not
  */
-short int_pending(unsigned short n) {
+short int_pending(uint16_t n) {
 	/* Find the group (the relevant interrupt mask register) for the interrupt */
-	unsigned short group = int_group(n);
+	uint16_t group = int_group(n);
 
 	/* Find the mask for the interrupt */
-	unsigned short mask = int_mask(n);
+	uint16_t mask = int_mask(n);
 
 	/* Set the mask bit for the interrupt in the correct MASK register */
 	return (PENDING_GRP0[group] & mask);
@@ -137,42 +123,64 @@ short int_pending(unsigned short n) {
  * Inputs:
  * n = the number of the interrupt: n[7..4] = group number, n[3..0] = individual number.
  */
-void int_clear(unsigned short n) {
+void int_clear(uint16_t n) {
 	/* Find the group (the relevant interrupt mask register) for the interrupt */
-	unsigned short group = int_group(n);
+	uint16_t group = int_group(n);
 
 	/* Find the mask for the interrupt */
-	unsigned short mask = int_mask(n);
-	unsigned short new_mask = PENDING_GRP0[group] | mask;
+	uint16_t mask = int_mask(n);
+	uint16_t new_mask = PENDING_GRP0[group] | mask;
 
 	/* Set the bit for the interrupt to mark it as cleared */
 	PENDING_GRP0[group] = new_mask;
 }
 
 /*
- * Interrupt dispatcher for Vicky Channel A interrupts (0 - 7)
+ * Return the group number for the interrupt number
+ *
+ * For the m68000 machines, this will just be the high nibble of the number
  */
-void int_vicky_channel_a() {
-	unsigned short n;
-	unsigned short mask;
-	unsigned short pending = *PENDING_GRP0 & 0xff;
+static uint16_t int_group(uint16_t n) {
+	return ((n >> 4) & 0x0f);
+}
+
+/*
+ * Return the mask bit for the interrupt number
+ *
+ * For the m68000 machines, this will just be the bit corresponding to the lower nibble
+ */
+static uint16_t int_mask(uint16_t n) {
+	return (1 << (n & 0x0f));
+}
+
+void int_vicky(int pending_shift) {
+	uint16_t n;
+	uint16_t mask;
+	uint16_t group_mask = (0x00ff << pending_shift);
+	uint16_t pending = *PENDING_GRP0 & group_mask;
+	p_int_handler *handler = &g_int_handler[pending_shift];
 
 	/* Acknowledge all the pending interrupts:
 	 * NOTE: we have to do this, even if there is no handler for the interrupt */
-	*PENDING_GRP0 = 0x00ff;
+	*PENDING_GRP0 = group_mask;
 
-	if (pending != 0) {
-		for (n = 0, mask = 1; n < 8; n++, mask <<= 1) {
-			if (pending & mask) {
-				p_int_handler handler = g_int_handler[n];
-
-				if (handler) {
-					/* If we got a handler, call it */
-					handler();
-				}
-			}
+	if (pending == 0)
+		return; // That's unexpected ! Pending interrupt occurred (int handler was called) but got acknowledged before we got here ?!
+	 
+	for (n = pending_shift, mask = (1 << pending_shift); n < (pending_shift+8); n++, mask <<= 1, handler++) {
+		if ((pending & mask) && *handler) {
+			/* If we got a handler, call it */
+			(*handler)();
 		}
 	}
+}
+
+
+/*
+ * Interrupt dispatcher for Vicky Channel A interrupts (0 - 7)
+ */
+void int_vicky_channel_a() {
+	int_vicky(0);
 }
 
 #if HAS_DUAL_SCREEN
@@ -180,27 +188,6 @@ void int_vicky_channel_a() {
  * Interrupt dispatcher for Vicky Channel B interrupts (8 - 15)
  */
 void int_vicky_channel_b() {
-	unsigned short n;
-	unsigned short mask = 1;
-	unsigned short pending = (*PENDING_GRP0 >> 8) & 0xff;
-
-	/* Acknowledge all the pending interrupts:
-	 * NOTE: we have to do this, even if there is no handler for the interrupt */
-	*PENDING_GRP0 = 0xff00;
-
-	if (pending != 0) {
-		for (n = 8; n < 16; n++) {
-			if (pending & mask) {
-				p_int_handler handler = g_int_handler[n];
-				if (handler) {
-					/* If we got a handler, call it */
-					handler();
-				}
-			}
-
-			// Compute the next mask
-			mask = mask << 1;
-		}
-	}
+	int_vicky(8);
 }
 #endif

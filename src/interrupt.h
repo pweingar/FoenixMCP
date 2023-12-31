@@ -17,39 +17,39 @@ typedef void (*p_int_handler)();
 
 #if (MODEL == MODEL_FOENIX_A2560K || MODEL == MODEL_FOENIX_GENX || MODEL == MODEL_FOENIX_A2560X)
 
-#define PENDING_GRP0 		((volatile unsigned short *)0xFEC00100)
-#define PENDING_GRP1 		((volatile unsigned short *)0xFEC00102)
-#define PENDING_GRP2 		((volatile unsigned short *)0xFEC00104)
+#define PENDING_GRP0 		((volatile uint16_t *)0xFEC00100)
+#define PENDING_GRP1 		((volatile uint16_t *)0xFEC00102)
+#define PENDING_GRP2 		((volatile uint16_t *)0xFEC00104)
 
-#define POL_GRP0 			((volatile unsigned short *)0xFEC00108)
-#define POL_GRP1 			((volatile unsigned short *)0xFEC0010A)
-#define POL_GRP2 			((volatile unsigned short *)0xFEC0010C)
+#define POL_GRP0 			((volatile uint16_t *)0xFEC00108)
+#define POL_GRP1 			((volatile uint16_t *)0xFEC0010A)
+#define POL_GRP2 			((volatile uint16_t *)0xFEC0010C)
 
-#define EDGE_GRP0 			((volatile unsigned short *)0xFEC00110)
-#define EDGE_GRP1 			((volatile unsigned short *)0xFEC00112)
-#define EDGE_GRP2 			((volatile unsigned short *)0xFEC00114)
+#define EDGE_GRP0 			((volatile uint16_t *)0xFEC00110)
+#define EDGE_GRP1 			((volatile uint16_t *)0xFEC00112)
+#define EDGE_GRP2 			((volatile uint16_t *)0xFEC00114)
 
-#define MASK_GRP0 			((volatile unsigned short *)0xFEC00118)
-#define MASK_GRP1 			((volatile unsigned short *)0xFEC0011A)
-#define MASK_GRP2 			((volatile unsigned short *)0xFEC0011C)
+#define MASK_GRP0 			((volatile uint16_t *)0xFEC00118)
+#define MASK_GRP1 			((volatile uint16_t *)0xFEC0011A)
+#define MASK_GRP2 			((volatile uint16_t *)0xFEC0011C)
 
 #elif MODEL == MODEL_FOENIX_A2560U || MODEL == MODEL_FOENIX_A2560U_PLUS
 
-#define PENDING_GRP0 		((volatile unsigned short *)0x00B00100)
-#define PENDING_GRP1 		((volatile unsigned short *)0x00B00102)
-#define PENDING_GRP2 		((volatile unsigned short *)0x00B00104)
+#define PENDING_GRP0 		((volatile uint16_t *)0x00B00100)
+#define PENDING_GRP1 		((volatile uint16_t *)0x00B00102)
+#define PENDING_GRP2 		((volatile uint16_t *)0x00B00104)
 
-#define POL_GRP0 			((volatile unsigned short *)0x00B00108)
-#define POL_GRP1 			((volatile unsigned short *)0x00B0010A)
-#define POL_GRP2 			((volatile unsigned short *)0x00B0010C)
+#define POL_GRP0 			((volatile uint16_t *)0x00B00108)
+#define POL_GRP1 			((volatile uint16_t *)0x00B0010A)
+#define POL_GRP2 			((volatile uint16_t *)0x00B0010C)
 
-#define EDGE_GRP0 			((volatile unsigned short *)0x00B00110)
-#define EDGE_GRP1 			((volatile unsigned short *)0x00B00112)
-#define EDGE_GRP2 			((volatile unsigned short *)0x00B00114)
+#define EDGE_GRP0 			((volatile uint16_t *)0x00B00110)
+#define EDGE_GRP1 			((volatile uint16_t *)0x00B00112)
+#define EDGE_GRP2 			((volatile uint16_t *)0x00B00114)
 
-#define MASK_GRP0 			((volatile unsigned short *)0x00B00118)
-#define MASK_GRP1 			((volatile unsigned short *)0x00B0011A)
-#define MASK_GRP2 			((volatile unsigned short *)0x00B0011C)
+#define MASK_GRP0 			((volatile uint16_t *)0x00B00118)
+#define MASK_GRP1 			((volatile uint16_t *)0x00B0011A)
+#define MASK_GRP2 			((volatile uint16_t *)0x00B0011C)
 
 #elif MODEL == MODEL_FOENIX_FMX || MODEL == MODEL_FOENIX_C256U || MODEL == MODEL_FOENIX_C256U_PLUS
 
@@ -252,7 +252,7 @@ extern void int_restore(short int_mask);
  * Inputs:
  * n = the number of the interrupt: n[7..4] = group number, n[3..0] = individual number.
  */
-extern void int_disable(unsigned short n);
+extern void int_disable(uint16_t n);
 
 /*
  * Enable an interrupt
@@ -260,7 +260,7 @@ extern void int_disable(unsigned short n);
  * Inputs:
  * n = the number of the interrupt
  */
-extern void int_enable(unsigned short n);
+extern void int_enable(uint16_t n);
 
 /*
  * Register a handler for a given interrupt.
@@ -272,7 +272,7 @@ extern void int_enable(unsigned short n);
  * Returns:
  * the pointer to the previous interrupt handler
  */
-extern p_int_handler int_register(unsigned short n, p_int_handler handler);
+extern p_int_handler int_register(uint16_t n, p_int_handler handler);
 
 /*
  * Return true (non-zero) if an interrupt is pending for the given interrupt
@@ -283,7 +283,7 @@ extern p_int_handler int_register(unsigned short n, p_int_handler handler);
  * Returns:
  * non-zero if interrupt n is pending, 0 if not
  */
-extern short int_pending(unsigned short n);
+extern short int_pending(uint16_t n);
 
 /*
  * Acknowledge an interrupt (clear out its pending flag)
@@ -291,6 +291,6 @@ extern short int_pending(unsigned short n);
  * Inputs:
  * n = the number of the interrupt: n[7..4] = group number, n[3..0] = individual number.
  */
-extern void int_clear(unsigned short n);
+extern void int_clear(uint16_t n);
 
 #endif

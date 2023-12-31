@@ -83,15 +83,15 @@ void ind_set_hdc(short state) {
 #elif MODEL == MODEL_FOENIX_GENX || MODEL == MODEL_FOENIX_A2560X
 // This is for GEN X Status LED
 void ind_set_fdc(short state) {
-    genx_set_fdc_led(ind_state_color(state));
+    ind_set_fdc_led(ind_state_color(state));
 }
 
 void ind_set_sdc(short state) {
-    genx_set_sdc_led(ind_state_color(state));
+    ind_set_sdc_led(ind_state_color(state));
 }
 
 void ind_set_hdc(short state) {
-    genx_set_hdc_led(ind_state_color(state));
+    ind_set_hdc_led(ind_state_color(state));
 }
 #else 
 void ind_set_fdc(short state) {
