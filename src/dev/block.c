@@ -153,7 +153,7 @@ short bdev_status(short dev) {
             ret = bdev->status();
     }
 
-    TRACE1("bdev_status returning %d", (int)ret);
+    TRACE2("bdev_status returning %d (0x%x)", (int)ret, ret);
     return ret;
 }
 

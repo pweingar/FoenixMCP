@@ -10,7 +10,7 @@
 #include "simpleio.h"
 #include "timers.h"
 
-static long rtc_ticks;
+static unsigned long rtc_ticks;
 
 /*
  * Interrupt handler for the real time clock
@@ -18,8 +18,8 @@ static long rtc_ticks;
 void rtc_handle_int() {
     unsigned char flags;
 
-    /* Periodic interrupt: increment the ticks counter */
-    flags = *RTC_FLAGS;
+    flags = *RTC_FLAGS; /* Acknowledge the interrupt */
+    
     rtc_ticks++;
 }
 
@@ -31,30 +31,28 @@ void rtc_init() {
     unsigned char rates;
     unsigned char enables;
 
-    log(LOG_TRACE, "rtc_init");
+    TRACE("rtc_init");
 
     int_disable(INT_RTC);
 
     /* Make sure the RTC is on */
-    *RTC_CTRL = (*RTC_CTRL & 0x07) | RTC_STOP;
+    *RTC_CTRL = RTC_STOP;
 
     /*
      * For the moment: Every so often, the RTC interrupt gets acknowledged
      * without clearing the flags. Until I can sort out why, I will use
      * the SOF A interrupt as a surrogate for the RTC jiffie timer
      */
-
+#if !(MODEL == MODEL_FOENIX_C256U || MODEL == MODEL_FOENIX_C256U_PLUS || MODEL == MODEL_FOENIX_FMX)
     // /* Set the periodic interrupt to 15 millisecs */
-    // *RTC_RATES = RTC_RATE_15ms;
-    //
-    // int_register(INT_RTC, rtc_handle_int);
-    //
-    // /* Enable the periodic interrupt */
-    // flags = *RTC_FLAGS;
-    // *RTC_ENABLES = RTC_PIE;
-    // rtc_ticks = 0;
-    //
-    // int_enable(INT_RTC);
+    *RTC_RATES = RTC_RATE_15ms;
+
+    int_register(INT_RTC, rtc_handle_int);
+    rtc_ticks = 0;
+
+    /* Enable the periodic interrupt */
+    rtc_enable_ticks();
+#endif
 }
 
 /*
@@ -64,7 +62,7 @@ void rtc_enable_ticks() {
     /* Set the periodic interrupt to 15 millisecs */
     *RTC_RATES = RTC_RATE_15ms;
 
-    unsigned char flags = *RTC_FLAGS;
+    unsigned char flags = *RTC_FLAGS; /* Acknowledge any previous interrupt before we start. */
 
     *RTC_ENABLES = RTC_PIE;
 
@@ -92,6 +90,7 @@ short rtc_register_periodic(short rate, FUNC_V_2_V handler) {
         int_enable(INT_RTC);
     }
 
+	return 0;
 }
 
 /*
@@ -139,7 +138,7 @@ void rtc_set_time(p_time time) {
     /* Temporarily disable updates to the clock */
     ctrl = *RTC_CTRL;
     *RTC_CTRL = ctrl | RTC_UTI;
-    log(LOG_INFO, "RTC Disabled");
+    logmsg(LOG_INFO, "RTC Disabled");
     log_num(LOG_INFO, "RTC Rates: ", *RTC_RATES);
     log_num(LOG_INFO, "RTC Enables: ", *RTC_ENABLES);
     log_num(LOG_INFO, "RTC Flags: ", *RTC_FLAGS);
@@ -179,7 +178,7 @@ void rtc_set_time(p_time time) {
 
     /* Re-enable updates to the clock */
     *RTC_CTRL = (ctrl & 0x07) | RTC_STOP;
-    log(LOG_INFO, "RTC Enabled");
+    logmsg(LOG_INFO, "RTC Enabled");
     log_num(LOG_INFO, "RTC Rates: ", *RTC_RATES);
     log_num(LOG_INFO, "RTC Enables: ", *RTC_ENABLES);
     log_num(LOG_INFO, "RTC Flags: ", *RTC_FLAGS);
@@ -200,7 +199,7 @@ void rtc_get_time(p_time time) {
     /* Temporarily disable updates to the clock */
     ctrl = *RTC_CTRL;
     *RTC_CTRL = ctrl | RTC_UTI;
-    log(LOG_INFO, "RTC Disabled");
+    logmsg(LOG_INFO, "RTC Disabled");
     log_num(LOG_INFO, "RTC Rates: ", *RTC_RATES);
     log_num(LOG_INFO, "RTC Enables: ", *RTC_ENABLES);
     log_num(LOG_INFO, "RTC Flags: ", *RTC_FLAGS);
@@ -222,7 +221,7 @@ void rtc_get_time(p_time time) {
 
     /* Re-enable updates to the clock */
     *RTC_CTRL = (ctrl & 0x07) | RTC_STOP;
-    log(LOG_INFO, "RTC Enabled");
+    logmsg(LOG_INFO, "RTC Enabled");
     log_num(LOG_INFO, "RTC Rates: ", *RTC_RATES);
     log_num(LOG_INFO, "RTC Enables: ", *RTC_ENABLES);
     log_num(LOG_INFO, "RTC Flags: ", *RTC_FLAGS);
@@ -260,3 +259,4 @@ void rtc_get_time(p_time time) {
 long rtc_get_jiffies() {
     return timers_jiffies();
 }
+

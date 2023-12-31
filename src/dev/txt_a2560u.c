@@ -132,20 +132,33 @@ static void txt_a2560u_get_sizes(p_extent text_size, p_extent pixel_size) {
  */
 static short txt_a2560u_set_mode(short mode) {
     /* Turn off anything not set */
-    msr_shadow &= ~(TXT_MODE_SLEEP | TXT_MODE_TEXT);
+    uint32_t old_msr = *MasterControlReg_A;
+    uint32_t new_msr = old_msr & ~(VKY3_MCR_BLANK_EN|VKY3_MCR_TEXT_EN|VKY3_MCR_TEXT_OVRLY|VKY3_MCR_GRAPH_EN|VKY3_MCR_BITMAP_EN); // Mask out bits we'll set here
 
     if (mode & TXT_MODE_SLEEP) {
-        /* Put the monitor to sleep */
-        msr_shadow |= VKY3_MCR_BLANK_EN;
+        /* Put the monitor to sleep (preserve settings) */
+        new_msr |= VKY3_MCR_BLANK_EN;
+    } else {
+        if (mode & TXT_MODE_TEXT) {
+            new_msr |= VKY3_MCR_TEXT_EN;
+        } else if (mode & TXT_MODE_BITMAP) {
+            new_msr |= VKY3_MCR_BITMAP_EN|VKY3_MCR_GRAPH_EN/*Is this really required?*/;
+            // Disable gamma (as I'm not sure it functional, but I may as well not understand it)
+            new_msr |= VKY3_MCR_GAMMA_EN;
+            new_msr &= ~VKY3_MCR_MANUAL_GAMMA_EN;
+        }
+        
+        /* If we want text and graphics, enable the overlay mode */
+        if ((mode & (TXT_MODE_BITMAP|TXT_MODE_TEXT)) == (TXT_MODE_BITMAP|TXT_MODE_TEXT)) {
+            // It seems just doing 'new_msr |= VKY3_MCR_TEXT_OVRLY' doesn't work
+            new_msr |= (VKY3_MCR_TEXT_EN|VKY3_MCR_TEXT_OVRLY|VKY3_MCR_GRAPH_EN|VKY3_MCR_BITMAP_EN);
+        }
+    }
+
+    if (new_msr != old_msr) {
+        msr_shadow = new_msr;
         *MasterControlReg_A = msr_shadow;
         return 0;
-
-    } else if (mode & TXT_MODE_TEXT) {
-        /* Put on text mode */
-        msr_shadow |= VKY3_MCR_TEXT_EN;
-        *MasterControlReg_A = msr_shadow;
-        return 0;
-
     } else {
         /* Unsupported mode */
         return -1;
@@ -172,11 +185,7 @@ static short txt_a2560u_set_resolution(short width, short height) {
         }
     }
 
-{
-    char msg[80];
-    sprintf(msg, "Setting resolution %dx%d", width, height);
-    DEBUG(msg);
-}
+    DEBUG2("Setting resolution %dx%d", width, height);
 
     /* Turn off resolution bits */
     /* TODO: there gotta be a better way to do that */
@@ -239,7 +248,7 @@ static void txt_a2560u_set_border(short width, short height) {
     }
 
     // Recalculate the size of the screen
-    txt_a2560u_set_sizes();    
+    txt_a2560u_set_sizes();
 }
 
 /**
@@ -321,11 +330,7 @@ static short txt_a2560u_get_region(p_rect region) {
     region->size.width = a2560u_region.size.width;
     region->size.height = a2560u_region.size.height;
 
-    {
-        char msg[80];
-        sprintf(msg,"txt_a2560u_get_region %p: x:%d, y:%d, w:%d, h:%d", region, region->origin.x, region->origin.y, region->size.width, region->size.height);
-        DEBUG(msg);
-    }  
+    DEBUG5("txt_a2560u_get_region %p: x:%d, y:%d, w:%d, h:%d", region, region->origin.x, region->origin.y, region->size.width, region->size.height);
 
     return 0;
 }
@@ -339,10 +344,7 @@ static short txt_a2560u_get_region(p_rect region) {
  * @return 0 on success, any other number means the region was invalid
  */
 static short txt_a2560u_set_region(const p_rect region) {    
-        char msg[80];
-        sprintf(msg,"SET REGION %p x:%d, y:%d, w:%d, h:%d (visible:%d,%d)",
-        region, region->origin.x, region->origin.y, region->size.width, region->size.height, a2560u_visible_size.width, a2560u_visible_size.height);
-        DEBUG(msg);
+    DEBUG7("SET REGION %p x:%d, y:%d, w:%d, h:%d (visible:%d,%d)", region, region->origin.x, region->origin.y, region->size.width, region->size.height, a2560u_visible_size.width, a2560u_visible_size.height);
 
     if ((region->size.width == 0) || (region->size.height == 0)) {
         /* Set the region to the default (full screen) */
@@ -360,11 +362,7 @@ static short txt_a2560u_set_region(const p_rect region) {
         //DEBUG(msg);
     }
 
-    {
-        sprintf(msg,"txt_a2560u_set_region: NEW REGION %p x:%d, y:%d, w:%d, h:%d (visible:%d,%d)",
-        region, region->origin.x, region->origin.y, region->size.width, region->size.height, a2560u_visible_size.width, a2560u_visible_size.height);
-        //DEBUG(msg);
-    }  
+    DEBUG7("txt_a2560u_set_region: NEW REGION %p x:%d, y:%d, w:%d, h:%d (visible:%d,%d)", region, region->origin.x, region->origin.y, region->size.width, region->size.height, a2560u_visible_size.width, a2560u_visible_size.height);
 
     return 0;
 }
@@ -394,17 +392,17 @@ static short txt_a2560u_set_color(unsigned char foreground, unsigned char backgr
 
 
 /* This works around a bug in the A2560U's FPGA where reading bytes of text memory
- * (possibly color as well ?) are inverted. Ie if the memory contains AB, A beint on an
+ * (possibly color as well ?) are inverted. Ie if the memory contains AB, A being on an
  * even address,  then when reading A you'll get B and reading B you'll get A. This
  * functions can be removed if the FPGA is corrected. */
-static char read_swapped_byte(char *addr) {
+static char read_swapped_byte(const uint8_t *addr) {
     if ((long)addr & 1) {
-        short w = *(short*)(addr-1);
+        uint16_t w = *(uint16_t*)(addr-1);
         return (char)w;
     }
     else {
-        short w = *(short*)(addr);
-        return ((char*)&w)[0];
+        uint16_t w = *(uint16_t*)(addr);
+        return ((uint8_t*)&w)[0];
     }
 }
 
@@ -462,8 +460,8 @@ static void txt_a2560u_scroll(short horizontal, short vertical) {
     }
    
     /* Copy the rectangle. We can't copy byte by byte, they get swapped (FPGA bug) */
-    char * const text_mem = (char*)ScreenText_A;
-    char * const color_mem = (char*)ColorText_A;
+    volatile uint8_t * const text_mem = ScreenText_A;
+    volatile uint8_t * const color_mem = ColorText_A;
 
     int delta_y = dy * a2560u_max_size.width;
     int row_dst = y0 * a2560u_max_size.width - delta_y;

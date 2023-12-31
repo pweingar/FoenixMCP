@@ -423,9 +423,9 @@ short cmd_type(short screen, int argc, const char * argv[]) {
                 short n = chan_read(fd, buffer, 128);
                 log_num(LOG_INFO, "cmd_type chan_read: ", n);
                 if (n > 0) {
-                    log(LOG_INFO, "cmd_type chan_write: ");
+                    logmsg(LOG_INFO, "cmd_type chan_write: ");
                     chan_write(screen, buffer, n);
-                    log(LOG_INFO, "/cmd_type chan_write: ");
+                    logmsg(LOG_INFO, "/cmd_type chan_write: ");
                 } else {
                     break;
                 }
@@ -439,7 +439,7 @@ short cmd_type(short screen, int argc, const char * argv[]) {
             return fd;
         }
     } else {
-        log(LOG_ERROR, "Usage: TYPE <path>");
+        logmsg(LOG_ERROR, "Usage: TYPE <path>");
         return -1;
     }
 }
@@ -460,9 +460,9 @@ short cmd_load(short screen, int argc, const char * argv[]) {
         short result = fsys_load(argv[1], destination, &start);
         if (result == 0) {
             if (start != 0) {
-                log(LOG_INFO, "Loaded file with a start adddress.");
+                logmsg(LOG_INFO, "Loaded file with a start adddress.");
             } else {
-                log(LOG_INFO, "File loaded.");
+                logmsg(LOG_INFO, "File loaded.");
             }
         } else {
             err_print(screen, "Unable to open file", result);
@@ -471,7 +471,7 @@ short cmd_load(short screen, int argc, const char * argv[]) {
 
         return result;
     } else {
-        log(LOG_ERROR, "Usage: LOAD <path> [<destination>]");
+        logmsg(LOG_ERROR, "Usage: LOAD <path> [<destination>]");
         return -1;
     }
 }

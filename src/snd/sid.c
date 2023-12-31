@@ -26,10 +26,12 @@ volatile unsigned char * sid_get_base(short sid) {
     switch (sid) {
         case 0:
             return SID_INT_N_V1_FREQ_LO;
+#if MODEL == MODEL_FOENIX_A2560U || MODEL == MODEL_FOENIX_A2560K || MODEL == MODEL_FOENIX_GENX || MODEL == MODEL_FOENIX_A2560X
         case 1:
             return SID_INT_L_V1_FREQ_LO;
         case 2:
             return SID_INT_R_V1_FREQ_LO;
+#endif
 #if MODEL == MODEL_FOENIX_A2560K || MODEL == MODEL_FOENIX_GENX || MODEL == MODEL_FOENIX_A2560X
         case 3:
             return SID_EXT_L_V1_FREQ_LO;
@@ -73,6 +75,58 @@ void sid_init_all() {
 
 }
 
+#if MODEL == MODEL_FOENIX_FMX || MODEL == MODEL_FOENIX_C256U || MODEL == MODEL_FOENIX_C256U_PLUS
+/*
+ * Test the internal SID implementation
+ */
+void sid_test_internal() {
+	volatile struct s_sid * sid = 0;
+
+	sid = (struct s_sid *)sid_get_base(0);
+	if (sid)  {
+		sid->v1.attack_decay = 0x29;
+		sid->v2.attack_decay = 0x29;
+		sid->v2.attack_decay = 0x29;
+
+		sid->v1.sustain_release = 0x1f;
+		sid->v2.sustain_release = 0x1f;
+		sid->v3.sustain_release = 0x1f;
+
+		sid->mode_volume = 0x0f;
+
+		sid->v1.frequency = 0x1660;
+		sid->v1.control = 0x11;
+
+		// jiffies = rtc_get_jiffies() + 3;
+    	// while (jiffies > rtc_get_jiffies());
+
+		// sid->v2.frequency = 0x0831;
+		// sid->v2.control = 0x11;
+
+		// jiffies = rtc_get_jiffies() + 3;
+    	// while (jiffies > rtc_get_jiffies());
+
+		// sid->v3.frequency = 0x2187;
+		// sid->v3.control = 0x11;
+
+		// jiffies = rtc_get_jiffies() + 25;
+		// while (jiffies > rtc_get_jiffies());
+
+		// sid->v1.control = 0x10;
+    	// jiffies = rtc_get_jiffies() + 3;
+    	// while (jiffies > rtc_get_jiffies());
+
+		// sid->v2.control = 0x10;
+    	// jiffies = rtc_get_jiffies() + 3;
+    	// while (jiffies > rtc_get_jiffies());
+
+		// sid->v3.control = 0x10;
+
+		// sid->mode_volume = 0;
+	}
+}
+
+#else
 /*
  * Test the internal SID implementation
  */
@@ -161,6 +215,7 @@ void sid_test_internal() {
 	*SID_INT_L_MODE_VOL = 0;
 	*SID_INT_R_MODE_VOL = 0;
 }
+#endif
 
 #if HAS_EXTERNAL_SIDS
 void sid_test_external() {

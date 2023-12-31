@@ -18,7 +18,7 @@ extern void psg_mute_all();
  * voice = the number of the voice (0 - 3)
  * frequency = the frequency
  */
-extern void psg_tone(short chip, unsigned short voice, int frequency);
+extern void psg_tone(short chip, unsigned short voice, unsigned long frequency);
 
 /*
  * Set the attenuation of a voice

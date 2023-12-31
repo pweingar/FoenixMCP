@@ -72,11 +72,7 @@ short sdc_protected() {
 //  is_on = if 0, turn the LED off, otherwise turn the LED on
 //
 void sdc_set_led(short is_on) {
-    if (is_on) {
-        *GABE_CTRL_REG = *GABE_CTRL_REG | SDCARD_LED;
-    } else {
-        *GABE_CTRL_REG = *GABE_CTRL_REG & ~SDCARD_LED;
-    }
+	ind_set(IND_SDC, is_on);
 }
 
 //
@@ -87,7 +83,6 @@ void sdc_set_led(short is_on) {
 //
 short sdc_wait_busy() {
     long timer_ticks;
-    int retry_count = MAX_TRIES_BUSY;
     unsigned char status;
 
     timer_ticks = rtc_get_jiffies() + SDC_TIMEOUT_JF;
@@ -126,18 +121,18 @@ short sdc_init() {
     if (sdc_wait_busy() == 0) {                     // Wait for it to complete
         g_sdc_error = *SDC_TRANS_ERROR_REG;         // Check for any error condition
         if (g_sdc_error == 0) {
-            log(LOG_INFO, "sdc_init: SUCCESS");
+            logmsg(LOG_INFO, "sdc_init: SUCCESS");
             g_sdc_status = 0;                       // Flag that the SD has been initialized
             return 0;
 
         } else {
-            log(LOG_ERROR, "sdc_init: DEV_CANNOT_INIT");
+            logmsg(LOG_ERROR, "sdc_init: DEV_CANNOT_INIT");
             g_sdc_status = SDC_STAT_NOINIT;
             return DEV_CANNOT_INIT;
         }
 
     } else {
-        log(LOG_ERROR, "sdc_init: DEV_TIMEOUT");
+        logmsg(LOG_ERROR, "sdc_init: DEV_TIMEOUT");
         g_sdc_status = SDC_STAT_NOINIT;
         return DEV_TIMEOUT;
     }
@@ -414,8 +409,10 @@ short sdc_ioctrl(short command, unsigned char * buffer, short size) {
             break;
 
         default:
-            return 0;
+            break;
     }
+
+	return 0;
 }
 
 //

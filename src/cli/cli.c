@@ -173,19 +173,21 @@ void cli_command_set(const char * path) {
             }
             cli_command_path[i] = c;
         }
+        TRACE1("Setting SHELL: %s", cli_command_path);
         result = sys_var_set("SHELL", cli_command_path);
         if (result) {
-            log(LOG_ERROR, "Unable to set SHELL");
+            ERROR("Unable to set SHELL");
         }
+        TRACE("SHELL Set");
 
     } else {
         // Set to the default CLI
         result = sys_var_set("SHELL", 0);
         if (result) {
-            log(LOG_ERROR, "Unable to set SHELL");
+            ERROR("Unable to set SHELL");
         }
-
     }
+    TRACE("Leaving cli_command_set");
 }
 
 /**
@@ -279,7 +281,7 @@ short cmd_sysinfo(short channel, int argc, const char * argv[]) {
     sprintf(buffer, "CPU: %s\n", cli_sys_info.cpu_name);
     print(channel, buffer);
 
-    sprintf(buffer, "Clock (kHz): %u\n", cli_sys_info.cpu_clock_khz);
+    sprintf(buffer, "Clock (kHz): %lu\n", cli_sys_info.cpu_clock_khz);
     print(channel, buffer);
 
     sprintf(buffer, "System Memory: 0x%lX\n", cli_sys_info.system_ram_size);
@@ -986,7 +988,7 @@ short cli_start_repl(short channel, const char * init_cwd) {
         result = sys_fsys_set_cwd(init_cwd);
         if (result) {
             char message[80];
-            sprintf(message, "Unable to set startup directory: %s\n", err_message(result));
+            sprintf(message, "Unable to set startup directory: %s\n", sys_err_message(result));
             print(g_current_channel, message);
         }
     }
@@ -1002,7 +1004,7 @@ short cli_start_repl(short channel, const char * init_cwd) {
             print(0, "Unable to start ");
             print(0, cli_command_path);
             print(0, ": ");
-            print(0, err_message(result));
+            print(0, sys_err_message(result));
             while (1) ;
         }
         return 0;
@@ -1036,7 +1038,7 @@ void cli_rerepl() {
             print(0, "Unable to start ");
             print(0, cli_command_path);
             print(0, ": ");
-            print(0, err_message(result));
+            print(0, sys_err_message(result));
             while (1) ;
         }
 

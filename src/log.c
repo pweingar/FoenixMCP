@@ -19,26 +19,37 @@
 #include "A2560U/gabe_a2560u.h"
 #elif (MODEL == MODEL_FOENIX_A2560K || MODEL == MODEL_FOENIX_GENX || MODEL == MODEL_FOENIX_A2560X)
 #include "A2560K/gabe_a2560k.h"
+#elif MODEL == MODEL_FOENIX_C256U || MODEL == MODEL_FOENIX_C256U_PLUS || MODEL == MODEL_FOENIX_FMX
+#include "C256/gabe_c256.h"
 #endif
 
 /* Channel to which the logging output should go.
- * Positive: screen number
- * -1: UART. 
+ * See log.h
  */
-static short log_channel = LOG_CHANNEL;
-static short log_level;
+static short log_channel;
 
+
+short log_level;
+#if DEFAULT_LOG_LEVEL >= 0
+char logbuf[LOGBUF_SIZE]; // Should hopefully be long enough ! It's here so we don't require more stack space
+#endif
 // do_log either points to log_to_uart or log_to_screen.
-static void (*do_log)(const char* message);
+void (*do_log)(const char* message);
+
 static void log_to_uart(const char* message);
 static void log_to_screen(const char* message);
-static void log_to_channel_A_low_level(const char *message);
 
+#if MODEL == MODEL_FOENIX_A2560K || MODEL == MODEL_FOENIX_GENX || MODEL == MODEL_FOENIX_A2560X
+static void log_to_channel_A_low_level(const char *message);
+#endif
+
+static short uart; // UART id to use with the uart_xxx functions
 #define UART_COM1 0
+#define UART_COM2 1
 
 /* Can use the buzzer as sound clues */
 void buzzer_on(void) {
-    *(GABE_CTRL_REG) = BUZZER_CONTROL;
+    *(GABE_CTRL_REG) |= BUZZER_CONTROL;
 }
 
 
@@ -49,14 +60,22 @@ void buzzer_off(void) {
 
 void log_init(void) {
     log_setlevel(DEFAULT_LOG_LEVEL);
+    log_channel = LOG_CHANNEL;
 
     switch (log_channel) {
-    case LOG_CHANNEL_UART0:
-        uart_init(UART_COM1);
+    case LOG_CHANNEL_COM1:
         do_log = log_to_uart;
-
+        uart = UART_COM1;
+        uart_init(uart);
         break;
+
 #if (MODEL == MODEL_FOENIX_A2560K || MODEL == MODEL_FOENIX_GENX || MODEL == MODEL_FOENIX_A2560X)
+    case LOG_CHANNEL_COM2:
+        do_log = log_to_uart;
+        uart = UART_COM2;
+        uart_init(uart);
+        break;
+
     case LOG_CHANNEL_CHANNEL_A_LOW_LEVEL:
         channel_A_logger_init();
         do_log = log_to_channel_A_low_level;
@@ -65,7 +84,7 @@ void log_init(void) {
     default:
         do_log = log_to_screen;
     }
-    log(LOG_INFO,"FOENIX DEBUG OUTPUT------------");
+    INFO("FOENIX DEBUG OUTPUT------------");
 }
 
 unsigned short panic_number;        /* The number of the kernel panic */
@@ -159,7 +178,7 @@ void panic(void) {
     t_rect region;
 TRACE("PANIC------------------------------------------");
     /* Shut off all interrupts */
-    int_disable_all();
+    // TODO: int_disable_all();
 
     /* Re-initialize the text screen */
     txt_init_screen(0);
@@ -253,13 +272,23 @@ void log_setlevel(short level) {
     log_level = level;
 }
 
+/* See do in the .h file */
+void set_log_channel(short channel) {
+    if (log_channel != channel) {
+        log_channel = channel;
+        log_init();
+    }
+}
 
 static void log_to_uart(const char *message) {
     char *c = (char*)message;
-    while (*c)
-        uart_put(UART_COM1, *c++);
-    uart_put(UART_COM1,'\r');
-    uart_put(UART_COM1,'\n');
+    while (*c) {
+        if (*c == '\n')
+            uart_put(uart,'\r');
+        uart_put(uart, *c++);
+    }
+    uart_put(uart,'\r');
+    uart_put(uart,'\n');
 }
 
 static void log_to_screen(const char *message) {
@@ -284,32 +313,16 @@ static void log_to_channel_A_low_level(const char *message) {
  * Caveat:
  * The total length should not exceed 512 chars.
  */
-void log(short level, const char * message, ...) {
+void logmsg(short level, const char * message, ...) {
     if (level > log_level)
         return;
 
-    char buf[80]; // Should hopefully be long enough !
-
     va_list args;
     va_start(args, message);
-    vsprintf(buf, message, args);
+    vsnprintf(logbuf, sizeof(logbuf), message, args);
     va_end(args);
 
-    (*do_log)(buf);
-}
-
-void trace(const char * message, ...) {
-    if (LOG_TRACE > log_level)
-        return;
-
-    char buf[80]; // Should hopefully be long enough !
-
-    va_list args;
-    va_start(args, message);
-    vsprintf(buf, message, args);
-    va_end(args);
-
-    (*do_log)(buf);
+    do_log(logbuf);
 }
 
 /*
@@ -324,7 +337,7 @@ void log2(short level, const char * message1, const char * message2) {
     if (level <= log_level) {
         char line[80];
         sprintf(line, "%s%s\n", message1, message2);
-        log(level, line);
+        logmsg(level, line);
     }
 }
 
@@ -341,7 +354,7 @@ void log3(short level, const char * message1, const char * message2, const char 
     if (level <= log_level) {
         char line[80];
         sprintf(line, "%s%s%s\n", message1, message2, message3);
-        log(level, line);
+        logmsg(level, line);
     }
 }
 
@@ -358,7 +371,7 @@ void log_num(short level, char * message, int n) {
 
     if (level <= log_level) {
         sprintf(line, "%s%08X", message, n);
-        log(level, line);
+        logmsg(level, line);
     }
 }
 
@@ -369,5 +382,5 @@ void log_c(short level, char c) {
     char line[2];
     line[0] = c;
     line[1] = '\0';
-    log(level, line);
+    logmsg(level, line);
 }

@@ -5,6 +5,7 @@
 #ifndef __PATA_H
 #define __PATA_H
 
+#include <stdint.h>
 #include "types.h"
 
 #define PATA_GET_SECTOR_COUNT   1
@@ -22,17 +23,17 @@
 //
 
 typedef struct s_drive_info {
-    unsigned short flags;
+    uint16_t flags;
     char serial_number[18];
     char firmware_version[6];
     char model_name[38];
-    unsigned short lba_enabled;
+    uint16_t lba_enabled;
     union u1 {
         struct s1 {
-            unsigned short lba_default_lo;
-            unsigned short lba_default_hi;
+            uint16_t lba_default_lo;
+            uint16_t lba_default_hi;
         } lbaw;
-        unsigned long lba_default;
+        uint32_t lba_default;
     } l;
 } t_drive_info, *p_drive_info;
 
