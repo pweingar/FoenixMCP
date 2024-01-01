@@ -46,7 +46,7 @@
 #include "libfoenix/include/fdc.h"
 #include "libfoenix/include/lpt.h"
 #include "libfoenix/include/midi.h"
-#include "libfoenix/include/pata.h"
+#include "dev/hdd.h"
 #include "libfoenix/include/ps2.h"
 #include "libfoenix/include/rtc.h"
 #include "libfoenix/include/sdc.h"
@@ -320,7 +320,7 @@ static void os_devices_initialize(void) {
         INFO("Console installed.");
     }
 
-    if ((res = pata_install())) {
+    if ((res = hdd_install())) {
         ERROR1("FAILED: PATA driver installation (%d)", res);
     } else {
         INFO("PATA driver installed.");

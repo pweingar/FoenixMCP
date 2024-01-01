@@ -2,6 +2,8 @@
  * Definitions for the MIDI ports
  */
 
+#include <stdint.h>
+
 #include "features.h"
 #include "midi_reg.h"
 #include "dev/channel.h"

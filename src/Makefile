@@ -245,7 +245,7 @@ foenix_obj := $(addprefix libfoenix/, $(subst .c,.o,$(foenix_c_src))) $(addprefi
 
 
 # OS device drivers (common to all Foenix)
-dev_c_src = block.c channel.c console.c fsys.c txt_screen.c
+dev_c_src = block.c channel.c hdd.c console.c fsys.c txt_screen.c
 dev_s_src =
 ifeq ($(UNIT),a2560k)
 	dev_c_src := $(dev_c_src) txt_a2560k_a.c txt_a2560k_b.c

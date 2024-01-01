@@ -37,13 +37,6 @@ typedef struct s_drive_info {
     } l;
 } t_drive_info, *p_drive_info;
 
-//
-// Install the PATA driver
-//
-// Returns:
-//  0 on success, any negative number is an error code
-//
-extern short pata_install();
 
 //
 // Initialize the PATA hard drive
@@ -51,7 +44,7 @@ extern short pata_install();
 // Returns:
 //  0 on success, any negative number is an error code
 //
-extern short pata_init();
+ int16_t pata_init();
 
 //
 // Read a block from the PATA hard drive
@@ -64,7 +57,7 @@ extern short pata_init();
 // Returns:
 //  number of chars read, any negative number is an error code
 //
-extern short pata_read(long lba, unsigned char * buffer, short size);
+ int16_t pata_read(int32_t lba, uint8_t * buffer, int16_t size);
 
 //
 // Write a block to the PATA hard drive
@@ -77,7 +70,7 @@ extern short pata_read(long lba, unsigned char * buffer, short size);
 // Returns:
 //  number of chars written, any negative number is an error code
 //
-extern short pata_write(long lba, const unsigned char * buffer, short size);
+ int16_t pata_write(int32_t lba, const uint8_t * buffer, int16_t size);
 
 //
 // Return the status of the PATA hard drive
@@ -85,7 +78,7 @@ extern short pata_write(long lba, const unsigned char * buffer, short size);
 // Returns:
 //  the status of the device
 //
-extern short pata_status();
+ int16_t pata_status();
 
 //
 // Return any error code of the PATA hard drive
@@ -93,27 +86,18 @@ extern short pata_status();
 // Returns:
 //  the error code of the device
 //
-extern short pata_error();
+ int16_t pata_error();
 
 //
-// Ensure that any pending writes to teh device have been completed
+// Ensure that any pending writes to the device have been completed
 //
 // Returns:
 //  0 on success, any negative number is an error code
 //
-extern short pata_flush();
+ int16_t pata_flush();
 
 //
-// Issue a control command to the PATA hard drive
-//
-// Inputs:
-//  command = the number of the command to send
-//  buffer = pointer to chars of additional data for the command
-//  size = the size of the buffer
-//
-// Returns:
-//  0 on success, any negative number is an error code
-//
-extern short pata_ioctrl(short command, unsigned char * buffer, short size);
+// Return info about the connected drive (we only support one)
+int16_t pata_identity(p_drive_info drive_info);
 
 #endif

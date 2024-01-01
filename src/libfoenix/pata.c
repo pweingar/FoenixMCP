@@ -2,12 +2,13 @@
  * Implementation of the PATA hard drive low level driver
  */
 
+#include <stdint.h>
 #include <string.h>
 #include "log.h"
 #include "errors.h"
 #include "constants.h"
 #include "indicators.h"
-#include "dev/block.h"
+
 #include "libfoenix/include/pata.h"
 #include "dev/txt_screen.h"
 #include "libfoenix/include/rtc.h"
@@ -24,8 +25,8 @@
 // Variables
 //
 
-short g_pata_error = 0;                     // Most recent error code received from the PATA drive
-short g_pata_status = PATA_STAT_NOINIT;     // Status of the PATA interface
+static int16_t g_pata_error = 0;                     // Most recent error code received from the PATA drive
+static int16_t g_pata_status = PATA_STAT_NOINIT;     // Status of the PATA interface
 
 //
 // Code
@@ -37,9 +38,9 @@ short g_pata_status = PATA_STAT_NOINIT;     // Status of the PATA interface
 // Returns:
 //  0 on success (PATA drive is no longer busy), DEV_TIMEOUT on timeout
 //
-short pata_wait_not_busy() {
-    long target_ticks;
-    long ticks = 0;
+int16_t pata_wait_not_busy() {
+    int32_t target_ticks;
+    int32_t ticks = 0;
     char status = 0;
 
     TRACE("pata_wait_not_busy");
@@ -66,9 +67,9 @@ short pata_wait_not_busy() {
 // Returns:
 //  0 on success (PATA drive is ready), DEV_TIMEOUT on timeout
 //
-short pata_wait_ready() {
-    long target_ticks;
-    long ticks = 0;
+int16_t pata_wait_ready() {
+    int32_t target_ticks;
+    int32_t ticks = 0;
     char status = 0;
 
     TRACE("pata_wait_ready");
@@ -93,9 +94,9 @@ short pata_wait_ready() {
 // Returns:
 //  0 on success (PATA drive is ready and not busy), DEV_TIMEOUT on timeout
 //
-short pata_wait_ready_not_busy() {
-    long target_ticks = 0;
-    long ticks = 0;
+int16_t pata_wait_ready_not_busy() {
+    int32_t target_ticks = 0;
+    int32_t ticks = 0;
     char status = 0;
 
     TRACE("pata_wait_ready_not_busy");
@@ -128,9 +129,9 @@ short pata_wait_ready_not_busy() {
 // Returns:
 //  0 on success (PATA drive is ready to transfer data), DEV_TIMEOUT on timeout
 //
-short pata_wait_data_request() {
-    long target_ticks = 0;
-    long ticks = 0;
+int16_t pata_wait_data_request() {
+    int32_t target_ticks = 0;
+    int32_t ticks = 0;
     char status = 0;
 
     TRACE("pata_wait_data_request");
@@ -160,12 +161,12 @@ char g_buffer[512];
 // Returns:
 //  0 on success, any negative number is an error code
 //
-short pata_identity(p_drive_info drive_info) {
+int16_t pata_identity(p_drive_info drive_info) {
     char * buffer = 0;
-    unsigned short *wptr;
+    uint16_t *wptr;
     char * cptr;
-    short i;
-    short count;
+    int16_t i;
+    int16_t count;
     TRACE("pata_identity");
 
     *PATA_HEAD = 0xe0;          // Drive 0, lBA enabled, Head 0
@@ -189,9 +190,9 @@ short pata_identity(p_drive_info drive_info) {
     TRACE("copying data");
 
     // Copy the data... let the compiler and the FPGA worry about endianess
-    wptr = (unsigned short *)g_buffer;
+    wptr = (uint16_t *)g_buffer;
     for (i = 0; i < 512; ) {
-        unsigned short data = *PATA_DATA_16;
+        uint16_t data = *PATA_DATA_16;
         g_buffer[i++] = data & 0xff;
         g_buffer[i++] = (data >> 8) & 0xff;
     }
@@ -221,8 +222,8 @@ short pata_identity(p_drive_info drive_info) {
 // Returns:
 //  0 on success, any negative number is an error code
 //
-short pata_init() {
-    short result;
+int16_t pata_init() {
+    int16_t result;
 
     TRACE("pata_init");
 
@@ -259,9 +260,9 @@ short pata_init() {
 // Returns:
 //  number of chars read, any negative number is an error code
 //
-short pata_read(long lba, unsigned char * buffer, short size) {
-    short i;
-    unsigned short *wptr;
+int16_t pata_read(int32_t lba, uint8_t * buffer, int16_t size) {
+    int16_t i;
+    uint16_t *wptr;
     TRACE("pata_read");
     log_num(LOG_VERBOSE, "pata_read lba: ", lba);
 
@@ -307,7 +308,7 @@ short pata_read(long lba, unsigned char * buffer, short size) {
     }
 
     // Copy the data... let the compiler and the FPGA worry about endianess
-    for (i = 0, wptr = (unsigned short *)buffer; i < size; i += 2) {
+    for (i = 0, wptr = (uint16_t *)buffer; i < size; i += 2) {
         *wptr++ = *PATA_DATA_16;
     }
 
@@ -317,11 +318,11 @@ short pata_read(long lba, unsigned char * buffer, short size) {
     return i;
 }
 
-short pata_flush_cache() {
-    long target_ticks;
-    short i;
-    unsigned short *wptr;
-    unsigned char status;
+int16_t pata_flush_cache() {
+    int32_t target_ticks;
+    int16_t i;
+    uint16_t *wptr;
+    uint8_t status;
     TRACE("pata_write");
 
     if (pata_wait_ready_not_busy()) {
@@ -377,11 +378,11 @@ short pata_flush_cache() {
 // Returns:
 //  number of chars written, any negative number is an error code
 //
-short pata_write(long lba, const unsigned char * buffer, short size) {
-    long target_ticks;
-    short i;
-    unsigned short *wptr;
-    unsigned char status;
+int16_t pata_write(int32_t lba, const uint8_t * buffer, int16_t size) {
+    int32_t target_ticks;
+    int16_t i;
+    uint16_t *wptr;
+    uint8_t status;
     TRACE("pata_write");
 
     /* Turn on the HDD LED */
@@ -422,7 +423,7 @@ short pata_write(long lba, const unsigned char * buffer, short size) {
     }
 
     // Copy the data... let the compiler and the FPGA worry about endianess
-    for (i = 0, wptr = (unsigned short *)buffer; i < size; i += 2) {
+    for (i = 0, wptr = (uint16_t *)buffer; i < size; i += 2) {
         *PATA_DATA_16 = *wptr++;
     }
 
@@ -470,7 +471,7 @@ short pata_write(long lba, const unsigned char * buffer, short size) {
 // Returns:
 //  the status of the device
 //
-short pata_status() {
+int16_t pata_status() {
     TRACE("pata_status");
     return g_pata_status;
 }
@@ -481,7 +482,7 @@ short pata_status() {
 // Returns:
 //  the error code of the device
 //
-short pata_error() {
+int16_t pata_error() {
     TRACE("pata_error");
     return g_pata_error;
 }
@@ -492,7 +493,7 @@ short pata_error() {
 // Returns:
 //  0 on success, any negative number is an error code
 //
-short pata_flush() {
+int16_t pata_flush() {
     TRACE("pata_flush");
     return 0;
 }
@@ -508,11 +509,11 @@ short pata_flush() {
 // Returns:
 //  0 on success, any negative number is an error code
 //
-short pata_ioctrl(short command, unsigned char * buffer, short size) {
-    short result;
-    long *p_long;
-    unsigned short *p_word;
-    long *p_lba_word;
+int16_t pata_ioctrl(int16_t command, uint8_t * buffer, int16_t size) {
+    int16_t result;
+    int32_t *p_long;
+    uint16_t *p_word;
+    int32_t *p_lba_word;
     t_drive_info drive_info;
     p_drive_info p_info;
 
@@ -520,7 +521,7 @@ short pata_ioctrl(short command, unsigned char * buffer, short size) {
 
     switch (command) {
         case PATA_GET_SECTOR_COUNT:
-            p_lba_word = (long *)buffer;
+            p_lba_word = (int32_t *)buffer;
             result = pata_identity(&drive_info);
             if (result != 0) {
                 return result;
@@ -531,13 +532,13 @@ short pata_ioctrl(short command, unsigned char * buffer, short size) {
 
         case PATA_GET_SECTOR_SIZE:
             // Return the size of a sector... always 512
-            p_word = (unsigned short *)buffer;
+            p_word = (uint16_t *)buffer;
             *p_word = PATA_SECTOR_SIZE;
             break;
 
         case PATA_GET_BLOCK_SIZE:
             // This isn't a flash device... return 1
-            p_long = (long *)buffer;
+            p_long = (int32_t *)buffer;
             *p_long = 1;
             break;
 
@@ -556,35 +557,4 @@ short pata_ioctrl(short command, unsigned char * buffer, short size) {
     return 0;
 }
 
-//
-// Install the PATA driver
-//
-// Returns:
-//  0 on success, any negative number is an error code
-//
-short pata_install() {
-    t_dev_block bdev;
 
-    TRACE("pata_install");
-
-    g_pata_error = 0;
-    g_pata_status = PATA_STAT_NOINIT;
-
-    // Check if drive is installed
-    // if ((*DIP_BOOTMODE & HD_INSTALLED) == 0) {
-        bdev.number = BDEV_HDC;
-        bdev.name = "HDD";
-        bdev.init = pata_init;
-        bdev.read = pata_read;
-        bdev.write = pata_write;
-        bdev.status = pata_status;
-        bdev.flush = pata_flush;
-        bdev.ioctrl = pata_ioctrl;
-
-        g_pata_status = PATA_STAT_PRESENT & PATA_STAT_NOINIT;
-
-        return bdev_register(&bdev);
-    // } else {
-    //     return 0;
-    // }
-}
