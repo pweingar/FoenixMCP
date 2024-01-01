@@ -5,12 +5,15 @@
 #ifndef __UART_H
 #define __UART_H
 
+#include <stdint.h>
+#include <stdbool.h>
+
 /**
  * Returns the address of the first register in the given UART
  *
  * @param uart the number of the UART 0 = COM1, 1 = COM2
  */
-extern volatile unsigned char * uart_get_base(short uart);
+uint8_t * uart_get_base(int16_t uart);
 
 /*
  * Set the data transfer speed
@@ -19,7 +22,7 @@ extern volatile unsigned char * uart_get_base(short uart);
  * uart = the number of the UART: 0 for COM1, 1 for COM2
  * bps_code = the UART_* code number for the bits-per-second
  */
-extern void uart_setbps(short uart, unsigned short bps_code);
+void uart_setbps(int16_t uart, uint16_t bps_code);
 
 /*
  * Set the line control register
@@ -28,7 +31,7 @@ extern void uart_setbps(short uart, unsigned short bps_code);
  * uart = the number of the UART: 0 for COM1, 1 for COM2
  * lcr_bits = the LCR settings
  */
-extern void uart_setlcr(short uart, unsigned char lcr_bits);
+void uart_setlcr(int16_t uart, uint8_t lcr_bits);
 
 /*
  * Initialize a UART
@@ -36,7 +39,7 @@ extern void uart_setlcr(short uart, unsigned char lcr_bits);
  * Inputs:
  * uart = the number of the UART: 0 for COM1, 1 for COM2
  */
-extern void uart_init(short uart);
+void uart_init(int16_t uart);
 
 /*
  * Return true (non-zero) if the UART has data ready to read in its FIFO
@@ -47,7 +50,7 @@ extern void uart_init(short uart);
  * Returns:
  * non-zero if there is data to read, 0 if there is no data.
  */
-extern bool uart_has_bytes(short uart);
+bool uart_has_bytes(int16_t uart);
 
 /*
  * Send a byte to the UART. Blocks until the FIFO is ready to recieve a byte.
@@ -56,7 +59,7 @@ extern bool uart_has_bytes(short uart);
  * uart = the number of the UART: 0 for COM1, 1 for COM2
  * b = the byte to send
  */
-extern void uart_put(short uart, unsigned char b);
+void uart_put(int16_t uart, uint8_t b);
 
 /*
  * Get a byte from the UART. Blocks until there is data to read.
@@ -67,11 +70,16 @@ extern void uart_put(short uart, unsigned char b);
  * Returns:
  * the byte read from the UART
  */
-extern unsigned char uart_get(short uart);
+uint8_t uart_get(int16_t uart);
 
 /**
- * Install the UART driver
+ * Compute the BitsPerSecond (bps) code for the desired baud speed
+ * 
+ * @return the value that can be used with _set_bps, or 0 if invalid argument
  */
-extern short uart_install();
+uint32_t uart_baud_to_code(uint16_t i);
+
+/** Indicates whether the uart is ready to send */
+int16_t uart_can_send(int16_t uart);
 
 #endif

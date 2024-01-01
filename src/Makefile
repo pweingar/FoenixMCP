@@ -201,9 +201,9 @@ else
 	ASFLAGS = -Fvobj -nowarn=62 $(VASM_CPU) -quiet
 	ifneq ($(MODEL_FAMILY),GENX32)
 		# Inline functions cause problems (at least on the X)
-		CFLAGS_EXTRA=-D__NOINLINE__
+		#CFLAGS_EXTRA=-D__NOINLINE__
 	else
-		CFLAGS_EXTRA=-D__NOINLINE__
+		#CFLAGS_EXTRA=-D__NOINLINE__
 	endif	
 	CFLAGS =-c -S -cpu=$(VBCC_CPU) +$(CFG_FILE) $(CFLAGS_EXTRA)
 	LDFLAGS = +$(CFG_FILE)
@@ -230,7 +230,7 @@ cpu_c_src := $(wildcard $(CPU_FAMILY)/*.c)
 cpu_obj := $(subst .c,.o,$(cpu_c_src)) $(subst .s,.o,$(cpu_s_src))
 
 # Foenix drivers
-foenix_c_src = pata.c ps2.c rtc.c sdc.c uart.c indicators.c interrupt.c
+foenix_c_src = pata.c sdc.c ps2.c rtc.c uart.c indicators.c interrupt.c
 foenix_s_src =
 ifeq ($(UNIT),a2560k)
 	foenix_c_src := $(foenix_c_src) fdc.c kbd_mo.c lpt.c midi.c superio.c
@@ -245,7 +245,7 @@ foenix_obj := $(addprefix libfoenix/, $(subst .c,.o,$(foenix_c_src))) $(addprefi
 
 
 # OS device drivers (common to all Foenix)
-dev_c_src = block.c channel.c hdd.c console.c fsys.c txt_screen.c
+dev_c_src = block.c channel.c hdd.c sdc.c com.c console.c fsys.c txt_screen.c
 dev_s_src =
 ifeq ($(UNIT),a2560k)
 	dev_c_src := $(dev_c_src) txt_a2560k_a.c txt_a2560k_b.c
