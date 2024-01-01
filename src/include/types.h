@@ -14,8 +14,8 @@
  * An extent or size of a rectangular area
  */
 typedef struct s_extent {
-    short width;        /**< The width of the region */
-    short height;       /**< The height of the region */
+    int16_t width;        /**< The width of the region */
+    int16_t height;       /**< The height of the region */
 } t_extent, *p_extent;
 
 /**
@@ -24,8 +24,8 @@ typedef struct s_extent {
  * A point on a plane
  */
 typedef struct s_point {
-    short x;                /**< The column of the point */
-    short y;                /**< The row of the point */
+    int16_t x;                /**< The column of the point */
+    int16_t y;                /**< The row of the point */
 } t_point, *p_point;
 
 /**
@@ -62,14 +62,14 @@ typedef struct s_color4 {
  */
 
 typedef void  (*FUNC_V_2_V)();
-typedef short (*FUNC_V_2_S)();
-typedef short (*FUNC_S_2_S)(char *);
-typedef short (*FUNC_BS_2_S)(unsigned char *, short);
-typedef short (*FUNC_cBS_2_S)(const unsigned char *, short);
-typedef short (*FUNC_B_2_S)(const unsigned short);
-typedef short (*FUNC_LBS_2_S)(long, unsigned char *, short);
-typedef short (*FUNC_LcBS_2_S)(long, const unsigned char *, short);
-typedef short (*FUNC_SBS_2_S)(short, unsigned char *, short);
-typedef short (*FUNC_LB_2_S)(long, short);
+typedef int16_t (*FUNC_V_2_S)();
+typedef int16_t (*FUNC_S_2_S)(int8_t *);
+typedef int16_t (*FUNC_BS_2_S)(uint8_t *, int16_t);
+typedef int16_t (*FUNC_cBS_2_S)(const uint8_t *, int16_t);
+typedef int16_t (*FUNC_B_2_S)(const uint16_t);
+typedef int16_t (*FUNC_LBS_2_S)(int32_t, uint8_t *, int16_t);
+typedef int16_t (*FUNC_LcBS_2_S)(int32_t, const uint8_t *, int16_t);
+typedef int16_t (*FUNC_SBS_2_S)(int16_t, uint8_t *, int16_t);
+typedef int16_t (*FUNC_LB_2_S)(int32_t, int16_t);
 
 #endif
