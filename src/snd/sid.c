@@ -11,7 +11,7 @@
 #include "sys_general.h"
 #include "snd/sid.h"
 #include "sound_reg.h"
-#include "dev/rtc.h"
+#include "libfoenix/include/rtc.h"
 
 /*
  * Return the base address of the given SID chip

@@ -13,8 +13,8 @@
 #include "interrupt.h"
 #include "simpleio.h"
 #include "vicky_general.h"
-#include "dev/ps2.h"
-#include "dev/rtc.h"
+#include "libfoenix/include/ps2.h"
+#include "libfoenix/include/rtc.h"
 #include "dev/txt_screen.h"
 #include "rsrc/bitmaps/mouse_pointer.h"
 

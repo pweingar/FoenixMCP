@@ -23,7 +23,7 @@
 #endif
 
 #if MODEL == MODEL_FOENIX_A2560K
-#include "dev/kbd_mo.h"
+#include "libfoenix/include/kbd_mo.h"
 #endif
 #if HAS_DUAL_SCREEN
 #include "dev/txt_a2560k_a.h"
@@ -38,21 +38,21 @@
 #include "syscalls.h"
 #include "timers.h"
 #include "boot.h"
-#include "dev/bitmap.h"
+#include "libfoenix/include/bitmap.h"
 #include "memory.h"
 #include "dev/block.h"
 #include "dev/channel.h"
 #include "dev/console.h"
-#include "dev/fdc.h"
-#include "dev/lpt.h"
-#include "dev/midi.h"
-#include "dev/pata.h"
-#include "dev/ps2.h"
-#include "dev/rtc.h"
-#include "dev/sdc.h"
+#include "libfoenix/include/fdc.h"
+#include "libfoenix/include/lpt.h"
+#include "libfoenix/include/midi.h"
+#include "libfoenix/include/pata.h"
+#include "libfoenix/include/ps2.h"
+#include "libfoenix/include/rtc.h"
+#include "libfoenix/include/sdc.h"
 #include "dev/txt_screen.h"
 
-#include "dev/uart.h"
+#include "libfoenix/include/uart.h"
 #include "snd/codec.h"
 #include "snd/psg.h"
 #include "snd/sid.h"

@@ -4,8 +4,8 @@
 #include "timers.h"
 #include "dev/channel.h"
 #include "dev/block.h"
-#include "dev/ps2.h"
-#include "dev/rtc.h"
+#include "libfoenix/include/ps2.h"
+#include "libfoenix/include/rtc.h"
 
 /**
  * @brief Translation file to map system calls into the irregularly named implementations.

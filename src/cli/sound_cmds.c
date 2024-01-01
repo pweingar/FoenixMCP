@@ -13,7 +13,7 @@
 #include "snd/opn2.h"
 #include "snd/psg.h"
 #include "snd/sid.h"
-#include "dev/midi.h"
+#include "libfoenix/include/midi.h"
 #include "simpleio.h"
 #include "syscalls.h"
 

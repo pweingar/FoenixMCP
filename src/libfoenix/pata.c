@@ -8,9 +8,9 @@
 #include "constants.h"
 #include "indicators.h"
 #include "dev/block.h"
-#include "dev/pata.h"
+#include "libfoenix/include/pata.h"
 #include "dev/txt_screen.h"
-#include "dev/rtc.h"
+#include "libfoenix/include/rtc.h"
 #include "pata_reg.h"
 
 //

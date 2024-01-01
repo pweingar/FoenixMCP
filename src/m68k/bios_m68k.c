@@ -20,13 +20,13 @@
 #include "dev/channel.h"
 #include "dev/block.h"
 #include "dev/fsys.h"
-#include "dev/rtc.h"
+#include "libfoenix/include/rtc.h"
 #include "sys_general.h"
 
 #if MODEL == MODEL_FOENIX_A2560K
-#include "dev/kbd_mo.h"
+#include "libfoenix/include/kbd_mo.h"
 #else
-#include "dev/ps2.h"
+#include "libfoenix/include/ps2.h"
 #endif
 
 /*

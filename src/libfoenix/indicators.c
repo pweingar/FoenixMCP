@@ -12,7 +12,7 @@
 #include "sys_general.h"
 
 #if MODEL == MODEL_FOENIX_A2560K
-#include "dev/kbd_mo.h"
+#include "libfoenix/include/kbd_mo.h"
 #endif
 
 void ind_set(short ind_number, short state);

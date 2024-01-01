@@ -5,7 +5,7 @@
 #include "features.h"
 #include "midi_reg.h"
 #include "dev/channel.h"
-#include "dev/midi.h"
+#include "libfoenix/include/midi.h"
 #include "errors.h"
 #include "simpleio.h"
 #include "sys_general.h"

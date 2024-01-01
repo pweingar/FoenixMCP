@@ -9,7 +9,7 @@
 #include <string.h>
 #include "indicators.h"
 #include "dev/block.h"
-#include "dev/fdc.h"
+#include "libfoenix/include/fdc.h"
 #include "log.h"
 #include "types.h"
 #include "timers.h"

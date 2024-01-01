@@ -11,7 +11,7 @@
 #include "simpleio.h"
 #include "syscalls.h"
 
-#include "dev/uart.h"
+#include "libfoenix/include/uart.h"
 #include "dev/txt_screen.h"
 #include "vicky3_txt_a_logger.h"
 

@@ -14,7 +14,7 @@
 #include "dev/block.h"
 #include "dev/console.h"
 #include "dev/fsys.h"
-#include "dev/kbd_mo.h"
+#include "libfoenix/include/kbd_mo.h"
 #include "fatfs/ff.h"
 
 /*

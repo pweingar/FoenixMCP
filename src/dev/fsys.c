@@ -12,7 +12,7 @@
 #include <string.h>
 
 #include "dev/channel.h"
-#include "dev/fdc.h"
+#include "libfoenix/include/fdc.h"
 #include "errors.h"
 #include "elf.h"
 #include "fsys.h"

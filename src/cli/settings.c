@@ -17,14 +17,14 @@
 #include "syscalls.h"
 #include "interrupt.h"
 #include "rtc_reg.h"
-#include "dev/rtc.h"
+#include "libfoenix/include/rtc.h"
 #include "dev/txt_screen.h"
 #include "snd/codec.h"
 #include "utilities.h"
 #include "vicky_general.h"
 
 #if MODEL == MODEL_FOENIX_A2560K
-#include "dev/kbd_mo.h"
+#include "libfoenix/include/kbd_mo.h"
 #endif
 
 #define MAX_SETTING_NAME    64

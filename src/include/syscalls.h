@@ -16,7 +16,7 @@
 #include "dev/channel.h"
 #include "dev/block.h"
 #include "dev/fsys.h"
-#include "dev/rtc.h"
+#include "libfoenix/include/rtc.h"
 #include "dev/txt_screen.h"
 
 /*

@@ -9,7 +9,7 @@
 #include "log.h"
 #include "uart_reg.h"
 #include "dev/channel.h"
-#include "dev/uart.h"
+#include "libfoenix/include/uart.h"
 #include "simpleio.h"
 #include "utilities.h"
 

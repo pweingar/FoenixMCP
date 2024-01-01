@@ -12,18 +12,18 @@
 #include "cli/sound_cmds.h"
 #include "dev/block.h"
 #include "dev/channel.h"
-#include "dev/fdc.h"
+#include "libfoenix/include/fdc.h"
 #include "dev/fsys.h"
-#include "dev/lpt.h"
-#include "dev/rtc.h"
+#include "libfoenix/include/lpt.h"
+#include "libfoenix/include/rtc.h"
 #include "dev/txt_screen.h"
-#include "dev/uart.h"
+#include "libfoenix/include/uart.h"
 #include "fatfs/ff.h"
 #include "interrupt.h"
 #include "log.h"
 #include "fdc_reg.h"
 #include "lpt_reg.h"
-#include "dev/ps2.h"
+#include "libfoenix/include/ps2.h"
 #include "rtc_reg.h"
 #include "simpleio.h"
 #include "syscalls.h"
@@ -34,7 +34,7 @@
 #include "vicky_general.h"
 
 #if MODEL == MODEL_FOENIX_A2560K
-#include "dev/kbd_mo.h"
+#include "libfoenix/include/kbd_mo.h"
 #endif
 
 #if HAS_DUAL_SCREEN

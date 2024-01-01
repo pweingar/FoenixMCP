@@ -6,7 +6,7 @@
 #include "errors.h"
 #include "log.h"
 #include "lpt_reg.h"
-#include "dev/lpt.h"
+#include "libfoenix/include/lpt.h"
 #include "dev/txt_screen.h"
 #include "simpleio.h"
 #include "sys_general.h"

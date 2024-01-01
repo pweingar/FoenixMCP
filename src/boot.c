@@ -22,7 +22,7 @@
 #include "syscalls.h"
 #include "vicky_general.h"
 #include "cli/cli.h"
-#include "dev/kbd_mo.h"
+#include "libfoenix/include/kbd_mo.h"
 #include "dev/txt_screen.h"
 
 #include "rsrc/font/quadrotextFONT.h"

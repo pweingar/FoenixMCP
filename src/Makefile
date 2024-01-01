@@ -143,7 +143,7 @@ else
  DEFINES := $(DEFINES) -DLOG_CHANNEL=$(LOG_CHANNEL)
 endif
 
-INCLUDES = -I. -I$(CURDIR)/include -I$(CURDIR)
+INCLUDES = -I. -I$(CURDIR)/include -I$(CURDIR) -I$(CURDIR)/libfoenix -I$(CURDIR)/libfoenix/include
 ifeq ($(OS),Windows_NT)
  INCLUDES := $(subst /,$(SEP),$(INCLUDES))
 endif
@@ -230,7 +230,7 @@ cpu_c_src := $(wildcard $(CPU_FAMILY)/*.c)
 cpu_obj := $(subst .c,.o,$(cpu_c_src)) $(subst .s,.o,$(cpu_s_src))
 
 # Foenix drivers
-foenix_c_src = pata.c ps2.c rtc.c sdc.c uart.c
+foenix_c_src = pata.c ps2.c rtc.c sdc.c uart.c indicators.c interrupt.c
 foenix_s_src =
 ifeq ($(UNIT),a2560k)
 	foenix_c_src := $(foenix_c_src) fdc.c kbd_mo.c lpt.c midi.c superio.c
@@ -239,9 +239,9 @@ else ifeq ($(UNIT),genx)
 else ifeq ($(UNIT),a2560x)
 	foenix_c_src := $(foenix_c_src) fdc.c lpt.c midi.c superio.c
 else ifeq ($(UNIT),a2560u)
-	foenix_c_src := $(foenix_c_src) txt_a2560u.o
+	foenix_c_src := $(foenix_c_src)
 endif
-foenix_obj := $(addprefix dev/, $(subst .c,.o,$(foenix_c_src))) $(addprefix dev/, $(subst .s,.o,$(foenix_s_src)))
+foenix_obj := $(addprefix libfoenix/, $(subst .c,.o,$(foenix_c_src))) $(addprefix libfoenix/, $(subst .s,.o,$(foenix_s_src)))
 
 
 # OS device drivers (common to all Foenix)
@@ -277,7 +277,7 @@ cli_obj := $(subst .c,.o,$(cli_c_src))
 c_src :=  $(wildcard *.c)
 c_obj := $(subst .c,.o,$(c_src))
 
-.PHONY: all clean $(CPU_FAMILY) dev fatfs snd cli
+.PHONY: all clean $(CPU_FAMILY) foenix dev fatfs snd cli
 
 # Target selection ------------------------------------------------------------
 ifeq ($(MEMORY),ram)
@@ -295,7 +295,7 @@ foenixmcp.s37: $(OBJS) $(LIBS)
 	$(LD) $(LDFLAGS) -o $@  $(subst /,$(SEP),$^)
 
 
-DEPS = $(cpu_obj) $(c_obj) ($foenix_obj) $(dev_obj) $(fatfs_obj) $(snd_obj) $(cli_obj) $(SPLASHSCREEN)
+DEPS = $(cpu_obj) $(c_obj) $(foenix_obj) $(dev_obj) $(fatfs_obj) $(snd_obj) $(cli_obj) $(SPLASHSCREEN)
 
 # We don't want to link:
 # - the startup file (because the linker script does it)

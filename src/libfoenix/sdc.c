@@ -15,8 +15,8 @@
 #include "interrupt.h"
 #include "dev/block.h"
 #include "sdc_reg.h"
-#include "dev/rtc.h"
-#include "dev/sdc.h"
+#include "libfoenix/include/rtc.h"
+#include "libfoenix/include/sdc.h"
 
 //
 // Constants

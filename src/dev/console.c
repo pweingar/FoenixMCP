@@ -18,8 +18,8 @@
 #include "constants.h"
 #include "dev/channel.h"
 #include "dev/console.h"
-#include "dev/ps2.h"
-#include "dev/kbd_mo.h"
+#include "libfoenix/include/ps2.h"
+#include "libfoenix/include/kbd_mo.h"
 #include "dev/txt_screen.h"
 #include "simpleio.h"
 
