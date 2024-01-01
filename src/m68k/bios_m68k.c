@@ -28,7 +28,7 @@
 #else
 #include "dev/ps2.h"
 #endif
-#include <stdio.h>
+
 /*
  * Determine the correct system function implementation and call it.
  */
@@ -46,14 +46,14 @@ unsigned long syscall_dispatch(int32_t function, int32_t param0, int32_t param1,
                     break;
 
                 case KFN_INT_REGISTER:
-                    return (int32_t)int_register((unsigned short)param0, (p_int_handler)param1);
+                    return (int32_t)int_register((uint16_t)param0, (p_int_handler)param1);
 
                 case KFN_INT_ENABLE:
-                    int_enable((unsigned short)param0);
+                    int_enable((uint16_t)param0);
                     return 0;
 
                 case KFN_INT_DISABLE:
-                    int_disable((unsigned short)param0);
+                    int_disable((uint16_t)param0);
                     return 0;
 
                 case KFN_INT_ENABLE_ALL:
@@ -63,11 +63,11 @@ unsigned long syscall_dispatch(int32_t function, int32_t param0, int32_t param1,
                     return int_disable_all();
 
                 case KFN_INT_CLEAR:
-                    int_clear((unsigned short)param0);
+                    int_clear((uint16_t)param0);
                     return 0;
 
                 case KFN_INT_PENDING:
-                    return int_pending((unsigned short)param0);
+                    return int_pending((uint16_t)param0);
 
                 case KFN_SYS_GET_INFO:
                     sys_get_information((p_sys_info)param0);

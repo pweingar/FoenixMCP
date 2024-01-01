@@ -14,6 +14,8 @@ p_int_handler g_int_handler[MAX_HANDLERS]; // Public because referenced by the a
 
 static uint16_t int_group(uint16_t n);
 static uint16_t int_mask(uint16_t n);
+static FUNC_V_2_V int_install_cpu_vector(int number, void (*handler)());
+
 
 /*
  * Initialize the interrupt registers
@@ -32,6 +34,83 @@ void int_init() {
 	*MASK_GRP0 = 0xFFFF;
 	*MASK_GRP1 = 0xFFFF;
 	*MASK_GRP2 = 0xFFFF;
+
+
+#if CPU_FAMILY==m68k
+	{
+		extern void m68k_int_superio_ps2(void);
+		extern void m68k_int_maurice(void);
+		extern void m68k_int_maurice(void);
+		extern void m68k_int_superio_mouse(void);
+		extern void m68k_int_superio_com1(void);
+		extern void m68k_int_superio_com2(void);
+		extern void m68k_int_superio_lpt1(void);
+		extern void m68k_int_superio_fdc(void);
+		extern void m68k_int_superio_midi(void);
+		extern void m68k_int_timer0(void);
+		extern void m68k_int_timer1(void);
+		extern void m68k_int_timer2(void);
+		extern void m68k_int_timer3(void);
+		extern void m68k_int_timer4(void);
+		extern void m68k_int_x1D(void);
+		extern void m68k_int_x1E(void);
+		extern void m68k_int_rtc(void);
+		extern void m68k_int_hdc(void);
+		extern void m68k_int_sdc_insert(void);
+		extern void m68k_int_sdc(void);
+		extern void m68k_int_opm(void);
+		extern void m68k_int_opn2(void);
+		extern void m68k_int_opl3(void);
+		extern void m68k_int_x26(void);
+		extern void m68k_int_x27(void);
+		extern void m68k_int_beatrix0(void);
+		extern void m68k_int_beatrix1(void);
+		extern void m68k_int_beatrix2(void);
+		extern void m68k_int_beatrix3(void);
+		extern void m68k_int_x2C(void);
+		extern void m68k_int_dac1(void);
+		extern void m68k_int_x2E(void);
+		extern void m68k_int_dac0(void);
+
+		const FUNC_V_2_V vecs[] = {
+			m68k_int_superio_ps2,  // 64 - Interrupt 0x10 - SuperIO - PS/2 Keyboard
+			m68k_int_maurice,      // 65 - Interrupt 0x11 - A2560K Built-in Keyboard (Mo)
+			m68k_int_superio_mouse,// 66 - Interrupt 0x12 - SuperIO - PS/2 Mouse
+			m68k_int_superio_com1, // 67 - Interrupt 0x13 - SuperIO - COM1
+			m68k_int_superio_com2, // 68 - Interrupt 0x14 - SuperIO - COM2
+			m68k_int_superio_lpt1, // 69 - Interrupt 0x15 - SuperIO - LPT1
+			m68k_int_superio_fdc,  // 70 - Interrupt 0x16 - SuperIO - Floppy Disk Controller
+			m68k_int_superio_midi, // 71 - Interrupt 0x17 - SuperIO - MIDI
+			m68k_int_timer0,    // 72 - Interrupt 0x18 - Timer 0
+			m68k_int_timer1,    // 73 - Interrupt 0x19 - Timer 1
+			m68k_int_timer2,    // 74 - Interrupt 0x1A - Timer 2
+			m68k_int_timer3,    // 75 - Interrupt 0x1B - Timer 3
+			m68k_int_timer4,    // 76 - Interrupt 0x1C - Timer 4
+			m68k_int_x1D,     	// 77 - Interrupt 0x1D - Reserved
+			m68k_int_x1E,     	// 78 - Interrupt 0x1E - Reserved
+			m68k_int_rtc,     	// 79 - Interrupt 0x1F - Real Time Clock
+			m68k_int_hdc,     	// 80 - Interrupt 0x20 - IDE HDD Generated Interrupt
+			m68k_int_sdc_insert,// 81 - Interrupt 0x21 - SDCard Insert
+			m68k_int_sdc,     	// 82 - Interrupt 0x22 - SDCard Controller
+			m68k_int_opm,     	// 83 - Interrupt 0x23 - Internal OPM
+			m68k_int_opn2,     	// 84 - Interrupt 0x24 - External OPN2
+			m68k_int_opl3,     	// 85 - Interrupt 0x25 - External OPL3
+			m68k_int_x26,     	// 86 - Interrupt 0x26 - Reserved
+			m68k_int_x27,     	// 87 - Interrupt 0x27 - Reserved
+			m68k_int_beatrix0,  // 88 - Interrupt 0x28 - Beatrix Interrupt 0
+			m68k_int_beatrix1,  // 89 - Interrupt 0x29 - Beatrix Interrupt 1
+			m68k_int_beatrix2,  // 90 - Interrupt 0x2A - Beatrix Interrupt 2
+			m68k_int_beatrix3,  // 91 - Interrupt 0x2B - Beatrix Interrupt 3
+			m68k_int_x2C,     	// 92 - Interrupt 0x2C - Reserved
+			m68k_int_dac1,     	// 93 - Interrupt 0x2D - DAC1 Playback Done Interrupt (48K)
+			m68k_int_x2E,     	// 94 - Interrupt 0x2E - Reserved
+			m68k_int_dac0,     	// 95 - Interrupt 0x2F - DAC0 Playback Done Interrupt (44.1K)
+		};
+		FUNC_V_2_V *h = (FUNC_V_2_V*)&vecs[0];
+		for (i=64; i<64+(sizeof(vecs)/sizeof(FUNC_V_2_V))-1; i++)
+			int_install_cpu_vector(i,*h++);
+	}
+#endif
 }
 
 /*
@@ -53,6 +132,30 @@ void int_disable(uint16_t n) {
 
 	/* Set the mask bit for the interrupt in the correct MASK register */
 	MASK_GRP0[group] = new_mask;
+}
+
+/**
+ * Sets a 
+ * 
+ * @param number the vector number (will be multiplied by the size of an address, which depends on the processor)
+ * @param handler pointer to the handler to set. If 1, the handler is not set.
+ * @return the previous handler.
+ */
+static FUNC_V_2_V int_install_cpu_vector(int number, void (*handler)()) {
+	*((uint32_t*)(number*4)) = (uint32_t)handler;
+	return 0L;
+
+	FUNC_V_2_V *address = (FUNC_V_2_V*)(number*4/*sizeof(void*)*/);
+	FUNC_V_2_V old = *address;
+	
+	if (handler != (FUNC_V_2_V)1) {
+#if (CPU >= CPU_M68000 && CPU <= CPU_M680EC40) || (CPU == CPU_MC68060)
+		if (address < (FUNC_V_2_V*)0x400) // Don't allow to set something that's not a 68K vector
+#endif
+		*address = handler;
+	}
+
+	return old;
 }
 
 /*
@@ -153,7 +256,12 @@ static uint16_t int_mask(uint16_t n) {
 	return (1 << (n & 0x0f));
 }
 
-void int_vicky(int pending_shift) {
+/**
+ * Process VICKY interrupt
+ * Inputs:
+ * pending_shift = 0 for channel A, and 8 for channel B
+ */
+void int_vicky(uint16_t pending_shift) {
 	uint16_t n;
 	uint16_t mask;
 	uint16_t group_mask = (0x00ff << pending_shift);
@@ -174,20 +282,3 @@ void int_vicky(int pending_shift) {
 		}
 	}
 }
-
-
-/*
- * Interrupt dispatcher for Vicky Channel A interrupts (0 - 7)
- */
-void int_vicky_channel_a() {
-	int_vicky(0);
-}
-
-#if HAS_DUAL_SCREEN
-/*
- * Interrupt dispatcher for Vicky Channel B interrupts (8 - 15)
- */
-void int_vicky_channel_b() {
-	int_vicky(8);
-}
-#endif

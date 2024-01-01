@@ -214,7 +214,7 @@ typedef void (*p_int_handler)();
 /*
  * Initialize the interrupt registers
  */
-extern void int_init();
+void int_init();
 
 /*
  * Enable all interrupts
@@ -224,7 +224,7 @@ extern void int_init();
  * Returns:
  * a machine dependent representation of the interrupt masking prior to enabling
  */
-extern short int_enable_all();
+short int_enable_all();
 
 /*
  * Disable all interrupts
@@ -234,7 +234,7 @@ extern short int_enable_all();
  * Returns:
  * a machine dependent representation of the interrupt masking prior to disabling
  */
-extern short int_disable_all();
+short int_disable_all();
 
 /*
  * Restore interrupt masking state returned by a previous call to int_enable/int_disable
@@ -244,7 +244,7 @@ extern short int_disable_all();
  * Inputs:
  * int_mask = machine dependent representation of the interrupt masking
  */
-extern void int_restore(short int_mask);
+void int_restore(short int_mask);
 
 /*
  * Disable an interrupt by masking it
@@ -252,7 +252,7 @@ extern void int_restore(short int_mask);
  * Inputs:
  * n = the number of the interrupt: n[7..4] = group number, n[3..0] = individual number.
  */
-extern void int_disable(uint16_t n);
+void int_disable(uint16_t n);
 
 /*
  * Enable an interrupt
@@ -260,7 +260,7 @@ extern void int_disable(uint16_t n);
  * Inputs:
  * n = the number of the interrupt
  */
-extern void int_enable(uint16_t n);
+void int_enable(uint16_t n);
 
 /*
  * Register a handler for a given interrupt.
@@ -272,7 +272,7 @@ extern void int_enable(uint16_t n);
  * Returns:
  * the pointer to the previous interrupt handler
  */
-extern p_int_handler int_register(uint16_t n, p_int_handler handler);
+p_int_handler int_register(uint16_t n, p_int_handler handler);
 
 /*
  * Return true (non-zero) if an interrupt is pending for the given interrupt
@@ -283,7 +283,7 @@ extern p_int_handler int_register(uint16_t n, p_int_handler handler);
  * Returns:
  * non-zero if interrupt n is pending, 0 if not
  */
-extern short int_pending(uint16_t n);
+short int_pending(uint16_t n);
 
 /*
  * Acknowledge an interrupt (clear out its pending flag)
@@ -291,6 +291,13 @@ extern short int_pending(uint16_t n);
  * Inputs:
  * n = the number of the interrupt: n[7..4] = group number, n[3..0] = individual number.
  */
-extern void int_clear(uint16_t n);
+void int_clear(uint16_t n);
+
+/**
+ * Process VICKY interrupt
+ * Inputs:
+ * pending_shift = 0 for channel A, and 8 for channel B
+ */
+void int_vicky(uint16_t pending_shift);
 
 #endif

@@ -4,7 +4,7 @@
 -asv=vasmm68k_mot -Fvobj -nowarn=62 %s -o %s
 -rm=del %s
 -rmv=del %s
--ld=vlink -brawbin1 -x  -Cvbcc m68040\startup_m68040.o %s %s -L%%VBCC%%\targets\m68k-foenix\lib -T%%VBCC%%\targets\m68k-foenix\vlink_flash_a2560x.cmd -lvc -o %s -Mmapfile
+-ld=vlink -brawbin1 -x  -Cvbcc m68k\startup_m68k.o %s %s -L%%VBCC%%\targets\m68k-foenix\lib -T%%VBCC%%\targets\m68k-foenix\vlink_flash_a2560x.cmd -lvc -o %s -Mmapfile
 -l2=vlink -brawbin1 -x  -Cvbcc %s %s -L%%VBCC%%\targets\m68k-foenix\lib -T%%VBCC%%\targets\m68k-foenix\vlink_flash_a2560x.cmd -o %s -Mmapfile
 -ldv=vlink -brawbin1 -t -x -Cvbcc m68040\startup.o %s %s -L%%VBCC%%\targets\m68k-foenix\lib -T%%VBCC%%\targets\m68k-foenix\vlink_flash_a2560x.cmd -lvc -o %s -Mmapfile
 -l2v=vlink -brawbin1 -t -x -Cvbcc %s %s -L%%VBCC%%\targets\m68k-foenix\lib -T%%VBCC%%\targets\m68k-foenix\vlink_flash_a2560x.cmd -o %s -Mmapfile

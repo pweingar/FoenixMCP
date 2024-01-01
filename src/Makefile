@@ -86,6 +86,15 @@ else ifeq ($(UNIT),C256_FMX)
 	LDFLAGS_FOR_UNIT = C256/ld_lc_c256_fmx.scm clib-lc-ld.a
 endif
 
+# We only manage one set of assembly files per processor family
+ifeq ($(CPU),m68k)
+	CPU_FAMILY=m68k
+else ifeq ($(CPU),m68040)
+	CPU_FAMILY=m68k
+else
+	CPU_FAMILY=$(CPU)
+endif
+
 
 # Log settings ----------------------------------------------------------------
 # FATAL   0   Log a critical or fatal event
@@ -100,7 +109,7 @@ DEFAULT_LOG_LEVEL=1
 
 
 # Common defines and includes -------------------------------------------------
-DEFINES = -DCPU=$(CPU_NUMBER) -DMODEL=$(MODEL_NUMBER) # -DKBD_POLLED 
+DEFINES = -DCPU=$(CPU_NUMBER) -DMODEL=$(MODEL_NUMBER) -DCPU_FAMILY=$(CPU_FAMILY) # -DKBD_POLLED 
 ifeq ("$(CPU)","w65816")
 	CPU_NUMBER = 255
 else ifeq ("$(CPU)","m68040") # M68040V or 68040
@@ -141,7 +150,7 @@ endif
 
 
 # Toolchain selection ---------------------------------------------------------
-ifeq ($(CPU),w65816)
+ifeq ($(CPU_FAMILY),w65816)
 	TOOLCHAIN = calypsi
 else
 	TOOLCHAIN = vbcc
@@ -194,6 +203,7 @@ else
 		# Inline functions cause problems (at least on the X)
 		CFLAGS_EXTRA=-D__NOINLINE__
 	else
+		CFLAGS_EXTRA=-D__NOINLINE__
 	endif	
 	CFLAGS =-c -S -cpu=$(VBCC_CPU) +$(CFG_FILE) $(CFLAGS_EXTRA)
 	LDFLAGS = +$(CFG_FILE)
@@ -215,8 +225,8 @@ LIBS = dev/devices.a snd/sound.a fatfs/fatfs.a
 SPLASHSCREEN = rsrc/bitmaps/splash_$(UNIT).o
 
 # CPU-specific files
-cpu_s_src := $(wildcard $(CPU)/*.s)
-cpu_c_src := $(wildcard $(CPU)/*.c)
+cpu_s_src := $(wildcard $(CPU_FAMILY)/*.s)
+cpu_c_src := $(wildcard $(CPU_FAMILY)/*.c)
 cpu_obj := $(subst .c,.o,$(cpu_c_src)) $(subst .s,.o,$(cpu_s_src))
 
 # Device drivers (common to all Foenix)
@@ -252,17 +262,17 @@ cli_obj := $(subst .c,.o,$(cli_c_src))
 c_src :=  $(wildcard *.c)
 c_obj := $(subst .c,.o,$(c_src))
 
-.PHONY: all clean $(CPU) dev fatfs snd cli
+.PHONY: all clean $(CPU_FAMILY) dev fatfs snd cli
 
 # Target selection ------------------------------------------------------------
 ifeq ($(MEMORY),ram)
 #	ifeq ($(CPU),"w65816")
 #all:foenixmcp.s37
 #	else
-all: foenixmcp.s68 $(CPU) dev snd cli
+all: foenixmcp.s68 $(CPU_FAMILY) dev snd cli
 #	endif
 else
-all: foenixmcp.bin $(CPU) dev snd cli
+all: foenixmcp.bin $(CPU_FAMILY) dev snd cli
 endif
 
 # Per-folder libraries (used by Calypsi)
@@ -276,7 +286,7 @@ DEPS = $(cpu_obj) $(c_obj) $(dev_obj) $(fatfs_obj) $(snd_obj) $(cli_obj) $(SPLAS
 # - the startup file (because the linker script does it)
 # - the splashscreen because it's #included from somewhere (boot.c)
 # So we remove them from the string of files to link.
-STARTUP_OBJ=$(CPU)/startup_$(CPU).o
+STARTUP_OBJ=$(CPU_FAMILY)/startup_$(CPU_FAMILY).o
 FILES_TO_LINK= $(subst $(STARTUP_OBJ),,$(DEPS))
 FILE_TO_LINK:=$(subst /,$(SEP),$(FILES_TO_LINK))
 
@@ -298,7 +308,7 @@ rsrc/bitmaps/splash_%.c: rsrc/bitmaps/splash_%.bmp
 # Clean up after a build
 clean:
 	$(RM) $(subst /,$(SEP),$(OBJS_TO_CLEAN)) $(subst /,$(SEP),$(DEPS)) foenixmcp.s37 *.lst *.map
-	$(MAKE) --directory=$(CPU) clean
+	$(MAKE) --directory=$(CPU_FAMILY) clean
 	$(MAKE) --directory=cli clean
 	$(MAKE) --directory=dev clean
 	$(MAKE) --directory=fatfs clean
