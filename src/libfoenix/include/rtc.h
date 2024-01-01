@@ -21,12 +21,12 @@ typedef struct s_time {
 /*
  * Initialize the RTC
  */
-extern void rtc_init();
+ void rtc_init();
 
 /*
  * Make sure the RTC tick counter is enabled
  */
-extern void rtc_enable_ticks();
+ void rtc_enable_ticks();
 
 /*
  * Set the time on the RTC
@@ -34,7 +34,7 @@ extern void rtc_enable_ticks();
  * Inputs:
  * time = pointer to a t_time record containing the correct time
  */
-extern void rtc_set_time(p_time time);
+ void rtc_set_time(p_time time);
 
 /*
  * Get the time on the RTC
@@ -42,7 +42,7 @@ extern void rtc_set_time(p_time time);
  * Inputs:
  * time = pointer to a t_time record in which to put the current time
  */
-extern void rtc_get_time(p_time time);
+ void rtc_get_time(p_time time);
 
 /*
  * Get the number of jiffies since the system last booted.
@@ -54,7 +54,7 @@ extern void rtc_get_time(p_time time);
  * Returns:
  * the number of jiffies since the last reset
  */
-extern long rtc_get_jiffies();
+ long rtc_get_jiffies();
 
 /**
  * Register a function to be called periodically
@@ -63,6 +63,6 @@ extern long rtc_get_jiffies();
  * @param handler a pointer to a function from void to void to be called
  * @return 0 on success, any other number is an error
  */
-extern short rtc_register_periodic(short rate, FUNC_V_2_V handler);
+ short rtc_register_periodic(short rate, void (*handler)());
 
 #endif

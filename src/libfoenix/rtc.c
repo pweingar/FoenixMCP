@@ -2,6 +2,8 @@
  * Definitions for access the bq4802LY real time clock
  */
 
+#include <stdint.h>
+
 #include "log.h"
 #include "interrupt.h"
 #include "gabe_reg.h"
