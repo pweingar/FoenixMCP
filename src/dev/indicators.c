@@ -15,12 +15,26 @@
 #include "dev/kbd_mo.h"
 #endif
 
+void ind_set(short ind_number, short state);
+
+/*
+ * Initialize the indicators
+ *
+ * Generally, this means the indicators will all be turned off
+ */
+void ind_init() {
+    ind_set(IND_POWER, IND_ON);
+    ind_set(IND_FDC, IND_OFF);
+    ind_set(IND_SDC, IND_OFF);
+    ind_set(IND_HDC, IND_OFF);
+}
+
 #if ( MODEL == MODEL_FOENIX_A2560K || MODEL == MODEL_FOENIX_GENX || MODEL == MODEL_FOENIX_A2560X)
 short ind_state_color(short state) {
     switch (state) {
         case IND_ON:
             /* Green for on */
-#if MODEL == MODEL_FOENIX_A2560K            
+#if MODEL == MODEL_FOENIX_A2560K
             return 0x02;
 #elif MODEL == MODEL_FOENIX_GENX
             return 0x05;
@@ -138,14 +152,40 @@ void ind_set(short ind_number, short state) {
     }
 }
 
+#if MODEL == MODEL_FOENIX_GENX || MODEL == MODEL_FOENIX_A2560X
+static short genx_leds = 0;
+
 /*
- * Initialize the indicators
+ * Set the color of the LED for the floppy drive
  *
- * Generally, this means the indicators will all be turned off
+ * Inputs:
+ * colors = color specification, three bits: 0x_____RGB
  */
-void ind_init() {
-    ind_set(IND_POWER, IND_ON);
-    ind_set(IND_FDC, IND_OFF);
-    ind_set(IND_SDC, IND_OFF);
-    ind_set(IND_HDC, IND_OFF);
+void ind_set_fdc_led(short colors) {
+    genx_leds = (genx_leds & 0xFFF8) | (colors & 0x07);
+    *GABE_GENX_STAT_LEDS = genx_leds;
 }
+
+/*
+ * Set the color of the LED for the SD card slot
+ *
+ * Inputs:
+ * colors = color specification, three bits: 0x_____RGB
+ */
+void ind_set_sdc_led(short colors) {
+    genx_leds = (genx_leds & 0xFFC7) | ((colors & 0x07) << 3);
+    *GABE_GENX_STAT_LEDS = genx_leds;
+}
+
+/*
+ * Set the color of the LED for the IDE hard drive
+ *
+ * Inputs:
+ * colors = color specification, three bits: 0x_____RGB
+ */
+void ind_set_hdc_led(short colors)  {
+    genx_leds = (genx_leds & 0xFE3F) | ((colors & 0x07) << 6);
+    *GABE_GENX_STAT_LEDS = genx_leds;
+}
+#endif
+

@@ -304,39 +304,3 @@ void sys_get_information(p_sys_info info) {
     }
 }
 
-#if MODEL == MODEL_FOENIX_GENX || MODEL == MODEL_FOENIX_A2560X
-static short genx_leds = 0;
-
-/*
- * Set the color of the LED for the floppy drive
- *
- * Inputs:
- * colors = color specification, three bits: 0x_____RGB
- */
-void ind_set_fdc_led(short colors) {
-    genx_leds = (genx_leds & 0xFFF8) | (colors & 0x07);
-    *GABE_GENX_STAT_LEDS = genx_leds;
-}
-
-/*
- * Set the color of the LED for the SD card slot
- *
- * Inputs:
- * colors = color specification, three bits: 0x_____RGB
- */
-void ind_set_sdc_led(short colors) {
-    genx_leds = (genx_leds & 0xFFC7) | ((colors & 0x07) << 3);
-    *GABE_GENX_STAT_LEDS = genx_leds;
-}
-
-/*
- * Set the color of the LED for the IDE hard drive
- *
- * Inputs:
- * colors = color specification, three bits: 0x_____RGB
- */
-void ind_set_hdc_led(short colors)  {
-    genx_leds = (genx_leds & 0xFE3F) | ((colors & 0x07) << 6);
-    *GABE_GENX_STAT_LEDS = genx_leds;
-}
-#endif
