@@ -12,13 +12,13 @@
 #include "simpleio.h"
 #include "timers.h"
 
-static unsigned long rtc_ticks;
+static uint32_t rtc_ticks;
 
 /*
  * Interrupt handler for the real time clock
  */
 void rtc_handle_int() {
-    unsigned char flags;
+    uint8_t flags;
 
     flags = *RTC_FLAGS; /* Acknowledge the interrupt */
     
@@ -29,9 +29,9 @@ void rtc_handle_int() {
  * Initialize the RTC
  */
 void rtc_init() {
-    unsigned char flags;
-    unsigned char rates;
-    unsigned char enables;
+    uint8_t flags;
+    uint8_t rates;
+    uint8_t enables;
 
     TRACE("rtc_init");
 
@@ -64,7 +64,7 @@ void rtc_enable_ticks() {
     /* Set the periodic interrupt to 15 millisecs */
     *RTC_RATES = RTC_RATE_15ms;
 
-    unsigned char flags = *RTC_FLAGS; /* Acknowledge any previous interrupt before we start. */
+    uint8_t flags = *RTC_FLAGS; /* Acknowledge any previous interrupt before we start. */
 
     *RTC_ENABLES = RTC_PIE;
 
@@ -78,7 +78,7 @@ void rtc_enable_ticks() {
  * @param handler a pointer to a function from void to void to be called
  * @return 0 on success, any other number is an error
  */
-short rtc_register_periodic(short rate, FUNC_V_2_V handler) {
+short rtc_register_periodic(short rate, void (* handler)()) {
     if (rate == 0) {
         int_disable(INT_RTC);
         *RTC_RATES = 0;
@@ -87,7 +87,7 @@ short rtc_register_periodic(short rate, FUNC_V_2_V handler) {
     } else {
         int_register(INT_RTC, handler);
         *RTC_RATES = rate;
-        unsigned char flags = *RTC_FLAGS;
+        uint8_t flags = *RTC_FLAGS;
         *RTC_ENABLES = RTC_PIE;
         int_enable(INT_RTC);
     }
@@ -102,9 +102,9 @@ short rtc_register_periodic(short rate, FUNC_V_2_V handler) {
  * time = pointer to a t_time record containing the correct time
  */
 void rtc_set_time(p_time time) {
-    unsigned char ctrl;
-    unsigned char century_bcd, year_bcd, month_bcd, day_bcd;
-    unsigned char hour_bcd, minute_bcd, second_bcd;
+    uint8_t ctrl;
+    uint8_t century_bcd, year_bcd, month_bcd, day_bcd;
+    uint8_t hour_bcd, minute_bcd, second_bcd;
     unsigned short century;
     unsigned short year;
 
@@ -194,9 +194,9 @@ void rtc_set_time(p_time time) {
  * time = pointer to a t_time record in which to put the current time
  */
 void rtc_get_time(p_time time) {
-    unsigned char ctrl;
-    unsigned char century_bcd, year_bcd, month_bcd, day_bcd;
-    unsigned char hour_bcd, minute_bcd, second_bcd;
+    uint8_t ctrl;
+    uint8_t century_bcd, year_bcd, month_bcd, day_bcd;
+    uint8_t hour_bcd, minute_bcd, second_bcd;
 
     /* Temporarily disable updates to the clock */
     ctrl = *RTC_CTRL;
