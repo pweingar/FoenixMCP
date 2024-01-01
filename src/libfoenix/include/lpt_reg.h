@@ -6,12 +6,13 @@
 #ifndef __LPT_REG_H
 #define __LPT_REG_H
 
-#include "sys_general.h"
+#include <stdint.h>
+#include "hardware_ids.h"
 
 #if MODEL == MODEL_FOENIX_A2560K || MODEL == MODEL_FOENIX_GENX || MODEL == MODEL_FOENIX_A2560X
-#define LPT_DATA_PORT   ((volatile unsigned char *)0xFEC02378)
-#define LPT_STAT_PORT   ((volatile unsigned char *)0xFEC02379)
-#define LPT_CTRL_PORT   ((volatile unsigned char *)0xFEC0237A)
+#define LPT_DATA_PORT   ((volatile uint8_t *)0xFEC02378)
+#define LPT_STAT_PORT   ((volatile uint8_t *)0xFEC02379)
+#define LPT_CTRL_PORT   ((volatile uint8_t *)0xFEC0237A)
 #endif
 
 #define LPT_STAT_nBUSY  0x80

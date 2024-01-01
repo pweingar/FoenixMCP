@@ -248,11 +248,11 @@ foenix_obj := $(addprefix libfoenix/, $(subst .c,.o,$(foenix_c_src))) $(addprefi
 dev_c_src = block.c channel.c hdd.c sdc.c com.c console.c fsys.c txt_screen.c
 dev_s_src =
 ifeq ($(UNIT),a2560k)
-	dev_c_src := $(dev_c_src) txt_a2560k_a.c txt_a2560k_b.c
+	dev_c_src := $(dev_c_src) txt_a2560k_a.c txt_a2560k_b.c lpt.c
 else ifeq ($(UNIT),genx)
-	dev_c_src := $(dev_c_src) txt_a2560k_a.c txt_a2560k_b.c
+	dev_c_src := $(dev_c_src) txt_a2560k_a.c txt_a2560k_b.c lpt.c
 else ifeq ($(UNIT),a2560x)
-	dev_c_src := $(dev_c_src) txt_a2560k_a.c txt_a2560k_b.c
+	dev_c_src := $(dev_c_src) txt_a2560k_a.c txt_a2560k_b.c lpt.c
 else ifeq ($(UNIT),a2560u)
 	dev_c_src := $(dev_c_src) txt_a2560u.o
 endif
