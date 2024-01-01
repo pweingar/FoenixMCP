@@ -5,6 +5,7 @@
 #ifndef __SDC_H
 #define __SDC_H
 
+#include <stdint.h>
 #include "types.h"
 
 //
@@ -17,10 +18,6 @@
 #define SDC_STAT_PRESENT        0x02        // SD is present
 #define SDC_STAT_PROTECTED      0x04        // SD is write-protected
 
-//
-// Install the SDC driver
-//
-extern short sdc_install();
 
 //
 // Initialize the SDC
@@ -28,7 +25,12 @@ extern short sdc_install();
 // Returns:
 //  0 on success, any negative number is an error code
 //
-extern short sdc_init();
+int16_t sdc_init();
+
+//
+// Attempt to reset the SD controller
+//
+void sdc_reset();
 
 //
 // Read a block from the SDC
@@ -41,7 +43,7 @@ extern short sdc_init();
 // Returns:
 //  number of bytes read, any negative number is an error code
 //
-extern short sdc_read(long lba, unsigned char * buffer, short size);
+int16_t sdc_read(int32_t lba, uint8_t * buffer, int16_t size);
 
 //
 // Write a block to the SDC
@@ -54,7 +56,7 @@ extern short sdc_read(long lba, unsigned char * buffer, short size);
 // Returns:
 //  number of bytes written, any negative number is an error code
 //
-extern short sdc_write(long lba, const unsigned char * buffer, short size);
+int16_t sdc_write(int32_t lba, const uint8_t * buffer, int16_t size);
 
 //
 // Return the status of the SDC
@@ -62,7 +64,7 @@ extern short sdc_write(long lba, const unsigned char * buffer, short size);
 // Returns:
 //  the status of the device
 //
-extern short sdc_status();
+int16_t sdc_status();
 
 //
 // Return any error code of the SDC
@@ -70,7 +72,7 @@ extern short sdc_status();
 // Returns:
 //  the error code of the device
 //
-extern short sdc_error();
+int16_t sdc_error();
 
 //
 // Ensure that any pending writes to teh device have been completed
@@ -78,19 +80,8 @@ extern short sdc_error();
 // Returns:
 //  0 on success, any negative number is an error code
 //
-extern short sdc_flush();
+int16_t sdc_flush();
 
-//
-// Issue a control command to the device
-//
-// Inputs:
-//  command = the number of the command to send
-//  buffer = pointer to bytes of additional data for the command
-//  size = the size of the buffer
-//
-// Returns:
-//  0 on success, any negative number is an error code
-//
-extern short sdc_ioctrl(short command, unsigned char * buffer, short size);
+int16_t sdc_sector_count();
 
 #endif

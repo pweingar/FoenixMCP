@@ -13,7 +13,6 @@
 #include "gabe_reg.h"
 #include "indicators.h"
 #include "interrupt.h"
-#include "dev/block.h"
 #include "sdc_reg.h"
 #include "libfoenix/include/rtc.h"
 #include "libfoenix/include/sdc.h"
@@ -24,8 +23,8 @@
 
 #define SDC_TIMEOUT_JF 20           /* Timeout in jiffies (1/60 second) */
 
-unsigned char g_sdc_status = SDC_STAT_NOINIT;
-unsigned char g_sdc_error = 0;
+static uint8_t g_sdc_status = SDC_STAT_NOINIT;
+static uint8_t g_sdc_error = 0;
 
 /*
  * Handle insertion of an SD card
@@ -39,7 +38,7 @@ void sdc_handler() {
 // Attempt to reset the SD controller
 //
 void sdc_reset() {
-    short delay;
+    int16_t delay;
 
     TRACE("sdc_reset");
 
@@ -52,7 +51,7 @@ void sdc_reset() {
 //
 // Return true if there is an SD card in the slot
 //
-short sdc_detected() {
+int16_t sdc_detected() {
     TRACE("sdc_detected()");
     return (*GABE_SDC_REG & GABE_SDC_PRESENT) != GABE_SDC_PRESENT;
 }
@@ -60,7 +59,7 @@ short sdc_detected() {
 //
 // Return true if there is an SD card is protected
 //
-short sdc_protected() {
+int16_t sdc_protected() {
     TRACE("sdc_protected()");
     return (*GABE_SDC_REG & GABE_SDC_WPROT) == GABE_SDC_WPROT;
 }
@@ -71,7 +70,7 @@ short sdc_protected() {
 // Inputs:
 //  is_on = if 0, turn the LED off, otherwise turn the LED on
 //
-void sdc_set_led(short is_on) {
+void sdc_set_led(int16_t is_on) {
 	ind_set(IND_SDC, is_on);
 }
 
@@ -81,9 +80,9 @@ void sdc_set_led(short is_on) {
 // Returns:
 //  0 on success, DEV_TIMEOUT on timeout
 //
-short sdc_wait_busy() {
-    long timer_ticks;
-    unsigned char status;
+int16_t sdc_wait_busy() {
+    int32_t timer_ticks;
+    uint8_t status;
 
     timer_ticks = rtc_get_jiffies() + SDC_TIMEOUT_JF;
     do {
@@ -104,8 +103,14 @@ short sdc_wait_busy() {
 // Returns:
 //  0 on success, any negative number is an error code
 //
-short sdc_init() {
+int16_t sdc_init() {
     TRACE("sdc_init");
+
+    /* Install an interrupt handler to catch insertion of a card */
+    int_register(INT_SDC_INS, sdc_handler);
+    int_enable(INT_SDC_INS);
+
+    sdc_reset();
 
     // Check for presence of the card
 
@@ -149,8 +154,8 @@ short sdc_init() {
 // Returns:
 //  number of bytes read, any negative number is an error code
 //
-short sdc_read(long lba, unsigned char * buffer, short size) {
-    long adjusted_lba;
+int16_t sdc_read(int32_t lba, uint8_t * buffer, int16_t size) {
+    int32_t adjusted_lba;
 
     TRACE3("sdc_read(%ld,%p,%d)", lba, buffer, (int)size);
 
@@ -189,8 +194,8 @@ short sdc_read(long lba, unsigned char * buffer, short size) {
             return DEV_CANNOT_READ;
 
         } else {
-            short count;
-            short i;
+            int16_t count;
+            int16_t i;
 
             // Get the number of bytes to be read and make sure there is room
             count = *SDC_RX_FIFO_DATA_CNT_HI << 8 | *SDC_RX_FIFO_DATA_CNT_LO;
@@ -242,9 +247,9 @@ short sdc_read(long lba, unsigned char * buffer, short size) {
 // Returns:
 //  number of bytes written, any negative number is an error code
 //
-short sdc_write(long lba, const unsigned char * buffer, short size) {
-    long adjusted_lba;
-    short i;
+int16_t sdc_write(int32_t lba, const uint8_t * buffer, int16_t size) {
+    int32_t adjusted_lba;
+    int16_t i;
 
     TRACE("sdc_write");
 
@@ -323,8 +328,8 @@ short sdc_write(long lba, const unsigned char * buffer, short size) {
 // Returns:
 //  the status of the device
 //
-short sdc_status() {
-    short status = g_sdc_status;
+int16_t sdc_status() {
+    int16_t status = g_sdc_status;
 
     TRACE1("sdc_status, status=0x%x",(int)status);
 
@@ -338,7 +343,7 @@ short sdc_status() {
         status |= SDC_STAT_PROTECTED;
     }
 
-    TRACE1("sdc_status: %x", (short)status);
+    TRACE1("sdc_status: %x", (int16_t)status);
     return status;
 }
 
@@ -348,7 +353,7 @@ short sdc_status() {
 // Returns:
 //  the error code of the device
 //
-short sdc_error() {
+int16_t sdc_error() {
     return g_sdc_error;
 }
 
@@ -358,85 +363,17 @@ short sdc_error() {
 // Returns:
 //  0 on success, any negative number is an error code
 //
-short sdc_flush() {
+int16_t sdc_flush() {
     return 0;           // We don't buffer writes... always return success
 }
 
 //
 // Return the count of sectors in this SD card
 //
-short sdc_sector_count() {
+int16_t sdc_sector_count() {
     // TODO: implement this!
     return 1000;
 }
 
-#define SDC_GET_SECTOR_COUNT 1
-#define SDC_GET_SECTOR_SIZE 2
-#define SDC_GET_BLOCK_SIZE 3
 
-//
-// Issue a control command to the device
-//
-// Inputs:
-//  command = the number of the command to send
-//  buffer = pointer to bytes of additional data for the command
-//  size = the size of the buffer
-//
-// Returns:
-//  0 on success, any negative number is an error code
-//
-short sdc_ioctrl(short command, unsigned char * buffer, short size) {
-    unsigned long *p_dword;
-    unsigned short *p_word;
-    unsigned long *p_lba_word;
 
-    switch (command) {
-        case SDC_GET_SECTOR_COUNT:
-            p_lba_word = (unsigned long *)buffer;
-            *p_lba_word = sdc_sector_count();
-            break;
-
-        case SDC_GET_SECTOR_SIZE:
-            // Return the size of a sector... always 512
-            p_word = (unsigned short *)buffer;
-            *p_word = SDC_SECTOR_SIZE;
-            break;
-
-        case SDC_GET_BLOCK_SIZE:
-            // We don't know what the block size is... return 1
-            p_dword = (unsigned long *)buffer;
-            *p_dword = 1;
-            break;
-
-        default:
-            break;
-    }
-
-	return 0;
-}
-
-//
-// Install the SDC driver
-//
-short sdc_install() {
-    t_dev_block dev;                    // bdev_register copies the data, so we'll allocate this on the stack
-
-    TRACE("sdc_install");
-
-    /* Install an interrupt handler to catch insertion of a card */
-    int_register(INT_SDC_INS, sdc_handler);
-    int_enable(INT_SDC_INS);
-
-    sdc_reset();
-
-    dev.number = BDEV_SDC;
-    dev.name = "SDC";
-    dev.init = sdc_init;
-    dev.read = sdc_read;
-    dev.write = sdc_write;
-    dev.flush = sdc_flush;
-    dev.status = sdc_status;
-    dev.ioctrl = sdc_ioctrl;
-
-    return bdev_register(&dev);
-}
