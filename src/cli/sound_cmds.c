@@ -832,7 +832,7 @@ short midi_rx_test(short channel, int argc, const char * argv[]) {
                 return 0;
             }
 
-            if ((input != 0xf8) && (input != 0xfe)) {
+            if ((input != 0xf8/*MIDI clock*/) && (input != 0xfe/*Active Sensing*/)) {
                 if ((i % 16) == 0) {
                     sprintf(message, "\n%02X", input);
                     sys_chan_write(channel, message, strlen(message));
