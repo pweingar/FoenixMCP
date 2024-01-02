@@ -41,15 +41,17 @@
 #include "libfoenix/include/bitmap.h"
 #include "memory.h"
 #include "dev/block.h"
+#include "dev/com.h"
 #include "dev/channel.h"
 #include "dev/console.h"
-#include "libfoenix/include/fdc.h"
-#include "libfoenix/include/lpt.h"
-#include "libfoenix/include/midi.h"
+#include "dev/sdc.h"
+#include "dev/lpt.h"
+#include "dev/midi.h"
 #include "dev/hdd.h"
+#include "libfoenix/include/fdc.h"
 #include "libfoenix/include/ps2.h"
 #include "libfoenix/include/rtc.h"
-#include "libfoenix/include/sdc.h"
+#include "dev/sdc.h"
 #include "dev/txt_screen.h"
 
 #include "libfoenix/include/uart.h"
@@ -254,6 +256,10 @@ static void hw_initialize(void) {
 static void os_devices_initialize(void) {
 	short res;
 
+    /* Initialize the device drivers system */
+    cdev_init_system();
+    INFO("Channel device system ready.");
+
 #if HAS_PARALLEL_PORT
 	/* Parallel port */
     if ((res = lpt_install())) {
@@ -272,14 +278,12 @@ static void os_devices_initialize(void) {
     }
 #endif
 
+    /* Serial port(s) */
     if (res = uart_install()) {
         ERROR1("FAILED: serial port initialization (%d)", res);
     } else {
         INFO("Serial ports initialized.");
     }
-
-    /* Initialize the variable system */
-    var_init();
 	
     /* Initialize the text channels: register the driver for the screens, then use txt_init_screen. */
 #if HAS_DUAL_SCREEN
@@ -307,9 +311,6 @@ static void os_devices_initialize(void) {
 #error Cannot identify screen setup
 #endif
 	INFO("Text system initialized...");
-
-    cdev_init_system();   // Initialize the channel device system
-    INFO("Channel device system ready.");
 
     bdev_init_system();   // Initialize the block device system
     INFO("Block device system ready.");
@@ -339,6 +340,9 @@ static void os_devices_initialize(void) {
         INFO("Floppy drive initialized.");
     }
 #endif
+
+    /* Initialize the variable system */
+    var_init();
 
     if ((res = fsys_init())) {
         ERROR1("FAILED: file system initialization (%d)", res);
