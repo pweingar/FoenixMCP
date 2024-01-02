@@ -289,7 +289,7 @@ void txt_set_cursor_visible(short screen, short enable) {
  * @return 0 on success, any other number means the region was invalid
  */
 short txt_get_region(short screen, p_rect region) {
-    DEBUG2("txt_get_region screen:%d region:%p", screen, region);
+    TRACE2("txt_get_region screen:%d region:%p", screen, region);
     p_txt_device device = txt_get_device(screen);
     if (device) {
         if (device->get_region) {
@@ -366,7 +366,7 @@ void txt_get_color(short screen, unsigned char * foreground, unsigned char * bac
  * @param y the row for the cursor
  */
 void txt_set_xy(short screen, short x, short y) {
-	DEBUG3("txt_set_xy(%d,%d,%d)", screen, (int)x, (int)y);
+	TRACE3("txt_set_xy(%d,%d,%d)", screen, (int)x, (int)y);
     p_txt_device device = txt_get_device(screen);
     if (device) {
         if (device->set_xy) {
