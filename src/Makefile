@@ -95,20 +95,8 @@ else
 	CPU_FAMILY=$(CPU)
 endif
 
-
-# Log settings ----------------------------------------------------------------
-# FATAL   0   Log a critical or fatal event
-# ERROR   1   Log an error
-# INFO    2   Log miscellaneous information
-# DEBUG   3   Log a debugging message
-# TRACE   4   Log tracing information (like entry into a subroutine)
-# VERBOSE 5   Log a truly verbose message... the sort you almost never want to bother with
-# Log message above DEFAULT_LOG_LEVEL level will not even be compiled, 
-# ie they will have NO chance of being output even if log_level is high enough.
-DEFAULT_LOG_LEVEL=1
-
-
 # Common defines and includes -------------------------------------------------
+
 DEFINES = -DCPU=$(CPU_NUMBER) -DMODEL=$(MODEL_NUMBER) -DCPU_FAMILY=$(CPU_FAMILY) # -DKBD_POLLED 
 ifeq ("$(CPU)","w65816")
 	CPU_NUMBER = 255
@@ -118,13 +106,16 @@ else ifeq ("$(CPU)","m68k") # M68000 or 68SEC000
 	CPU_NUMBER = 0
 endif
 
-# Maximum working logging level to compile
-#define LOG_FATAL   0   /* Log a critical or fatal event */
-#define LOG_ERROR   1   /* Log an error */
-#define LOG_INFO    2   /* Log miscellaneous information */
-#define LOG_DEBUG   3   /* Log a debugging message */
-#define LOG_TRACE   4   /* Log tracing information (like entry into a subroutine) */
-#define LOG_VERBOSE 5   /* Log a truly verbose message... the sort you almost never want to bother with */
+# Log settings ----------------------------------------------------------------
+
+# FATAL   0   Log a critical or fatal event
+# ERROR   1   Log an error
+# INFO    2   Log miscellaneous information
+# DEBUG   3   Log a debugging message
+# TRACE   4   Log tracing information (like entry into a subroutine)
+# VERBOSE 5   Log a truly verbose message... the sort you almost never want to bother with
+# Log message above DEFAULT_LOG_LEVEL level will not even be compiled, 
+# ie they will have NO chance of being output even if log_level is high enough.
 DEFAULT_LOG_LEVEL=0
 
 #define LOG_CHANNEL_CHANNEL_A 0
@@ -201,7 +192,7 @@ else
 	ASFLAGS = -Fvobj -nowarn=62 $(VASM_CPU) -quiet
 	ifneq ($(MODEL_FAMILY),GENX32)
 		# Inline functions cause problems (at least on the X)
-		#CFLAGS_EXTRA=-D__NOINLINE__
+		CFLAGS_EXTRA=-D__NOINLINE__
 	else
 		#CFLAGS_EXTRA=-D__NOINLINE__
 	endif	
@@ -248,11 +239,11 @@ foenix_obj := $(addprefix libfoenix/, $(subst .c,.o,$(foenix_c_src))) $(addprefi
 dev_c_src = block.c channel.c hdd.c sdc.c com.c console.c fsys.c txt_screen.c
 dev_s_src =
 ifeq ($(UNIT),a2560k)
-	dev_c_src := $(dev_c_src) txt_a2560k_a.c txt_a2560k_b.c lpt.c
+	dev_c_src := $(dev_c_src) txt_a2560k_a.c txt_a2560k_b.c lpt.c midi.c
 else ifeq ($(UNIT),genx)
-	dev_c_src := $(dev_c_src) txt_a2560k_a.c txt_a2560k_b.c lpt.c
+	dev_c_src := $(dev_c_src) txt_a2560k_a.c txt_a2560k_b.c lpt.c midi.c
 else ifeq ($(UNIT),a2560x)
-	dev_c_src := $(dev_c_src) txt_a2560k_a.c txt_a2560k_b.c lpt.c
+	dev_c_src := $(dev_c_src) txt_a2560k_a.c txt_a2560k_b.c lpt.c midi.c
 else ifeq ($(UNIT),a2560u)
 	dev_c_src := $(dev_c_src) txt_a2560u.o
 endif
