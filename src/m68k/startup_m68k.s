@@ -150,8 +150,8 @@ ___BSSSIZE  .sectionSize bss
 coldboot:   move.w #$2700,SR        ; Supervisor mode, Interrupt mode (68040), disable all interrupts
 
   IF CPU == 6
-            moveq #0,d0   ; Disable 040's MMU
-            movec d0,TC
+            moveq #0,d0    ; Disable 040's MMU
+            dc.l $4e7b0003 ; movec d0,TC : TODO Calypsi doesn't seem to support it
   ENDC
 
   move.l #$ff00ff00,$fec80008 ; border color for debug
@@ -439,7 +439,7 @@ h_trap_15:
 
             rte                         ; Return to the caller
 
-h_trap_elev ori #$2000,(sp)             ; Change the caller's privilege to supervisor
+h_trap_elev ori.w #$2000,(sp)           ; Change the caller's privilege to supervisor
             rte                         ; And return to it
 
 ;
