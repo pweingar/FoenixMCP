@@ -141,25 +141,50 @@ endif
 
 
 # Toolchain selection ---------------------------------------------------------
-ifeq ($(CPU_FAMILY),w65816)
-	TOOLCHAIN = calypsi
-else
-	TOOLCHAIN = vbcc
+ifeq ($(TOOLCHAIN),)
+# Select prefered toolchain
+	ifeq ($(CPU_FAMILY),w65816)
+		TOOLCHAIN = calypsi
+	else
+		TOOLCHAIN = vbcc
+	endif
 endif
 
 
 # Toolchain specific settings -------------------------------------------------
 ifeq ($(TOOLCHAIN),calypsi)
-	CC = cc65816
-	AS = as65816
-	LD = ln65816
-	AR = nlib
+	ifeq ($(CPU_FAMILY),m68k)
+		CC = cc68k
+		AS = as68k
+		LD = ln68k
+		AR = nlib
 
-	# Determine the correct configuration file (barring OS)
-	ifeq ($(MEMORY),ram)
-		LD_OUTPUT_TYPE = s37
+		ifeq ("$(CPU)","m68k")
+			CC68K_CPU = 68000
+		else ifeq ("$(CPU)","m68040")
+			CC68K_CPU = 68040
+		endif
+
+		ASFLAGS = --core $(CC68K_CPU) --data-model large
+
+		# Determine the correct configuration file (barring OS)
+		ifeq ($(MEMORY),ram)
+			LD_OUTPUT_TYPE = s68
+		else
+			LD_OUTPUT_TYPE = # TODO
+		endif
 	else
-		LD_OUTPUT_TYPE = # TODO
+		CC = cc65816
+		AS = as65816
+		LD = ln65816
+		AR = nlib
+
+		# Determine the correct configuration file (barring OS)
+		ifeq ($(MEMORY),ram)
+			LD_OUTPUT_TYPE = s37
+		else
+			LD_OUTPUT_TYPE = # TODO
+		endif
 	endif
 
 	CFLAGS = -l --target Foenix --code-model large --data-model large
