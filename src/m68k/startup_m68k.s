@@ -8,6 +8,7 @@
             xref _panic_pc
             xref _int_vicky
             xref _g_int_handler
+            xref _syscall_dispatch
 
             xdef _syscall
             xdef ___exit
@@ -181,22 +182,22 @@ ___exit:
 ; Autovector handler: Used by VICKY III Channel B interrupts
 ;
 int_vicky_b:
-            movem.l d0-d7/a0-a6,-(a7)
+            movem.l d0-d7/a0-a6,-(sp)
             move.w #8,-(sp)           ; Use MSB of the interrupt registers
             jsr _int_vicky            ; Call the dispatcher for Channel B interrupts
             addq.l  #2,sp
-            movem.l (a7)+,d0-d7/a0-a6
+            movem.l (sp)+,d0-d7/a0-a6
             rte
 
 ;
 ; Autovector handler: Used by VICKY III Channel A interrupts
 ;
 int_vicky_a:
-            movem.l d0-d7/a0-a6,-(a7)
+            movem.l d0-d7/a0-a6,-(sp)
             clr.w -(sp)               ; Use LSB of the interrupt registers
             jsr _int_vicky            ; Call the dispatcher for Channel A interrupts
             addq.l  #2,sp            
-            movem.l (a7)+,d0-d7/a0-a6
+            movem.l (sp)+,d0-d7/a0-a6
             rte
 
 ;
@@ -207,12 +208,12 @@ int_vicky_a:
 ;
 int_dispatch:
             lea _g_int_handler,a0           ; Look in the interrupt handler table
-            move.l (a0,d0),d0               ; Get the address of the handler
+            move.l (a0,d0.w),d0             ; Get the address of the handler
             beq.s intdis_end                ; If there isn't one, just return
             movea.l d0,a0
             jsr (a0)                        ; If there is, call it.
 
-intdis_end: movem.l (a7)+,d0-d7/a0-a6       ; Restore affected registers
+intdis_end: movem.l (sp)+,d0-d7/a0-a6       ; Restore affected registers
             rte
 
             ;
@@ -228,14 +229,14 @@ intdis_end: movem.l (a7)+,d0-d7/a0-a6       ; Restore affected registers
             ;
  IFD __VASM
             macro inthandler                ; Individual interrupt handler. Parameters: interrupt number, interrupt mask, pending register
-            movem.l d0-d7/a0-a6,-(a7)       ; Save affected registers
+            movem.l d0-d7/a0-a6,-(sp)       ; Save affected registers
             move.w #\2,(\3)                 ; Clear the flag for the interrupt
             move.w #(\1<<2),d0              ; Get the offset to interrupt 0x11
             endm
  ENDC
  IFD __CALYPSI__
 inthandler  macro number,mask,pending_reg                // Individual interrupt handler. Parameters: interrupt number, interrupt mask, pending register
-            movem.l d0-d7/a0-a6,-(a7)       // Save affected registers
+            movem.l d0-d7/a0-a6,-(sp)       // Save affected registers
             move.w #\mask,(\pending_reg)                 // Clear the flag for the interrupt
             move.w #(\number<<2),d0              // Get the offset to interrupt 0x11
             bra int_dispatch
@@ -339,8 +340,8 @@ _handle_bus_err:
                     lea _panic_pc,a1
                     lea _panic_address,a2
                     move.w #2,(a0)
-                    move.l (2,a7),(a1)
-                    move.l (8,a7),(a2)
+                    move.l (2,sp),(a1)
+                    move.l (8,sp),(a2)
                     bra call_panic
 
 _handle_addr_err:
@@ -348,50 +349,50 @@ _handle_addr_err:
                     lea _panic_pc,a1
                     lea _panic_address,a2
                     move.w #3,(a0)
-                    move.l (2,a7),(a1)
-                    move.l (8,a7),(a2)
+                    move.l (2,sp),(a1)
+                    move.l (8,sp),(a2)
                     bra call_panic
 
 _handle_inst_err:
                     lea _panic_number,a0
                     lea _panic_pc,a1
                     move.w #4,(a0)
-                    move.l (2,a7),(a1)
+                    move.l (2,sp),(a1)
                     bra call_panic
 
 _handle_div0_err:
                     lea _panic_number,a0
                     lea _panic_pc,a1
                     move.w #5,(a0)
-                    move.l (2,a7),(a1)
+                    move.l (2,sp),(a1)
                     bra call_panic
 
 _handle_chk_err:
                     lea _panic_number,a0
                     lea _panic_pc,a1
                     move.w #6,(a0)
-                    move.l (2,a7),(a1)
+                    move.l (2,sp),(a1)
                     bra call_panic
 
 _handle_trapv_err:
                     lea _panic_number,a0
                     lea _panic_pc,a1
                     move.w #7,(a0)
-                    move.l (2,a7),(a1)
+                    move.l (2,sp),(a1)
                     bra call_panic
 
 _handle_priv_err:
                     lea _panic_number,a0
                     lea _panic_pc,a1
                     move.w #8,(a0)
-                    move.l (2,a7),(a1)
+                    move.l (2,sp),(a1)
                     bra call_panic
 
 _handle_spurious:
                     lea _panic_number,a0
                     lea _panic_pc,a1
                     move.w #24,(a0)
-                    move.l (2,a7),(a1)
+                    move.l (2,sp),(a1)
                     bra call_panic
 
 call_panic:         jsr _panic
@@ -438,7 +439,7 @@ h_trap_15:
 
             rte                         ; Return to the caller
 
-h_trap_elev ori #$2000,(a7)             ; Change the caller's privilege to supervisor
+h_trap_elev ori #$2000,(sp)             ; Change the caller's privilege to supervisor
             rte                         ; And return to it
 
 ;
@@ -449,31 +450,31 @@ _call_user:
   ; Not sure that works (was taken from startup_m68k.s)
   ; a0 = pointer to code to execute
   ; a1 = location to set user stack pointer
-            move.l (4,a7),a0            ; Get the pointer to the code to start
-            move.l (8,a7),a1            ; Get the pointer to the process's stack
-            move.l (12,a7),d0           ; Get the number of parameters passed
-            move.l (16,a7),a2           ; Get the pointer to the parameters
+            move.l (4,sp),a0            ; Get the pointer to the code to start
+            move.l (8,sp),a1            ; Get the pointer to the process's stack
+            move.l (12,sp),d0           ; Get the number of parameters passed
+            move.l (16,sp),a2           ; Get the pointer to the parameters
             ; andi #$dfff,sr              ; Drop into user mode
-            movea.l a1,a7               ; Set the stack
+            movea.l a1,sp               ; Set the stack
 
-            move.l a2,-(a7)             ; Push the parameters list
-            move.l d0,-(a7)             ; Push the parameter count
+            move.l a2,-(sp)             ; Push the parameters list
+            move.l d0,-(sp)             ; Push the parameter count
             jsr (a0)
  ELSE
             ; Set up the user stack
             move.l #$00010000,a0        ; Get the pointer to the process's stack
-            move.l (12,a7),d1           ; Get the number of parameters passed
-            move.l (16,a7),a1           ; Get the pointer to the parameters
+            move.l (12,sp),d1           ; Get the number of parameters passed
+            move.l (16,sp),a1           ; Get the pointer to the parameters
             move.l a1,-(a0)             ; Push the parameters list
             move.w d1,-(a0)             ; Push the parameter count
             move.l a0,usp               ; Set the User Stack Pointer
 
 
             ; Set up the system stack
-            move.l (4,a7),a0            ; Get the pointer to the code to start
-            move.w #0,-(a7)             ; Push the fake vector offset
-            move.l a0,-(a7)             ; Push it as the starting address
-            move.w #$0000,-(a7)         ; Push the user's initial SR (to switch to user mode)
+            move.l (4,sp),a0            ; Get the pointer to the code to start
+            move.w #0,-(sp)             ; Push the fake vector offset
+            move.l a0,-(sp)             ; Push it as the starting address
+            move.w #$0000,-(sp)         ; Push the user's initial SR (to switch to user mode)
             rte                         ; Start the user process
  ENDC
 _restart_cli:
