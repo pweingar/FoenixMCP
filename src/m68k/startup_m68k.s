@@ -132,7 +132,7 @@ PENDING_GRP2 = $FEC00104
 
 coldboot:   move.w #$2700,SR        ; Supervisor mode, Interrupt mode (68040), disable all interrupts
 
-  IF CPU=6
+  IF CPU == 6
             moveq #0,d0   ; Disable 040's MMU
             movec d0,TC
   ENDC
