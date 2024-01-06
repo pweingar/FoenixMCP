@@ -53,14 +53,14 @@ FDC_CCR = $FEC023F7     ; Write - Configuration Control Register
 ; @param buffer the buffer to fill with any read data (a2)
 ; @param resultc the count of result bytes expected
 ; @param results the buffer to fill with result bytes (a3)
-_fdc_cmd_asm    ; Save our registers
+_fdc_cmd_asm:   ; Save our registers
                 ; TODO: save only those affected
                 movem d4-d7/a4-a5,-(a7)
 
                 ; Clear the buffer
 
                 move.w #$0,d0
-clr_buffer      move.b #0,(a2,d0)
+clr_buffer:     move.b #0,(a2,d0)
                 addq.w #1,d0
                 cmp.w #512,d0
                 bne clr_buffer
@@ -68,7 +68,7 @@ clr_buffer      move.b #0,(a2,d0)
                 ; Clear the results
 
                 move.w #$0,d0
-clr_results     move.b #0,(a3,d0)
+clr_results:    move.b #0,(a3,d0)
                 addq.w #1,d0
                 cmp.w #10,d0
                 bne clr_results
@@ -81,12 +81,12 @@ clr_results     move.b #0,(a3,d0)
                 move.l #$FFFFFFFF,d0            ; Return -1
                 bra fdc_cmd_exit
 
-snd_cmd         move.b d1,FDC_DATA              ; Send the command
+snd_cmd:        move.b d1,FDC_DATA              ; Send the command
 
                 ; Send the arguments
 
                 move.w #0,d4                    ; Counter = 0
-wait_snd_args   move.b FDC_MSR,d0               ; Get the MSR
+wait_snd_args:  move.b FDC_MSR,d0               ; Get the MSR
                 btst #7,d0                      ; Is RQM set?
                 beq wait_snd_args
                 btst #6,d0                      ; Verify that DIO = 0
@@ -94,20 +94,20 @@ wait_snd_args   move.b FDC_MSR,d0               ; Get the MSR
                 move.w #$FFFFFFFE,d0            ; Return -2
                 bra fdc_cmd_exit
 
-snd_arg         move.b (a1,d4),FDC_DATA         ; Send the next argument byte
+snd_arg:        move.b (a1,d4),FDC_DATA         ; Send the next argument byte
                 addq.w #1,d4
                 cmp.w d2,d4
                 bne wait_snd_args               ; If not done, wait for the FDC to be ready and send the next byte
 
                 ; Receive data bytes
 
-get_data        move.b FDC_MSR,d0
+get_data:       move.b FDC_MSR,d0
                 btst #5,d0
                 bne result_phase
 
                 move.w #0,d4                    ; Counter = 0
 
-wait_data       move.b FDC_MSR,d0
+wait_data:      move.b FDC_MSR,d0
                 btst #7,d0                      ; Is RQM = 1
                 beq wait_data                   ; No: wait until it is
 
@@ -123,17 +123,17 @@ wait_data       move.b FDC_MSR,d0
 
                 ; Receive result bytes
 
-result_phase    ; Start by waiting?
+result_phase:   ; Start by waiting?
                 jsr _timers_jiffies             ; Wait 5 jiffies? Just adding some delay
                 move.l d0,d4
                 addq.l #2,d4                    ; Put the target jiffy count in D4
 
-wait_delay      jsr _timers_jiffies             ; Wait until we reach the target time
+wait_delay:     jsr _timers_jiffies             ; Wait until we reach the target time
                 cmp.l d0,d4
                 bgt wait_delay
 
                 move.w #0,d4                    ; Counter = 0
-wait_result     move.b FDC_MSR,d0               ; Get the MSR
+wait_result:    move.b FDC_MSR,d0               ; Get the MSR
                 andi.b #$D0,d0
 
                 cmp.b #FDC_MSR_RQM,d0
@@ -150,9 +150,9 @@ wait_result     move.b FDC_MSR,d0               ; Get the MSR
                 cmp.w d4,d3                     ; Have we reached the end?
                 bne wait_result                 ; No: keep looping
 
-chk_done        ; Make sure the results are not an error
+chk_done:       ; Make sure the results are not an error
 
-wait_done       move.b FDC_MSR,d0               ; Get the MSR
+wait_done:      move.b FDC_MSR,d0               ; Get the MSR
                 btst #7,d0                      ; Is RQM set?
                 beq wait_done                   ; No: wait until it is
 
@@ -162,15 +162,15 @@ wait_done       move.b FDC_MSR,d0               ; Get the MSR
                 beq fdc_success                 ; If it's 0, we're done
                 bra wait_done
 
-fdc_error_2     move.l #$fffffffe,d0
+fdc_error_2:    move.l #$fffffffe,d0
                 bra fdc_cmd_exit
 
-fdc_error       move.l #$ffffffff,d0            ; Return -1 for error
+fdc_error:      move.l #$ffffffff,d0            ; Return -1 for error
                 bra fdc_cmd_exit
 
-fdc_success     move.l #0,d0                    ; Return 0 for success
+fdc_success:    move.l #0,d0                    ; Return 0 for success
 
                 ; Restore our registers
                 ; TODO: restore what we saved
-fdc_cmd_exit    movem (a7)+,d4-d7/a4-a5
+fdc_cmd_exit:   movem (a7)+,d4-d7/a4-a5
                 rts
