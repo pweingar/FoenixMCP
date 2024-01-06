@@ -210,12 +210,21 @@ intdis_end: movem.l (a7)+,d0-d7/a0-a6       ; Restore affected registers
             ; 5. Restore all registers
             ; 6. Return to the interrupted code
             ;
+ IFD __VASM
             macro inthandler                ; Individual interrupt handler. Parameters: interrupt number, interrupt mask, pending register
             movem.l d0-d7/a0-a6,-(a7)       ; Save affected registers
             move.w #\2,(\3)                 ; Clear the flag for the interrupt
             move.w #(\1<<2),d0              ; Get the offset to interrupt 0x11
+            endm
+ ENDC
+ IFD __CALYPSI
+inthandler  macro number,mask,pending_reg                // Individual interrupt handler. Parameters: interrupt number, interrupt mask, pending register
+            movem.l d0-d7/a0-a6,-(a7)       // Save affected registers
+            move.w #\mask,(\pending_reg)                 // Clear the flag for the interrupt
+            move.w #(\number<<2),d0              // Get the offset to interrupt 0x11
             bra int_dispatch
             endm
+ ENDC
 
 ;
 ; Group 1 Interrupt Handlers
