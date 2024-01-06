@@ -4,6 +4,10 @@
             xref _cli_rerepl
             xref _panic
             xref _panic_number
+            xref _panic_address
+            xref _panic_pc
+            xref _int_vicky
+            xref _g_int_handler
 
             xdef _syscall
             xdef ___exit
@@ -61,6 +65,12 @@ PENDING_GRP2 = $FEC00104
  IFD __VASM
             section "VECTORS",code
  ELSE
+            .section stack
+___STACK    .sectionEnd stack
+
+___BSSSTART .sectionStart bss
+___BSSSIZE  .sectionSize bss
+
             .section text
  ENDC
 
@@ -197,7 +207,7 @@ int_vicky_a:
 ;
 int_dispatch:
             lea _g_int_handler,a0           ; Look in the interrupt handler table
-            move.l (0,a0,d0),d0             ; Get the address of the handler
+            move.l (a0,d0),d0               ; Get the address of the handler
             beq.s intdis_end                ; If there isn't one, just return
             movea.l d0,a0
             jsr (a0)                        ; If there is, call it.
