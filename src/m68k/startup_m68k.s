@@ -1,3 +1,5 @@
+; For Calypsi this, file is pre_processed by utilities/vasm2as68k.sh
+
             xref ___main
             xref _cli_rerepl
             xref _panic
@@ -56,7 +58,11 @@ PENDING_GRP0 = $FEC00100
 PENDING_GRP1 = $FEC00102
 PENDING_GRP2 = $FEC00104
 
+ IFD __VASM
             section "VECTORS",code
+ ELSE
+            .section text
+ ENDC
 
             dc.l ___STACK           ; 00 - Initial stack pointer
             dc.l coldboot           ; 01 - Initial PC
@@ -217,7 +223,7 @@ intdis_end: movem.l (a7)+,d0-d7/a0-a6       ; Restore affected registers
             move.w #(\1<<2),d0              ; Get the offset to interrupt 0x11
             endm
  ENDC
- IFD __CALYPSI
+ IFD __CALYPSI__
 inthandler  macro number,mask,pending_reg                // Individual interrupt handler. Parameters: interrupt number, interrupt mask, pending register
             movem.l d0-d7/a0-a6,-(a7)       // Save affected registers
             move.w #\mask,(\pending_reg)                 // Clear the flag for the interrupt
