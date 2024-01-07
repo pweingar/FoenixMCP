@@ -377,6 +377,11 @@ int main(int argc, char * argv[]) {
 	bm_set_data(0, (uint8_t *)0xb00000);
 	bm_set_visibility(0, 0, 1);
 
+#ifdef _CALYPSI_MCP_DEBUGGER
+	extern int CalypsiDebugger(void);
+	CalypsiDebugger(); // This will not return
+#endif
+
     /* Infinite loop... */
     while (1) {
 	};
