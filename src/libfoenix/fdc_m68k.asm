@@ -5,7 +5,7 @@
                 xdef _fdc_cmd_asm
                 xref _timers_jiffies
 
-                code
+                ;code
 
 FDC_BASE = $FEC023F0
 FDC_DOR = $FEC023F2     ; Read/Write - Digital Output Register
@@ -55,7 +55,7 @@ FDC_CCR = $FEC023F7     ; Write - Configuration Control Register
 ; @param results the buffer to fill with result bytes (a3)
 _fdc_cmd_asm:   ; Save our registers
                 ; TODO: save only those affected
-                movem d4-d7/a4-a5,-(a7)
+                movem.l d4-d7/a4-a5,-(a7)
 
                 ; Clear the buffer
 
@@ -91,7 +91,7 @@ wait_snd_args:  move.b FDC_MSR,d0               ; Get the MSR
                 beq wait_snd_args
                 btst #6,d0                      ; Verify that DIO = 0
                 beq snd_arg
-                move.w #$FFFFFFFE,d0            ; Return -2
+                move.l #$FFFFFFFE,d0            ; Return -2
                 bra fdc_cmd_exit
 
 snd_arg:        move.b (a1,d4),FDC_DATA         ; Send the next argument byte
@@ -172,5 +172,5 @@ fdc_success:    move.l #0,d0                    ; Return 0 for success
 
                 ; Restore our registers
                 ; TODO: restore what we saved
-fdc_cmd_exit:   movem (a7)+,d4-d7/a4-a5
+fdc_cmd_exit:   movem.l (a7)+,d4-d7/a4-a5
                 rts

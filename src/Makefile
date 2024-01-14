@@ -169,7 +169,7 @@ ifeq ($(TOOLCHAIN),calypsi)
 
 		# Determine the correct configuration file (barring OS)
 		ifeq ($(MEMORY),ram)
-			LD_OUTPUT_TYPE = s68
+			LD_OUTPUT_TYPE = s28
 		else
 			LD_OUTPUT_TYPE = # TODO
 		endif
@@ -188,10 +188,13 @@ ifeq ($(TOOLCHAIN),calypsi)
 	endif
 
 	CFLAGS = -l --target Foenix --code-model large --data-model large
-	LDFLAGS=--target foenix --output-format $(LD_OUTPUT_TYPE) --list-file foenixmcp.map
+	MY_LIB = $(HOME)/GenX/Calypsi-m68k-Foenix/foenix-lc-ld.a
+	SCM_RULES = linker_scripts/a2560u+.scm
+	LDFLAGS=--output-format $(LD_OUTPUT_TYPE) --list-file foenixmcp.map --rtattr printf=float --rtattr scanf=float --rtattr cstartup=Foenix_user --stack-size=65536 --heap-size=262144 --target=Foenix --no-auto-libraries clib-$(CC68K_CPU)-lc-ld-foenix.a $(MY_LIB) $(SCM_RULES)
 else
 	CC = vc
 	AS = vasmm68k_mot
+	LD = vc
 
 	# VBCC
 	ifeq ("$(CPU)","m68k")
@@ -241,13 +244,13 @@ LIBS = dev/devices.a snd/sound.a fatfs/fatfs.a
 SPLASHSCREEN = rsrc/bitmaps/splash_$(UNIT).o
 
 # CPU-specific files
-cpu_s_src := $(wildcard $(CPU_FAMILY)/*.s)
+cpu_s_src := $(wildcard $(CPU_FAMILY)/*.asm)
 cpu_c_src := $(wildcard $(CPU_FAMILY)/*.c)
-cpu_obj := $(subst .c,.o,$(cpu_c_src)) $(subst .s,.o,$(cpu_s_src))
+cpu_obj := $(subst .c,.o,$(cpu_c_src)) $(subst .asm,.o,$(cpu_s_src))
 
 # Foenix drivers
 foenix_c_src = pata.c sdc.c ps2.c rtc.c uart.c indicators.c interrupt.c
-foenix_s_src =
+foenix_s_src = fdc_m68k.asm
 ifeq ($(UNIT),a2560k)
 	foenix_c_src := $(foenix_c_src) fdc.c kbd_mo.c lpt.c midi.c superio.c
 else ifeq ($(UNIT),genx)
@@ -257,7 +260,7 @@ else ifeq ($(UNIT),a2560x)
 else ifeq ($(UNIT),a2560u)
 	foenix_c_src := $(foenix_c_src)
 endif
-foenix_obj := $(addprefix libfoenix/, $(subst .c,.o,$(foenix_c_src))) $(addprefix libfoenix/, $(subst .s,.o,$(foenix_s_src)))
+foenix_obj := $(addprefix libfoenix/, $(subst .c,.o,$(foenix_c_src))) $(addprefix libfoenix/, $(subst .asm,.o,$(foenix_s_src)))
 
 
 # OS device drivers (common to all Foenix)
@@ -318,14 +321,18 @@ DEPS = $(cpu_obj) $(c_obj) $(foenix_obj) $(dev_obj) $(fatfs_obj) $(snd_obj) $(cl
 # - the splashscreen because it's #included from somewhere (boot.c)
 # So we remove them from the string of files to link.
 STARTUP_OBJ=$(CPU_FAMILY)/startup_$(CPU_FAMILY).o
-FILES_TO_LINK= $(subst $(STARTUP_OBJ),,$(DEPS))
-FILE_TO_LINK:=$(subst /,$(SEP),$(FILES_TO_LINK))
+ifeq ($(TOOLCHAIN),vbcc)
+	FILES_TO_LINK= $(subst $(STARTUP_OBJ),,$(DEPS))
+else
+	FILES_TO_LINK= $(DEPS)
+endif
+FILES_TO_LINK:=$(subst /,$(SEP),$(FILES_TO_LINK))
 
 foenixmcp.s68: $(DEPS)
-	$(CC) $(LDFLAGS) -o $@ $(FILES_TO_LINK)
+	$(LD) $(LDFLAGS) -o $@ $(FILES_TO_LINK)
 
 foenixmcp.bin: $(DEPS)
-	$(CC) $(LDFLAGS) -o $@ $(FILES_TO_LINK)
+	$(LD) $(LDFLAGS) -o $@ $(FILES_TO_LINK)
 # TODO Test that the file is <= PAD_FLASH_SIZE bytes otherwise'll be slashing the OS !
 	$(PAD_CMD)
 
@@ -335,6 +342,13 @@ foenixmcp.bin: $(DEPS)
 # pip3 install pillow  
 rsrc/bitmaps/splash_%.c: rsrc/bitmaps/splash_%.bmp
 	$(PYTHON3) rsrc/bitmaps/bmp2c.py -i $^ -o $@
+
+%.s:%.asm
+	# The conversion is in-place so we copy the source (.asm) into a assembler-specific file (.s)
+	-cp $< $@
+ifeq ($(TOOLCHAIN),calypsi)
+	../utilities/vasm2as68k.sh $@ 
+endif
 
 # Clean up after a build
 clean:

@@ -66,15 +66,17 @@ PENDING_GRP2 = $FEC00104
  IFD __VASM
             section "VECTORS",code
  ELSE
-            .section stack
-___STACK    .sectionEnd stack
-
-___BSSSTART .sectionStart bss
-___BSSSIZE  .sectionSize bss
-
-            .section text
+	    .section stack
+	    ; We probably can remove all that since the startup of the Calypsi Foenix lib can take care of it
+	    .section bss,BSS
+___STACK    .equ .sectionEnd stack
+___BSSSTART .equ .sectionStart bss
+___BSSSIZE  .equ .sectionSize bss
  ENDC
 
+            .section vectors
+
+    ;; This goes at the very start of the FLASH as it's copied to RAM by GAVIN upon reset.
             dc.l ___STACK           ; 00 - Initial stack pointer
             dc.l coldboot           ; 01 - Initial PC
             dc.l _handle_bus_err    ; 02 - Bus error
@@ -145,13 +147,17 @@ ___BSSSIZE  .sectionSize bss
             dc.l not_impl           ; 62 - Reserved
             dc.l not_impl           ; 63 - Reserved
 
-            code
+IFD __VASM
+	    code
+ELSE
+	    .section code 
+ENDC
 
 coldboot:   move.w #$2700,SR        ; Supervisor mode, Interrupt mode (68040), disable all interrupts
 
   IF CPU == 6
             moveq #0,d0    ; Disable 040's MMU
-            dc.l $4e7b0003 ; movec d0,TC : TODO Calypsi doesn't seem to support it
+            dc.l $4e7b0003 ; movec d0,TC : TODO Calypsi 5.1 doesn't support it
   ENDC
 
   move.l #$ff00ff00,$fec80008 ; border color for debug
