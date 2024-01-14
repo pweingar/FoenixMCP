@@ -14,9 +14,15 @@ sed -i 's/EQU\s/.equ /g' $1
 sed -i 's/; /\/\/ /g' $1
 sed -i 's/;$/\/\//g' $1
 sed -i 's/;;/\/\//g' $1
-# Import / export
+# Import / export / labels
+sed -i 's/xdef _/xdef /g' $1
+sed -i 's/xref _/xref /g' $1
 sed -i 's/xdef/.global/g' $1
 sed -i 's/xref/.extern/g' $1
+sed -i 's/^_//g' $1
+sed -i 's/[ ]_/ /g' $1
+sed -i 's/\t_/ /g' $1
+sed -i 's/#_/#/g' $1
 # Constants
 sed -i 's/dc.l/.long/g' $1
 sed -i 's/dc.w/.word/g' $1
@@ -33,3 +39,5 @@ sed -i 's/^\s*ELSE/#else/g' $1
 sed -i 's/^\s*ENDC/#endif/g' $1
 #sections
 sed -i 's/^\s*code/.section text/g' $1
+# Hacks to restore stuff. TODO improve things so we don't need this !
+sed -i 's/_CALYPSI_ASSEMBLER/__CALYPSI_ASSEMBLER/g' $1

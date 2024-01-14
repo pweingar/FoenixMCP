@@ -11,8 +11,10 @@
             xref _syscall_dispatch
 
             xdef _syscall
-            xdef ___exit
-            xdef _int_enable_all
+ IFD __VASM
+	    xdef ___exit
+ ENDC
+	    xdef _int_enable_all
             xdef _int_disable_all
             xdef _call_user
             xdef _restart_cli
@@ -66,16 +68,17 @@ PENDING_GRP2 = $FEC00104
  IFD __VASM
             section "VECTORS",code
  ELSE
-	    .section stack
+;	    .section stack
+	    .section os_memory
 	    ; We probably can remove all that since the startup of the Calypsi Foenix lib can take care of it
-	    .section bss,BSS
+	    .section os_memory,bss
 ___STACK    .equ .sectionEnd stack
-___BSSSTART .equ .sectionStart bss
-___BSSSIZE  .equ .sectionSize bss
- ENDC
+___BSSSTART .equ .sectionStart os_memory
+___BSSSIZE  .equ .sectionSize os_memory
 
             .section vectors
-
+ ENDC
+ 
     ;; This goes at the very start of the FLASH as it's copied to RAM by GAVIN upon reset.
             dc.l ___STACK           ; 00 - Initial stack pointer
             dc.l coldboot           ; 01 - Initial PC
@@ -162,7 +165,7 @@ coldboot:   move.w #$2700,SR        ; Supervisor mode, Interrupt mode (68040), d
 
   move.l #$ff00ff00,$fec80008 ; border color for debug
             lea ___STACK,sp
-            bsr _int_disable_all
+           ;  bsr _int_disable_all
 
             ; Clear BSS segment (we assumed it's 32bits aligned)
             lea	___BSSSTART,a0
@@ -173,13 +176,13 @@ clrloop:    move.l d1,(a0)+
             subq.l #4,d0
             bne	clrloop
 
-  move.l #$ffffff00,$fec80008 ; change border color
-
-  xref _int_init
-  ;jsr _int_init
-  ; move.l #$ffff0000,$fec80008 ; change border color
-callmain:   jsr ___main             ; call __main to transfer to the C code
-
+callmain:
+ IFD __VASM
+    jsr ___main             ; call __main to transfer to the C code
+ ELSE
+    .extern ___program_root_section
+    jsr ___program_root_section
+ ENDC
 ;	endless loop; can be changed accordingly
 ___exit:
             bra	___exit
@@ -240,7 +243,7 @@ intdis_end: movem.l (sp)+,d0-d7/a0-a6       ; Restore affected registers
             move.w #(\1<<2),d0              ; Get the offset to interrupt 0x11
             endm
  ENDC
- IFD __CALYPSI__
+ IFD __CALYPSI_ASSEMBLER__
 inthandler  macro number,mask,pending_reg                // Individual interrupt handler. Parameters: interrupt number, interrupt mask, pending register
             movem.l d0-d7/a0-a6,-(sp)       // Save affected registers
             move.w #\mask,(\pending_reg)                 // Clear the flag for the interrupt
@@ -483,6 +486,7 @@ _call_user:
             move.w #$0000,-(sp)         ; Push the user's initial SR (to switch to user mode)
             rte                         ; Start the user process
  ENDC
+ 
 _restart_cli:
             lea ___STACK,sp
             jsr _cli_rerepl

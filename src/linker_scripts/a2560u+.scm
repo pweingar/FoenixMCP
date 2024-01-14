@@ -1,7 +1,6 @@
 (define memories
   '((memory VECTORS (address (#x0000 . #x03ff)) (section vectors))
-    (memory bss (address (#x1000 . #x13ff)) (type BSS))
-    (memory dataRAM (address (#x200000 . #x37ffff)) (type RAM))
+    (memory systemRAM (address (#x200000 . #x37ffff)) (section (os_memory) (stack)) (type RAM))
     (memory flash (address (#x12000 . #x1fffff)) (type ROM))    
 
     

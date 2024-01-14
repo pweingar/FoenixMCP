@@ -347,7 +347,8 @@ rsrc/bitmaps/splash_%.c: rsrc/bitmaps/splash_%.bmp
 	# The conversion is in-place so we copy the source (.asm) into a assembler-specific file (.s)
 	-cp $< $@
 ifeq ($(TOOLCHAIN),calypsi)
-	../utilities/vasm2as68k.sh $@ 
+	../utilities/vasm2as68k.sh $@
+	-cp $@ $@.debug
 endif
 
 # Clean up after a build
