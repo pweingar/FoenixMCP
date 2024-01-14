@@ -293,7 +293,11 @@ cli_c_src := $(wildcard cli/*.c)
 cli_obj := $(subst .c,.o,$(cli_c_src))
 
 # Base MCP files
-c_src :=  $(wildcard *.c)
+c_src := $(wildcard *.c)
+ifeq ($(TOOLCHAIN),calypsi))
+else
+c_src := $(subst calypsi_stubs.c,,$(c_src))
+endif
 c_obj := $(subst .c,.o,$(c_src))
 
 .PHONY: all clean $(CPU_FAMILY) foenix dev fatfs snd cli

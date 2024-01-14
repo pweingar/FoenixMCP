@@ -150,11 +150,11 @@ ___BSSSIZE  .equ .sectionSize os_memory
             dc.l not_impl           ; 62 - Reserved
             dc.l not_impl           ; 63 - Reserved
 
-IFD __VASM
+ IFD __VASM
 	    code
-ELSE
+ ELSE
 	    .section code 
-ENDC
+ ENDC
 
 coldboot:   move.w #$2700,SR        ; Supervisor mode, Interrupt mode (68040), disable all interrupts
 
