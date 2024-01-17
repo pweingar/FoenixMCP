@@ -91,7 +91,7 @@ int main(int argc, char * argv[]) {
     sid_test_internal();
     TRACE("Internal SID tested");
 
-    if (result = cli_init()) {
+    if ((result = cli_init())) {
         ERROR1("FAILED: CLI initialization (%d)", result);
     } else {
         INFO("CLI initialized.");
@@ -255,7 +255,7 @@ static void hw_initialize(void) {
 /* Install OS devices */
 static void os_devices_initialize(void) {
 	short res;
-
+    INFO("os_devices_initialize()");
     /* Initialize the device drivers system */
     cdev_init_system();
     INFO("Channel device system ready.");
@@ -279,7 +279,7 @@ static void os_devices_initialize(void) {
 #endif
 
     /* Serial port(s) */
-    if (res = uart_install()) {
+    if ((res = uart_install())) {
         ERROR1("FAILED: serial port initialization (%d)", res);
     } else {
         INFO("Serial ports initialized.");
@@ -343,6 +343,7 @@ static void os_devices_initialize(void) {
 
     /* Initialize the variable system */
     var_init();
+    INFO("variables system initialized.");
 
     if ((res = fsys_init())) {
         ERROR1("FAILED: file system initialization (%d)", res);
