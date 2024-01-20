@@ -81,7 +81,7 @@ short cli_set_register(const char * name, const char * help, cli_setter setter, 
         /* Set the fields for the setting */
         cli_name_upper(setting->name, name);
         strncpy(setting->help, help, MAX_SETTING_HELP);
-        setting->help[MAX_SETTING_HELP] = '\0';
+        setting->help[MAX_SETTING_HELP-1] = '\0';
         setting->setter = setter;
         setting->getter = getter;
         setting->next = 0;
@@ -190,10 +190,10 @@ void cli_set_help(short channel) {
     p_setting setting;
 
     sprintf(message, "SET/GET command supported settings:\n");
-    sys_chan_write(channel, message, strlen(message));
+    sys_chan_write(channel, (uint8_t*)message, strlen(message));
 
     for (setting = cli_first_setting; setting != 0; setting = setting->next) {
-        sys_chan_write(channel, setting->help, strlen(setting->help));
+        sys_chan_write(channel, (uint8_t*)setting->help, strlen(setting->help));
         sys_chan_write(channel, "\n", 1);
     }
 }
