@@ -77,7 +77,7 @@ uint8_t uart_get(int16_t uart);
  * 
  * @return the value that can be used with _set_bps, or 0 if invalid argument
  */
-uint32_t uart_baud_to_code(uint16_t i);
+uint32_t uart_baud_to_code(uint32_t i);
 
 /** Indicates whether the uart is ready to send */
 int16_t uart_can_send(int16_t uart);

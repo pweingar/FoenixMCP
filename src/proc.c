@@ -37,8 +37,8 @@ extern void call_user(long start, long stack, int argc, char * argv[]);
 void proc_exec(long start, long stack, int argc, char * argv[]) {
     TRACE("proc_exec");
 
-    INFO1(LOG_INFO, "proc_exec start: %d");
-    INFO1(LOG_INFO, "proc_exec stack: %d");
+    INFO1("proc_exec start: %p", (void*)start);
+    INFO1("proc_exec stack: %p", (void*)stack);
 
     g_proc_result = 0;
     call_user(start, stack, argc, argv);
