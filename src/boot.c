@@ -286,7 +286,7 @@ short boot_screen(void) {
     sprintf(buffer, "BOOT: %s=SD CARD, %s=HARD DRIVE, %s=DEFAULT, %s=SAFE", f1, f2, space, cr_text);
 #endif
     txt_set_xy(screen, (80 - strlen(buffer)) / 2, 58);
-    sys_chan_write(screen, buffer, strlen(buffer));
+    sys_chan_write(screen, (uint8_t*)buffer, strlen(buffer));
 
     // Get the information about the system
     sys_get_info(&info);
