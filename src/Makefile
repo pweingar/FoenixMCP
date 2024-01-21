@@ -123,7 +123,7 @@ DEFAULT_LOG_LEVEL=0
 #define LOG_CHANNEL_CHANNEL_A_LOW_LEVEL 2 // low-level routines (doesn't use MCP's console stuff)
 #define LOG_CHANNEL_COM1 10
 #define LOG_CHANNEL_COM2 11
-LOG_CHANNEL=11
+LOG_CHANNEL=10
 
 ifeq ("$(DEFAULT_LOG_LEVEL)","")
 else
@@ -294,7 +294,7 @@ cli_obj := $(subst .c,.o,$(cli_c_src))
 
 # Base MCP files
 c_src := $(wildcard *.c)
-ifeq ($(TOOLCHAIN),calypsi))
+ifeq ($(TOOLCHAIN),calypsi)
 else
 c_src := $(subst calypsi_stubs.c,,$(c_src))
 endif
@@ -352,7 +352,7 @@ rsrc/bitmaps/splash_%.c: rsrc/bitmaps/splash_%.bmp
 	-cp $< $@
 ifeq ($(TOOLCHAIN),calypsi)
 	../utilities/vasm2as68k.sh $@
-	-cp $@ $@.debug
+#	-cp $@ $@.debug
 endif
 
 # Clean up after a build
