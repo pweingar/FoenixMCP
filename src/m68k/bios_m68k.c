@@ -32,8 +32,8 @@
 /*
  * Determine the correct system function implementation and call it.
  */
-unsigned long syscall_dispatch(int32_t function, int32_t param0, int32_t param1, int32_t param2, int32_t param3, int32_t param4, int32_t param5) {
-    TRACE7("DISPATCH(0x%lx,%ld,%ld,%ld,%ld,%ld,%ld)", function, param0, param1, param2, param3, param4, param5);
+uint32_t SYSTEMCALL syscall_dispatch(int32_t function, int32_t param0, int32_t param1, int32_t param2, int32_t param3, int32_t param4, int32_t param5) {
+    TRACE7("DISPATCH(0x%x,%x,%x,%x,%x,%x,%x)", function, param0, param1, param2, param3, param4, param5);
     switch (function & 0x00f0) {
         case 0x00:
             /* Core System Calls */
@@ -109,7 +109,7 @@ unsigned long syscall_dispatch(int32_t function, int32_t param0, int32_t param1,
                     return chan_ioctrl((short)param0, (short)param1, (unsigned char *)param2, (short)param3);
 
                 case KFN_CHAN_OPEN:
-                    return chan_open((short)param0, (const char *)param1, (short)param2);
+                    return chan_open((short)param0, (const uint8_t *)param1, (short)param2);
 
                 case KFN_CHAN_CLOSE:
                     return chan_close((short)param0);

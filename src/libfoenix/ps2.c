@@ -67,11 +67,11 @@ typedef enum kbd_state {
  */
 struct s_ps2_kbd {
     t_kbd_state state;          /* State of the scan code processing state machine */
-    unsigned char control;      /* Bits to control how the keyboard processes things */
-    unsigned char status;       /* Status of the keyboard */
+    uint8_t control;      /* Bits to control how the keyboard processes things */
+    uint8_t status;       /* Status of the keyboard */
     t_word_ring sc_buf;         /* Buffer containing scancodes that have been processed */
     t_word_ring char_buf;       /* Buffer containing characters to be read */
-    unsigned char modifiers;    /* State of the modifier keys (CTRL, ALT, SHIFT) and caps lock */
+    uint8_t modifiers;    /* State of the modifier keys (CTRL, ALT, SHIFT) and caps lock */
 
     /* Scan code to character lookup tables */
 
@@ -125,7 +125,7 @@ static const char * ansi_keys[] = {
 };
 
 // Translation table from base set1 make scan codes to Foenix scan codes
-const unsigned char g_kbd_set1_base[128] = {
+const uint8_t g_kbd_set1_base[128] = {
     0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, /* 0x00 - 0x07 */
     0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, /* 0x08 - 0x0F */
     0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, /* 0x10 - 0x17 */
@@ -145,7 +145,7 @@ const unsigned char g_kbd_set1_base[128] = {
 };
 
 // Translation table from E0 prefixed set1 make scan codes to Foenix scan codes
-const unsigned char g_kbd_set1_e0[128] = {
+const uint8_t g_kbd_set1_e0[128] = {
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, /* 0x00 - 0x07 */
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, /* 0x08 - 0x0F */
     0x70, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, /* 0x10 - 0x17 */
@@ -374,7 +374,7 @@ short ps2_wait_in() {
  * Returns:
  *  The response from the PS/2 controller, -1 if there was a timeout
  */
-short ps2_controller_cmd(unsigned char cmd) {
+short ps2_controller_cmd(uint8_t cmd) {
     if (ps2_wait_in()) {
 		INFO("ps2_controller_cmd: ps2_wait_in timeout");
 		return -1;
@@ -396,7 +396,7 @@ short ps2_controller_cmd(unsigned char cmd) {
  *
  * Returns: 0 on success, -1 on timeout
  */
-short ps2_controller_cmd_noreply(unsigned char cmd) {
+short ps2_controller_cmd_noreply(uint8_t cmd) {
     if (ps2_wait_in()) {
 		INFO("ps2_controller_cmd_noreply: ps2_wait_in timeout");
 		return -1;
@@ -411,7 +411,7 @@ short ps2_controller_cmd_noreply(unsigned char cmd) {
  * Returns:
  *  The response from the PS/2 controller, -1 if there was a timeout
  */
-short ps2_controller_cmd_param(unsigned char cmd, unsigned char parameter) {
+short ps2_controller_cmd_param(uint8_t cmd, uint8_t parameter) {
     if (ps2_wait_in()) {
 		DEBUG("ps2_controller_cmd_param: ps2_wait_in #1 timeout.");
 		return -1;
@@ -433,7 +433,7 @@ short ps2_controller_cmd_param(unsigned char cmd, unsigned char parameter) {
  * Returns:
  *  The response from the PS/2 controller, -1 if there was a timeout
  */
-short ps2_kbd_cmd_p(unsigned char cmd, unsigned char parameter) {
+short ps2_kbd_cmd_p(uint8_t cmd, uint8_t parameter) {
     if (ps2_wait_in()) {
 		DEBUG("ps2_kbd_cmd_p: ps2_wait_in #1 timeout.");
 		return -1;
@@ -462,7 +462,7 @@ short ps2_kbd_cmd_p(unsigned char cmd, unsigned char parameter) {
  * Returns:
  *  The response from the PS/2 controller, -1 if there was a timeout
  */
-short ps2_kbd_cmd(unsigned char cmd, short delay) {
+short ps2_kbd_cmd(uint8_t cmd, short delay) {
     if (ps2_wait_in()) return -1;
     *PS2_DATA_BUF = cmd;
 
@@ -480,7 +480,7 @@ short ps2_kbd_cmd(unsigned char cmd, short delay) {
  */
 void ps2_flush_out() {
     while (*PS2_STATUS & PS2_STAT_OBF) {
-        unsigned char x = *PS2_DATA_BUF;
+        uint8_t x = *PS2_DATA_BUF;
     }
 }
 
@@ -505,10 +505,10 @@ void kbd_makebreak_modifier(short flag, short is_break) {
 /*
  * Add the scan code to the queue of scan codes
  */
-void kbd_enqueue_scan(unsigned char scan_code) {
+void kbd_enqueue_scan(uint8_t scan_code) {
     // Make sure the scan code isn't 0 or 128, which are invalid make/break codes
     if ((scan_code != 0) && (scan_code != 0x80)) {
-        unsigned char is_break = scan_code & 0x80;
+        uint8_t is_break = scan_code & 0x80;
 
         // Check the scan code to see if it's a modifier key or a lock key
         // update the modifier and lock variables accordingly...
@@ -562,7 +562,7 @@ void kbd_enqueue_scan(unsigned char scan_code) {
  * Returns:
  *      The next scancode to be processed, 0 if nothing.
  */
-unsigned short kbd_get_scancode() {
+uint16_t kbd_get_scancode() {
     return rb_word_get(&g_kbd_control.sc_buf);
 }
 
@@ -570,9 +570,9 @@ unsigned short kbd_get_scancode() {
  * IRQ handler for the keyboard... read a scan code and queue it
  */
 void kbd_handle_irq() {
-    volatile unsigned char *data = (unsigned char *)PS2_DATA_BUF;
-    unsigned char scan_code = *data;
-    unsigned char translated_code;
+    volatile uint8_t *data = (uint8_t *)PS2_DATA_BUF;
+    uint8_t scan_code = *data;
+    uint8_t translated_code;
 
     /* Clear the pending flag */
     int_clear(INT_KBD_PS2);
@@ -585,7 +585,7 @@ void kbd_handle_irq() {
     if (scan_code) {
         // Make sure the scan code isn't 0 or 128, which are invalid make/break codes
         if ((scan_code != 0) && (scan_code != 0x80)) {
-            unsigned char is_break = scan_code & 0x80;
+            uint8_t is_break = scan_code & 0x80;
 
             // Process the byte according to the state machine...
             switch (g_kbd_control.state) {
@@ -770,7 +770,7 @@ void kbd_handle_irq() {
  * modifiers = the current modifier bit flags (ALT, CTRL, META, etc)
  * c = the character found from the scan code.
  */
-static char kbd_to_ansi(unsigned char modifiers, unsigned char c) {
+static char kbd_to_ansi(uint8_t modifiers, uint8_t c) {
     if ((c >= 0x80) && (c <= 0x95)) {
         /* The key is a function key or a special control key */
         const char * sequence;
@@ -780,7 +780,7 @@ static char kbd_to_ansi(unsigned char modifiers, unsigned char c) {
 
         /* Check to see if we need to send a modifier sequence */
         if (modifiers & (KBD_MOD_SHIFT | KBD_MOD_CTRL | KBD_MOD_ALT | KBD_MOD_OS)) {
-            unsigned char code_bcd;
+            uint8_t code_bcd;
             short modifier_code = 0;
             short i;
 
@@ -825,12 +825,12 @@ char kbd_getc() {
 
     } else {
         // Otherwise, we need to check the scan code queue...
-        unsigned short raw_code = kbd_get_scancode();
+        uint16_t raw_code = kbd_get_scancode();
         while (raw_code != 0) {
             if ((raw_code & 0x80) == 0) {
                 // If it's a make code, let's try to look it up...
-                unsigned char modifiers = (raw_code >> 8) & 0xff;    // Get the modifiers
-                unsigned char scan_code = raw_code & 0x7f;           // Get the base code for the key
+                uint8_t modifiers = (raw_code >> 8) & 0xff;    // Get the modifiers
+                uint8_t scan_code = raw_code & 0x7f;           // Get the base code for the key
 
                 if (scan_code < KBD_SC_PIVOT) {
                     // It's on the left side of the keyboard, use modifiers to determine lookup table
@@ -908,8 +908,8 @@ char kbd_getc_poll() {
  * Handle an interrupt from the PS/2 mouse port
  */
 void mouse_handle_irq() {
-    //unsigned char status = *PS2_STATUS;
-    unsigned char mouse_byte = *PS2_DATA_BUF;
+    //uint8_t status = *PS2_STATUS;
+    uint8_t mouse_byte = *PS2_DATA_BUF;
 
     /* Clear the pending interrupt flag for the mouse */
     int_clear(INT_MOUSE);
@@ -923,7 +923,7 @@ void mouse_handle_irq() {
 
     } else {
         /* Send the byte to Vicky */
-        MousePtr_A_Mouse0[g_mouse_state++] = (unsigned short)mouse_byte;
+        MousePtr_A_Mouse0[g_mouse_state++] = (uint16_t)mouse_byte;
 
         /* After three bytes, return to state 0 */
         if (g_mouse_state > 2) {
@@ -941,7 +941,7 @@ void mouse_handle_irq() {
  * Returns:
  * -1 on timeout, otherwise the result of the command
  */
-short ps2_mouse_command(unsigned char cmd) {
+short ps2_mouse_command(uint8_t cmd) {
 
     short result;
 
@@ -961,7 +961,7 @@ short ps2_mouse_command(unsigned char cmd) {
     return (short)result;
 }
 
-short ps2_mouse_command_repeatable(unsigned char cmd) {
+short ps2_mouse_command_repeatable(uint8_t cmd) {
     int sends = 0;
     short result = 0;
 
@@ -993,10 +993,10 @@ short ps2_mouse_get_packet() {
 
     for (i = 0; i < 3; i++) {
         if (ps2_wait_out()) return -1;
-        unsigned char data = *PS2_DATA_BUF;
+        uint8_t data = *PS2_DATA_BUF;
 
         /* Send the byte to Vicky */
-        MousePtr_A_Mouse0[i] = (unsigned short)data;
+        MousePtr_A_Mouse0[i] = (uint16_t)data;
     }
 
     return 0;
@@ -1033,8 +1033,8 @@ void mouse_set_visible(short is_visible) {
  */
 short mouse_init() {
     short i, retries;
-    unsigned short low_components;
-    unsigned short hi_components;
+    uint16_t low_components;
+    uint16_t hi_components;
     short result;
 
     TRACE("mouse_init");
@@ -1233,7 +1233,7 @@ void ps2_identify(short port) {
  *  Status code indicating if either the mouse or the keyboard is missing.
  */
 short ps2_init() {
-    unsigned char x = 0;
+    uint8_t x = 0;
     short mouse_present = 0;
     short mouse_error = 0;
     short res = 0;
