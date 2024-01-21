@@ -73,8 +73,6 @@ PENDING_GRP2 EQU (GAVIN_BASE+$104)
 
 
  IFD __VASM
-___BSSSTART .equ .sectionStart os_memory
-___BSSSIZE  .equ .sectionSize os_memory
             section "VECTORS",code
  ELSE
 ___STACK    EQU .sectionEnd stack
@@ -251,13 +249,14 @@ intdis_end: movem.l (sp)+,d0-d7/a0-a6       ; Restore affected registers
             movem.l d0-d7/a0-a6,-(sp)       ; Save affected registers
             move.w #\2,(\3)                 ; Clear the flag for the interrupt
             move.w #(\1<<2),d0              ; Get the offset to interrupt 0x11
+            bra int_dispatch
             endm
  ENDC
  IFD __CALYPSI_ASSEMBLER__
-inthandler  macro number,mask,pending_reg                // Individual interrupt handler. Parameters: interrupt number, interrupt mask, pending register
+inthandler  macro number,mask,pending_reg   // Individual interrupt handler. Parameters: interrupt number, interrupt mask, pending register
             movem.l d0-d7/a0-a6,-(sp)       // Save affected registers
-            move.w #\mask,(\pending_reg)                 // Clear the flag for the interrupt
-            move.w #(\number<<2),d0              // Get the offset to interrupt 0x11
+            move.w #\mask,(\pending_reg)    // Clear the flag for the interrupt
+            move.w #(\number<<2),d0         // Get the offset to interrupt 0x11
             bra int_dispatch
             endm
  ENDC
@@ -266,43 +265,43 @@ inthandler  macro number,mask,pending_reg                // Individual interrupt
 ; Group 1 Interrupt Handlers
 ;
 
-_m68k_int_superio_ps2:  inthandler $10, $0001, PENDING_GRP1   ; Interrupt Vector 0x10 -- SuperIO Keyboard
-_m68k_int_maurice:  inthandler $11, $0002, PENDING_GRP1       ; Interrupt Vector 0x11 -- A2560K "Mo" keyboard
-_m68k_int_superio_mouse:  inthandler $12, $0004, PENDING_GRP1 ; Interrupt Vector 0x12 -- SuperIO Mouse
-_m68k_int_superio_com1:  inthandler $13, $0008, PENDING_GRP1  ; Interrupt Vector 0x13 -- COM1
-_m68k_int_superio_com2:  inthandler $14, $0010, PENDING_GRP1  ; Interrupt Vector 0x14 -- COM2
-_m68k_int_superio_lpt1:  inthandler $15, $0020, PENDING_GRP1  ; Interrupt Vector 0x15 -- LPT1
+_m68k_int_superio_ps2: inthandler $10, $0001, PENDING_GRP1   ; Interrupt Vector 0x10 -- SuperIO Keyboard
+_m68k_int_maurice: inthandler $11, $0002, PENDING_GRP1       ; Interrupt Vector 0x11 -- A2560K "Mo" keyboard
+_m68k_int_superio_mouse: inthandler $12, $0004, PENDING_GRP1 ; Interrupt Vector 0x12 -- SuperIO Mouse
+_m68k_int_superio_com1: inthandler $13, $0008, PENDING_GRP1  ; Interrupt Vector 0x13 -- COM1
+_m68k_int_superio_com2: inthandler $14, $0010, PENDING_GRP1  ; Interrupt Vector 0x14 -- COM2
+_m68k_int_superio_lpt1: inthandler $15, $0020, PENDING_GRP1  ; Interrupt Vector 0x15 -- LPT1
 _m68k_int_superio_fdc:  inthandler $16, $0040, PENDING_GRP1   ; Interrupt Vector 0x16 -- Floppy drive controller
-_m68k_int_superio_midi:  inthandler $17, $0080, PENDING_GRP1  ; Interrupt Vector 0x17 -- MIDI
-_m68k_int_timer0:  inthandler $18, $0100, PENDING_GRP1        ; Interrupt Vector 0x18 -- Timer 0
-_m68k_int_timer1:  inthandler $19, $0200, PENDING_GRP1        ; Interrupt Vector 0x19 -- Timer 1
-_m68k_int_timer2:  inthandler $1A, $0400, PENDING_GRP1        ; Interrupt Vector 0x1A -- Timer 2
-_m68k_int_timer3:  inthandler $1B, $0800, PENDING_GRP1        ; Interrupt Vector 0x1B -- Timer 3
-_m68k_int_timer4:  inthandler $1C, $1000, PENDING_GRP1        ; Interrupt Vector 0x1C -- Timer 4
-_m68k_int_x1D:  inthandler $1D, $2000, PENDING_GRP1           ; Interrupt Vector 0x1D -- Reserved
-_m68k_int_x1E:  inthandler $1E, $4000, PENDING_GRP1           ; Interrupt Vector 0x1E -- Reserved
-_m68k_int_rtc:  inthandler $1F, $8000, PENDING_GRP1           ; Interrupt Vector 0x1F -- Real Time Clock
+_m68k_int_superio_midi: inthandler $17, $0080, PENDING_GRP1  ; Interrupt Vector 0x17 -- MIDI
+_m68k_int_timer0: inthandler $18, $0100, PENDING_GRP1        ; Interrupt Vector 0x18 -- Timer 0
+_m68k_int_timer1: inthandler $19, $0200, PENDING_GRP1        ; Interrupt Vector 0x19 -- Timer 1
+_m68k_int_timer2: inthandler $1A, $0400, PENDING_GRP1        ; Interrupt Vector 0x1A -- Timer 2
+_m68k_int_timer3: inthandler $1B, $0800, PENDING_GRP1        ; Interrupt Vector 0x1B -- Timer 3
+_m68k_int_timer4: inthandler $1C, $1000, PENDING_GRP1        ; Interrupt Vector 0x1C -- Timer 4
+_m68k_int_x1D: inthandler $1D, $2000, PENDING_GRP1           ; Interrupt Vector 0x1D -- Reserved
+_m68k_int_x1E: inthandler $1E, $4000, PENDING_GRP1           ; Interrupt Vector 0x1E -- Reserved
+_m68k_int_rtc: inthandler $1F, $8000, PENDING_GRP1           ; Interrupt Vector 0x1F -- Real Time Clock
 
 ;
 ; Group 2 Interrupt Handlers
 ;
 
-_m68k_int_hdc:  inthandler $20, $0001, PENDING_GRP2           ; Interrupt Vector 0x20 -- IDE HDD Generated Interrupt
-_m68k_int_sdc_insert:  inthandler $21, $0002, PENDING_GRP2    ; Interrupt Vector 0x21 -- SDCard Insert
-_m68k_int_sdc:  inthandler $22, $0004, PENDING_GRP2           ; Interrupt Vector 0x22 -- SDCard Controller
-_m68k_int_opm:  inthandler $23, $0008, PENDING_GRP2           ; Interrupt Vector 0x23 -- Internal OPM
-_m68k_int_opn2:  inthandler $24, $0010, PENDING_GRP2          ; Interrupt Vector 0x24 -- External OPN2
-_m68k_int_opl3:  inthandler $25, $0020, PENDING_GRP2          ; Interrupt Vector 0x25 -- External OPL3
-_m68k_int_x26:  inthandler $26, $0040, PENDING_GRP2           ; Interrupt Vector 0x26 -- Reserved
-_m68k_int_x27:  inthandler $27, $0080, PENDING_GRP2           ; Interrupt Vector 0x27 -- Reserved
-_m68k_int_beatrix0:  inthandler $28, $0100, PENDING_GRP2      ; Interrupt Vector 0x28 -- Beatrix Interrupt 0
-_m68k_int_beatrix1:  inthandler $29, $0200, PENDING_GRP2      ; Interrupt Vector 0x29 -- Beatrix Interrupt 1
-_m68k_int_beatrix2:  inthandler $2A, $0400, PENDING_GRP2      ; Interrupt Vector 0x2A -- Beatrix Interrupt 2
-_m68k_int_beatrix3:  inthandler $2B, $0800, PENDING_GRP2      ; Interrupt Vector 0x2B -- Beatrix Interrupt 3
-_m68k_int_x2C:  inthandler $2C, $1000, PENDING_GRP2           ; Interrupt Vector 0x2C -- Reserved
-_m68k_int_dac1:  inthandler $2D, $2000, PENDING_GRP2          ; Interrupt Vector 0x2D -- DAC1 Playback Done Interrupt (48K)
-_m68k_int_x2E:  inthandler $2E, $4000, PENDING_GRP2           ; Interrupt Vector 0x2E -- Reserved
-_m68k_int_dac0:  inthandler $2F, $8000, PENDING_GRP2          ; Interrupt Vector 0x2F -- DAC0 Playback Done Interrupt (44.1K)
+_m68k_int_hdc:      inthandler $20, $0001, PENDING_GRP2   ; Interrupt Vector 0x20 -- IDE HDD Generated Interrupt
+_m68k_int_sdc_insert: inthandler $21, $0002, PENDING_GRP2 ; Interrupt Vector 0x21 -- SDCard Insert
+_m68k_int_sdc:      inthandler $22, $0004, PENDING_GRP2   ; Interrupt Vector 0x22 -- SDCard Controller
+_m68k_int_opm:      inthandler $23, $0008, PENDING_GRP2   ; Interrupt Vector 0x23 -- Internal OPM
+_m68k_int_opn2:     inthandler $24, $0010, PENDING_GRP2   ; Interrupt Vector 0x24 -- External OPN2
+_m68k_int_opl3:     inthandler $25, $0020, PENDING_GRP2   ; Interrupt Vector 0x25 -- External OPL3
+_m68k_int_x26:      inthandler $26, $0040, PENDING_GRP2   ; Interrupt Vector 0x26 -- Reserved
+_m68k_int_x27:      inthandler $27, $0080, PENDING_GRP2   ; Interrupt Vector 0x27 -- Reserved
+_m68k_int_beatrix0: inthandler $28, $0100, PENDING_GRP2   ; Interrupt Vector 0x28 -- Beatrix Interrupt 0
+_m68k_int_beatrix1: inthandler $29, $0200, PENDING_GRP2   ; Interrupt Vector 0x29 -- Beatrix Interrupt 1
+_m68k_int_beatrix2: inthandler $2A, $0400, PENDING_GRP2   ; Interrupt Vector 0x2A -- Beatrix Interrupt 2
+_m68k_int_beatrix3: inthandler $2B, $0800, PENDING_GRP2   ; Interrupt Vector 0x2B -- Beatrix Interrupt 3
+_m68k_int_x2C:      inthandler $2C, $1000, PENDING_GRP2   ; Interrupt Vector 0x2C -- Reserved
+_m68k_int_dac1:     inthandler $2D, $2000, PENDING_GRP2   ; Interrupt Vector 0x2D -- DAC1 Playback Done Interrupt (48K)
+_m68k_int_x2E:      inthandler $2E, $4000, PENDING_GRP2   ; Interrupt Vector 0x2E -- Reserved
+_m68k_int_dac0:     inthandler $2F, $8000, PENDING_GRP2   ; Interrupt Vector 0x2F -- DAC0 Playback Done Interrupt (44.1K)
 
 ;
 ; Unimplemented Exception Handler -- just return
@@ -422,7 +421,6 @@ panic_lock:         bra panic_lock
 ; int32_t syscall(int32_t number, int32_t p0, int32_t p1, int32_t p2, int32_t p3, int32_t p4, int32_t p5)
 ;
 _syscall:
- IFD __VASM
             movem.l d1-d7,-(sp)         ; Save caller's registers
             move.l (56,sp),d6           ; Parameter 5 to D6
             move.l (52,sp),d5           ; Parameter 4 to D5
@@ -435,18 +433,6 @@ _syscall:
             TRAP #15                    ; Call into the kernel
 
             movem.l (sp)+,d1-d7         ; Restore caller's registers
- ELSE
-            movem.l d2-d7,-(sp)         ; Save caller's registers
-            move.l (44,sp),d6           ; Parameter 5 to D6
-            move.l (40,sp),d5           ; Parameter 4 to D5
-            move.l (36,sp),d4           ; Parameter 3 to D4
-            move.l (32,sp),d3           ; Parameter 2 to D3
-            move.l (28,sp),d2           ; Parameter 1 to D2
- 
-            TRAP #15                    ; Call into the kernel
-
-            movem.l (sp)+,d2-d7         ; Restore caller's registers 
- ENDC
             rts
 
 ;
@@ -455,7 +441,7 @@ _syscall:
 h_trap_15:
             cmp.w #$43,d1               ; Is this a sys_proc_elevate call?
             beq h_trap_elev             ; Yes, just handle it here
- IFD __VASM
+
             move.l d6,-(sp)             ; Push the parameters to the stack for the C call
             move.l d5,-(sp)
             move.l d4,-(sp)
@@ -466,18 +452,9 @@ h_trap_15:
             jsr _syscall_dispatch       ; Call the C routine to do the dispatch
                                         ; Note: the C routine depends upon the register push order
             add.l #28,sp                ; Remove parameters from the stack
- ELSE
-            move.l d6,-(sp)             ; Push the parameters (d0/d1/a0/a1 woud already be set) to the stack for the C call
-            move.l d5,-(sp)
-            move.l d4,-(sp)
-            move.l d3,-(sp)
-            move.l d2,-(sp)
 
-            jsr _syscall_dispatch       ; Call the C routine to do the dispatch
-                                        ; Note: the C routine depends upon the register push order
-            add.l #5*4,sp                ; Remove parameters from the stack 
- ENDC
             rte                         ; Return to the caller
+
 
 h_trap_elev ori.w #$2000,(sp)           ; Change the caller's privilege to supervisor
             rte                         ; And return to it
