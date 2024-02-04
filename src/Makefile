@@ -2,7 +2,7 @@
 DEBUGGER=../module/Calypsi-remote-debug/src
 
 UNIT := C256U_PLUS
-MEMORY := RAM
+MEMORY := ROM
 
 # Define OS-dependent variables
 
@@ -25,7 +25,7 @@ else ifeq ($(UNIT),C256U_PLUS)
 	C_SRCS_DEBUGGER=$(DEBUGGER)/agent.c $(DEBUGGER)/c256-uart.c $(DEBUGGER)/low_level_WDC65816.s
 	SRCS_FOR_UNIT=C256/jumptable.s C256/syscalls.s C256/syscalls_c256.c C256/io_stubs.c
 	CFLAGS_FOR_UNIT=-DMODEL=5 -DCPU=255 --code-model large --data-model large
-	LDFLAGS_FOR_UNIT=C256/ld_lc_c256_fmx.scm clib-lc-ld.a --rtattr printf=medium
+	LDFLAGS_FOR_UNIT=C256/flash-u-plus.scm clib-lc-ld.a --rtattr printf=medium
 else ifeq ($(UNIT),C256_FMX)
 	CPU=w65816
 	C_SRCS_DEBUGGER=$(DEBUGGER)/agent.c $(DEBUGGER)/c256-uart.c $(DEBUGGER)/low_level_WDC65816.s
@@ -44,7 +44,7 @@ endif
 INCLUDES=-I. -I./include
 CFLAGS=$(INCLUDES) $(CFLAGS_FOR_UNIT) -l -D_CALYPSI_MCP_DEBUGGER
 ASFLAGS=$(INCLUDES)
-LDFLAGS=--target foenix --output-format s37 $(LDFLAGS_FOR_UNIT) --list-file foenixmcp.map
+LDFLAGS=--rom-code $(LDFLAGS_FOR_UNIT) --list-file foenixmcp.map
 
 SRCS = foenixmcp.c log.c memory.c ring_buffer.c simpleio.c sys_general.c variables.c utilities.c $(SRCS_FOR_UNIT) $(C_SRCS_DEBUGGER)
 OBJS = $(patsubst %.s,%.o,$(patsubst %.c,%.o,$(SRCS)))
@@ -54,7 +54,10 @@ LIBS = dev/devices.a snd/sound.a fatfs/fatfs.a
 .PHONY: clean
 
 foenixmcp.s37: $(OBJS) $(LIBS)
-	$(LD) $(LDFLAGS) -o $@ $^
+	$(LD) $(LDFLAGS) --output-format s37 -o $@ $^
+
+foenixmcp.raw: $(OBJS) $(LIBS)
+	$(LD) $(LDFLAGS) --output-format raw -o $@ $^
 
 dev/devices.a:
 	$(MAKE) --directory=dev
