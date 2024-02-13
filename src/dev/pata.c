@@ -198,8 +198,8 @@ short pata_identity(p_drive_info drive_info) {
 
     TRACE("data copied");
 
-    drive_info->flags = g_buffer[1] << 16 | g_buffer[0];
-    drive_info->lba_enabled = g_buffer[99] << 16 | g_buffer[98];
+    drive_info->flags = (long) g_buffer[1] << 16 | g_buffer[0];
+    drive_info->lba_enabled = (long) g_buffer[99] << 16 | g_buffer[98];
     drive_info->l.lbaw.lba_default_lo = g_buffer[121] << 8 | g_buffer[120];
     drive_info->l.lbaw.lba_default_hi = g_buffer[123] << 8 | g_buffer[122];
 
