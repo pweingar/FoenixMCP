@@ -613,7 +613,7 @@ FIL * fchan_to_file(t_channel * chan) {
 short fchan_read(t_channel * chan, unsigned char * buffer, short size) {
     FIL * file;
     FRESULT result;
-    int total_read;
+    unsigned total_read;
 
     log(LOG_TRACE, "fchan_read");
 
@@ -633,16 +633,17 @@ short fchan_read(t_channel * chan, unsigned char * buffer, short size) {
 /**
  * Read a line of text from the device
  */
-short fchan_readline(t_channel * chan, unsigned char * buffer, short size) {
+short fchan_readline(t_channel * chan, uint8_t * buffer, short size) {
     FIL * file;
     char * result;
     int total_read;
+    char *char_buffer = (char*) buffer;
 
     file = fchan_to_file(chan);
     if (file) {
-        result = f_gets(buffer, size, file);
+        result = f_gets(char_buffer, size, file);
         if (result) {
-            return strlen(buffer);
+            return strlen(char_buffer);
         } else {
             return fatfs_to_foenix(f_error(file));
         }
@@ -683,7 +684,7 @@ short fchan_read_b(t_channel * chan) {
 short fchan_write(p_channel chan, const unsigned char * buffer, short size) {
     FIL * file;
     FRESULT result;
-    int total_written;
+    unsigned total_written;
 
     file = fchan_to_file(chan);
     if (file) {
@@ -705,7 +706,7 @@ short fchan_write(p_channel chan, const unsigned char * buffer, short size) {
 short fchan_write_b(t_channel * chan, const unsigned char b) {
     FIL * file;
     FRESULT result;
-    int total_written;
+    unsigned total_written;
     unsigned char buffer[1];
 
     file = fchan_to_file(chan);
@@ -790,9 +791,9 @@ short fchan_seek(t_channel * chan, long position, short base) {
 			/* Position relative to the end of the file */
             result = f_lseek(file, f_size(file) + position);
             return fatfs_to_foenix(result);
-        }
-
-        return fatfs_to_foenix(f_lseek(file, new_position));
+        } else {
+	    return ERR_BAD_ARGUMENT;
+	} 
     }
 
     return ERR_BADCHANNEL;
@@ -1057,11 +1058,11 @@ short fsys_pgz_loader(short chan, long destination, long * start) {
                                     address = address | chunk[i] << 8;
                                     break;
                                 case 2:
-                                    address = address | chunk[i] << 16;
+                                    address = address | (long) chunk[i] << 16;
                                     log_num(LOG_INFO, "PGZ 24-bit address: ", address);
                                     break;
                                 case 3:
-                                    address = address | chunk[i] << 24;
+                                    address = address | (long) chunk[i] << 24;
                                     log_num(LOG_INFO, "PGZ 32-bit address: ", address);
                                     break;
                             }
@@ -1077,14 +1078,14 @@ short fsys_pgz_loader(short chan, long destination, long * start) {
                                     count = count | chunk[i] << 8;
                                     break;
                                 case 2:
-                                    count = count | chunk[i] << 16;
+                                    count = count | (long) chunk[i] << 16;
                                     if (!use_32bits && count == 0) {
                                         *start = address;
                                     }
                                     log_num(LOG_INFO, "PGZ 24-bit count: ", count);
                                     break;
                                 case 3:
-                                    count = count | chunk[i] << 24;
+                                    count = count | (long) chunk[i] << 24;
                                     if (use_32bits && count == 0) {
                                         *start = address;
                                     }
@@ -1298,6 +1299,7 @@ static bool get_app_ext(const char * path, char * extension) {
                 return true;
             }
         }
+	return true;
     } else {
         return false;
     }
