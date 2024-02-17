@@ -6,10 +6,7 @@
 #define __INTERRUPT_H
 
 #include "sys_general.h"
-#include "types.h"
-
-/* Type declaration for an interrupt handler */
-typedef void (*p_int_handler)();
+#include "sys_types.h"
 
 /*
  * Interrupt control registers

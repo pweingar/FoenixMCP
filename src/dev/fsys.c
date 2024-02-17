@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "constants.h"
 #include "dev/channel.h"
 #include "dev/fdc.h"
 #include "errors.h"

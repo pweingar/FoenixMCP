@@ -5,8 +5,10 @@
 #ifndef __BLOCK_H
 #define __BLOCK_H
 
-#include "types.h"
+#include "constants.h"
+#include "sys_types.h"
 #include "errors.h"
+#include "sys_types.h"
 
 //
 // Preset block device numbers
@@ -14,24 +16,8 @@
 
 #define BDEV_DEVICES_MAX 8
 
-#define BDEV_SDC 0
-#define BDEV_FDC 1
-#define BDEV_HDC 2
 
-//
-// Structure defining a block device's functions
-//
 
-typedef struct s_dev_block {
-    short number;           // The number of the device (assigned by registration)
-    char * name;            // The name of the device
-    FUNC_V_2_S init;        // short init() -- Initialize the device
-    FUNC_LBS_2_S read;      // short read(long lba, byte * buffer, short size) -- Read a block from the device
-    FUNC_LcBS_2_S write;    // short write(long lba, byte * buffer, short size) -- Write a block to the device
-    FUNC_V_2_S status;      // short status() -- Get the status of the device
-    FUNC_V_2_S flush;       // short flush() -- Ensure that any pending writes to teh device have been completed
-    FUNC_SBS_2_S ioctrl;    // short ioctrl(short command, byte * buffer, short size)) -- Issue a control command to the device
-} t_dev_block, *p_dev_block;
 
 //
 // Initialize the block driver system

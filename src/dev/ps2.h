@@ -6,7 +6,7 @@
 #define __PS2_H
 
 #include "constants.h"
-#include "types.h"
+#include "sys_types.h"
 #include "ps2_reg.h"
 
 /*

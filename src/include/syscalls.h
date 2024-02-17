@@ -10,20 +10,16 @@
 #ifndef __SYSCALLS_H
 #define __SYSCALLS_H
 
-#include "types.h"
-#include "interrupt.h"
-#include "sys_general.h"
-#include "dev/channel.h"
-#include "dev/block.h"
-#include "dev/fsys.h"
-#include "dev/rtc.h"
-#include "dev/txt_screen.h"
+#include <stdbool.h>
+#include <stdint.h>
+#include "constants.h"
+#include "sys_types.h"
 
 /*
  * Define the machine-specific system call function prefix
  */
 
-#if MODEL == MODEL_FOENIX_FMX || MODEL == MODEL_FOENIX_C256U || MODEL == MODEL_FOENIX_C256U_PLUS
+#ifdef __CALYPSI_CORE_65816__
 #define SYSTEMCALL __attribute__((simple_call))
 #else
 #define SYSTEMCALL

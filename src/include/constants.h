@@ -43,4 +43,24 @@
 #define FSYS_AM_DIR         0x10	/* Directory */
 #define FSYS_AM_ARC         0x20	/* Archive */
 
+/*
+ * Block devices
+ */
+
+#define BDEV_SDC 0
+#define BDEV_FDC 1
+#define BDEV_HDC 2
+
+/*
+ * Channel devices 
+ */
+
+#define CDEV_CONSOLE 0
+#define CDEV_EVID 1
+#define CDEV_COM1 2
+#define CDEV_COM2 3
+#define CDEV_LPT 4
+#define CDEV_MIDI 5
+#define CDEV_FILE 6
+
 #endif

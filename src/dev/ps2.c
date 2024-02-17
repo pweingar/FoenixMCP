@@ -9,7 +9,7 @@
 #include "log_level.h"
 #define DEFAULT_LOG_LEVEL LOG_DEBUG
 #include "log.h"
-#include "types.h"
+#include "sys_types.h"
 #include "ring_buffer.h"
 #include "interrupt.h"
 #include "simpleio.h"

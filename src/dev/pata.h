@@ -6,7 +6,7 @@
 #define __PATA_H
 
 #include <stdint.h>
-#include "types.h"
+#include "sys_types.h"
 
 #define PATA_GET_SECTOR_COUNT   1
 #define PATA_GET_SECTOR_SIZE    2

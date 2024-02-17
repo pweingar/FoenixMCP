@@ -14,7 +14,7 @@
 #include <string.h>
 
 #include "log.h"
-#include "types.h"
+#include "sys_types.h"
 #include "interrupt.h"
 #include "simpleio.h"
 #include "syscalls.h"

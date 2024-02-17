@@ -5,7 +5,7 @@
 #ifndef __FDC_H
 #define __FDC_H
 
-#include "types.h"
+#include "sys_types.h"
 
 /*
  * Definitions for the FDC controller

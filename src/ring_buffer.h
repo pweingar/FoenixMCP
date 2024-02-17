@@ -5,7 +5,7 @@
 #ifndef __RING_BUFFER_H
 #define __RING_BUFFER_H
 
-#include "types.h"
+#include "sys_types.h"
 
 #define MAX_BUFFER_SIZE 128
 

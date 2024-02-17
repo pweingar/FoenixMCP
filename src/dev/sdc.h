@@ -5,7 +5,7 @@
 #ifndef __SDC_H
 #define __SDC_H
 
-#include "types.h"
+#include "sys_types.h"
 
 //
 // Definitions for GABE's internal SD card controller

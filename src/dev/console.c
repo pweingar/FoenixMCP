@@ -14,7 +14,7 @@
 #include <string.h>
 #include "features.h"
 #include "log.h"
-#include "types.h"
+#include "sys_types.h"
 #include "constants.h"
 #include "dev/channel.h"
 #include "dev/console.h"

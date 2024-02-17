@@ -12,7 +12,7 @@
 #ifndef __c256_vicky_ii__
 #define __c256_vicky_ii__
 
-#include "types.h"
+#include "sys_types.h"
 #include <stdint.h>
 
 /**

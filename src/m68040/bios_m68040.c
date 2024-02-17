@@ -5,7 +5,7 @@
  */
 
 #include "log.h"
-#include "types.h"
+#include "sys_types.h"
 #include "syscalls.h"
 #include "interrupt.h"
 #include "memory.h"

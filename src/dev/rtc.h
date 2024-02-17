@@ -5,18 +5,7 @@
 #ifndef __RTC_H
 #define __RTC_H
 
-#include "types.h"
-
-typedef struct s_time {
-    short year;
-    short month;
-    short day;
-    short hour;
-    short minute;
-    short second;
-    short is_pm;
-    short is_24hours;
-} t_time, *p_time;
+#include "sys_types.h"
 
 /*
  * Initialize the RTC

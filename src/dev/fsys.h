@@ -6,28 +6,9 @@
 #define __FSYS_H
 
 #include "constants.h"
-#include "types.h"
+#include "sys_types.h"
 
 #define DEFAULT_CHUNK_SIZE  256
-
-/**
- * Type for directory information about a file
- */
-typedef struct s_file_info {
-    long size;
-    unsigned short date;
-    unsigned short time;
-    unsigned char attributes;
-    char name[MAX_PATH_LEN];
-} t_file_info, * p_file_info;
-
-/*
- * Pointer type for file loaders
- *
- * short loader(short chan, destination, start);
- */
-
-typedef short (*p_file_loader)(short chan, long destination, long * start);
 
 /**
  * Initialize the file system

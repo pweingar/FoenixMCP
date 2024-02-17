@@ -10,7 +10,7 @@
 #define __GABE_H_
 
 #include <stdint.h>
-#include "types.h"
+#include "sys_types.h"
 
 #define GABE_MSTR_CTRL			((volatile __attribute__((far)) uint8_t *)0xafe880)
 #define GABE_CTRL_PWR_LED		0x01     	// Controls the LED in the Front of the case (Next to the reset button)

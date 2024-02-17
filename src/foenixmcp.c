@@ -43,6 +43,7 @@
 #include "dev/channel.h"
 #include "dev/console.h"
 #include "dev/fdc.h"
+#include "dev/fsys.h"
 #include "dev/lpt.h"
 #include "dev/midi.h"
 #include "dev/pata.h"

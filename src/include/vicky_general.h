@@ -5,7 +5,7 @@
 #ifndef __vicky_general_h
 #define __vicky_general_h
 
-#include "types.h"
+#include "sys_types.h"
 #include "sys_general.h"
 
 #if MODEL == MODEL_FOENIX_A2560K || MODEL == MODEL_FOENIX_GENX || MODEL == MODEL_FOENIX_A2560X

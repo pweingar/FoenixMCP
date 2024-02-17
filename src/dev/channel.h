@@ -9,7 +9,8 @@
 #ifndef __CHANNEL_H
 #define __CHANNEL_H
 
-#include "types.h"
+#include "constants.h"
+#include "sys_types.h"
 
 /*
  * Preset channel device numbers
@@ -18,14 +19,6 @@
 #define CDEV_DEVICES_MAX    8       // The maximum number of channel devices we will support
 #define CHAN_MAX            16      // The maximum number of open channels we will support
 #define CHAN_DATA_SIZE      32      // The number of bytes in the channel's data area
-
-#define CDEV_CONSOLE 0
-#define CDEV_EVID 1
-#define CDEV_COM1 2
-#define CDEV_COM2 3
-#define CDEV_LPT 4
-#define CDEV_MIDI 5
-#define CDEV_FILE 6
 
 /*
  * Channel status bits

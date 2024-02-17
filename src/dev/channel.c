@@ -19,7 +19,7 @@
 #include "dev/channel.h"
 #include "errors.h"
 #include "simpleio.h"
-#include "types.h"
+#include "sys_types.h"
 #include "log.h"
 
 t_dev_chan g_channel_devs[CDEV_DEVICES_MAX];

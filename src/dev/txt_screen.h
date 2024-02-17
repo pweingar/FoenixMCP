@@ -7,7 +7,7 @@
 #ifndef __TXT_SCREEN_H
 #define __TXT_SCREEN_H
 
-#include "types.h"
+#include "sys_types.h"
 
 #define TXT_CNT_SCREENS 5       /**< The maximum number of screens supported */
 
@@ -17,19 +17,7 @@
 #define TXT_MODE_TILE   0x0008  /**< The bit to enable tile graphics mode */
 #define TXT_MODE_SLEEP  0x0010  /**< The bit to put the monitor to sleep by disabling sync */
 
-/**
- * @struct s_txt_capabilities
- *
- * A description of a screen's capabilities
- */
-typedef struct s_txt_capabilities {
-    short number;               /**< The unique ID of the screen */
-    short supported_modes;      /**< The display modes supported on this screen */
-    short font_size_count;      /**< The number of supported font sizes */
-    p_extent font_sizes;        /**< Pointer to a list of t_extent listing all supported font sizes */
-    short resolution_count;     /**< The number of supported display resolutions */
-    p_extent resolutions;       /**< Pointer to a list of t_extent listing all supported display resolutions (in pixels) */
-} t_txt_capabilities, *p_txt_capabilities;
+
 
 typedef void (*p_init)();
 typedef const p_txt_capabilities (*p_get_capabilities)();

@@ -7,7 +7,7 @@
 #include "simpleio.h"
 #include "sys_general.h"
 #include "syscalls.h"
-#include "types.h"
+#include "sys_types.h"
 #include "mem_cmds.h"
 
 /* Pointer to a function taking void and returning void */

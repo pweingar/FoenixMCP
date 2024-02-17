@@ -11,7 +11,7 @@
 #include "dev/block.h"
 #include "dev/fdc.h"
 #include "log.h"
-#include "types.h"
+#include "sys_types.h"
 #include "timers.h"
 #include "fdc.h"
 #include "fdc_reg.h"
