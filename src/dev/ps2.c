@@ -1132,7 +1132,7 @@ short mouse_init() {
  * Returns:
  * 0 on success, a negative number if there was an error
  */
-short kbd_layout(const char * tables) {
+SYSTEMCALL short kbd_layout(const char * tables) {
     short i;
 
     /* Are we resetting the tables? */

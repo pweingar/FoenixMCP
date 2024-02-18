@@ -5,6 +5,7 @@
 #ifndef __RTC_H
 #define __RTC_H
 
+#include "sys_macros.h"
 #include "sys_types.h"
 
 /*
@@ -23,7 +24,7 @@ extern void rtc_enable_ticks();
  * Inputs:
  * time = pointer to a t_time record containing the correct time
  */
-extern void rtc_set_time(p_time time);
+extern SYSTEMCALL void rtc_set_time(p_time time);
 
 /*
  * Get the time on the RTC
@@ -31,7 +32,7 @@ extern void rtc_set_time(p_time time);
  * Inputs:
  * time = pointer to a t_time record in which to put the current time
  */
-extern void rtc_get_time(p_time time);
+extern SYSTEMCALL void rtc_get_time(p_time time);
 
 /*
  * Get the number of jiffies since the system last booted.

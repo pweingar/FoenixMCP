@@ -39,7 +39,7 @@ void timers_init() {
 /*
  * Return the number of jiffies (1/60 of a second) since last reset time
  */
-long timers_jiffies() {
+SYSTEMCALL long timers_jiffies() {
     // return jiffy_count;
     return *TIMER_VALUE_3;
 }

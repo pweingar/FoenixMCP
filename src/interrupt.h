@@ -6,6 +6,7 @@
 #define __INTERRUPT_H
 
 #include "sys_general.h"
+#include "sys_macros.h"
 #include "sys_types.h"
 
 /*
@@ -221,7 +222,7 @@ extern void int_init();
  * Returns:
  * a machine dependent representation of the interrupt masking prior to enabling
  */
-extern short int_enable_all();
+extern SYSTEMCALL short int_enable_all();
 
 /*
  * Disable all interrupts
@@ -231,7 +232,7 @@ extern short int_enable_all();
  * Returns:
  * a machine dependent representation of the interrupt masking prior to disabling
  */
-extern short int_disable_all();
+extern SYSTEMCALL short int_disable_all();
 
 /*
  * Restore interrupt masking state returned by a previous call to int_enable/int_disable
@@ -241,7 +242,7 @@ extern short int_disable_all();
  * Inputs:
  * int_mask = machine dependent representation of the interrupt masking
  */
-extern void int_restore(short int_mask);
+extern SYSTEMCALL void int_restore(short int_mask);
 
 /*
  * Disable an interrupt by masking it
@@ -249,7 +250,7 @@ extern void int_restore(short int_mask);
  * Inputs:
  * n = the number of the interrupt: n[7..4] = group number, n[3..0] = individual number.
  */
-extern void int_disable(unsigned short n);
+extern SYSTEMCALL void int_disable(unsigned short n);
 
 /*
  * Enable an interrupt
@@ -257,7 +258,7 @@ extern void int_disable(unsigned short n);
  * Inputs:
  * n = the number of the interrupt
  */
-extern void int_enable(unsigned short n);
+extern SYSTEMCALL void int_enable(unsigned short n);
 
 /*
  * Register a handler for a given interrupt.
@@ -269,7 +270,7 @@ extern void int_enable(unsigned short n);
  * Returns:
  * the pointer to the previous interrupt handler
  */
-extern p_int_handler int_register(unsigned short n, p_int_handler handler);
+extern SYSTEMCALL p_int_handler int_register(unsigned short n, p_int_handler handler);
 
 /*
  * Return true (non-zero) if an interrupt is pending for the given interrupt
@@ -280,7 +281,7 @@ extern p_int_handler int_register(unsigned short n, p_int_handler handler);
  * Returns:
  * non-zero if interrupt n is pending, 0 if not
  */
-extern short int_pending(unsigned short n);
+extern SYSTEMCALL short int_pending(unsigned short n);
 
 /*
  * Acknowledge an interrupt (clear out its pending flag)
@@ -288,6 +289,6 @@ extern short int_pending(unsigned short n);
  * Inputs:
  * n = the number of the interrupt: n[7..4] = group number, n[3..0] = individual number.
  */
-extern void int_clear(unsigned short n);
+extern SYSTEMCALL void int_clear(unsigned short n);
 
 #endif

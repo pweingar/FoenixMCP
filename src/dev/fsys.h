@@ -6,6 +6,7 @@
 #define __FSYS_H
 
 #include "constants.h"
+#include "sys_macros.h"
 #include "sys_types.h"
 
 #define DEFAULT_CHUNK_SIZE  256
@@ -28,7 +29,7 @@ extern short fsys_init();
  * Returns:
  * the channel ID for the open file (negative if error)
  */
-extern short fsys_open(const char * path, short mode);
+extern SYSTEMCALL short fsys_open(const char * path, short mode);
 
 /**
  * Close access to a previously open file.
@@ -39,7 +40,7 @@ extern short fsys_open(const char * path, short mode);
  * Returns:
  * 0 on success, negative number on failure
  */
-extern short fsys_close(short fd);
+extern SYSTEMCALL short fsys_close(short fd);
 
 /**
  * N.B.: fsys_open returns a channel ID, and fsys_close accepts a channel ID.
@@ -56,7 +57,7 @@ extern short fsys_close(short fd);
  * Returns:
  * the handle to the directory if >= 0. An error if < 0
  */
-extern short fsys_opendir(const char * path);
+extern SYSTEMCALL short fsys_opendir(const char * path);
 
 /**
  * Close a previously open directory
@@ -67,7 +68,7 @@ extern short fsys_opendir(const char * path);
  * Returns:
  * 0 on success, negative number on error
  */
-extern short fsys_closedir(short dir);
+extern SYSTEMCALL short fsys_closedir(short dir);
 
 /**
  * Attempt to read an entry from an open directory
@@ -79,7 +80,7 @@ extern short fsys_closedir(short dir);
  * Returns:
  * 0 on success, negative number on failure
  */
-extern short fsys_readdir(short dir, p_file_info file);
+extern SYSTEMCALL short fsys_readdir(short dir, p_file_info file);
 
 /**
  * Open a directory given the path and search for the first file matching the pattern.
@@ -92,7 +93,7 @@ extern short fsys_readdir(short dir, p_file_info file);
  * Returns:
  * the directory handle to use for subsequent calls if >= 0, error if negative
  */
-extern short fsys_findfirst(const char * path, const char * pattern, p_file_info file);
+extern SYSTEMCALL short fsys_findfirst(const char * path, const char * pattern, p_file_info file);
 
 /**
  * Open a directory given the path and search for the first file matching the pattern.
@@ -104,7 +105,7 @@ extern short fsys_findfirst(const char * path, const char * pattern, p_file_info
  * Returns:
  * 0 on success, error if negative
  */
-extern short fsys_findnext(short dir, p_file_info file);
+extern SYSTEMCALL short fsys_findnext(short dir, p_file_info file);
 
 /**
  * Check to see if the file is present.
@@ -115,7 +116,7 @@ extern short fsys_findnext(short dir, p_file_info file);
  * path = the path to the file to check
  * file = pointer to a file info record to fill in, if the file is found.
  */
-extern short fsys_stat(const char * path, p_file_info file);
+extern SYSTEMCALL short fsys_stat(const char * path, p_file_info file);
 
 /*
  * Get the label for the drive holding the path
@@ -124,7 +125,7 @@ extern short fsys_stat(const char * path, p_file_info file);
  * path = path to the drive
  * label = buffer that will hold the label... should be at least 35 bytes
  */
-extern short fsys_getlabel(char * path, char * label);
+extern SYSTEMCALL short fsys_getlabel(char * path, char * label);
 
 /*
  * Set the label for the drive holding the path
@@ -133,7 +134,7 @@ extern short fsys_getlabel(char * path, char * label);
  * drive = drive number
  * label = buffer that holds the label
  */
-extern short fsys_setlabel(short drive, const char * label);
+extern SYSTEMCALL short fsys_setlabel(short drive, const char * label);
 
 /*
  * Format a drive
@@ -142,7 +143,7 @@ extern short fsys_setlabel(short drive, const char * label);
  * drive = drive number
  * label = the label to apply to the drive
  */
-extern short fsys_mkfs(short drive, char * label);
+extern SYSTEMCALL short fsys_mkfs(short drive, char * label);
 
 /**
  * Create a directory
@@ -153,7 +154,7 @@ extern short fsys_mkfs(short drive, char * label);
  * Returns:
  * 0 on success, negative number on failure.
  */
-extern short fsys_mkdir(const char * path);
+extern SYSTEMCALL short fsys_mkdir(const char * path);
 
 /**
  * Delete a file or directory
@@ -164,7 +165,7 @@ extern short fsys_mkdir(const char * path);
  * Returns:
  * 0 on success, negative number on failure.
  */
-extern short fsys_delete(const char * path);
+extern SYSTEMCALL short fsys_delete(const char * path);
 
 /**
  * Rename a file or directory
@@ -176,7 +177,7 @@ extern short fsys_delete(const char * path);
  * Returns:
  * 0 on success, negative number on failure.
  */
-extern short fsys_rename(const char * old_path, const char * new_path);
+extern SYSTEMCALL short fsys_rename(const char * old_path, const char * new_path);
 
 /**
  * Change the current working directory (and drive)
@@ -187,7 +188,7 @@ extern short fsys_rename(const char * old_path, const char * new_path);
  * Returns:
  * 0 on success, negative number on failure.
  */
-extern short fsys_set_cwd(const char * path);
+extern SYSTEMCALL short fsys_set_cwd(const char * path);
 
 /**
  * Get the current working drive and directory
@@ -199,7 +200,7 @@ extern short fsys_set_cwd(const char * path);
  * Returns:
  * 0 on success, negative number on failure.
  */
-extern short fsys_get_cwd(char * path, short size);
+extern SYSTEMCALL short fsys_get_cwd(char * path, short size);
 
 /*
  * Load a file into memory at the designated destination address.
@@ -217,7 +218,7 @@ extern short fsys_get_cwd(char * path, short size);
  * Returns:
  * 0 on success, negative number on error
  */
-extern short fsys_load(const char * path, long destination, long * start);
+extern SYSTEMCALL short fsys_load(const char * path, long destination, long * start);
 
 /*
  * Register a file loading routine
@@ -232,6 +233,6 @@ extern short fsys_load(const char * path, long destination, long * start);
  * Returns:
  * 0 on success, negative number on error
  */
-extern short fsys_register_loader(const char * extension, p_file_loader loader);
+extern SYSTEMCALL short fsys_register_loader(const char * extension, p_file_loader loader);
 
 #endif

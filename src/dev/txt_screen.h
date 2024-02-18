@@ -7,6 +7,7 @@
 #ifndef __TXT_SCREEN_H
 #define __TXT_SCREEN_H
 
+#include "sys_macros.h"
 #include "sys_types.h"
 
 #define TXT_CNT_SCREENS 5       /**< The maximum number of screens supported */
@@ -101,7 +102,7 @@ extern void txt_init_screen(short screen);
  *
  * @return a pointer to the read-only description (0 on error)
  */
-extern const p_txt_capabilities txt_get_capabilities(short screen);
+extern SYSTEMCALL const p_txt_capabilities txt_get_capabilities(short screen);
 
 /**
  * Set the display mode for the screen
@@ -111,14 +112,14 @@ extern const p_txt_capabilities txt_get_capabilities(short screen);
  *
  * @return 0 on success, any other number means the mode is invalid for the screen
  */
-extern short txt_set_mode(short screen, short mode);
+extern SYSTEMCALL short txt_set_mode(short screen, short mode);
 
 /**
  * Recalculate the size of the text screen
  *
  * @return 0 on success, any other number means the mode is invalid for the screen
  */
-extern short txt_setsizes(short screen);
+extern SYSTEMCALL short txt_setsizes(short screen);
 
 /**
  * Set the display resolution of the screen
@@ -129,7 +130,7 @@ extern short txt_setsizes(short screen);
  *
  * @return 0 on success, any other number means the resolution is unsupported
  */
-extern short txt_set_resolution(short screen, short width, short height);
+extern SYSTEMCALL short txt_set_resolution(short screen, short width, short height);
 
 /**
  * Set the size of the border of the screen (if supported)
@@ -138,7 +139,7 @@ extern short txt_set_resolution(short screen, short width, short height);
  * @param width the horizontal size of one side of the border (0 - 32 pixels)
  * @param height the vertical size of one side of the border (0 - 32 pixels)
  */
-extern void txt_set_border(short screen, short width, short height);
+extern SYSTEMCALL void txt_set_border(short screen, short width, short height);
 
 /**
  * Set the size of the border of the screen (if supported)
@@ -148,7 +149,7 @@ extern void txt_set_border(short screen, short width, short height);
  * @param green the green component of the color (0 - 255)
  * @param blue the blue component of the color (0 - 255)
  */
-extern void txt_set_border_color(short screen, unsigned char red, unsigned char green, unsigned char blue);
+extern SYSTEMCALL void txt_set_border_color(short screen, unsigned char red, unsigned char green, unsigned char blue);
 
 /**
  * Load a font as the current font for the screen
@@ -158,7 +159,7 @@ extern void txt_set_border_color(short screen, unsigned char red, unsigned char 
  * @param height of a character in pixels
  * @param data pointer to the raw font data to be loaded
  */
-extern short txt_set_font(short screen, short width, short height, const unsigned char * data);
+extern SYSTEMCALL short txt_set_font(short screen, short width, short height, const unsigned char * data);
 
 /**
  * Set the appearance of the cursor
@@ -168,7 +169,7 @@ extern short txt_set_font(short screen, short width, short height, const unsigne
  * @param rate the blink rate for the cursor (0=1s, 1=0.5s, 2=0.25s, 3=1/5s)
  * @param c the character in the current font to use as a cursor
  */
-extern void txt_set_cursor(short screen, short enable, short rate, char c);
+extern SYSTEMCALL void txt_set_cursor(short screen, short enable, short rate, char c);
 
 /**
  * Set the appearance of the cursor
@@ -176,7 +177,7 @@ extern void txt_set_cursor(short screen, short enable, short rate, char c);
  * @param screen the number of the text device
  * @param enable 0 to hide, any other number to make visible
  */
-extern void txt_set_cursor_visible(short screen, short enable);
+extern SYSTEMCALL void txt_set_cursor_visible(short screen, short enable);
 
 /**
  * Get the current region.
@@ -186,7 +187,7 @@ extern void txt_set_cursor_visible(short screen, short enable);
  *
  * @return 0 on success, any other number means the region was invalid
  */
-extern short txt_get_region(short screen, p_rect region);
+extern SYSTEMCALL short txt_get_region(short screen, p_rect region);
 
 /**
  * Set a region to restrict further character display, scrolling, etc.
@@ -197,7 +198,7 @@ extern short txt_get_region(short screen, p_rect region);
  *
  * @return 0 on success, any other number means the region was invalid
  */
-extern short txt_set_region(short screen, p_rect region);
+extern SYSTEMCALL short txt_set_region(short screen, p_rect region);
 
 /**
  * Set the default foreground and background colors for printing
@@ -206,7 +207,7 @@ extern short txt_set_region(short screen, p_rect region);
  * @param foreground the Text LUT index of the new current foreground color (0 - 15)
  * @param background the Text LUT index of the new current background color (0 - 15)
  */
-extern short txt_set_color(short screen, unsigned char foreground, unsigned char background);
+extern SYSTEMCALL short txt_set_color(short screen, unsigned char foreground, unsigned char background);
 
 /*
  * Get the foreground and background color for printing
@@ -216,7 +217,7 @@ extern short txt_set_color(short screen, unsigned char foreground, unsigned char
  * foreground = pointer to the foreground color number
  * background = pointer to the background color number
  */
-extern void txt_get_color(short screen, unsigned char * foreground, unsigned char * background);
+extern SYSTEMCALL void txt_get_color(short screen, unsigned char * foreground, unsigned char * background);
 
 /**
  * Set the position of the cursor to (x, y) relative to the current region
@@ -228,7 +229,7 @@ extern void txt_get_color(short screen, unsigned char * foreground, unsigned cha
  * @param x the column for the cursor
  * @param y the row for the cursor
  */
-extern void txt_set_xy(short screen, short x, short y);
+extern SYSTEMCALL void txt_set_xy(short screen, short x, short y);
 
 /**
  * Get the position of the cursor (x, y) relative to the current region
@@ -236,7 +237,7 @@ extern void txt_set_xy(short screen, short x, short y);
  * @param screen the number of the text device
  * @param position pointer to a t_point record to fill out
  */
-extern void txt_get_xy(short screen, p_point position);
+extern SYSTEMCALL void txt_get_xy(short screen, p_point position);
 
 /**
  * Print a character to the current cursor position in the current color
@@ -253,7 +254,7 @@ extern void txt_get_xy(short screen, p_point position);
  * @param screen the number of the text device
  * @param c the character to print
  */
-extern void txt_put(short screen, char c);
+extern SYSTEMCALL void txt_put(short screen, char c);
 
 /*
  * Send a character to the screen without any escape code interpretation
@@ -271,7 +272,7 @@ extern void text_put_raw(short screen, char c);
  * @param screen the number of the text device
  * @param c the ASCII Z string to print
  */
-extern void txt_print(short screen, const char * message);
+extern SYSTEMCALL void txt_print(short screen, const char * message);
 
 /**
  * Scroll the text in the current region
@@ -337,6 +338,6 @@ extern void txt_delete(short screen, short count);
  * @param text_size the size of the screen in visible characters (may be null)
  * @param pixel_size the size of the screen in pixels (may be null)
  */
-extern void txt_get_sizes(short screen, p_extent text_size, p_extent pixel_size);
+extern SYSTEMCALL void txt_get_sizes(short screen, p_extent text_size, p_extent pixel_size);
 
 #endif

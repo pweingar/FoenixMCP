@@ -9,6 +9,8 @@
 #ifndef __PROC_H
 #define __PROC_H
 
+#include "sys_macros.h"
+
 /*
  * Start a user mode process
  *
@@ -29,7 +31,7 @@ extern void proc_exec(long start, long stack, int argc, char * argv[]);
  *
  * Inputs:
  */
-extern void proc_exit(int result);
+extern SYSTEMCALL void proc_exit(int result);
 
 /*
  * Return the result code of the previously running user process
@@ -47,6 +49,6 @@ extern int proc_get_result();
  * Returns:
  * returns an error code on failure, will not return on success
  */
-extern short proc_run(const char * path, int argc, char * argv[]);
+extern SYSTEMCALL short proc_run(const char * path, int argc, char * argv[]);
 
 #endif

@@ -120,7 +120,7 @@ void fsys_update_stat(const char * path) {
  * Returns:
  * the channel ID for the open file (negative if error)
  */
-short fsys_open(const char * path, short mode) {
+SYSTEMCALL short fsys_open(const char * path, short mode) {
     p_channel chan = 0;
     short i, fd = -1;
 
@@ -180,7 +180,7 @@ short fsys_open(const char * path, short mode) {
  * Returns:
  * 0 on success, negative number on failure
  */
-short fsys_close(short c) {
+SYSTEMCALL short fsys_close(short c) {
     p_channel chan = 0;
     short fd = 0;
 
@@ -209,7 +209,7 @@ short fsys_close(short c) {
  * Returns:
  * the handle to the directory if >= 0. An error if < 0
  */
-short fsys_opendir(const char * path) {
+SYSTEMCALL short fsys_opendir(const char * path) {
     short i;
     short dir = -1;
     FRESULT fres;
@@ -257,7 +257,7 @@ short fsys_opendir(const char * path) {
  * Returns:
  * 0 on success, negative number on error
  */
-short fsys_closedir(short dir) {
+SYSTEMCALL short fsys_closedir(short dir) {
     if (g_dir_state[dir]) {
         /* Close and deallocate the handle */
         f_closedir(&g_directory[dir]);
@@ -277,7 +277,7 @@ short fsys_closedir(short dir) {
  * Returns:
  * 0 on success, negative number on failure
  */
-short fsys_readdir(short dir, p_file_info file) {
+SYSTEMCALL short fsys_readdir(short dir, p_file_info file) {
     FILINFO finfo;
 
     if (g_dir_state[dir]) {
@@ -316,7 +316,7 @@ short fsys_readdir(short dir, p_file_info file) {
  * path = the path to the file to check
  * file = pointer to a file info record to fill in, if the file is found.
  */
-short fsys_stat(const char * path, p_file_info file) {
+SYSTEMCALL short fsys_stat(const char * path, p_file_info file) {
 	FRESULT fres;
 	FILINFO finfo;
 	char match1[10], match2[10];
@@ -383,7 +383,7 @@ short fsys_stat(const char * path, p_file_info file) {
  * Returns:
  * the directory handle to use for subsequent calls if >= 0, error if negative
  */
-short fsys_findfirst(const char * path, const char * pattern, p_file_info file) {
+SYSTEMCALL short fsys_findfirst(const char * path, const char * pattern, p_file_info file) {
     FILINFO finfo;
     FRESULT fres = -1;
     short dir = 0;
@@ -441,7 +441,7 @@ short fsys_findfirst(const char * path, const char * pattern, p_file_info file) 
  * Returns:
  * 0 on success, error if negative
  */
-short fsys_findnext(short dir, p_file_info file) {
+SYSTEMCALL short fsys_findnext(short dir, p_file_info file) {
     FILINFO finfo;
     FRESULT fres;
 
@@ -482,7 +482,7 @@ short fsys_findnext(short dir, p_file_info file) {
  * Returns:
  * 0 on success, negative number on failure.
  */
-short fsys_mkdir(const char * path) {
+SYSTEMCALL short fsys_mkdir(const char * path) {
     FRESULT result;
 
     TRACE("fsys_mkdir");
@@ -509,7 +509,7 @@ short fsys_mkdir(const char * path) {
  * Returns:
  * 0 on success, negative number on failure.
  */
-short fsys_delete(const char * path) {
+SYSTEMCALL short fsys_delete(const char * path) {
     FRESULT result;
 
 	// If the path being deleted is on the floppy drive, make sure the FDC status
@@ -535,7 +535,7 @@ short fsys_delete(const char * path) {
  * Returns:
  * 0 on success, negative number on failure.
  */
-short fsys_rename(const char * old_path, const char * new_path) {
+SYSTEMCALL short fsys_rename(const char * old_path, const char * new_path) {
     FRESULT fres;
 
 	// If the path being renamed is on the floppy drive, make sure the FDC status
@@ -559,7 +559,7 @@ short fsys_rename(const char * old_path, const char * new_path) {
  * Returns:
  * 0 on success, negative number on failure.
  */
-short fsys_set_cwd(const char * path) {
+SYSTEMCALL short fsys_set_cwd(const char * path) {
     FRESULT result;
 
 	/* Send the path to FatFS */
@@ -584,7 +584,7 @@ short fsys_set_cwd(const char * path) {
  * Returns:
  * 0 on success, negative number on failure.
  */
-short fsys_get_cwd(char * path, short size) {
+SYSTEMCALL short fsys_get_cwd(char * path, short size) {
     strncpy(path, g_current_directory, size);
 	return 0;
 }

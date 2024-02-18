@@ -31,7 +31,7 @@ void mem_init(unsigned long top_of_ram) {
  *
  * @return the address of the first byte of reserved system RAM (one above the last byte the user program can use)
  */
-unsigned long mem_get_ramtop() {
+SYSTEMCALL unsigned long mem_get_ramtop() {
     return mem_top_of_ram;
 }
 
@@ -41,7 +41,7 @@ unsigned long mem_get_ramtop() {
  * @param bytes the number of bytes to reserve
  * @return address of the first byte of the reserved block
  */
-unsigned long mem_reserve(unsigned long bytes) {
+SYSTEMCALL unsigned long mem_reserve(unsigned long bytes) {
     mem_top_of_ram -= bytes;
     return mem_top_of_ram;
 }

@@ -57,7 +57,7 @@ void int_init() {
  * Inputs:
  * n = the number of the interrupt: n[7..4] = group number, n[3..0] = individual number.
  */
-void int_disable(unsigned short n) {
+SYSTEMCALL void int_disable(unsigned short n) {
 	/* Find the group (the relevant interrupt mask register) for the interrupt */
 	unsigned short group = int_group(n);
 
@@ -79,7 +79,7 @@ void int_disable(unsigned short n) {
  * Inputs:
  * n = the number of the interrupt: n[7..4] = group number, n[3..0] = individual number.
  */
-void int_enable(unsigned short n) {
+SYSTEMCALL void int_enable(unsigned short n) {
 	/* Find the group (the relevant interrupt mask register) for the interrupt */
 	unsigned short group = int_group(n);
 
@@ -101,7 +101,7 @@ void int_enable(unsigned short n) {
  * Returns:
  * the pointer to the previous interrupt handler
  */
-p_int_handler int_register(unsigned short n, p_int_handler handler) {
+SYSTEMCALL p_int_handler int_register(unsigned short n, p_int_handler handler) {
 	if (n < MAX_HANDLERS) {
 		p_int_handler old_handler = g_int_handler[n];
 		g_int_handler[n] = handler;
@@ -120,7 +120,7 @@ p_int_handler int_register(unsigned short n, p_int_handler handler) {
  * Returns:
  * non-zero if interrupt n is pending, 0 if not
  */
-short int_pending(unsigned short n) {
+SYSTEMCALL short int_pending(unsigned short n) {
 	/* Find the group (the relevant interrupt mask register) for the interrupt */
 	unsigned short group = int_group(n);
 
@@ -137,7 +137,7 @@ short int_pending(unsigned short n) {
  * Inputs:
  * n = the number of the interrupt: n[7..4] = group number, n[3..0] = individual number.
  */
-void int_clear(unsigned short n) {
+SYSTEMCALL void int_clear(unsigned short n) {
 	/* Find the group (the relevant interrupt mask register) for the interrupt */
 	unsigned short group = int_group(n);
 

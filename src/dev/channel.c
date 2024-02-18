@@ -186,7 +186,7 @@ short cdev_init(short dev) {
  * Returns:
  * the number of the channel opened, negative number on error
  */
-short chan_open(short dev, const uint8_t * path, short mode) {
+SYSTEMCALL short chan_open(short dev, const uint8_t * path, short mode) {
     short result;
     p_channel chan;
     p_dev_chan cdev;
@@ -238,7 +238,7 @@ short chan_open(short dev, const uint8_t * path, short mode) {
  * Returns:
  * nothing useful
  */
-short chan_close(short channel) {
+SYSTEMCALL short chan_close(short channel) {
     TRACE1("chan_close(%d)", channel);
     p_channel chan;
     p_dev_chan cdev;
@@ -263,7 +263,7 @@ short chan_close(short channel) {
 // Returns:
 //  number of bytes read, any negative number is an error code
 //
-short chan_read(short channel, uint8_t * buffer, short size) {
+SYSTEMCALL short chan_read(short channel, uint8_t * buffer, short size) {
     p_channel chan;
     p_dev_chan cdev;
     short res;
@@ -291,7 +291,7 @@ short chan_read(short channel, uint8_t * buffer, short size) {
 // Returns:
 //  number of bytes read, any negative number is an error code
 //
-short chan_readline(short channel, uint8_t * buffer, short size) {
+SYSTEMCALL short chan_readline(short channel, uint8_t * buffer, short size) {
     p_channel chan;
     p_dev_chan cdev;
     short res;
@@ -318,7 +318,7 @@ short chan_readline(short channel, uint8_t * buffer, short size) {
 // Returns:
 //  the value read (if negative, error)
 //
-short chan_read_b(short channel) {
+SYSTEMCALL short chan_read_b(short channel) {
     p_channel chan;
     p_dev_chan cdev;
     short res;
@@ -346,7 +346,7 @@ short chan_read_b(short channel) {
 // Returns:
 //  number of bytes written, any negative number is an error code
 //
-short chan_write(short channel, const uint8_t * buffer, short size) {
+SYSTEMCALL short chan_write(short channel, const uint8_t * buffer, short size) {
     p_channel chan;
     p_dev_chan cdev;
     short res;
@@ -371,7 +371,7 @@ short chan_write(short channel, const uint8_t * buffer, short size) {
 // Returns:
 //  0 on success, a negative value on error
 //
-short chan_write_b(short channel, uint8_t b) {
+SYSTEMCALL short chan_write_b(short channel, uint8_t b) {
     p_channel chan;
     p_dev_chan cdev;
     short res;
@@ -396,7 +396,7 @@ short chan_write_b(short channel, uint8_t b) {
 // Returns:
 //  the status of the device
 //
-short chan_status(short channel) {
+SYSTEMCALL short chan_status(short channel) {
     p_channel chan;
     p_dev_chan cdev;
     short res;
@@ -419,7 +419,7 @@ short chan_status(short channel) {
 // Returns:
 //  0 on success, any negative number is an error code
 //
-short chan_flush(short channel) {
+SYSTEMCALL short chan_flush(short channel) {
     p_channel chan;
     p_dev_chan cdev;
     short res;
@@ -445,7 +445,7 @@ short chan_flush(short channel) {
  * Returns:
  *  0 = success, a negative number is an error.
  */
-short chan_seek(short channel, long position, short base) {
+SYSTEMCALL short chan_seek(short channel, long position, short base) {
     p_channel chan;
     p_dev_chan cdev;
     short res;
@@ -471,7 +471,7 @@ short chan_seek(short channel, long position, short base) {
 // Returns:
 //  0 on success, any negative number is an error code
 //
-short chan_ioctrl(short channel, short command, uint8_t * buffer, short size) {
+SYSTEMCALL short chan_ioctrl(short channel, short command, uint8_t * buffer, short size) {
     p_channel chan;
     p_dev_chan cdev;
     short res;

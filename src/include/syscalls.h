@@ -13,17 +13,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include "constants.h"
+#include "sys_macros.h"
 #include "sys_types.h"
-
-/*
- * Define the machine-specific system call function prefix
- */
-
-#ifdef __CALYPSI_CORE_65816__
-#define SYSTEMCALL __attribute__((simple_call))
-#else
-#define SYSTEMCALL
-#endif
 
 /*
  * Syscall function numbers

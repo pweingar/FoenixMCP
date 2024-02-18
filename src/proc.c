@@ -53,7 +53,7 @@ void proc_exec(long start, long stack, int argc, char * argv[]) {
  *
  * Inputs:
  */
-void proc_exit(int result) {
+SYSTEMCALL void proc_exit(int result) {
     g_proc_result = result;
     restart_cli();
 }
@@ -76,7 +76,7 @@ int proc_get_result() {
  * Returns:
  * returns an error code on failure, will not return on success
  */
-short proc_run(const char * path, int argc, char * argv[]) {
+SYSTEMCALL short proc_run(const char * path, int argc, char * argv[]) {
 
     TRACE1("proc_run(\"%s\")", path);
 

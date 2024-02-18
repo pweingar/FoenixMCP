@@ -126,7 +126,7 @@ void txt_init_screen(short screen) {
  *
  * @return a pointer to the read-only description (0 on error)
  */
-const p_txt_capabilities txt_get_capabilities(short screen) {
+SYSTEMCALL const p_txt_capabilities txt_get_capabilities(short screen) {
     TRACE("txt_get_capabilities");
     p_txt_device device = txt_get_device(screen);
     if (device) {
@@ -144,7 +144,7 @@ const p_txt_capabilities txt_get_capabilities(short screen) {
  *
  * @return 0 on success, any other number means the mode is invalid for the screen
  */
-short txt_set_mode(short screen, short mode) {
+SYSTEMCALL short txt_set_mode(short screen, short mode) {
     TRACE("txt_set_mode");
     p_txt_device device = txt_get_device(screen);
     if (device) {
@@ -160,7 +160,7 @@ short txt_set_mode(short screen, short mode) {
  *
  * @return 0 on success, any other number means the mode is invalid for the screen
  */
-short txt_setsizes(short screen) {
+SYSTEMCALL short txt_setsizes(short screen) {
     TRACE("txt_setsizes");
     p_txt_device device = txt_get_device(screen);
     if (device) {
@@ -181,7 +181,7 @@ short txt_setsizes(short screen) {
  *
  * @return 0 on success, any other number means the resolution is unsupported
  */
-short txt_set_resolution(short screen, short width, short height) {
+SYSTEMCALL short txt_set_resolution(short screen, short width, short height) {
     TRACE("txt_set_resolution");
     p_txt_device device = txt_get_device(screen);
     if (device) {
@@ -199,7 +199,7 @@ short txt_set_resolution(short screen, short width, short height) {
  * @param width the horizontal size of one side of the border (0 - 32 pixels)
  * @param height the vertical size of one side of the border (0 - 32 pixels)
  */
-void txt_set_border(short screen, short width, short height) {
+SYSTEMCALL void txt_set_border(short screen, short width, short height) {
     TRACE("txt_set_border");
     p_txt_device device = txt_get_device(screen);
     if (device) {
@@ -217,7 +217,7 @@ void txt_set_border(short screen, short width, short height) {
  * @param green the green component of the color (0 - 255)
  * @param blue the blue component of the color (0 - 255)
  */
-void txt_set_border_color(short screen, unsigned char red, unsigned char green, unsigned char blue) {
+SYSTEMCALL void txt_set_border_color(short screen, unsigned char red, unsigned char green, unsigned char blue) {
     TRACE("txt_set_border_color");
     p_txt_device device = txt_get_device(screen);
     if (device) {
@@ -235,7 +235,7 @@ void txt_set_border_color(short screen, unsigned char red, unsigned char green, 
  * @param height of a character in pixels
  * @param data pointer to the raw font data to be loaded
  */
-short txt_set_font(short screen, short width, short height, const unsigned char * data) {
+SYSTEMCALL short txt_set_font(short screen, short width, short height, const unsigned char * data) {
     TRACE("txt_set_font");
     p_txt_device device = txt_get_device(screen);
     if (device) {
@@ -254,7 +254,7 @@ short txt_set_font(short screen, short width, short height, const unsigned char 
  * @param rate the blink rate for the cursor (0=1s, 1=0.5s, 2=0.25s, 3=1/5s)
  * @param c the character in the current font to use as a cursor
  */
-void txt_set_cursor(short screen, short enable, short rate, char c) {
+SYSTEMCALL void txt_set_cursor(short screen, short enable, short rate, char c) {
     TRACE("txt_set_cursor");
     p_txt_device device = txt_get_device(screen);
     if (device) {
@@ -270,7 +270,7 @@ void txt_set_cursor(short screen, short enable, short rate, char c) {
  * @param screen the number of the text device
  * @param enable 0 to hide, any other number to make visible
  */
-void txt_set_cursor_visible(short screen, short enable) {
+SYSTEMCALL void txt_set_cursor_visible(short screen, short enable) {
     TRACE("txt_set_cursor_visible");
     p_txt_device device = txt_get_device(screen);
     if (device) {
@@ -288,7 +288,7 @@ void txt_set_cursor_visible(short screen, short enable) {
  *
  * @return 0 on success, any other number means the region was invalid
  */
-short txt_get_region(short screen, p_rect region) {
+SYSTEMCALL short txt_get_region(short screen, p_rect region) {
     DEBUG2("txt_get_region screen:%d region:%p", screen, region);
     p_txt_device device = txt_get_device(screen);
     if (device) {
@@ -308,7 +308,7 @@ short txt_get_region(short screen, p_rect region) {
  *
  * @return 0 on success, any other number means the region was invalid
  */
-short txt_set_region(short screen, p_rect region) {
+SYSTEMCALL short txt_set_region(short screen, p_rect region) {
     TRACE5("txt_set_region(%d,{x:%d; y:%d w:%d, h:%d})", (int)screen, (int)region->origin.x, (int)region->origin.y, (int)region->size.width, (int)region->size.height);
     p_txt_device device = txt_get_device(screen);
     if (device) {
@@ -326,7 +326,7 @@ short txt_set_region(short screen, p_rect region) {
  * @param foreground the Text LUT index of the new current foreground color (0 - 15)
  * @param background the Text LUT index of the new current background color (0 - 15)
  */
-short txt_set_color(short screen, unsigned char foreground, unsigned char background) {
+SYSTEMCALL short txt_set_color(short screen, unsigned char foreground, unsigned char background) {
     TRACE3("txt_get_color(%d,%d,%d)", (int)screen, (int)foreground, (int)background);
     p_txt_device device = txt_get_device(screen);
     if (device) {
@@ -345,7 +345,7 @@ short txt_set_color(short screen, unsigned char foreground, unsigned char backgr
  * foreground = pointer to the foreground color number
  * background = pointer to the background color number
  */
-void txt_get_color(short screen, unsigned char * foreground, unsigned char * background) {
+SYSTEMCALL void txt_get_color(short screen, unsigned char * foreground, unsigned char * background) {
     TRACE3("txt_get_color(%d,%p,%p)", (int)screen, foreground, background);
     p_txt_device device = txt_get_device(screen);
     if (device) {
@@ -365,7 +365,7 @@ void txt_get_color(short screen, unsigned char * foreground, unsigned char * bac
  * @param x the column for the cursor
  * @param y the row for the cursor
  */
-void txt_set_xy(short screen, short x, short y) {
+SYSTEMCALL void txt_set_xy(short screen, short x, short y) {
 	DEBUG3("txt_set_xy(%d,%d,%d)", screen, (int)x, (int)y);
     p_txt_device device = txt_get_device(screen);
     if (device) {
@@ -381,7 +381,7 @@ void txt_set_xy(short screen, short x, short y) {
  * @param screen the number of the text device
  * @param position pointer to a t_point record to fill out
  */
-void txt_get_xy(short screen, p_point position) {
+SYSTEMCALL void txt_get_xy(short screen, p_point position) {
     p_txt_device device = txt_get_device(screen);
     if (device) {
         if (device->get_xy) {
@@ -405,7 +405,7 @@ void txt_get_xy(short screen, p_point position) {
  * @param screen the number of the text device
  * @param c the character to print
  */
-void txt_put(short screen, char c) {
+SYSTEMCALL void txt_put(short screen, char c) {
     t_point cursor;
 
     p_txt_device device = txt_get_device(screen);
@@ -464,7 +464,7 @@ void text_put_raw(short screen, char c) {
  * @param screen the number of the text device
  * @param c the ASCII Z string to print
  */
-void txt_print(short screen, const char * message) {
+SYSTEMCALL void txt_print(short screen, const char * message) {
     const char * x = message;
 
     while (*x) {
@@ -714,7 +714,7 @@ void txt_delete(short screen, short count) {
  * @param text_size the size of the screen in visible characters (may be null)
  * @param pixel_size the size of the screen in pixels (may be null)
  */
-void txt_get_sizes(short screen, p_extent text_size, p_extent pixel_size) {
+SYSTEMCALL void txt_get_sizes(short screen, p_extent text_size, p_extent pixel_size) {
     TRACE("txt_get_sizes");
     p_txt_device device = txt_get_device(screen);
     if (device) {

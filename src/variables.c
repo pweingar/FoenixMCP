@@ -101,7 +101,7 @@ short var_set_value(p_var_entry entry, const char * value) {
  * @param value the value the variable should have
  * @return 0 on success, negative number on error
  */
-short var_set(const char *name, const char *value) {
+SYSTEMCALL short var_set(const char *name, const char *value) {
     TRACE("var_set");
 
     p_var_entry entry = var_find(name);
@@ -148,7 +148,7 @@ short var_set(const char *name, const char *value) {
  * @param name the name of the variable to set
  * @return pointer to the string on success, 0 if not found
  */
-const char * var_get(const char *name) {
+SYSTEMCALL const char * var_get(const char *name) {
     TRACE("var_get");
     p_var_entry entry = var_find(name);
     if (entry) {

@@ -18,7 +18,7 @@
  * Returns:
  * the number of jiffies since the last reset
  */
-long time_jiffies() {
+SYSTEMCALL long time_jiffies() {
 	return timers_jiffies();
 }
 
@@ -28,13 +28,13 @@ long time_jiffies() {
  * Inputs:
  * info = pointer to a s_sys_info structure to fill out
  */
-void get_info(p_sys_info info) {
+SYSTEMCALL void get_info(p_sys_info info) {
 	sys_get_information(info);
 }
 
 /*
  * Return the next scan code from the keyboard... 0 if nothing pending
  */
-unsigned short kbd_scancode() {
+SYSTEMCALL unsigned short kbd_scancode() {
     return kbd_get_scancode();
 }

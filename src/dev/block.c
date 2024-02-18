@@ -29,7 +29,7 @@ void bdev_init_system() {
 //
 // Register a block device driver
 //
-short bdev_register(p_dev_block device) {
+SYSTEMCALL short bdev_register(p_dev_block device) {
     short dev;
 
     TRACE1("bdev_register(%s)", device->name);
@@ -91,7 +91,7 @@ short bdev_init(short dev) {
 // Returns:
 //  number of bytes read, any negative number is an error code
 //
-short bdev_read(short dev, long lba, unsigned char * buffer, short size) {
+SYSTEMCALL short bdev_read(short dev, long lba, unsigned char * buffer, short size) {
     TRACE4("bdev_read(%d,%ld,%p,%d)", (int)dev, lba, buffer, (int)size);
 
     short ret = DEV_ERR_BADDEV;
@@ -118,7 +118,7 @@ short bdev_read(short dev, long lba, unsigned char * buffer, short size) {
 // Returns:
 //  number of bytes written, any negative number is an error code
 //
-short bdev_write(short dev, long lba, const unsigned char * buffer, short size) {
+SYSTEMCALL short bdev_write(short dev, long lba, const unsigned char * buffer, short size) {
     TRACE4("bdev_write(%d,%ld,%p,%d)", (int)dev, lba, buffer, (int)size);
 
     short ret = DEV_ERR_BADDEV;
@@ -142,7 +142,7 @@ short bdev_write(short dev, long lba, const unsigned char * buffer, short size) 
 // Returns:
 //  the status of the device
 //
-short bdev_status(short dev) {
+SYSTEMCALL short bdev_status(short dev) {
     TRACE1("bdev_status(%d)", dev);
 
     short ret = DEV_ERR_BADDEV;
@@ -166,7 +166,7 @@ short bdev_status(short dev) {
 // Returns:
 //  0 on success, any negative number is an error code
 //
-short bdev_flush(short dev) {
+SYSTEMCALL short bdev_flush(short dev) {
     TRACE1("bdev_flush(%d)", (int)dev);
 
     short ret = DEV_ERR_BADDEV;
@@ -193,7 +193,7 @@ short bdev_flush(short dev) {
 // Returns:
 //  0 on success, any negative number is an error code
 //
-short bdev_ioctrl(short dev, short command, unsigned char * buffer, short size) {
+SYSTEMCALL short bdev_ioctrl(short dev, short command, unsigned char * buffer, short size) {
     TRACE4("bdev_ioctrl(%d, %d, %p, %d)", (int)dev, command, buffer, (int)size);
 
     short ret = DEV_ERR_BADDEV;

@@ -10,6 +10,7 @@
 #define __CHANNEL_H
 
 #include "constants.h"
+#include "sys_macros.h"
 #include "sys_types.h"
 
 /*
@@ -82,7 +83,7 @@ extern void cdev_init_system();
  * Inputs:
  * p_dev_chan = pointer to the description of the channel device
  */
-extern short cdev_register(p_dev_chan device);
+extern SYSTEMCALL short cdev_register(p_dev_chan device);
 
 /*
  * Get a free channel
@@ -136,7 +137,7 @@ extern short cdev_init(short dev);
  * Returns:
  * the number of the channel opened, negative number on error
  */
-extern short chan_open(short dev, const uint8_t * path, short mode);
+extern SYSTEMCALL short chan_open(short dev, const uint8_t * path, short mode);
 
 /*
  * Close a channel
@@ -147,7 +148,7 @@ extern short chan_open(short dev, const uint8_t * path, short mode);
  * Returns:
  * nothing useful
  */
-extern short chan_close(short chan);
+extern SYSTEMCALL short chan_close(short chan);
 
 /*
  * Read bytes from the channel
@@ -160,7 +161,7 @@ extern short chan_close(short chan);
  * Returns:
  *  number of bytes read, any negative number is an error code
  */
-extern short chan_read(short channel, uint8_t * buffer, short size);
+extern SYSTEMCALL short chan_read(short channel, uint8_t * buffer, short size);
 
 /*
  * Read a line from the channel
@@ -173,7 +174,7 @@ extern short chan_read(short channel, uint8_t * buffer, short size);
  * Returns:
  *  number of bytes read, any negative number is an error code
  */
-extern short chan_readline(short channel, uint8_t * buffer, short size);
+extern SYSTEMCALL short chan_readline(short channel, uint8_t * buffer, short size);
 
 /*
  * Read a single uint8_t from the channel
@@ -184,7 +185,7 @@ extern short chan_readline(short channel, uint8_t * buffer, short size);
  * Returns:
  *  the value read (if negative, error)
  */
-extern short chan_read_b(short channel);
+extern SYSTEMCALL short chan_read_b(short channel);
 
 /*
  * Write a bytes to the channel
@@ -197,7 +198,7 @@ extern short chan_read_b(short channel);
  * Returns:
  *  number of bytes written, any negative number is an error code
  */
-extern short chan_write(short channel, const uint8_t * buffer, short size);
+extern SYSTEMCALL short chan_write(short channel, const uint8_t * buffer, short size);
 
 /*
  * Write a single uint8_t to the device
@@ -209,7 +210,7 @@ extern short chan_write(short channel, const uint8_t * buffer, short size);
  * Returns:
  *  0 on success, a negative value on error
  */
-extern short chan_write_b(short channel, uint8_t b);
+extern SYSTEMCALL short chan_write_b(short channel, uint8_t b);
 
 /*
  * Return the status of the channel device
@@ -220,7 +221,7 @@ extern short chan_write_b(short channel, uint8_t b);
  * Returns:
  *  the status of the device
  */
-extern short chan_status(short channel);
+extern SYSTEMCALL short chan_status(short channel);
 
 /*
  * Ensure that any pending writes to teh device have been completed
@@ -231,7 +232,7 @@ extern short chan_status(short channel);
  * Returns:
  *  0 on success, any negative number is an error code
  */
-extern short chan_flush(short channel);
+extern SYSTEMCALL short chan_flush(short channel);
 
 /*
  * Attempt to set the position of the channel cursor (if supported)
@@ -245,7 +246,7 @@ extern short chan_flush(short channel);
  * Returns:
  *  0 = success, a negative number is an error.
  */
-extern short chan_seek(short channel, long position, short base);
+extern SYSTEMCALL short chan_seek(short channel, long position, short base);
 
 /*
  * Issue a control command to the device
@@ -259,7 +260,7 @@ extern short chan_seek(short channel, long position, short base);
  * Returns:
  *  0 on success, any negative number is an error code
  */
-extern short chan_ioctrl(short channel, short command, uint8_t * buffer, short size);
+extern SYSTEMCALL short chan_ioctrl(short channel, short command, uint8_t * buffer, short size);
 
 /**
  * Return the device associated with the channel

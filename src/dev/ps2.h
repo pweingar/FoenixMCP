@@ -6,6 +6,7 @@
 #define __PS2_H
 
 #include "constants.h"
+#include "sys_macros.h"
 #include "sys_types.h"
 #include "ps2_reg.h"
 
@@ -67,7 +68,7 @@ extern char kbd_getc_poll();
  * Inputs:
  * tables = pointer to the keyboard translation tables
  */
-extern short kbd_layout(const char * tables);
+extern SYSTEMCALL short kbd_layout(const char * tables);
 
 /*
  * Query the mouse for an update packet (use if we aren't using interrupts)

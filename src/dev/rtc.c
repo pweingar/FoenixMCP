@@ -101,7 +101,7 @@ short rtc_register_periodic(short rate, FUNC_V_2_V handler) {
  * Inputs:
  * time = pointer to a t_time record containing the correct time
  */
-void rtc_set_time(p_time time) {
+SYSTEMCALL void rtc_set_time(p_time time) {
     unsigned char ctrl;
     unsigned char century_bcd, year_bcd, month_bcd, day_bcd;
     unsigned char hour_bcd, minute_bcd, second_bcd;
@@ -193,7 +193,7 @@ void rtc_set_time(p_time time) {
  * Inputs:
  * time = pointer to a t_time record in which to put the current time
  */
-void rtc_get_time(p_time time) {
+SYSTEMCALL void rtc_get_time(p_time time) {
     unsigned char ctrl;
     unsigned char century_bcd, year_bcd, month_bcd, day_bcd;
     unsigned char hour_bcd, minute_bcd, second_bcd;
