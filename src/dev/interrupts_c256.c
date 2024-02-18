@@ -175,7 +175,7 @@ void int_init() {
  * Returns:
  * a machine dependent representation of the interrupt masking prior to enabling
  */
-short int_enable_all() {
+SYSTEMCALL short int_enable_all() {
 	// NOTE: this code uses Calypsi specific intrinsic functions
 	//       and does a cast that may not be valid
 
@@ -190,7 +190,7 @@ short int_enable_all() {
  * Returns:
  * a machine dependent representation of the interrupt masking prior to disabling
  */
-short int_disable_all() {
+SYSTEMCALL short int_disable_all() {
 	// NOTE: this code uses Calypsi specific intrinsic functions
 	//       and does a cast that may not be valid
 
@@ -208,7 +208,7 @@ short int_disable_all() {
  * Inputs:
  * n = the number of the interrupt: n[7..4] = group number, n[3..0] = individual number.
  */
-void int_disable(unsigned short n) {
+SYSTEMCALL void int_disable(unsigned short n) {
 	/* Find the group (the relevant interrupt mask register) for the interrupt */
 	unsigned short group = int_group(n);
 
@@ -235,7 +235,7 @@ void int_disable(unsigned short n) {
  * Inputs:
  * n = the number of the interrupt: n[7..4] = group number, n[3..0] = individual number.
  */
-void int_enable(unsigned short n) {
+SYSTEMCALL void int_enable(unsigned short n) {
 	/* Find the group (the relevant interrupt mask register) for the interrupt */
 	unsigned short group = int_group(n);
 
@@ -316,7 +316,7 @@ static int int_group_mask_to_offset(unsigned short group, unsigned short mask) {
  * Returns:
  * the pointer to the previous interrupt handler
  */
-p_int_handler int_register(unsigned short n, p_int_handler handler) {
+SYSTEMCALL p_int_handler int_register(unsigned short n, p_int_handler handler) {
 	p_int_handler * handler_ref = 0;
 	p_int_handler old_handler = 0;
 
@@ -470,7 +470,7 @@ p_int_handler int_register(unsigned short n, p_int_handler handler) {
  * Returns:
  * non-zero if interrupt n is pending, 0 if not
  */
-short int_pending(unsigned short n) {
+SYSTEMCALL short int_pending(unsigned short n) {
 	/* Find the group (the relevant interrupt mask register) for the interrupt */
 	unsigned short group = int_group(n);
 
@@ -493,7 +493,7 @@ short int_pending(unsigned short n) {
  * Inputs:
  * n = the number of the interrupt: n[7..4] = group number, n[3..0] = individual number.
  */
-void int_clear(unsigned short n) {
+SYSTEMCALL void int_clear(unsigned short n) {
 	/* Find the group (the relevant interrupt mask register) for the interrupt */
 	unsigned short group = int_group(n);
 
