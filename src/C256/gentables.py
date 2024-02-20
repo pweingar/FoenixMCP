@@ -20,27 +20,27 @@ with open("syscalls.txt", "r") as call_names:
 		if len(line) > 0:
 			sys_call_names.append(line)
 
-# Create the system call table, which is used to call into the kernel jump table
+# # Create the system call table, which is used to call into the kernel jump table
 
-with open("syscalls.s", "w") as f:
-	for call_name in sys_call_names:
-		f.write("\t.public sys_{}\n".format(call_name))
+# with open("syscalls.s", "w") as f:
+# 	for call_name in sys_call_names:
+# 		f.write("\t.public sys_{}\n".format(call_name))
 
-	f.write("\n")
+# 	f.write("\n")
 
-	for call_name in sys_call_names:
-		f.write("\t.extern sjt_{}\n".format(call_name))
+# 	for call_name in sys_call_names:
+# 		f.write("\t.extern sjt_{}\n".format(call_name))
 		
-	f.write("\n\t.section farcode\n\n");
+# 	f.write("\n\t.section farcode\n\n");
 
-	for call_name in sys_call_names:
-		f.write("sys_{:26}\tjmp long:sjt_{}\n".format(call_name + ": ", call_name))
+# 	for call_name in sys_call_names:
+# 		f.write("sys_{:26}\t.equlab sjt_{}\n".format(call_name + ": ", call_name))
 
 # Create the kernel jump table
 
 with open("jumptable.s", "w") as f:
 	for call_name in sys_call_names:
-		f.write("\t.public sjt_{}\n".format(call_name))
+		f.write("\t.public sys_{}\n".format(call_name))
 
 	f.write("\n")
 
@@ -50,4 +50,4 @@ with open("jumptable.s", "w") as f:
 	f.write("\n\t.section jumptable\n\n");
 
 	for call_name in sys_call_names:
-		f.write("sjt_{:26}\tjmp long:{}\n".format(call_name + ": ", call_name))
+		f.write("sys_{:26}\tjmp long:{}\n".format(call_name + ": ", call_name))

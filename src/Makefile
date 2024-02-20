@@ -23,7 +23,7 @@ ifeq ($(UNIT),C256U)
 else ifeq ($(UNIT),C256U_PLUS)
 	CPU=w65816
 	C_SRCS_DEBUGGER=$(DEBUGGER)/agent.c $(DEBUGGER)/c256-uart.c $(DEBUGGER)/low_level_WDC65816.s
-	SRCS_FOR_UNIT=C256/jumptable.s C256/syscalls.s C256/syscalls_c256.c C256/io_stubs.c
+	SRCS_FOR_UNIT=C256/jumptable.s C256/syscalls_c256.c C256/io_stubs.c
 	CFLAGS_FOR_UNIT=-DMODEL=5 -DCPU=255 --code-model large --data-model large
 
 	ifeq ($(MEMORY),ROM)
