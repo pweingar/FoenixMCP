@@ -190,7 +190,7 @@ ifeq ($(TOOLCHAIN),calypsi)
 	CFLAGS = -l --target Foenix --code-model large --data-model large
 	MY_LIB = $(HOME)/GenX/Calypsi-m68k-Foenix/foenix-lc-ld.a
 	SCM_RULES = linker_scripts/a2560u+.scm
-	LDFLAGS=--output-format $(LD_OUTPUT_TYPE) --list-file foenixmcp.map --rtattr printf=float --rtattr scanf=float --rtattr cstartup=Foenix_user --stack-size=65536 --heap-size=262144 --target=Foenix --no-auto-libraries clib-$(CC68K_CPU)-lc-ld-foenix.a $(MY_LIB) $(SCM_RULES)
+	LDFLAGS=--output-format $(LD_OUTPUT_TYPE) --list-file foenixmcp.map --stack-size=65536 --heap-size=262144 --target=Foenix --no-auto-libraries clib-$(CC68K_CPU)-lc-ld-foenix.a $(MY_LIB) $(SCM_RULES)
 else
 	CC = vc
 	AS = vasmm68k_mot
