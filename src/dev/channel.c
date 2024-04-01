@@ -354,7 +354,7 @@ int16_t chan_write(int16_t channel, const uint8_t * buffer, int16_t size) {
     p_channel chan;
     p_dev_chan cdev;
     int16_t res;
-    logmsg(LOG_TRACE,"chan_write(%d,%p,%x)", channel, buffer, (int)size);
+    //logmsg(LOG_TRACE,"chan_write(%d,%p,%x)", channel, buffer, (int)size);
 
     res = chan_get_records(channel, &chan, &cdev);
     if (res == 0)
