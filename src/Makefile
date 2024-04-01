@@ -218,7 +218,7 @@ else
 	endif
 
 	ASFLAGS = -Fvobj -nowarn=62 $(VASM_CPU) -quiet
-	ifneq ($(MODEL_FAMILY),GENX32)
+	ifeq ($(MODEL_FAMILY),GENX32)
 		# Inline functions cause problems (at least on the X)
 		CFLAGS_EXTRA=-D__NOINLINE__
 	else
