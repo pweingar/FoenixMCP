@@ -281,13 +281,13 @@ short cmd_sysinfo(short channel, int argc, const char * argv[]) {
     sprintf(buffer, "CPU: %s\n", cli_sys_info.cpu_name);
     print(channel, buffer);
 
-    sprintf(buffer, "Clock (kHz): %u\n", cli_sys_info.cpu_clock_khz);
+    sprintf(buffer, "Clock (kHz): %lu\n", cli_sys_info.cpu_clock_khz);
     print(channel, buffer);
 
-    sprintf(buffer, "System Memory: 0x%X\n", cli_sys_info.system_ram_size);
+    sprintf(buffer, "System Memory: 0x%lX\n", cli_sys_info.system_ram_size);
     print(channel, buffer);
 
-    sprintf(buffer, "FPGA Model: %08X\n", cli_sys_info.fpga_model);
+    sprintf(buffer, "FPGA Model: %08lX\n", cli_sys_info.fpga_model);
     print(channel, buffer);
 
     sprintf(buffer, "FPGA Version: %04X.%04X\n", cli_sys_info.fpga_version, cli_sys_info.fpga_subver);
@@ -331,6 +331,7 @@ short cmd_showint(short channel, int argc, const char * argv[]) {
     return 0;
 }
 
+
 //
 // Attempt to execute a command
 //
@@ -338,13 +339,14 @@ short cmd_showint(short channel, int argc, const char * argv[]) {
 //  command = the upper case name of the command (first word of the command line)
 //  parameters = the string of parameters to be passed to the command
 //
-short cli_exec(short channel, char * command, int argc, const char * argv[]) {
+short cli_exec(short channel, const char * command, int argc, const char * argv[]) {
     p_cli_command commands = (p_cli_command)g_cli_commands;
 
-    log3(LOG_INFO, "cli_exec: '", argv[0], "'");
-    log_num(LOG_INFO, "argc = ", argc);
+    INFO1("cli_exec: '%s'", argv[0]);
+    INFO1("argc = %d", argc);
 
     while ((commands != 0) && (commands->name != 0)) {
+		TRACE2("Comparing '%s' and '%s'",command, commands->name);
         // Does the command match the name?
         if (strcmp(commands->name, command) == 0) {
             //print(channel,"Executing:");print(channel,commands->name);print(channel,"\r\n");
