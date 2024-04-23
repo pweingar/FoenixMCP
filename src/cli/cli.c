@@ -2,6 +2,12 @@
  * Implementation of the command line interface
  */
 
+#include "log_level.h"
+#ifndef DEFAULT_LOG_LEVEL
+    #define DEFAULT_LOG_LEVEL LOG_TRACE
+#endif
+
+
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -22,9 +28,9 @@
 #include "cli/sound_cmds.h"
 #include "cli/test_cmds.h"
 #include "dev/console.h"
-#include "dev/ps2.h"
-#include "dev/rtc.h"
-#include "dev/uart.h"
+#include "libfoenix/include/ps2.h"
+#include "libfoenix/include/rtc.h"
+#include "libfoenix/include/uart.h"
 #include "uart_reg.h"
 #include "rtc_reg.h"
 #include "utilities.h"
@@ -54,6 +60,10 @@
 #define CLI_KEY_MONITOR 0x8010  /* A2560K Monitor key */
 #define CLI_KEY_CTX     0x8011  /* A2560K CTX Switch key */
 #define CLI_KEY_HELP    0x8012  /* A2560K Menu/Help key */
+
+// DEBUG: if I uncomment this then I get a crash
+#define sys_txt_get_region txt_get_region
+#define sys_txt_set_region txt_set_region
 
 //
 // Types
@@ -163,19 +173,21 @@ void cli_command_set(const char * path) {
             }
             cli_command_path[i] = c;
         }
+        TRACE1("Setting SHELL: %s", cli_command_path);
         result = sys_var_set("SHELL", cli_command_path);
         if (result) {
-            log(LOG_ERROR, "Unable to set SHELL");
+            ERROR("Unable to set SHELL");
         }
+        TRACE("SHELL Set");
 
     } else {
         // Set to the default CLI
         result = sys_var_set("SHELL", 0);
         if (result) {
-            log(LOG_ERROR, "Unable to set SHELL");
+            ERROR("Unable to set SHELL");
         }
-
     }
+    TRACE("Leaving cli_command_set");
 }
 
 /**
@@ -211,7 +223,7 @@ void cli_txt_screen_set(short screen) {
  * @return the number of the text device to use
  */
 short cli_txt_screen_get() {
-    return sys_chan_device(0);
+    return sys_chan_device(CDEV_CONSOLE); // FIXME that seems to always return rather than e.g. TXT_SCREEN_A2560U
 }
 
 //
@@ -221,8 +233,8 @@ short cmd_help(short channel, int argc, const char * argv[]) {
     p_cli_command command;
 
     for (command = (p_cli_command)g_cli_commands; (command != 0) && (command->name != 0); command++) {
-        sys_chan_write(channel, command->help, strlen(command->help));
-        sys_chan_write(channel, "\n", 2);
+        sys_chan_write(channel, (uint8_t*)command->help, strlen(command->help));
+        sys_chan_write(channel, (uint8_t*)"\n", 2);
     }
     return 0;
 }
@@ -231,7 +243,7 @@ short cmd_getjiffies(short channel, int argc, const char * argv[]) {
     char buffer[80];
 
     sprintf(buffer, "%ld\n", timers_jiffies());
-    sys_chan_write(channel, buffer, strlen(buffer));;
+    sys_chan_write(channel, (uint8_t*)buffer, strlen(buffer));;
     return 0;
 }
 
@@ -242,7 +254,7 @@ short cmd_get_ticks(short channel, int argc, const char * argv[]) {
     char buffer[80];
 
     sprintf(buffer, "%ld\n", rtc_get_jiffies());
-    sys_chan_write(channel, buffer, strlen(buffer));
+    sys_chan_write(channel, (uint8_t*)buffer, strlen(buffer));
     return 0;
 }
 
@@ -252,7 +264,7 @@ short cmd_get_ticks(short channel, int argc, const char * argv[]) {
 short cmd_cls(short channel, int argc, const char * argv[]) {
     const char * ansi_cls = "\x1B[2J\x1B[H";
 
-    sys_chan_write(channel, ansi_cls, strlen(ansi_cls));
+    sys_chan_write(channel, (uint8_t*)ansi_cls, strlen(ansi_cls));
     return 0;
 }
 
@@ -269,7 +281,7 @@ short cmd_sysinfo(short channel, int argc, const char * argv[]) {
     sprintf(buffer, "CPU: %s\n", cli_sys_info.cpu_name);
     print(channel, buffer);
 
-    sprintf(buffer, "Clock (kHz): %u\n", cli_sys_info.cpu_clock_khz);
+    sprintf(buffer, "Clock (kHz): %lu\n", cli_sys_info.cpu_clock_khz);
     print(channel, buffer);
 
     sprintf(buffer, "System Memory: 0x%lX\n", cli_sys_info.system_ram_size);
@@ -319,6 +331,7 @@ short cmd_showint(short channel, int argc, const char * argv[]) {
     return 0;
 }
 
+
 //
 // Attempt to execute a command
 //
@@ -326,16 +339,17 @@ short cmd_showint(short channel, int argc, const char * argv[]) {
 //  command = the upper case name of the command (first word of the command line)
 //  parameters = the string of parameters to be passed to the command
 //
-short cli_exec(short channel, char * command, int argc, const char * argv[]) {
-    const char * cmd_not_found = "Command not found.\n";
+short cli_exec(short channel, const char * command, int argc, const char * argv[]) {
     p_cli_command commands = (p_cli_command)g_cli_commands;
 
-    log3(LOG_INFO, "cli_exec: '", argv[0], "'");
-    log_num(LOG_INFO, "argc = ", argc);
+    INFO1("cli_exec: '%s'", argv[0]);
+    INFO1("argc = %d", argc);
 
     while ((commands != 0) && (commands->name != 0)) {
+		TRACE2("Comparing '%s' and '%s'",command, commands->name);
         // Does the command match the name?
         if (strcmp(commands->name, command) == 0) {
+            //print(channel,"Executing:");print(channel,commands->name);print(channel,"\r\n");
             // Found it, execute the handler
             return commands->handler(channel, argc, argv);
         } else {
@@ -771,8 +785,9 @@ short cli_process_line(short channel, char * command_line) {
         }
 
         // Try to execute the command
-        return cli_exec(channel, argv[0], argc, argv);
+        return cli_exec(channel, argv[0], argc, (const char**)argv);
     }
+    return E_OK;
 }
 
 void cli_draw_window(short channel, const char * status, short is_active) {
@@ -784,6 +799,10 @@ void cli_draw_window(short channel, const char * status, short is_active) {
     short i = 0, j;
 
     short dev = sys_chan_device(channel);
+    if (dev == ERR_BADCHANNEL) {
+        ERROR1("cli_draw_window on bad channel %d", channel);
+        return;
+    }
 
     // Save the current region and cursor location
     sys_txt_get_xy(dev, &cursor);
@@ -826,8 +845,9 @@ void cli_draw_window(short channel, const char * status, short is_active) {
     sys_txt_set_xy(dev, cursor.x, cursor.y);
 
     // Set cursor visibility based on if the screen is active
-    sys_chan_ioctrl(0, 0x06, 0, 0);
-    sys_chan_ioctrl(1, 0x07, 0, 0);
+    for (i = 0; i < cli_sys_info.screens; i++) {
+        sys_chan_ioctrl(i, i == channel ? CON_IOCTRL_CURS_ON : CON_IOCTRL_CURS_OFF, 0, 0);
+    }
 }
 
 /**
@@ -863,7 +883,6 @@ void cli_setup_screen(short channel, const char * path, short is_active) {
     cli_draw_window(channel, path, is_active);
     print(channel, "\x1b[2J\x1b[1;2H");
 
-    print(channel, "\x1b[2J\x1b[1;2H");
     print_banner(channel, cli_sys_info.model);
 
     sprintf(message, "\nFoenix/MCP v%02u.%02u.%04u\n\n", (unsigned int)cli_sys_info.mcp_version, (unsigned int)cli_sys_info.mcp_rev, (unsigned int)cli_sys_info.mcp_build);
@@ -898,18 +917,20 @@ short cli_repl(short channel) {
             if (sys_fsys_get_cwd(cwd_buffer, MAX_PATH_LEN) == 0) {
                 // char message[80];
                 // sprintf(message, "%d", strlen(cwd_buffer));
-                print(0, "");
+                print(CDEV_CONSOLE, "");
+#if MODEL == MODEL_FOENIX_A2560K || MODEL == MODEL_FOENIX_GENX || MODEL == MODEL_FOENIX_A2560X
                 if (g_channels_swapped) {
                     // If channel has changed, deactivate old channel
-                    cli_draw_window(1, cwd_buffer, 0);
+                    cli_draw_window(CDEV_EVID, cwd_buffer, 0);
                     old_channel = g_current_channel;
                     g_channels_swapped = 0;
                 }
-                cli_draw_window(0, cwd_buffer, 1);
+#endif
+                cli_draw_window(CDEV_CONSOLE, cwd_buffer, 1);
             }
         }
 
-        sys_chan_write(g_current_channel, "\x10 ", 2);                           // Print our prompt
+        sys_chan_write(g_current_channel, (uint8_t*)"\x10 ", 2);                           // Print our prompt
         result = cli_readline(g_current_channel, command_line);
         switch (result) {
             case -1:
@@ -970,7 +991,7 @@ short cli_start_repl(short channel, const char * init_cwd) {
         result = sys_fsys_set_cwd(init_cwd);
         if (result) {
             char message[80];
-            sprintf(message, "Unable to set startup directory: %s\n", err_message(result));
+            sprintf(message, "Unable to set startup directory: %s\n", sys_err_message(result));
             print(g_current_channel, message);
         }
     }
@@ -986,7 +1007,7 @@ short cli_start_repl(short channel, const char * init_cwd) {
             print(0, "Unable to start ");
             print(0, cli_command_path);
             print(0, ": ");
-            print(0, err_message(result));
+            print(0, sys_err_message(result));
             while (1) ;
         }
         return 0;
@@ -1020,7 +1041,7 @@ void cli_rerepl() {
             print(0, "Unable to start ");
             print(0, cli_command_path);
             print(0, ": ");
-            print(0, err_message(result));
+            print(0, sys_err_message(result));
             while (1) ;
         }
 
@@ -1053,7 +1074,7 @@ short cli_exec_batch(short channel, const char * path) {
         short result = 0;
 
         do {
-            result = sys_chan_readline(fd, command_line, MAX_COMMAND_SIZE);
+            result = sys_chan_readline(fd, (uint8_t*)command_line, MAX_COMMAND_SIZE);
             if (result > 0) {
                 // We got a line, so parse it
                 cli_process_line(channel, command_line);

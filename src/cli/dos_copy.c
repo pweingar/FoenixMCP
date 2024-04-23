@@ -2,6 +2,7 @@
  * Provide the various functions needed for the COPY command
  */
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -55,17 +56,17 @@
  * Check to see if the path points to a directory
  *
  * @param path the path to check
- * @return 1 if the path points to a directory, 0 otherwise
+ * @return true if the path points to a directory, false otherwise
  */
-short is_directory(const char * path) {
+bool is_directory(const char * path) {
     t_file_info file;
 
     short result = sys_fsys_stat(path, &file);
     if ((result < 0) || ((file.attributes & FSYS_AM_DIR) == 0)) {
-        return 0;
+        return false;
     }
 
-    return 1;
+    return true;
 }
 
 /**
@@ -236,7 +237,7 @@ short fsys_copy_path_absolute(char * path) {
     return 0;
 }
 
-static fsys_copy_error(short screen, short n) {
+static void fsys_copy_error(short screen, short n) {
     char line[80];
     switch (n) {
         case ERR_COPY_SELF:
@@ -270,7 +271,7 @@ static fsys_copy_error(short screen, short n) {
  * The DOS COPY command itself:
  * COPY <src path> <dst path>
  */
-short cmd_copy(short screen, int argc, char * argv[]) {
+short cmd_copy(short screen, int argc, const char * argv[]) {
     char *x = 0;
     char *src_path = 0;
     char *src_pattern = 0;

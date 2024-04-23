@@ -41,7 +41,7 @@
 #define CDEV_SEEK_END       2       /* Seek from teh end of the file */
 
 /*
- * Structure defining a channel
+ * Structure defining a channel (i.e. a device opened by a process, it's like a file handle in purpose)
  */
 
 typedef struct s_channel {
@@ -94,10 +94,13 @@ extern short cdev_register(p_dev_chan device);
 /*
  * Get a free channel
  *
+ * Inputs:
+ * the device to associate with the channel
+ *
  * Returns:
  * A pointer to the free channel, 0 if none are available.
  */
-extern p_channel chan_alloc();
+extern p_channel chan_alloc(short dev);
 
 /*
  * Return a channel to the pool of unused channels

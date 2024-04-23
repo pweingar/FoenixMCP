@@ -4,9 +4,15 @@
  * Routines to support the boot process
  */
 
+#include "log_level.h"
+#ifndef DEFAULT_LOG_LEVEL
+    #define DEFAULT_LOG_LEVEL LOG_TRACE
+#endif
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include "sys_general.h"
 #include "boot.h"
 #include "constants.h"
 #include "errors.h"
@@ -14,21 +20,27 @@
 #include "log.h"
 #include "simpleio.h"
 #include "syscalls.h"
-#include "sys_general.h"
 #include "vicky_general.h"
 #include "cli/cli.h"
-#include "dev/kbd_mo.h"
+#include "libfoenix/include/kbd_mo.h"
 #include "dev/txt_screen.h"
 
 #include "rsrc/font/quadrotextFONT.h"
+#include "rsrc/bitmaps/image.h" /* Splashscreen */
+
 #if MODEL == MODEL_FOENIX_A2560U || MODEL == MODEL_FOENIX_A2560U_PLUS
-#include "rsrc/bitmaps/splash_a2560u.h"
 #elif MODEL == MODEL_FOENIX_A2560K
-#include "rsrc/bitmaps/splash_a2560k.h"
+//#include "rsrc/bitmaps/splash_a2560k.h"
+#elif MODEL == MODEL_FOENIX_A2560X || MODEL == MODEL_FOENIX_GENX
+//#include "rsrc/bitmaps/splash_a2560x.h"
+#elif MODEL == MODEL_FOENIX_C256U || MODEL == MODEL_FOENIX_C256U_PLUS || MODEL == MODEL_FOENIX_FMX
 #endif
 
-#define SPLASH_WAIT_SEC     10      /* How many seconds to wait on the splash screen */
-
+#if MODEL == MODEL_FOENIX_A2560K
+    #define SPLASH_WAIT_SEC     10      /* How many seconds to wait on the splash screen */
+#else
+    #define SPLASH_WAIT_SEC     4      /* How many seconds to wait on the splash screen */
+#endif    
 /*
  * Important scan codes
  */
@@ -102,7 +114,7 @@ void boot_animate_keyboard(unsigned long max_ticks, unsigned long ticks, unsigne
  *
  * @return 0 if not bootable, non-zero if bootable
  */
-short is_bootable(unsigned char * sector, short device) {
+bool is_bootable(unsigned char * sector, short device) {
     switch(device) {
         case BDEV_FDC:
             // The SDC and HDC boot off the MBR...
@@ -112,7 +124,7 @@ short is_bootable(unsigned char * sector, short device) {
                 if ((sector[BOOT_SIG_VBR_OFF] == ((BOOT_SIG >> 8) & 0x00FF)) &&
                     (sector[BOOT_SIG_VBR_OFF+1] == (BOOT_SIG & 0x00FF))) {
                     // The CPU is supported, and the boot signature is correct
-                    return 1;
+                    return true;
                 }
             }
             break;
@@ -126,7 +138,7 @@ short is_bootable(unsigned char * sector, short device) {
                 if ((sector[BOOT_SIG_MBR_OFF] == ((BOOT_SIG >> 8) & 0x00FF)) &&
                     (sector[BOOT_SIG_MBR_OFF+1] == (BOOT_SIG & 0x00FF))) {
                     // The CPU is supported, and the boot signature is correct
-                    return 1;
+                    return true;
                 }
             }
             break;
@@ -137,7 +149,7 @@ short is_bootable(unsigned char * sector, short device) {
     }
 
     // If we have reached this point, the sector is not bootable
-    return 0;
+    return false;
 }
 
 /**
@@ -180,10 +192,10 @@ void make_key_name(const char * original, char * buffer) {
  *
  * @return boot device selected by user
  */
-short boot_screen() {
+short boot_screen(void) {
     t_rect region;
     short device = BOOT_DEFAULT;
-    short screen = 0;
+    short screen;
     char buffer[256];
     char entry[50];
     unsigned long target_jiffies = 0;
@@ -196,43 +208,56 @@ short boot_screen() {
     char f1[3], f2[3], f3[3];
     char space[10], cr_text[10];
 
+    TRACE("boot_screen");
+
     // We'll display boot information on the common screen
     screen = 0;
 
     /* Turn off the screen */
-    txt_set_mode(screen, 0);
+    txt_set_mode(screen, TXT_MODE_SLEEP);
 
     for (i = 0; i < 256; i++) {
-        LUT_0[4*i] = splashscreen_lut[4*i];
+        LUT_0[4*i+0] = splashscreen_lut[4*i+0]; 
         LUT_0[4*i+1] = splashscreen_lut[4*i+1];
         LUT_0[4*i+2] = splashscreen_lut[4*i+2];
         LUT_0[4*i+3] = splashscreen_lut[4*i+3];
     }
 
-    /* Copy the bitmap to video RAM */
+#if 1
+    /* Copy the bitmap to video RAM, it has simple RLE compression */
     for (pixels = splashscreen_pix; *pixels != 0;) {
-        unsigned char count = *pixels++;
-        unsigned char pixel = *pixels++;
+        uint8_t count = *pixels++;
+        uint8_t color = *pixels++;
         for (i = 0; i < count; i++) {
-            *vram++ = pixel;
+            *vram++ = color;
         }
     }
-
+#else
+ #if 0
+    // For debug, try something more basic
+    const line_len = 640;
+    //memset(vram, 1, 640*480);
+    for (i=0; i < 640*480; i++)
+        vram[i] = 3;
+    for (i = 0; i < 480; i++)
+        vram[640*i + i] = 2;
+  #endif
+#endif
     /* Set up the bitmap */
-    *BM0_Addy_Pointer_Reg = 0;
-    *BM0_Control_Reg = 1;
+    *BM0_Addy_Pointer_Reg = 0; /* Start of VRAM */
+    *BM0_Control_Reg = 1; /* Enable bitmap layer, use LUT 0 */
 
     /* Set a background color for the bitmap mode */
-#if MODEL == MODEL_FOENIX_A2560K
+#if HAS_DUAL_SCREEN
     *BackGroundControlReg_B = 0x00202020;
     screen = 0;
 #else
-    *BackGroundControlReg_A = 0x00202020;
+    *BackGroundControlReg_A = 0x00402040;
     screen = 0;
 #endif
 
     /* Display the splashscreen at 640x480 without a border */
-    txt_set_resolution(screen, 640, 680);
+    txt_set_resolution(screen, 640, 480);
     txt_set_border(screen, 0, 0);
     txt_set_font(screen, 8, 8, quadrotextFONT);
 
@@ -255,9 +280,13 @@ short boot_screen() {
     make_key_name("SPACE", space);
     make_key_name("RETURN", cr_text);
 
-    sprintf(buffer, "BOOT: %s=FLOPPY, %s=SD CARD, %s=HARD DRIVE, %s=DEFAULT, %s=SAFE", f1, f2, f3, space, cr_text);
+#if HAS_FLOPPY
+    sprintf(buffer, "BOOT: %s=SD CARD, %s=HARD DRIVE, %s=FLOPPY, %s=DEFAULT, %s=SAFE", f1, f2, f3, space, cr_text);
+#else
+    sprintf(buffer, "BOOT: %s=SD CARD, %s=HARD DRIVE, %s=DEFAULT, %s=SAFE", f1, f2, space, cr_text);
+#endif
     txt_set_xy(screen, (80 - strlen(buffer)) / 2, 58);
-    sys_chan_write(screen, buffer, strlen(buffer));
+    sys_chan_write(screen, (uint8_t*)buffer, strlen(buffer));
 
     // Get the information about the system
     sys_get_info(&info);
@@ -276,7 +305,7 @@ short boot_screen() {
     str_upcase(info.cpu_name, entry);
     sprintf(buffer, "         CPU: %s\n", entry);
     print(screen, buffer);
-    sprintf(buffer, " CLOCK (KHZ): %u\n", info.cpu_clock_khz);
+    sprintf(buffer, " CLOCK (KHZ): %lu\n", info.cpu_clock_khz);
     print(screen, buffer);
     sprintf(buffer, "      FPGA V: %u.%02u.%04u\n", (unsigned int)info.fpga_model, info.fpga_version, info.fpga_subver);
     print(screen, buffer);
@@ -285,46 +314,50 @@ short boot_screen() {
     sprintf(buffer, "Booting from default device...\n");
     min_jiffies = sys_time_jiffies();
     target_jiffies = min_jiffies + SPLASH_WAIT_SEC * 60;
-    current_jiffies = sys_time_jiffies();
-    while (target_jiffies > current_jiffies) {
+
+    while (target_jiffies > (current_jiffies = sys_time_jiffies())) {
         boot_animate_keyboard(target_jiffies, current_jiffies, min_jiffies);
 
-        short scan_code = sys_kbd_scancode();
-        if (scan_code != 0) {
-            switch (scan_code) {
-                case SC_F1:
-                    device = BDEV_FDC;
-                    strcpy(buffer, "Booting from floppy drive.\n");
-                    break;
+        unsigned short scan_code = sys_kbd_scancode();
+        if (scan_code == 0)
+            continue;
 
-                case SC_F2:
-                    device = BDEV_SDC;
-                    strcpy(buffer, "Booting from SD card.\n");
-                    break;
+        switch (scan_code) {
+            case SC_F1:
+                device = BDEV_SDC;
+                strcpy(buffer, "Booting from SD card.\n");
+                break;
 
-                case SC_F3:
-                    device = BDEV_HDC;
-                    strcpy(buffer, "Booting from hard drive.\n");
-                    break;
+            case SC_F2:
+                device = BDEV_HDC;
+                strcpy(buffer, "Booting from hard drive.\n");
+                break;
 
-                case SC_RETURN:
-                    device = BOOT_SAFE;
-                    strcpy(buffer, "Booting directly to the command line.\n");
-                    break;
+#if HAS_FLOPPY
+            case SC_F3:
+                device = BDEV_FDC;
+                strcpy(buffer, "Booting from floppy drive.\n");
+                break;
+#endif
 
-                default:
-                    device = BOOT_DEFAULT;
-                    break;
-            }
-            break;
+            case SC_RETURN:
+                device = BOOT_SAFE;
+                strcpy(buffer, "Booting directly to the command line.\n");
+                break;
+
+            default:
+                device = BOOT_DEFAULT;
+                break;
         }
-
-        current_jiffies = sys_time_jiffies();
+        break;
     }
-
-    txt_init_screen(screen);
-    txt_set_resolution(0, 0, 0);    // Set the resolution based on the DIP switch
+    
+    /* Initialise all screens */
+    txt_init_screen(screen); /* This is the one used for the boot message */
+    /* No need to txt_set_resolution(screen, 0, 0) because during screen_init, the defaults are applied */
+#if MODEL == MODEL_FOENIX_A2560K || MODEL == MODEL_FOENIX_A2560X || MODEL == MODEL_FOENIX_GENX
     txt_set_resolution(1, 0, 0);    // Set the resolution based on the DIP switch
+#endif
     print(screen, buffer);
 
 #if MODEL == MODEL_FOENIX_A2560K
@@ -342,8 +375,16 @@ short boot_screen() {
  */
 void boot_from_bdev(short device) {
     char initial_path[10];
+#if MODEL == MODEL_FOENIX_A2560K
+    unsigned int boot_dip = 0;        // The setting on the user and boot mode DIP switches
+#elif MODEL == MODEL_FOENIX_GENX || MODEL == MODEL_FOENIX_A2560X || MODEL_FOENIX_A2560U_PLUS
     unsigned short boot_dip = 0;        // The setting on the user and boot mode DIP switches
+#endif 
     short bootable = 0;                 // Is the boot sector of the selected device bootable?
+
+    TRACE1("boot_from_bdev(%d)", device);
+
+    initial_path[0] = '\0';
 
     // Get the boot device
     switch (device) {
@@ -354,27 +395,28 @@ void boot_from_bdev(short device) {
                 case 0x0000:
                     // Boot from IDE
                     device = BDEV_HDC;
-                    log(LOG_INFO, "Boot DIP set for IDE");
+                    INFO("Boot DIP set for IDE");
                     strcpy(initial_path, "/hd");
                     break;
 
                 case 0x0001:
                     // Boot from SDC
                     device = BDEV_SDC;
-                    log(LOG_INFO, "Boot DIP set for SDC");
+                    INFO("Boot DIP set for SDC");
                     strcpy(initial_path, "/sd");
                     break;
 
+#if HAS_FLOPPY
                 case 0x0002:
                     // Boot from Floppy
                     device = BDEV_FDC;
-                    log(LOG_INFO, "Boot DIP set for FDC");
+                    INFO("Boot DIP set for FDC");
                     strcpy(initial_path, "/fd");
                     break;
-
+#endif
                 default:
                     // Boot straight to REPL
-                    log(LOG_INFO, "Boot DIP set for REPL");
+                    INFO("Boot DIP set for REPL");
                     strcpy(initial_path, "/sd");
                     device = -1;
                     break;
@@ -394,6 +436,7 @@ void boot_from_bdev(short device) {
         }
 
         // Try to load the boot sector
+        DEBUG("boot_from_bdev: trying to read boot sector");
         short result = bdev_read(device, 0, BOOT_SECTOR_BUFFER, 512);
         if (result > 0) {
             // Check to see if it's bootable
@@ -402,17 +445,19 @@ void boot_from_bdev(short device) {
     }
 
     if (bootable) {
+        DEBUG("boot_from_bdev: boot sector is bootable, trying to run");
         // If bootable, run it
         boot_sector_run(device);
 
     } else {
+        DEBUG("boot_from_bdev: boot sector not bootable");
         // If not bootable...
 
         // Get the screen for the CLI
         short cli_screen = cli_txt_screen_get();
 
         if (device >= 0) {
-            // Execute startup file on boot device (if present)
+            DEBUG("Execute startup file on boot device (if present)");
             switch (device) {
                 case BDEV_SDC:
                     strcpy(initial_path, "/sd");

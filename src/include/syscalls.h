@@ -12,11 +12,22 @@
 
 #include "types.h"
 #include "interrupt.h"
+#include "sys_general.h"
 #include "dev/channel.h"
 #include "dev/block.h"
 #include "dev/fsys.h"
-#include "dev/rtc.h"
+#include "libfoenix/include/rtc.h"
 #include "dev/txt_screen.h"
+
+/*
+ * Define the machine-specific system call function prefix
+ */
+
+#if __CALYPSI__
+#define SYSTEMCALL __attribute__((simple_call))
+#else
+#define SYSTEMCALL
+#endif
 
 /*
  * Syscall function numbers
@@ -125,7 +136,7 @@
 /*
  * Call into the kernel (provided by assembly)
  */
-extern int32_t syscall(int32_t function, ...);
+extern SYSTEMCALL int32_t syscall(int32_t function, ...);
 
 /***
  *** Core system calls
@@ -920,5 +931,30 @@ extern void sys_txt_set_border(short screen, short width, short height);
  * @param blue the blue component of the color (0 - 255)
  */
 extern void sys_txt_set_border_color(short screen, unsigned char red, unsigned char green, unsigned char blue);
+
+/**
+ * Print a character to the current cursor position in the current color
+ *
+ * Most character codes will result in a glyph being displayed at the current
+ * cursor position, advancing the cursor one spot. There are some exceptions that
+ * will be treated as control codes:
+ *
+ * 0x08 - BS - Move the cursor back one position, erasing the character underneath
+ * 0x09 - HT - Move forward to the next TAB stop
+ * 0x0A - LF - Move the cursor down one line (line feed)
+ * 0x0D - CR - Move the cursor to column 0 (carriage return)
+ *
+ * @param screen the number of the text device
+ * @param c the character to print
+ */
+extern void sys_txt_put(short screen, char c);
+
+/**
+ * Print an ASCII Z string to the screen
+ *
+ * @param screen the number of the text device
+ * @param c the ASCII Z string to print
+ */
+extern void sys_txt_print(short screen, const char * message);
 
 #endif

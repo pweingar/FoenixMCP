@@ -3,20 +3,25 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
+#include "features.h"
 #include "timers.h"
 #include "sound_cmds.h"
 #include "sound_reg.h"
 #include "snd/opn2.h"
 #include "snd/psg.h"
 #include "snd/sid.h"
-#include "dev/midi.h"
+#include "libfoenix/include/midi.h"
 #include "simpleio.h"
 #include "syscalls.h"
 
 #include "include/A2560K/YM2151.h"
 #include "include/A2560K/YM2612_Ext.h"
+#if MODEL == MODEL_FOENIX_A2560K || MODEL == MODEL_FOENIX_A2560X || MODEL == MODEL_FOENIX_GENX
+#include "include/A2560K/sound_a2560k.h"
+#endif
 
 /*
  * Play a sound on the PSG
@@ -69,12 +74,7 @@ short psg_test(short channel, int argc, const char * argv[]) {
  * Play a sound on the SID
  */
 short sid_test(short channel, int argc, const char * argv[]) {
-    short i;
-    unsigned char reg;
-    unsigned char data;
-    long target_time;
-    volatile unsigned char * opm_base = OPM_INT_BASE;
-
+#if HAS_EXTERNAL_SIDS
     if (argc >= 2) {
         /* Allow the user to select the external OPM */
         if ((strcmp(argv[1], "ext") == 0) || (strcmp(argv[1], "EXT") == 0)) {
@@ -83,11 +83,15 @@ short sid_test(short channel, int argc, const char * argv[]) {
             sid_test_internal();
         }
     }
+#else
+    sid_test_internal();
+#endif
 
     return 0;
 }
 
 
+#if HAS_OPM
  void Test_EXT_FM2151( void ) {
 
      unsigned char i;
@@ -198,7 +202,9 @@ short sid_test(short channel, int argc, const char * argv[]) {
 
      * EXT_OPM_08_KEY_ON_OFF = 0x00;
  }
+#endif
 
+#if HAS_OPN
  void Test_EXT_FM2612( void ) {
  			unsigned char i;
  			unsigned int j;
@@ -447,8 +453,9 @@ short sid_test(short channel, int argc, const char * argv[]) {
  			// 400ms Delay (prolly not quite the time it needs)
  			for (j=0 ; j<262144; j++);
  }
+#endif
 
-
+#if HAS_OPM
 /*
  * Test tone for OPM: register, value
  */
@@ -650,9 +657,15 @@ short opn_test(short channel, int argc, const char * argv[]) {
 
     return 0;
 }
+#endif
 
-const unsigned char opl3_tone_on[] = {
-    0x01,0x00,              /* initialise */
+
+const uint16_t opl3_tone_on[] = {
+#if 1 // 7-channel tone with enveloppes and feeback
+//0x01,0x00,              /* initialise */
+0x00bd, 0x40, 0x00bd, 0xc0, 0x0043, 0x00, 0x0023, 0x03, 0x0023, 0x23, 0x0063, 0xf0, 0x0063, 0xff, 0x0083, 0x00, 0x0083, 0x05, 0x0043, 0x2b, 0x0023, 0x23, 0x0023, 0x23, 0x00c0, 0x00, 0x00c0, 0x06, 0x0040, 0x00, 0x0020, 0x02, 0x0020, 0x22, 0x0060, 0xf0, 0x0060, 0xf2, 0x0080, 0x40, 0x0080, 0x45, 0x0040, 0x00, 0x0020, 0x22, 0x0020, 0x22, 0x00b0, 0x0a, 0x00a0, 0x8c, 0x00b1, 0x0b, 0x00a1, 0x35, 0x00b2, 0x0b, 0x00a2, 0xd1, 0x00b3, 0x0e, 0x00a3, 0x8b, 0x00b4, 0x06, 0x00a4, 0x8e, 0x00b5, 0x02, 0x00a5, 0x93, 0x00c0, 0x36, 0x00c0, 0x37, 0x00b0, 0x2a, 0x0044, 0x00, 0x0024, 0x03, 0x0024, 0x23, 0x0064, 0xf0, 0x0064, 0xff, 0x0084, 0x00, 0x0084, 0x05, 0x0044, 0x2b, 0x0024, 0x23, 0x0024, 0x23, 0x00c0, 0x36, 0x00c1, 0x06, 0x0041, 0x00, 0x0021, 0x02, 0x0021, 0x22, 0x0061, 0xf0, 0x0061, 0xf2, 0x0081, 0x40, 0x0081, 0x45, 0x0041, 0x00, 0x0021, 0x22, 0x0021, 0x22, 0x00b0, 0x2a, 0x00a0, 0x8c, 0x00b1, 0x0b, 0x00a1, 0x35, 0x00b2, 0x0b, 0x00a2, 0xd1, 0x00b3, 0x0e, 0x00a3, 0x8b, 0x00b4, 0x06, 0x00a4, 0x8e, 0x00b5, 0x02, 0x00a5, 0x93, 0x00c1, 0x36, 0x00c1, 0x37, 0x00b1, 0x2b, 0x0045, 0x00, 0x0025, 0x03, 0x0025, 0x23, 0x0065, 0xf0, 0x0065, 0xff, 0x0085, 0x00, 0x0085, 0x05, 0x0045, 0x2b, 0x0025, 0x23, 0x0025, 0x23, 0x00c0, 0x36, 0x00c2, 0x06, 0x0042, 0x00, 0x0022, 0x02, 0x0022, 0x22, 0x0062, 0xf0, 0x0062, 0xf2, 0x0082, 0x40, 0x0082, 0x45, 0x0042, 0x00, 0x0022, 0x22, 0x0022, 0x22, 0x00b0, 0x2a, 0x00a0, 0x8c, 0x00b1, 0x2b, 0x00a1, 0x35, 0x00b2, 0x0b, 0x00a2, 0xd1, 0x00b3, 0x0e, 0x00a3, 0x8b, 0x00b4, 0x06, 0x00a4, 0x8e, 0x00b5, 0x02, 0x00a5, 0x93, 0x00c2, 0x36, 0x00c2, 0x37, 0x00b2, 0x2b, 0x004b, 0x00, 0x002b, 0x03, 0x002b, 0x23, 0x006b, 0xf0, 0x006b, 0xff, 0x008b, 0x00, 0x008b, 0x05, 0x004b, 0x2b, 0x002b, 0x23, 0x002b, 0x23, 0x00c0, 0x36, 0x00c3, 0x06, 0x0048, 0x00, 0x0028, 0x02, 0x0028, 0x22, 0x0068, 0xf0, 0x0068, 0xf2, 0x0088, 0x40, 0x0088, 0x45, 0x0048, 0x00, 0x0028, 0x22, 0x0028, 0x22, 0x00b0, 0x2a, 0x00a0, 0x8c, 0x00b1, 0x2b, 0x00a1, 0x35, 0x00b2, 0x2b, 0x00a2, 0xd1, 0x00b3, 0x0e, 0x00a3, 0x8b, 0x00b4, 0x06, 0x00a4, 0x8e, 0x00b5, 0x02, 0x00a5, 0x93, 0x00c3, 0x36, 0x00c3, 0x37, 0x00b3, 0x2e, 0x004c, 0x00, 0x002c, 0x03, 0x002c, 0x23, 0x006c, 0xf0, 0x006c, 0xff, 0x008c, 0x00, 0x008c, 0x05, 0x004c, 0x2b, 0x002c, 0x23, 0x002c, 0x23, 0x00c0, 0x36, 0x00c4, 0x06, 0x0049, 0x00, 0x0029, 0x02, 0x0029, 0x22, 0x0069, 0xf0, 0x0069, 0xf2, 0x0089, 0x40, 0x0089, 0x45, 0x0049, 0x00, 0x0029, 0x22, 0x0029, 0x22, 0x00b0, 0x2a, 0x00a0, 0x8c, 0x00b1, 0x2b, 0x00a1, 0x35, 0x00b2, 0x2b, 0x00a2, 0xd1, 0x00b3, 0x2e, 0x00a3, 0x8b, 0x00b4, 0x06, 0x00a4, 0x8e, 0x00b5, 0x02, 0x00a5, 0x93, 0x00c4, 0x36, 0x00c4, 0x37, 0x00b4, 0x26, 0x004d, 0x00, 0x002d, 0x03, 0x002d, 0x23, 0x006d, 0xf0, 0x006d, 0xff, 0x008d, 0x00, 0x008d, 0x05, 0x004d, 0x2b, 0x002d, 0x23, 0x002d, 0x23, 0x00c0, 0x36, 0x00c5, 0x06, 0x004a, 0x00, 0x002a, 0x02, 0x002a, 0x22, 0x006a, 0xf0, 0x006a, 0xf2, 0x008a, 0x40, 0x008a, 0x45, 0x004a, 0x00, 0x002a, 0x22, 0x002a, 0x22, 0x00b0, 0x2a, 0x00a0, 0x8c, 0x00b1, 0x2b, 0x00a1, 0x35, 0x00b2, 0x2b, 0x00a2, 0xd1, 0x00b3, 0x2e, 0x00a3, 0x8b, 0x00b4, 0x26, 0x00a4, 0x8e, 0x00b5, 0x02, 0x00a5, 0x93, 0x00c5, 0x36, 0x00c5, 0x37, 0x00b5, 0x22, 0x0053, 0x00, 0x0033, 0x03, 0x0033, 0x23, 0x0073, 0xf0, 0x0073, 0xff, 0x0093, 0x00, 0x0093, 0x05, 0x0053, 0x2b, 0x0033, 0x23, 0x0033, 0x23, 0x00c0, 0x36, 0x00c6, 0x06, 0x0050, 0x00, 0x0030, 0x02, 0x0030, 0x22, 0x0070, 0xf0, 0x0070, 0xf2, 0x0090, 0x40, 0x0090, 0x45, 0x0050, 0x00, 0x0030, 0x22, 0x0030, 0x22, 0x00b0, 0x2a, 0x00a0, 0x8c, 0x00b1, 0x2b, 0x00a1, 0x35, 0x00b2, 0x2b, 0x00a2, 0xd1, 0x00b3, 0x2e, 0x00a3, 0x8b, 0x00b4, 0x26, 0x00a4, 0x8e, 0x00b5, 0x22, 0x00a5, 0x93, 0x00c6, 0x36, 0x00c6, 0x37, 0x00b6, 0x20,
+#else // single tone
+    0x01,0x00,              /* initialise */    
     0x05,0x01,              /* OPL3 mode, necessary for stereo */
     0xc0,0x31,              /* both channel, parallel connection */
 
@@ -684,15 +697,14 @@ const unsigned char opl3_tone_on[] = {
 
     /* block 0, key on */
     0xb0,0x32,
-
+#endif
     /* end of sequence marker */
-    0xff
+    0xffff
 };
 
-const unsigned char opl3_tone_off[] = {
-    /* block 0, key off */
-    0xb0,0x00,
-
+const uint8_t opl3_tone_off[] = {
+    /* block 0 to 6, key off */
+    0xb0, 0x00, 0xb1, 0x00, 0xb2, 0x00, 0xb3, 0x00, 0xb4, 0x00, 0xb5, 0x00, 0xb6, 0x00,
     /* end of sequence marker */
     0xff
 };
@@ -702,23 +714,34 @@ const unsigned char opl3_tone_off[] = {
  */
 short opl3_test(short channel, int argc, const char * argv[]) {
     short i;
-    unsigned char reg;
+    unsigned short reg;
     unsigned char data;
     long target_time;
+
+    // Delay between sending bytes. If none, it seems (on the A2560U at least) some commands are missed.
+    // Maybe the FIFO managed by Beatrix to feed the YM262 gets too full?
+    // Even a tiny delay is enough to avoid the issue.
+    long delay = argc > 0 ? atol(argv[1]) : 10;
+
+    print(channel, "Loading data into OPL3...\n");
 
     i = 0;
     while (1) {
         reg = opl3_tone_on[i++];
-        if (reg == 0xff) {
+        if (reg == 0xffff)
             break;
-        } else {
-            data = opl3_tone_on[i++];
-            OPL3_PORT[reg] = data;
-        }
+
+        data = opl3_tone_on[i++];
+        //print_hex_32(channel, (unsigned long)(&OPL3_PORT[reg]));print(channel, " ");print_hex_8(channel, data);print(channel, "\n");
+        OPL3_PORT[reg] = data;
+        
+        if (delay)
+            for (int j=0; j<delay; j++);
     }
 
-    target_time = sys_time_jiffies() + 60;
-    while (target_time > sys_time_jiffies()) ;
+    print(channel, "Playing now. Press 'ESC' to quit.");
+    while (sys_kbd_scancode() != 0x01 /*ESC scancode*/)
+        ;
 
     i = 0;
     while (1) {
@@ -728,17 +751,19 @@ short opl3_test(short channel, int argc, const char * argv[]) {
         } else {
             data = opl3_tone_off[i++];
             OPL3_PORT[reg] = data;
+            if (delay)
+                for (int j=0; j<delay; j++);
         }
     }
 
     return 0;
 }
 
+#if HAS_MIDI_PORTS
 /*
  * Perform a transmit test on the MIDI ports
  */
 short midi_tx_test(short channel, int argc, const char * argv[]) {
-#if MODEL == MODEL_FOENIX_A2560K
     const char note_on[] = { 0x90, 0x3c, 0x3f };
     const char note_off[] = { 0x80, 0x3c, 0x00 };
     char message[80];
@@ -776,19 +801,18 @@ short midi_tx_test(short channel, int argc, const char * argv[]) {
 
         sys_chan_close(midi);
     } else {
-        sprintf(message, "Couldn't open MIDI port: %s\n", err_message(midi));
+        sprintf(message, "Couldn't open MIDI port: %s\n", sys_err_message(midi));
         print(channel, message);
         return 0;
     }
-#endif
     return 0;
 }
+
 
 /*
  * Perform a receive test on the MIDI ports
  */
 short midi_rx_test(short channel, int argc, const char * argv[]) {
-#if MODEL == MODEL_FOENIX_A2560K
     char message[80];
     unsigned short scancode = 0;
     int i;
@@ -803,12 +827,12 @@ short midi_rx_test(short channel, int argc, const char * argv[]) {
         while (scancode != 0x01) {
             short input = sys_chan_read_b(midi);
             if (input < 0) {
-                sprintf(message, "Could not read from MIDI port: %s\n", err_message(input));
+                sprintf(message, "Could not read from MIDI port: %s\n", sys_err_message(input));
                 print(channel, message);
                 return 0;
             }
 
-            if ((input != 0xf8) && (input != 0xfe)) {
+            if ((input != 0xf8/*MIDI clock*/) && (input != 0xfe/*Active Sensing*/)) {
                 if ((i % 16) == 0) {
                     sprintf(message, "\n%02X", input);
                     sys_chan_write(channel, message, strlen(message));
@@ -826,11 +850,11 @@ short midi_rx_test(short channel, int argc, const char * argv[]) {
         print_c(channel, '\n');
         sys_chan_close(midi);
     } else {
-        sprintf(message, "Couldn't open MIDI port: %s\n", err_message(midi));
+        sprintf(message, "Couldn't open MIDI port: %s\n", sys_err_message(midi));
         print(channel, message);
         return 0;
     }
-#endif
+
     return 0;
 }
 
@@ -838,7 +862,6 @@ short midi_rx_test(short channel, int argc, const char * argv[]) {
  * Perform a loopback test on the MIDI ports
  */
 short midi_loop_test(short channel, int argc, const char * argv[]) {
-#if MODEL == MODEL_FOENIX_A2560K
     char message[80];
     unsigned short scancode = 0;
     unsigned char output;
@@ -856,7 +879,7 @@ short midi_loop_test(short channel, int argc, const char * argv[]) {
             print(channel, "Sending: ");
             result = sys_chan_write_b(midi, output);
             if (result) {
-                sprintf(message, "Unable to write a byte to the MIDI ports: %s\n", err_message(result));
+                sprintf(message, "Unable to write a byte to the MIDI ports: %s\n", sys_err_message(result));
                 print(channel, message);
                 return 0;
             }
@@ -865,7 +888,7 @@ short midi_loop_test(short channel, int argc, const char * argv[]) {
 
             short input = sys_chan_read_b(midi);
             if (input < 0) {
-                sprintf(message, "Unable to read a byte to the MIDI ports: %s\n", err_message(input));
+                sprintf(message, "Unable to read a byte to the MIDI ports: %s\n", sys_err_message(input));
                 print(channel, message);
                 return 0;
             }
@@ -883,10 +906,11 @@ short midi_loop_test(short channel, int argc, const char * argv[]) {
         sys_chan_write(channel, "\n", 1);
         sys_chan_close(midi);
     } else {
-        sprintf(message, "Couldn't open MIDI port: %s\n", err_message(midi));
+        sprintf(message, "Couldn't open MIDI port: %s\n", sys_err_message(midi));
         print(channel, message);
         return 0;
     }
-#endif
     return 0;
 }
+
+#endif

@@ -2,7 +2,7 @@
 #include "interrupt.h"
 #include "dev/channel.h"
 #include "dev/block.h"
-#include "dev/rtc.h"
+#include "libfoenix/include/rtc.h"
 
 /***
  *** Core system calls

@@ -6,6 +6,11 @@
  *
  */
 
+#include "log_level.h"
+#ifndef DEFAULT_LOG_LEVEL
+    #define DEFAULT_LOG_LEVEL LOG_ERROR
+#endif
+
 #include "errors.h"
 #include "log.h"
 #include "dev/fsys.h"
@@ -46,6 +51,9 @@ void proc_init() {
 void proc_exec(long start, long stack, int argc, char * argv[]) {
     TRACE("proc_exec");
 
+    INFO1("proc_exec start: %p", (void*)start);
+    INFO1("proc_exec stack: %p", (void*)stack);
+
     g_proc_result = 0;
     call_user(start, stack, argc, argv);
 }
@@ -85,7 +93,8 @@ int proc_get_result() {
  * returns an error code on failure, will not return on success
  */
 short proc_run(const char * path, int argc, char * argv[]) {
-    TRACE("proc_run");
+
+    TRACE1("proc_run(\"%s\")", path);
 
     /* TODO: allow for a search PATH */
     /* TODO: allocate stack more dynamically */
@@ -133,11 +142,11 @@ short proc_run(const char * path, int argc, char * argv[]) {
             proc_exec(start, k_default_stack, argc, new_argv);
             return 0;
         } else {
-            log_num(LOG_ERROR, "Couldn't execute file: ", result);
+            ERROR1("Couldn't execute file: %d", result);
             return ERR_NOT_EXECUTABLE;
         }
     } else {
-        log_num(LOG_ERROR, "Couldn't load file: ", result);
+        ERROR1("Couldn't load file: %d", result);
         return result;
     }
 }

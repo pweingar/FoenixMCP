@@ -12,7 +12,7 @@
 #include <string.h>
 
 #include "dev/channel.h"
-#include "dev/fdc.h"
+#include "libfoenix/include/fdc.h"
 #include "errors.h"
 #include "elf.h"
 #include "fsys.h"
@@ -20,6 +20,7 @@
 #include "log.h"
 #include "syscalls.h"
 #include "simpleio.h"
+#include "utilities.h"
 
 #define MAX_DRIVES      8       /* Maximum number of drives */
 #define MAX_DIRECTORIES 8       /* Maximum number of open directories */
@@ -122,7 +123,7 @@ short fsys_open(const char * path, short mode) {
     p_channel chan = 0;
     short i, fd = -1;
 
-    TRACE("fsys_open");
+    TRACE2("fsys_open(\"%s\",%d)", path, (int)mode);
 
 	// If the file being opened is on the floppy drive, make sure the FDC status
 	// is updated correctly for disk change by spinning up the motor and checking the DIR register
@@ -139,7 +140,7 @@ short fsys_open(const char * path, short mode) {
     }
 
     if (fd < 0) {
-        log(LOG_ERROR, "fsys_open out of handles");
+        ERROR("fsys_open out of handles");
         return ERR_OUT_OF_HANDLES;
     }
 
@@ -147,7 +148,7 @@ short fsys_open(const char * path, short mode) {
 
     chan = chan_alloc(CDEV_FILE);
     if (chan) {
-        log_num(LOG_INFO, "chan_alloc: ", chan->number);
+        INFO1("chan_alloc: %d", (int)chan->number);
         chan->dev = CDEV_FILE;
         FRESULT result = f_open(&g_file[fd], path, mode);
         if (result == 0) {
@@ -155,7 +156,7 @@ short fsys_open(const char * path, short mode) {
             return chan->number;
         } else {
             /* There was an error... deallocate the channel and file descriptor */
-            log_num(LOG_ERROR, "fsys_open error: ", result);
+            ERROR1("fsys_open error: %d", result);
             g_fil_state[fd] = 0;
             chan_free(chan);
             return fatfs_to_foenix(result);
@@ -163,7 +164,7 @@ short fsys_open(const char * path, short mode) {
 
     } else {
         /* We couldn't allocate a channel... return our file descriptor */
-        log(LOG_ERROR, "fsys_open out of channels");
+        ERROR("fsys_open out of channels");
         g_fil_state[fd] = 0;
         return ERR_OUT_OF_HANDLES;
     }
@@ -614,7 +615,7 @@ short fchan_read(t_channel * chan, unsigned char * buffer, short size) {
     FRESULT result;
     int total_read;
 
-    log(LOG_TRACE, "fchan_read");
+    logmsg(LOG_TRACE, "fchan_read");
 
     file = fchan_to_file(chan);
     if (file) {
@@ -659,7 +660,7 @@ short fchan_read_b(t_channel * chan) {
     short total_read;
     char buffer[2];
 
-    log(LOG_TRACE, "fchan_read");
+    logmsg(LOG_TRACE, "fchan_read_b");
 
     file = fchan_to_file(chan);
     if (file) {
@@ -765,12 +766,12 @@ short fchan_flush(t_channel * chan) {
 }
 
 /**
- * attempt to move the "cursor" position in the channel
+ * Attempt to move the "cursor" position in the channel
  */
 short fchan_seek(t_channel * chan, long position, short base) {
     FIL * file;
     FRESULT result;
-    int total_written;
+    FSIZE_t new_position;
 
     file = fchan_to_file(chan);
     if (file) {
@@ -790,6 +791,8 @@ short fchan_seek(t_channel * chan, long position, short base) {
             result = f_lseek(file, f_size(file) + position);
             return fatfs_to_foenix(result);
         }
+
+        return fatfs_to_foenix(f_lseek(file, new_position));
     }
 
     return ERR_BADCHANNEL;
@@ -823,8 +826,7 @@ short fsys_mount(short bdev) {
 
     fres = f_mount(&g_drive[bdev], drive, 0);
     if (fres != FR_OK) {
-        DEBUG("Unable to mount drive:");
-        DEBUG(drive);
+        DEBUG1("Unable to mount drive: %s", drive);        
         return fatfs_to_foenix(fres);
     } else {
         return 0;
@@ -1275,14 +1277,14 @@ static bool loader_exists(const char * extension) {
     for (i = 0; i < MAX_LOADERS; i++) {
         if (g_file_loader[i].status) {
             if (strcmp(g_file_loader[i].extension, extension) == 0) {
-                return 1;
+                return true;
             }
         }
     }
-    return 0;
+    return false;
 }
 
-static int get_app_ext(const char * path, char * extension) {
+static bool get_app_ext(const char * path, char * extension) {
     char * point = strrchr(path, '.');
     extension[0] = 0;
     if (point != 0) {
@@ -1293,11 +1295,11 @@ static int get_app_ext(const char * path, char * extension) {
                 extension[i] = toupper(c);
             } else {
                 extension[i] = 0;
-                return 1;
+                return true;
             }
         }
     } else {
-        return 0;
+        return false;
     }
 }
 
@@ -1337,11 +1339,11 @@ static short fsys_load_ext(const char * path, const char * extension, long desti
     if (loader == 0) {
         if (destination != 0) {
             /* If a destination was specified, just load it into memory without interpretation */
-            log(LOG_DEBUG, "Setting default loader.");
+            logmsg(LOG_DEBUG, "Setting default loader.");
             loader = fsys_default_loader;
 
         } else {
-            log(LOG_DEBUG, "Returning a bad extension.");
+            logmsg(LOG_DEBUG, "Returning a bad extension.");
             /* Return bad extension */
             return ERR_BAD_EXTENSION;
         }
@@ -1432,11 +1434,16 @@ short fsys_load(const char * path, long destination, long * start) {
         }
         f_closedir(&dj);
 
+        if (fr != FR_OK && fr != FR_NO_FILE) {
+            log_num(LOG_ERROR, "File system error: ", fr);
+            return FSYS_ERR_DISK_ERR;
+        }
+
         if(found_loader) {
             // Found path with valid loader
             fsys_load_ext(spath, extension, destination, start);
         } else {
-            log(LOG_ERROR, "Command not found.");
+            logmsg(LOG_ERROR, "Command not found.");
             return ERR_NOT_FOUND;
         }
     }

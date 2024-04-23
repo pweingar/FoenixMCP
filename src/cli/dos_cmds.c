@@ -14,7 +14,7 @@
 #include "dev/block.h"
 #include "dev/console.h"
 #include "dev/fsys.h"
-#include "dev/kbd_mo.h"
+#include "libfoenix/include/kbd_mo.h"
 #include "fatfs/ff.h"
 
 /*
@@ -37,8 +37,8 @@ short cmd_diskread(short screen, int argc, const char * argv[]) {
     bdev_number = (short)cli_eval_number(argv[1]);
     lba = cli_eval_number(argv[2]);
 
-    sprintf(buffer, "Reading drive #%d, sector %p\n", bdev_number, (void*)lba);
-    print(screen, buffer);
+    sprintf((char*)buffer, "Reading drive #%d, sector %p\n", bdev_number, (void*)lba);
+    print(screen, (char*)buffer);
 
     result = bdev_read(bdev_number, lba, buffer, 512);
     if (result < 512) {
@@ -73,8 +73,8 @@ short cmd_diskfill(short screen, int argc, const char * argv[]) {
     lba = cli_eval_number(argv[2]);
     value = (unsigned char)cli_eval_number(argv[3]);
 
-    sprintf(buffer, "Filling drive #%d, sector %p with 0x%02X\n", bdev_number, (void*)lba, (short)value);
-    print(screen, buffer);
+    sprintf((char*)buffer, "Filling drive #%d, sector %p with 0x%02X\n", bdev_number, (void*)lba, (short)value);
+    print(screen, (char*)buffer);
 
     for (i = 0; i < 512; i++) {
         buffer[i] = value;
@@ -100,7 +100,7 @@ short cmd_run(short screen, int argc, const char * argv[]) {
     TRACE("cmd_run");
 
     sys_chan_ioctrl(screen, CON_IOCTRL_ECHO_ON, 0, 0);
-    short result = proc_run(argv[0], argc, argv);
+    short result = proc_run(argv[0], argc, (char**)argv);
     if (result < 0) {
         err_print(screen, "Unable to execute file", result);
         return -1;
@@ -127,6 +127,7 @@ short cmd_mkdir(short screen, int argc, const char * argv[]) {
         print(screen, "USAGE: MKDIR <path>\n");
         return -1;
     }
+    return E_OK;
 }
 
 /*
@@ -146,6 +147,7 @@ short cmd_del(short screen, int argc, const char * argv[]) {
         print(screen, "USAGE: DEL <path>\n");
         return -1;
     }
+    return E_OK;
 }
 
 /*
@@ -170,8 +172,7 @@ short cmd_cd(short screen, int argc, const char * argv[]) {
         print(screen, "USAGE: CD <path>\n");
         return -1;
     }
-
-    return 0;
+    return E_OK;
 }
 
 /*
@@ -328,7 +329,7 @@ short cmd_dir(short screen, int argc, const char * argv[]) {
         result = fsys_getlabel(path, label);
         if ((result == 0) && (strlen(label) > 0)) {
             sprintf(buffer, "Drive: %s\n", label);
-            chan_write(screen, buffer, strlen(buffer));
+            chan_write(screen, (uint8_t*)buffer, strlen(buffer));
         }
 
         while (1) {
@@ -415,17 +416,17 @@ short cmd_type(short screen, int argc, const char * argv[]) {
     if (argc > 1) {
         unsigned char buffer[128];
 
-        log3(LOG_INFO, "Attempting to type [", (char*)(argv[1]), "]");
+        INFO1("Attempting to type [%s]", (char*)(argv[1]));
         short fd = fsys_open(argv[1], FA_READ);
         if (fd >= 0) {
-            log_num(LOG_INFO, "File open: ", fd);
+            INFO1("File open: %d", fd);
             while (1) {
                 short n = chan_read(fd, buffer, 128);
-                log_num(LOG_INFO, "cmd_type chan_read: ", n);
+                INFO1("cmd_type chan_read: %d", n);
                 if (n > 0) {
-                    log(LOG_INFO, "cmd_type chan_write: ");
+                    INFO("cmd_type chan_write: ");
                     chan_write(screen, buffer, n);
-                    log(LOG_INFO, "/cmd_type chan_write: ");
+                    INFO("/cmd_type chan_write: ");
                 } else {
                     break;
                 }
@@ -439,7 +440,7 @@ short cmd_type(short screen, int argc, const char * argv[]) {
             return fd;
         }
     } else {
-        log(LOG_ERROR, "Usage: TYPE <path>");
+        ERROR("Usage: TYPE <path>");
         return -1;
     }
 }
@@ -460,9 +461,9 @@ short cmd_load(short screen, int argc, const char * argv[]) {
         short result = fsys_load(argv[1], destination, &start);
         if (result == 0) {
             if (start != 0) {
-                log(LOG_INFO, "Loaded file with a start adddress.");
+                INFO("Loaded file with a start adddress.");
             } else {
-                log(LOG_INFO, "File loaded.");
+                INFO("File loaded.");
             }
         } else {
             err_print(screen, "Unable to open file", result);
@@ -471,7 +472,7 @@ short cmd_load(short screen, int argc, const char * argv[]) {
 
         return result;
     } else {
-        log(LOG_ERROR, "Usage: LOAD <path> [<destination>]");
+        ERROR("Usage: LOAD <path> [<destination>]");
         return -1;
     }
 }
@@ -495,6 +496,7 @@ short cmd_label(short screen, int argc, const char * argv[]) {
         print(screen, "USAGE: LABEL <drive #> <label>\n");
         return -1;
     }
+    return E_OK;
 }
 
 /**
@@ -598,4 +600,5 @@ short cmd_format(short screen, int argc, const char * argv[]) {
         print(screen, "USAGE: FORMAT <drive #>\n");
         return -1;
     }
+    return E_OK;
 }

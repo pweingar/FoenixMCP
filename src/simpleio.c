@@ -2,9 +2,16 @@
  * A simple collection of I/O functions the kernel will need often
  */
 
+#include "log_level.h"
+#ifndef DEFAULT_LOG_LEVEL
+    #define DEFAULT_LOG_LEVEL LOG_TRACE
+#endif
+
+
 #include <ctype.h>
 #include <string.h>
 #include <stdio.h>
+#include "log.h"
 #include "syscalls.h"
 #include "simpleio.h"
 #include "dev/txt_screen.h"
@@ -29,7 +36,11 @@ void print_c(short channel, char c) {
  * message = the ASCII-Z string to print
  */
 void print(short channel, const char * message) {
-    sys_chan_write(channel, message, strlen(message));
+	TRACE1("print(%d,..)", channel);
+	
+    short ret = sys_chan_write(channel, (const unsigned char *)message, strlen(message));
+    if (ret < 0)
+        ERROR1("Error while printing: %d", ret);
 }
 
 /**
@@ -259,9 +270,7 @@ void dump_buffer(short channel, const unsigned char * buffer, short size, short 
         c = buffer[i];
 
         if (i % 16 == 0) {
-            print(channel, " ");
-            print(channel, ascii_buffer);
-            print(channel, "\n");
+			printf(" %s\n", ascii_buffer);
 
             for (j = 0; j < 17; j++) {
                 ascii_buffer[j] = 0;
@@ -270,11 +279,9 @@ void dump_buffer(short channel, const unsigned char * buffer, short size, short 
             ascii_idx = 0;
 
             if (labels == 1) {
-                print_hex_16(channel, i);
-                print(channel, ":");
+				printf("%04X:", i);
             } else if (labels == 2) {
-                print_hex_32(channel, (unsigned long)buffer + i);
-                print(channel, ":");
+				printf("%024lX:", (unsigned long)buffer + 1);
             }
         }
 
@@ -285,15 +292,13 @@ void dump_buffer(short channel, const unsigned char * buffer, short size, short 
         }
 
         if ((i % 8) == 0) {
-            print(channel, " ");
+            printf(" ");
         }
 
-        print_hex_8(channel, c);
+		printf("%02X", c);
     }
 
-    print(channel, " ");
-    print(channel, ascii_buffer);
-    print(channel, "\n");
+	printf(" %s\n", ascii_buffer);
 }
 
 /**
@@ -340,11 +345,11 @@ const char * model_banner[] = {
     "",
 
     // 4 = A2560 GENX
-    "    ___   ___   ___________ ____     _____________   ___  __",
-    "   /   | |__ \\ / ____/ ___// __ \\   / ____/ ____/ | / / |/ /",
-    "  / /| | __/ //___ \\/ __ \\/ / / /  / / __/ __/ /  |/ /|   / ",
-    " / ___ |/ __/____/ / /_/ / /_/ /  / /_/ / /___/ /|  //   |  ",
-    "/_/  |_/____/_____/\\____/\\____/   \\____/_____/_/ |_//_/|_|  ",
+    "     GGGGGG  EEEEEEE NN    NN XX    XXX  3333333 2222222",
+    "   GG       EE      NNN   NN   XX XXX        33      22 ",
+    "  GG  GGGG EEEEE   NN NN NN    XXX       33333  22222   ",
+    " GG    GG EE      NN   NNN  XXX  XX        33 22        ",
+    " GGGGGG  EEEEEEE NN    NN XXX     XX 3333333 2222222    ",
 
     // 5 = C256 U+
     "   _________   ___________    __  __    ",
@@ -368,11 +373,16 @@ const char * model_banner[] = {
     "",
 
     // 8 = A2560 X
-    "    ___   ___   ___________ ____     _  __",
-    "   /   | |__ \\ / ____/ ___// __ \\   | |/ /",
-    "  / /| | __/ //___ \\/ __ \\/ / / /   |   / ",
-    " / ___ |/ __/____/ / /_/ / /_/ /   /   |  ",
-    "/_/  |_/____/_____/\\____/\\____/   /_/|_|  ",
+    //"    ___   ___   ___________ ____     _  __",
+    //"   /   | |__ \\ / ____/ ___// __ \\   | |/ /",
+    //"  / /| | __/ //___ \\/ __ \\/ / / /   |   / ",
+    //" / ___ |/ __/____/ / /_/ / /_/ /   /   |  ",
+    //"/_/  |_/____/_____/\\____/\\____/   /_/|_|  ",
+    " AAA  22222 55555 6     00000 X   X",
+    "A   A     2 5     6     0   0  X X ",
+    "AAAAA 22222 55555 66666 0   0   X  ",
+    "A   A 2         5 6   6 0   0  X X ",
+    "A   A 22222 55555 66666 00000 X   X",
 
     // 9 = A2560 U
     "    ___   ___   ___________ ____     __  __",

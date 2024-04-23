@@ -15,12 +15,14 @@
 #ifndef __MEMORY_H
 #define __MEMORY_H
 
+#include <stdint.h>
+
 /*
  * Initialize the memory management system
  *
  * @param top_of_ram initial value for the top of system RAM
  */
-extern void mem_init(unsigned long top_of_ram);
+extern void mem_init(uint32_t top_of_ram);
 
 /**
  * Return the top of system RAM... the user program must not use any
@@ -28,7 +30,7 @@ extern void mem_init(unsigned long top_of_ram);
  *
  * @return the address of the first byte of reserved system RAM (one above the last byte the user program can use)
  */
-extern unsigned long mem_get_ramtop();
+extern uint32_t  mem_get_ramtop();
 
 /**
  * Reserve a block of memory at the top of system RAM.
@@ -36,6 +38,6 @@ extern unsigned long mem_get_ramtop();
  * @param bytes the number of bytes to reserve
  * @return address of the first byte of the reserved block
  */
-extern unsigned long mem_reserve(unsigned long bytes);
+extern uint32_t mem_reserve(uint32_t bytes);
 
 #endif

@@ -1,13 +1,15 @@
 /*
- * Declarations for the MIDI ports
+ * MCP device driver for the MIDI ports
  */
 
-#ifndef __MIDI_H
-#define __MIDI_H
+#ifndef DEV_MIDI_H
+#define DEV_MIDI_H
+
+#include <stdint.h>
 
 /**
  * Install the driver for the MIDI port
  */
-extern short midi_install();
+int16_t midi_install();
 
 #endif

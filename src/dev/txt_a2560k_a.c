@@ -8,6 +8,7 @@
 #include "constants.h"
 #include "log.h"
 #include "utilities.h"
+#include "sys_general.h"
 #include "A2560K/vky_chan_a.h"
 #include "A2560K/vky_chan_b.h"
 #include "dev/txt_screen.h"
@@ -25,7 +26,11 @@ const unsigned long a2560k_a_lut[VKY3_A_LUT_SIZE] = {
 	0xFFAA5500, // Mid-Tone Orange
 	0xFF008080, // Mid-Tone Cian
 	0xFF808080, // 50% Grey
+#if MODEL_FOENIX_A2560X
+    0xFF202020, // Dark Grey
+#else
 	0xFF555555, // Dark Grey
+#endif
     0xFFFF0000, // Bright Red
 	0xFF55FF55, // Bright Green
 	0xFFFFFF55, // Bright Yellow
@@ -601,7 +606,11 @@ void txt_a2560k_a_init() {
     txt_a2560k_a_set_resolution(800, 600);                      /* Default resolution is 800x600 */
 
     /* Set the default color: light grey on blue */
+#if MODEL_FOENIX_A2560X
+    txt_a2560k_a_set_color(0x0F, 0x08);
+#else
     txt_a2560k_a_set_color(0x07, 0x04);
+#endif
 
     /* Set the font */
     txt_a2560k_a_set_font(8, 8, MSX_CP437_8x8_bin);             /* Use 8x8 font */
@@ -610,8 +619,13 @@ void txt_a2560k_a_init() {
     txt_a2560k_a_set_cursor(1, 0, 0xB1);
 
     /* Set the border */
+#if MODEL_FOENIX_A2560X
+    txt_a2560k_a_set_border(8, 8);                            /* Set up the border */
+    txt_a2560k_a_set_border_color(0x10, 0x00, 0x10);
+#else
     txt_a2560k_a_set_border(16, 16);                            /* Set up the border */
     txt_a2560k_a_set_border_color(0, 0, 0x3f);
+#endif
 
     /*
      * Enable set_sizes, now that everything is set up initially

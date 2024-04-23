@@ -5,15 +5,21 @@
  *
  */
 
+#include "log_level.h"
+#ifndef LOG_LEVEL
+    #define LOG_LEVEL LOG_TRACE
+#endif
+
 #include <ctype.h>
 #include <string.h>
+#include "features.h"
 #include "log.h"
 #include "types.h"
 #include "constants.h"
 #include "dev/channel.h"
 #include "dev/console.h"
-#include "dev/ps2.h"
-#include "dev/kbd_mo.h"
+#include "libfoenix/include/ps2.h"
+#include "libfoenix/include/kbd_mo.h"
 #include "dev/txt_screen.h"
 #include "simpleio.h"
 
@@ -427,7 +433,7 @@ short con_init() {
 }
 
 /*
- * Open the consolde device for the given channel
+ * Open the console device for the given channel
  *
  * Inputs:
  * chan = the channel record for this console device
@@ -527,17 +533,17 @@ short con_read_b(p_channel chan) {
 
 #if MODEL == MODEL_FOENIX_A2560K
 #ifdef KBD_POLLED
-            //ps2_mouse_get_packet();
+            ps2_mouse_get_packet();
             c = kbdmo_getc_poll();
 #else
             c = kbdmo_getc();
 #endif
 #else
-#ifdef KBD_POLLED
-            c = kbd_getc_poll();
-#else
+ #ifdef KBD_POLLED
+           c = kbd_getc_poll();
+ #else
             c = kbd_getc();
-#endif
+ #endif
 #endif
         }
 
@@ -667,8 +673,8 @@ short con_has_input(p_channel chan) {
                 c = kbdmo_getc();
     #endif
     #else
-    #ifdef KBD_POLLED
-                c = kbd_getc_poll();
+    #ifdef KBD_POLLED  
+              c = kbd_getc_poll();      
     #else
                 c = kbd_getc();
     #endif
@@ -818,7 +824,7 @@ short con_install() {
 
     chan_open(CDEV_CONSOLE, 0, 0);
 
-#if MODEL == MODEL_FOENIX_A2560K
+#if MODEL == MODEL_FOENIX_A2560K || MODEL == MODEL_FOENIX_GENX || MODEL == MODEL_FOENIX_A2560X
     chan_open(CDEV_EVID, 0, 0);
 #endif
 

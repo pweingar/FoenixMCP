@@ -17,14 +17,14 @@
 #include "syscalls.h"
 #include "interrupt.h"
 #include "rtc_reg.h"
-#include "dev/rtc.h"
+#include "libfoenix/include/rtc.h"
 #include "dev/txt_screen.h"
 #include "snd/codec.h"
 #include "utilities.h"
 #include "vicky_general.h"
 
 #if MODEL == MODEL_FOENIX_A2560K
-#include "dev/kbd_mo.h"
+#include "libfoenix/include/kbd_mo.h"
 #endif
 
 #define MAX_SETTING_NAME    64
@@ -81,7 +81,7 @@ short cli_set_register(const char * name, const char * help, cli_setter setter, 
         /* Set the fields for the setting */
         cli_name_upper(setting->name, name);
         strncpy(setting->help, help, MAX_SETTING_HELP);
-        setting->help[MAX_SETTING_HELP] = '\0';
+        setting->help[MAX_SETTING_HELP-1] = '\0';
         setting->setter = setter;
         setting->getter = getter;
         setting->next = 0;
@@ -190,11 +190,11 @@ void cli_set_help(short channel) {
     p_setting setting;
 
     sprintf(message, "SET/GET command supported settings:\n");
-    sys_chan_write(channel, message, strlen(message));
+    sys_chan_write(channel, (uint8_t*)message, strlen(message));
 
     for (setting = cli_first_setting; setting != 0; setting = setting->next) {
-        sys_chan_write(channel, setting->help, strlen(setting->help));
-        sys_chan_write(channel, "\n", 1);
+        sys_chan_write(channel, (uint8_t*)setting->help, strlen(setting->help));
+        sys_chan_write(channel, (uint8_t*)"\n", 1);
     }
 }
 
@@ -209,7 +209,7 @@ short cli_cmd_set(short channel, int argc, const char * argv[]) {
         result = cli_set_value(channel, argv[1], argv[2]);
         if (result != 0) {
             sprintf(message, "Unable to change setting: %s", sys_err_message(result));
-            sys_chan_write(channel, message, strlen(message));
+            sys_chan_write(channel, (uint8_t*)message, strlen(message));
             return 0;
         }
         return result;
@@ -221,6 +221,7 @@ short cli_cmd_set(short channel, int argc, const char * argv[]) {
         print(channel, "USAGE: SET <name> <value>\n");
         return -1;
     }
+    return E_OK;
 }
 
 /*
@@ -244,7 +245,7 @@ short cli_cmd_get(short channel, int argc, const char * argv[]) {
 
             } else {
                 sprintf(buffer, "Unable to get setting: %s", sys_err_message(result));
-                sys_chan_write(channel, buffer, strlen(buffer));
+                sys_chan_write(channel, (uint8_t*)buffer, strlen(buffer));
                 return result;
             }
         }
@@ -253,6 +254,7 @@ short cli_cmd_get(short channel, int argc, const char * argv[]) {
         print(channel, "USAGE: GET <name>\n");
         return -1;
     }
+    return E_OK;
 }
 
 /*
@@ -271,7 +273,7 @@ short cli_sof_set(short channel, const char * value) {
         sprintf(message, "USAGE: SET SOF 0|1\n");
     }
 
-    sys_chan_write(channel, message, strlen(message));
+    sys_chan_write(channel, (uint8_t*)message, strlen(message));
     return 0;
 }
 
@@ -300,7 +302,7 @@ short cli_rtc_set(short channel, const char * value) {
         sprintf(message, "USAGE: SET RTC 0|1\n");
     }
 
-    sys_chan_write(channel, message, strlen(message));
+    sys_chan_write(channel, (uint8_t*)message, strlen(message));
     return 0;
 }
 
@@ -340,12 +342,12 @@ short cli_date_set(short channel, const char * date) {
     for (i = 0; i < 10; i++) {
         if ((i == 4) || (i == 7)) {
             if (date[i] != '-') {
-                sys_chan_write(channel, usage, strlen(usage));
+                sys_chan_write(channel, (uint8_t*)usage, strlen(usage));
                 return ERR_GENERAL;
             }
         } else {
             if ((date[i] < '0') || (date[i] > '9')) {
-                sys_chan_write(channel, usage, strlen(usage));
+                sys_chan_write(channel, (uint8_t*)usage, strlen(usage));
                 return ERR_GENERAL;
             }
         }
@@ -389,12 +391,12 @@ short cli_time_set(short channel, const char * time) {
     for (i = 0; i < 8; i++) {
         if ((i == 2) || (i == 5)) {
             if (time[i] != ':') {
-                sys_chan_write(channel, usage, strlen(usage));
+                sys_chan_write(channel, (uint8_t*)usage, strlen(usage));
                 return ERR_GENERAL;
             }
         } else {
             if ((time[i] < '0') || (time[i] > '9')) {
-                sys_chan_write(channel, usage, strlen(usage));
+                sys_chan_write(channel, (uint8_t*)usage, strlen(usage));
                 return ERR_GENERAL;
             }
         }
@@ -422,8 +424,8 @@ short cli_time_get(short channel, char * value, short size) {
 }
 
 short cli_set_font(short screen, const char * path) {
-    const unsigned long load_address = 0x10000;
-    unsigned long jump_address = 0;
+    const long load_address = 0x10000;
+    long jump_address = 0;
     char message[80];
     t_file_info filinfo;
 
@@ -538,7 +540,7 @@ short cli_layout_set(short channel, const char * value) {
     fd = sys_fsys_open(value, 1);
     if (fd >= 0) {
         /* Try to read the data */
-        result = sys_chan_read(fd, buffer, 1024);
+        result = sys_chan_read(fd, (uint8_t*)buffer, 1024);
 
         if (result > 0) {
             /* If we got something, set the layout */
@@ -656,9 +658,9 @@ void cli_set_init() {
 
     cli_set_register("KEYBOARD", "KEYBOARD <path> -- set the keyboard layout", cli_layout_set, cli_layout_get);
 
-    if (info.model == MODEL_FOENIX_A2560K) {
-        cli_set_register("KEYCOLOR", "KEYCOLOR 0x0RGB -- set the keyboard color", cli_keycolor_set, cli_keycolor_get);
-    }
+#if MODEL == MODEL_FOENIX_A2560K
+    cli_set_register("KEYCOLOR", "KEYCOLOR 0x0RGB -- set the keyboard color", cli_keycolor_set, cli_keycolor_get);
+#endif
 
     if (info.screens > 1) {
         cli_set_register("SCREEN", "SCREEN <0 - 1> -- set the channel number to use for interactions", cli_screen_set, cli_screen_get);

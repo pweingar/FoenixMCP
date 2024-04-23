@@ -7,9 +7,17 @@
  * to the low level drivers (e.g. txt_a2560k_a) registered with it.
  */
 
+#include "log_level.h"
+#ifndef DEFAULT_LOG_LEVEL
+    #define DEFAULT_LOG_LEVEL LOG_ERROR
+#endif
+
+#include <string.h>
+
 #include "constants.h"
 #include "log.h"
 #include "dev/txt_screen.h"
+
 
 /**
  * The array of device drivers.
@@ -22,34 +30,8 @@ static t_txt_device txt_device_driver[TXT_CNT_SCREENS];
  * Initialize the text system.
  */
 void txt_init() {
-    int i;
-
     /* Initialize all the drivers to blank... */
-    for (i = 0; i < TXT_CNT_SCREENS; i++) {
-        txt_device_driver[i].number = 0;
-        txt_device_driver[i].name = 0;
-
-        txt_device_driver[i].init = 0;
-        txt_device_driver[i].get_capabilities = 0;
-        txt_device_driver[i].set_mode = 0;
-        txt_device_driver[i].set_sizes = 0;
-        txt_device_driver[i].set_resolution = 0;
-        txt_device_driver[i].set_border = 0;
-        txt_device_driver[i].set_border_color = 0;
-        txt_device_driver[i].set_font = 0;
-        txt_device_driver[i].set_cursor = 0;
-        txt_device_driver[i].set_cursor_visible = 0;
-        txt_device_driver[i].get_region = 0;
-        txt_device_driver[i].set_region = 0;
-        txt_device_driver[i].get_color = 0;
-        txt_device_driver[i].set_color = 0;
-        txt_device_driver[i].set_xy = 0;
-        txt_device_driver[i].get_xy = 0;
-        txt_device_driver[i].put = 0;
-        txt_device_driver[i].scroll = 0;
-        txt_device_driver[i].fill = 0;
-        txt_device_driver[i].get_sizes = 0;
-    }
+    memset(txt_device_driver, 0, sizeof(txt_device_driver));
 }
 
 /**
@@ -65,6 +47,8 @@ void txt_init() {
  * @return 0 on success, any other number is an error
  */
 short txt_register(p_txt_device device) {
+    DEBUG1("txt_register(%s)", device->name);
+	
     if (device->number < TXT_CNT_SCREENS) {
         int i = device->number;
 
@@ -111,7 +95,7 @@ p_txt_device txt_get_device(short screen) {
         if (device->number == screen) {
             return device;
         } else {
-            log_num(LOG_ERROR, "txt_get_device: number mismatch ", screen);
+            ERROR1("txt_get_device: number mismatch %d", screen);
         }
     }
 
@@ -124,13 +108,14 @@ p_txt_device txt_get_device(short screen) {
  * @param screen the number of the text device
  */
 void txt_init_screen(short screen) {
+    TRACE1("txt_init_screen(%d)", (int)screen);
     p_txt_device device = txt_get_device(screen);
     if (device) {
         if (device->init) {
             device->init();
         }
     } else {
-        log_num(LOG_ERROR, "Could not find screen ", screen);
+        ERROR1("Could not find screen %d", screen);
     }
 }
 
@@ -142,6 +127,7 @@ void txt_init_screen(short screen) {
  * @return a pointer to the read-only description (0 on error)
  */
 const p_txt_capabilities txt_get_capabilities(short screen) {
+    TRACE("txt_get_capabilities");
     p_txt_device device = txt_get_device(screen);
     if (device) {
         if (device->get_capabilities) {
@@ -159,6 +145,7 @@ const p_txt_capabilities txt_get_capabilities(short screen) {
  * @return 0 on success, any other number means the mode is invalid for the screen
  */
 short txt_set_mode(short screen, short mode) {
+    TRACE("txt_set_mode");
     p_txt_device device = txt_get_device(screen);
     if (device) {
         if (device->set_mode) {
@@ -174,6 +161,7 @@ short txt_set_mode(short screen, short mode) {
  * @return 0 on success, any other number means the mode is invalid for the screen
  */
 short txt_setsizes(short screen) {
+    TRACE("txt_setsizes");
     p_txt_device device = txt_get_device(screen);
     if (device) {
         if (device->set_sizes) {
@@ -194,6 +182,7 @@ short txt_setsizes(short screen) {
  * @return 0 on success, any other number means the resolution is unsupported
  */
 short txt_set_resolution(short screen, short width, short height) {
+    TRACE("txt_set_resolution");
     p_txt_device device = txt_get_device(screen);
     if (device) {
         if (device->set_resolution) {
@@ -211,6 +200,7 @@ short txt_set_resolution(short screen, short width, short height) {
  * @param height the vertical size of one side of the border (0 - 32 pixels)
  */
 void txt_set_border(short screen, short width, short height) {
+    TRACE("txt_set_border");
     p_txt_device device = txt_get_device(screen);
     if (device) {
         if (device->set_border) {
@@ -228,6 +218,7 @@ void txt_set_border(short screen, short width, short height) {
  * @param blue the blue component of the color (0 - 255)
  */
 void txt_set_border_color(short screen, unsigned char red, unsigned char green, unsigned char blue) {
+    TRACE("txt_set_border_color");
     p_txt_device device = txt_get_device(screen);
     if (device) {
         if (device->set_border_color) {
@@ -245,6 +236,7 @@ void txt_set_border_color(short screen, unsigned char red, unsigned char green, 
  * @param data pointer to the raw font data to be loaded
  */
 short txt_set_font(short screen, short width, short height, const unsigned char * data) {
+    TRACE("txt_set_font");
     p_txt_device device = txt_get_device(screen);
     if (device) {
         if (device->set_font) {
@@ -263,6 +255,7 @@ short txt_set_font(short screen, short width, short height, const unsigned char 
  * @param c the character in the current font to use as a cursor
  */
 void txt_set_cursor(short screen, short enable, short rate, char c) {
+    TRACE("txt_set_cursor");
     p_txt_device device = txt_get_device(screen);
     if (device) {
         if (device->set_cursor) {
@@ -278,6 +271,7 @@ void txt_set_cursor(short screen, short enable, short rate, char c) {
  * @param enable 0 to hide, any other number to make visible
  */
 void txt_set_cursor_visible(short screen, short enable) {
+    TRACE("txt_set_cursor_visible");
     p_txt_device device = txt_get_device(screen);
     if (device) {
         if (device->set_cursor_visible) {
@@ -295,6 +289,7 @@ void txt_set_cursor_visible(short screen, short enable) {
  * @return 0 on success, any other number means the region was invalid
  */
 short txt_get_region(short screen, p_rect region) {
+    TRACE2("txt_get_region screen:%d region:%p", screen, region);
     p_txt_device device = txt_get_device(screen);
     if (device) {
         if (device->get_region) {
@@ -314,6 +309,7 @@ short txt_get_region(short screen, p_rect region) {
  * @return 0 on success, any other number means the region was invalid
  */
 short txt_set_region(short screen, p_rect region) {
+    TRACE5("txt_set_region(%d,{x:%d; y:%d w:%d, h:%d})", (int)screen, (int)region->origin.x, (int)region->origin.y, (int)region->size.width, (int)region->size.height);
     p_txt_device device = txt_get_device(screen);
     if (device) {
         if (device->set_region) {
@@ -331,6 +327,7 @@ short txt_set_region(short screen, p_rect region) {
  * @param background the Text LUT index of the new current background color (0 - 15)
  */
 short txt_set_color(short screen, unsigned char foreground, unsigned char background) {
+    TRACE3("txt_get_color(%d,%d,%d)", (int)screen, (int)foreground, (int)background);
     p_txt_device device = txt_get_device(screen);
     if (device) {
         if (device->set_color) {
@@ -349,6 +346,7 @@ short txt_set_color(short screen, unsigned char foreground, unsigned char backgr
  * background = pointer to the background color number
  */
 void txt_get_color(short screen, unsigned char * foreground, unsigned char * background) {
+    TRACE3("txt_get_color(%d,%p,%p)", (int)screen, foreground, background);
     p_txt_device device = txt_get_device(screen);
     if (device) {
         if (device->get_color) {
@@ -368,6 +366,7 @@ void txt_get_color(short screen, unsigned char * foreground, unsigned char * bac
  * @param y the row for the cursor
  */
 void txt_set_xy(short screen, short x, short y) {
+	TRACE3("txt_set_xy(%d,%d,%d)", screen, (int)x, (int)y);
     p_txt_device device = txt_get_device(screen);
     if (device) {
         if (device->set_xy) {
@@ -481,6 +480,7 @@ void txt_print(short screen, const char * message) {
  * @param vertical the number of rows to scroll (negative is down, positive is up)
  */
 void txt_scroll(short screen, short horizontal, short vertical) {
+    TRACE3("txt_scroll(%d,%d,%d)", screen, horizontal, vertical);
     p_txt_device device = txt_get_device(screen);
     if (device) {
         if (device->scroll) {
@@ -517,6 +517,8 @@ void txt_clear(short screen, short mode) {
     t_point cursor;
     t_rect old_region, region;
 
+	TRACE2("txt_clear(%d,%d)", (int)screen, (int)mode);
+	
     txt_get_xy(screen, &cursor);
     txt_get_region(screen, &old_region);
 
@@ -590,6 +592,8 @@ void txt_clear_line(short screen, short mode) {
     t_point cursor;
     t_rect old_region, region;
 
+	TRACE2("txt_clear_line(%d,%d)", (int)screen, (int)mode);
+	
     txt_get_xy(screen, &cursor);
     txt_get_region(screen, &old_region);
 
@@ -653,6 +657,8 @@ void txt_insert(short screen, short count) {
     t_point cursor;
     t_rect old_region, region;
 
+	TRACE2("txt_clear_line(%d,%d)", (int)screen, (int)count);
+	
     if (count > 0) {
         txt_get_xy(screen, &cursor);
         txt_get_region(screen, &old_region);
@@ -679,9 +685,13 @@ void txt_delete(short screen, short count) {
     t_rect old_region, region;
     short left;
 
+   	TRACE2("txt_delete(%d,%d)", screen, (int)count);
+	
     if (count > 0) {
         txt_get_xy(screen, &cursor);
         txt_get_region(screen, &old_region);
+
+TRACE4("Got region %d,%d,%d,%d", (int)old_region.origin.x, (int)old_region.origin.y, (int)old_region.size.width, (int)old_region.size.height);
 
         if (count > cursor.x) {
             count = cursor.x;
@@ -691,10 +701,14 @@ void txt_delete(short screen, short count) {
         region.origin.y = old_region.origin.y + cursor.y;
         region.size.width = old_region.size.width - cursor.x;
         region.size.height = 1;
+
+        TRACE4("Setting region %d,%d,%d,%d", (int)region.origin.x, (int)region.origin.y, (int)region.size.width, (int)region.size.height);
         txt_set_region(screen, &region);
         txt_scroll(screen, count, 0);
         txt_set_region(screen, &old_region);
     }
+
+   	TRACE("txt_delete( returning");
 }
 
 /**
@@ -705,6 +719,7 @@ void txt_delete(short screen, short count) {
  * @param pixel_size the size of the screen in pixels (may be null)
  */
 void txt_get_sizes(short screen, p_extent text_size, p_extent pixel_size) {
+    TRACE("txt_get_sizes");
     p_txt_device device = txt_get_device(screen);
     if (device) {
         if (device->get_sizes) {

@@ -6,32 +6,40 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "features.h"
 #include "cli.h"
 #include "cli/test_cmds.h"
 #include "cli/sound_cmds.h"
 #include "dev/block.h"
 #include "dev/channel.h"
-#include "dev/fdc.h"
+#include "libfoenix/include/fdc.h"
 #include "dev/fsys.h"
-#include "dev/lpt.h"
-#include "dev/rtc.h"
+#include "libfoenix/include/lpt.h"
+#include "libfoenix/include/rtc.h"
 #include "dev/txt_screen.h"
-#include "dev/uart.h"
+#include "libfoenix/include/uart.h"
 #include "fatfs/ff.h"
 #include "interrupt.h"
 #include "log.h"
 #include "fdc_reg.h"
 #include "lpt_reg.h"
-#include "dev/ps2.h"
+#include "libfoenix/include/ps2.h"
 #include "rtc_reg.h"
 #include "simpleio.h"
 #include "syscalls.h"
 #include "sys_general.h"
+// TODO: the CLI should use system calls rather than depend on hardware directly
 #include "uart_reg.h"
+#include "gabe_reg.h"
 #include "vicky_general.h"
 
 #if MODEL == MODEL_FOENIX_A2560K
-#include "dev/kbd_mo.h"
+#include "libfoenix/include/kbd_mo.h"
+#endif
+
+#if HAS_DUAL_SCREEN
+#include "dev/txt_a2560k_a.h"
+#include "dev/txt_a2560k_b.h"
 #endif
 
 typedef struct s_cli_test_feature {
@@ -44,6 +52,7 @@ typedef struct s_cli_test_feature {
  * Tests...
  */
 
+#if MODEL == MODEL_FOENIX_A2560K
 /*
  * Return true if the BREAK key has been pressed
  */
@@ -51,23 +60,31 @@ short kbd_break() {
     /* Channel 0, CON_IOCTRL_BREAK */
     return sys_chan_ioctrl(0, 5, 0, 0);
 }
+#endif
 
 /*
  * Test the PS/2 keyboard
  */
 short cli_test_ps2(short channel, int argc, const char * argv[]) {
-    char message[80];
+    const char help[] = "Press keys on a PS/2 keyboard... CTRL-C to quit.\n";
     unsigned short scancode = 0;
 
-    sprintf(message, "Press keys on a PS/2 keyboard... CTRL-C to quit.\n");
-    sys_chan_write(channel, message, strlen(message));
+    sys_chan_write(channel, (uint8_t*)help, strlen(help));
 
     do {
         if (scancode != 0) {
+            char message[80];
             sprintf(message, "Scan code: %04x\n", scancode);
-            sys_chan_write(channel, message, strlen(message));
+            sys_chan_write(channel, (uint8_t*)message, strlen(message));
         }
-    } while (sys_chan_ioctrl(channel, 0x05, 0, 0) == 0);
+    } while (
+#if MODEL == MODEL_FOENIX_A2560K
+        // Not totally sure what this is supposed to test. Doesn't seem related to PS/2 anyway.
+        sys_chan_ioctrl(channel, 0x05, 0, 0) == 0
+#else
+        (scancode = kbd_get_scancode()) || 1
+#endif
+    );
 
     return 0;
 }
@@ -76,6 +93,56 @@ short cli_test_ps2(short channel, int argc, const char * argv[]) {
  * Test the joystick ports
  */
 short cli_test_joystick(short channel, int argc, const char * argv[]) {
+#if MODEL == MODEL_FOENIX_A2560U
+    volatile uint16_t * const atari_db9 = (uint16_t *)0xb00500;
+    uint16_t current,previous;
+    //const char msg[] = "Displays UPLR012 as Up/Down/Left/Right/Button0/Button1/Button2\nPress ESC to exit.\n";
+    //sys_chan_write(channel, (uint8_t*)msg, strlen(msg));
+
+    current = previous = ~*atari_db9;
+
+    // CAVEAT: this tests the hardware, not the MCP Device driver.
+    while (sys_kbd_scancode() != 0x01) {
+        if ((current = ~*atari_db9) == previous)
+            continue;
+        else {
+            char state[40];
+            int i = 0;
+            
+            if ((current & 0x00ff) != (previous & 0x00ff)) {
+                state[i] = '\0';
+                strcat(state, "JOY1:");
+                i = strlen(state);
+                if (current & JOY1_UP) state[i++] = 'U';
+                if (current & JOY1_DOWN) state[i++] = 'D';
+                if (current & JOY1_LEFT) state[i++] = 'L';
+                if (current & JOY1_RIGHT) state[i++] = 'R';
+                if (current & JOY1_BTN0) state[i++] = '0';
+                if (current & JOY1_BTN1) state[i++] = '1';
+                if (current & JOY1_BTN2) state[i++] = '2';
+                state[i++] = ' ';
+            }
+
+            if ((current & 0xff00) != (previous & 0xff00)) {
+                state[i] = '\0';
+                strcat(state, "JOY2:");
+                i = strlen(state);
+                if (current & JOY2_UP) state[i++] = 'U';
+                if (current & JOY2_DOWN) state[i++] = 'D';
+                if (current & JOY2_LEFT) state[i++] = 'L';
+                if (current & JOY2_RIGHT) state[i++] = 'R';
+                if (current & JOY2_BTN0) state[i++] = '0';
+                if (current & JOY2_BTN1) state[i++] = '1';
+                if (current & JOY2_BTN2) state[i++] = '2';
+            }
+
+            state[i++] = '\n';
+            state[i] = '\0';
+            sys_chan_write(channel, (uint8_t*)state, strlen(state));
+            previous = current;
+        }
+    }
+#else
     char message[80];
     volatile unsigned int * joystick_port = (volatile unsigned int *)0xFEC00500;
     volatile unsigned int * game_ctrl_port = (volatile unsigned int *)0xFEC00504;
@@ -83,7 +150,7 @@ short cli_test_joystick(short channel, int argc, const char * argv[]) {
     unsigned short scancode = 0;
 
     sprintf(message, "Plug a joystick into either port 0 or port 1... ESC to quit.\n");
-    sys_chan_write(channel, message, strlen(message));
+    sys_chan_write(channel, (uint8_t*)message, strlen(message));
 
     /* Make sure we're in Atari joystick mode */
     *game_ctrl_port = 0;
@@ -93,12 +160,12 @@ short cli_test_joystick(short channel, int argc, const char * argv[]) {
         if (joy_state != old_joy_state) {
             old_joy_state = joy_state;
             sprintf(message, "Joystick: %08X\n", joy_state);
-            sys_chan_write(channel, message, strlen(message));
+            sys_chan_write(channel, (uint8_t*)message, strlen(message));
         }
 
         scancode = sys_kbd_scancode();
     } while (sys_chan_ioctrl(channel, 5, 0, 0) == 0);
-
+#endif
     return 0;
 }
 
@@ -129,7 +196,7 @@ short cli_test_gamepad(short channel, int argc, const char * argv[]) {
     }
 
     sprintf(message, "Testing SNES gamepad port %d... ESC to quit.\n", (short)port);
-    sys_chan_write(channel, message, strlen(message));
+    sys_chan_write(channel, (uint8_t*)message, strlen(message));
 
     /* Make sure we're in SNES mode */
     if (port == 0) {
@@ -161,7 +228,7 @@ short cli_test_gamepad(short channel, int argc, const char * argv[]) {
             old_game_state_0 = game_state_0;
             old_game_state_1 = game_state_1;
             sprintf(message, "Gamepads: %08X %08X\n", game_state_0, game_state_1);
-            sys_chan_write(channel, message, strlen(message));
+            sys_chan_write(channel, (uint8_t*)message, strlen(message));
         }
 
         scancode = sys_kbd_scancode();
@@ -229,10 +296,10 @@ short cli_test_uart(short channel, int argc, const char * argv[]) {
     uart_index = cdev - CDEV_COM1;
     uart_address = (unsigned long)uart_get_base(uart_index);
 
-    sprintf(buffer, "Serial port loopback test of COM%d at 0x%08X...\n", cdev - CDEV_COM1 + 1, uart_address);
+    sprintf(buffer, "Serial port loopback test of COM%d at %p...\n", cdev - CDEV_COM1 + 1, (void*)uart_address);
     print(channel, buffer);
 
-    uart = sys_chan_open(cdev, "9600,8,1,NONE", 0);
+    uart = sys_chan_open(cdev, (uint8_t*)"9600,8,1,NONE", 0);
     if (uart >= 0) {
         sprintf(buffer, "COM%d: 9600, no parity, 1 stop bit, 8 data bits\nPress ESC to finish.\n", cdev - CDEV_COM1 + 1);
         print(channel, buffer);
@@ -287,14 +354,14 @@ short cli_test_rtc(short channel, int argc, const char * argv[]) {
     ticks = sys_time_jiffies();
 
     sprintf(buffer, "Waiting for updated ticks starting from %ld\n", ticks);
-    sys_chan_write(channel, buffer, strlen(buffer));
+    sys_chan_write(channel, (uint8_t*)buffer, strlen(buffer));
 
-    for (;;) {
+    while (sys_kbd_scancode() != 0x01) {
         if (ticks < sys_time_jiffies()) {
             /* We got the periodic interrupt */
 
             sprintf(buffer, "Tick! %ld\n", ticks);
-            sys_chan_write(channel, buffer, strlen(buffer));
+            sys_chan_write(channel, (uint8_t*)buffer, strlen(buffer));
 
             ticks = sys_time_jiffies();
         }
@@ -315,7 +382,7 @@ short cli_mem_test(short channel, int argc, const char * argv[]) {
     char message[80];
     unsigned long i;
 
-#if MODEL == MODEL_FOENIX_A2560K
+#if (MODEL == MODEL_FOENIX_A2560K || MODEL == MODEL_FOENIX_GENX || MODEL == MODEL_FOENIX_A2560X)
     if (argc > 1) {
         if ((strcmp(argv[1], "MERA") == 0) || (strcmp(argv[1], "mera") == 0)) {
             mem_start = 0x02000000;
@@ -326,7 +393,7 @@ short cli_mem_test(short channel, int argc, const char * argv[]) {
     }
 #endif
 
-    sprintf(message, "\x1B[H\x1B[2JTesting memory from 0x%08X to 0x%08X\n", (unsigned long)mem_start, (unsigned long)mem_end);
+    sprintf(message, "\x1B[H\x1B[2JTesting memory from %p to %p\n", (void*)mem_start, (void*)mem_end);
     print(channel, message);
 
     for (i = mem_start; i < mem_end; i++) {
@@ -362,7 +429,7 @@ short cli_mem_test(short channel, int argc, const char * argv[]) {
     return 0;
 }
 
-#if MODEL == MODEL_FOENIX_A2560K
+#if HAS_FLOPPY
 short cli_test_recalibrate(short screen, int argc, const char * argv[]) {
     unsigned char buffer[512];
     short i;
@@ -371,14 +438,14 @@ short cli_test_recalibrate(short screen, int argc, const char * argv[]) {
     bdev_ioctrl(BDEV_FDC, FDC_CTRL_MOTOR_ON, 0, 0);
 
     sprintf(buffer, "Recalibrating the floppy drive\n");
-    sys_chan_write(screen, buffer, strlen(buffer));
+    sys_chan_write(screen, (uint8_t*)buffer, strlen(buffer));
 
     if (fdc_recalibrate() == 0) {
         sprintf(buffer, "Success\n");
-        sys_chan_write(screen, buffer, strlen(buffer));
+        sys_chan_write(screen, (uint8_t*)buffer, strlen(buffer));
     } else {
         sprintf(buffer, "Failed\n");
-        sys_chan_write(screen, buffer, strlen(buffer));
+        sys_chan_write(screen, (uint8_t*)buffer, strlen(buffer));
     }
 
     bdev_ioctrl(BDEV_FDC, FDC_CTRL_MOTOR_OFF, 0, 0);
@@ -396,14 +463,14 @@ short cli_test_seek(short screen, int argc, const char * argv[]) {
     cylinder = (unsigned char)cli_eval_number(argv[1]);
 
     sprintf(buffer, "Seeking to %d\n", (short)cylinder);
-    sys_chan_write(screen, buffer, strlen(buffer));
+    sys_chan_write(screen, (uint8_t*)buffer, strlen(buffer));
 
     if (fdc_seek(cylinder) == 0) {
         sprintf(buffer, "Success\n");
-        sys_chan_write(screen, buffer, strlen(buffer));
+        sys_chan_write(screen, (uint8_t*)buffer, strlen(buffer));
     } else {
         sprintf(buffer, "Failed\n");
-        sys_chan_write(screen, buffer, strlen(buffer));
+        sys_chan_write(screen, (uint8_t*)buffer, strlen(buffer));
     }
 
     bdev_ioctrl(BDEV_FDC, FDC_CTRL_MOTOR_OFF, 0, 0);
@@ -461,7 +528,7 @@ short cli_test_fdc(short screen, int argc, const char * argv[]) {
         result = bdev_init(BDEV_FDC);
         if (result != 0) {
             sprintf(buffer, "Could not initialize FDC: %s\n", sys_err_message(result));
-            sys_chan_write(screen, buffer, strlen(buffer));
+            sys_chan_write(screen, (uint8_t*)buffer, strlen(buffer));
             return result;
         }
 
@@ -543,7 +610,7 @@ short cli_test_create(short screen, int argc, const char * argv[]) {
         short channel = fsys_open(argv[1], FA_CREATE_NEW | FA_WRITE);
         if (channel >= 0) {
             char * message = "Hello, world!\n";
-            n = chan_write(channel, message, strlen(message));
+            n = chan_write(channel, (uint8_t*)message, strlen(message));
             if (n <= 0) {
                 err_print(screen, "Unable to write to file", n);
             }
@@ -562,15 +629,15 @@ short cli_test_create(short screen, int argc, const char * argv[]) {
     }
 }
 
+#if HAS_PARALLEL_PORT
 short cli_test_lpt(short screen, int argc, const char * argv[]) {
-#if MODEL == MODEL_FOENIX_A2560K
     char message[80];
     unsigned char scancode;
 
     sprintf(message, "Test parallel port:\nF1: DATA='B'  F2: DATA='A'  F3: STRB=1  F4: STRB=0\n");
-    sys_chan_write(screen, message, strlen(message));
+    sys_chan_write(screen, (uint8_t*)message, strlen(message));
     sprintf(message, "F5: INIT=1  F6: INIT=0  F7: SEL=1  F8: SEL=0\nESC: Quit\n");
-    sys_chan_write(screen, message, strlen(message));
+    sys_chan_write(screen, (uint8_t*)message, strlen(message));
 
     unsigned char ctrl = 0;
     *LPT_CTRL_PORT = ctrl;
@@ -641,12 +708,11 @@ short cli_test_lpt(short screen, int argc, const char * argv[]) {
                 break;
         }
     }
-#endif
+
     return 0;
 }
 
 short cmd_test_print(short screen, int argc, const char * argv[]) {
-#if MODEL == MODEL_FOENIX_A2560K
     const char * test_pattern = "0123456789ABCDEFGHIJKLMNOPQRTSUVWZXYZ\r\n";
 
     char message[80];
@@ -659,7 +725,7 @@ short cmd_test_print(short screen, int argc, const char * argv[]) {
         print(screen, "Sending test patterns to printer (ESC to quit)...\n");
 
         while (scancode != 0x01) {
-            short result = sys_chan_write(lpt, test_pattern, strlen(test_pattern));
+            short result = sys_chan_write(lpt, (uint8_t*)test_pattern, strlen(test_pattern));
             if (result != 0) {
                 sprintf(message, "Unable to print: %s\n", err_message(result));
                 print(screen, message);
@@ -679,9 +745,9 @@ short cmd_test_print(short screen, int argc, const char * argv[]) {
         sprintf(message, "Could not open channel to printer: %s\n", err_message(lpt));
         print(screen, message);
     }
-#endif
     return 0;
 }
+#endif
 
 /**
  * Test the ANSI escape codes
@@ -713,10 +779,10 @@ short cmd_test_ansi(short screen, int argc, const char * argv[]) {
         }
 
         sprintf(buffer, "\x1b[%dm%10s\x1b[37;44m \x1b[30;%dm%10s\x1b[37;44m", 30 + i, color_name, 40 + i, color_name);
-        sys_chan_write(screen, buffer, strlen(buffer));
+        sys_chan_write(screen, (uint8_t*)buffer, strlen(buffer));
 
         sprintf(buffer, "\t\x1b[%dm%10s\x1b[37;44m \x1b[30;%dm%10s\x1b[37;44m\n", 90 + i, color_name, 100 + i, color_name);
-        sys_chan_write(screen, buffer, strlen(buffer));
+        sys_chan_write(screen, (uint8_t*)buffer, strlen(buffer));
     }
 
     print(screen, "\x1b[1;13H0123456789ABCDEF\x1b[6;13H\x1b[2@^^\x1b[20;13H<--2 characters inserted");
@@ -774,34 +840,156 @@ short cmd_test_ansi(short screen, int argc, const char * argv[]) {
     return 0;
 }
 
+static short cli_test_textscroll (short screen, int argc, const char * argv[]) {
+    int i;
+    char c;    
+    char *scr;
+    short *swrw;
+    char *dst;
+
+    if (argc != 2) {
+        printf("Copy size missing!");
+        return 0;
+    }        
+
+#if HAS_DUAL_SCREEN
+    switch (screen) {
+    case TXT_SCREEN_A2560K_A: 
+        scr = (char*)ScreenText_A;
+        break;
+    case TXT_SCREEN_A2560K_B:
+        scr = (char*)ScreenText_B;
+        break;
+    default:
+        // How would we even get here ??
+        // TODO return error somehow
+        return 0;
+    }
+#elif MODEL == MODEL_FOENIX_A2560U || MODEL == MODEL_FOENIX_A2560U_PLUS
+    scr = (char*)ScreenText_A;
+#endif 
+
+    // Fill screen byte by byte
+    const int line_length = 640/8; // # chars on a line
+    const int full_screen_size= line_length*480/8;    
+    unsigned long jiffies = sys_time_jiffies() + 60*3;
+
+    if (strcmp("word", argv[1]) == 0) {       
+        short *dstw;
+        char w[2];
+
+        // Fill using words
+        for (i=0, dstw=(short*)scr; i<full_screen_size/2; i++) {
+            if (w[0] > 'Y' || (i % (line_length/2)) == 0) {
+                w[0] = 'A';
+                w[1] = 'B';
+            }
+                
+            *dstw++ = *((short*)&w);
+            w[0] += 2;
+            w[1] += 2;            
+        }
+
+        // Wait a bit
+        while (sys_time_jiffies() < jiffies);
+
+        for (i=0, dstw = (short*)scr; i<(full_screen_size-line_length)/2; i++) {
+            *dstw = dstw[1];
+            dstw++;
+        }
+    }
+    else if (strcmp("byte", argv[1]) == 0) {
+        // Fill using bytes
+        for (i=0, dst=scr; i<full_screen_size; i++) {
+            if (c > 'Z' || (i % line_length) == 0)
+                c = 'A';
+            *dst++ = c++;
+        }
+
+        // Wait a bit
+        while (sys_time_jiffies() < jiffies);
+
+        for (i=0, dst = scr; i<full_screen_size-line_length; i++) {
+            *dst = dst[1];
+            dst++;
+        }
+    }
+    else
+        print(screen, "Unrecognized option!");
+
+    return 0;
+}
+
+
+static short cli_test_background (short screen, int argc, const char * argv[]) {
+    if (argc != 2) {
+        print (screen, "AARRGGBB color code missing.");
+        return 0;
+    }
+    
+    uint32_t jiffies = sys_time_jiffies() + 60*3;
+
+    uint32_t old_ctrl = *MasterControlReg_A;
+    uint32_t old_rgb = *BackGroundControlReg_A;
+    uint32_t rgb = (uint32_t)cli_eval_number(argv[1]);
+
+    *MasterControlReg_A = (old_ctrl & 0xfffffff0) | (VKY3_MCR_TEXT_EN|VKY3_MCR_TEXT_OVRLY|VKY3_MCR_GRAPH_EN);
+    *BackGroundControlReg_A = rgb;
+
+    // Wait a bit
+    while (sys_time_jiffies() < jiffies);
+
+    *MasterControlReg_A = old_ctrl; // Bitmap+screen overlay
+    *BackGroundControlReg_A = old_rgb;
+
+    return 0;
+}
+
 const t_cli_test_feature cli_test_features[] = {
     {"ANSI", "ANSI: test the ANSI escape codes", cmd_test_ansi},
+    {"BACKGROUND", "BACKGROUND <0xaarrggbb>: set the background color to the give RGB color", cli_test_background},
     {"BITMAP", "BITMAP: test the bitmap screen", cli_test_bitmap},
     {"CREATE", "CREATE <path>: test creating a file", cli_test_create},
     {"IDE", "IDE: test reading the MBR of the IDE drive", cli_test_ide},
-#if MODEL == MODEL_FOENIX_A2560K
+#if HAS_FLOPPY
     {"FDC", "FDC DSKCHG | [<lba> [WRITE <data>]]: test reading/writing the MBR from the floppy drive", cli_test_fdc},
-    {"GAMEPAD", "GAMEPAD [0 | 1]: test SNES gamepads", cli_test_gamepad},
-    {"JOY", "JOY: test the joystick", cli_test_joystick},
 #endif
+#if HAS_SNES_GAMEPAD
+    {"GAMEPAD", "GAMEPAD [0 | 1]: test SNES gamepads", cli_test_gamepad},
+#endif    
+    {"JOY", "JOY: test the joystick", cli_test_joystick},
+#if HAS_PARALLEL_PORT
     {"LPT", "LPT: test the parallel port", cli_test_lpt},
+#endif
     {"MEM", "MEM [SYS|MERA]: test reading and writing of system or MERA memory", cli_mem_test},
+#if HAS_SUPERIO
     {"MIDILOOP", "MIDILOOP: perform a loopback test on the MIDI ports", midi_loop_test},
     {"MIDIRX", "MIDIRX: perform a receive test on the MIDI ports", midi_rx_test},
     {"MIDITX", "MIDITX: send a note to a MIDI keyboard", midi_tx_test},
-    {"OPL3", "OPL3: test the OPL3 sound chip", opl3_test},
+#endif
+    {"OPL3", "OPL3 <delay>: test the OPL3 sound chip, with some optional delay between bytes", opl3_test},
+#if HAS_OPN
     {"OPN", "OPN [EXT|INT]: test the OPN sound chip", opn_test},
+#endif
+#if HAS_OPM
     {"OPM", "OPM [EXT|INT]: test the OPM sound chip", opm_test},
+#endif
     {"PANIC", "PANIC: test the kernel panic mechanism", cli_test_panic},
     {"PS2", "PS2: test the PS/2 keyboard", cli_test_ps2},
     {"PSG", "PSG [EXT|INTL|INTR|INTS]: test the PSG sound chip", psg_test},
+#if HAS_PARALLEL_PORT
     {"PRINT", "PRINT: sent text to the printer", cmd_test_print},
-#if MODEL == MODEL_FOENIX_A2560K
-    {"RECALIBRATE", "RECALIBRATE: recalibrate the floppy drive", cli_test_recalibrate},
-    {"SEEK", "SEEK <track>: move the floppy drive head to a track", cli_test_seek},
-    {"SID", "SID [EXT|INT]: test the SID sound chips", sid_test},
 #endif
+#if HAS_FLOPPY
+    {"RECALIBRATE", "RECALIBRATE: recalibrate the floppy drive", cli_test_recalibrate},
+#endif
+    {"RTC", "RTC: Test the RTC interrupts", cli_test_rtc},
+#if HAS_FLOPPY
+    {"SEEK", "SEEK <track>: move the floppy drive head to a track", cli_test_seek},
+#endif
+    {"SID", "SID [EXT|INT]: test the SID sound chips", sid_test},
     {"UART","UART [1|2]: test the serial port",cli_test_uart},
+    {"TEXTSCROLL", "TEXTSCROLL [byte|word]: fills the text memory with A..Z then scroll one char to the left", cli_test_textscroll},
     {"END", "END", 0}
 };
 
@@ -852,4 +1040,12 @@ short cmd_test(short screen, int argc, const char * argv[]) {
     }
 
     return 0;
+}
+
+// This is meant as a buffer so because of one byte missing in the transfer might get the whole command Test to fail.
+// Don't use this routine.
+short cmd_Dummy (short screen, int argc, const char * argv[]) 
+{
+    argc = argc + 1;
+    return (argc);
 }

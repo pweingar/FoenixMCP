@@ -1,8 +1,14 @@
 /**
  * Implementation of 68000 specific syscall routines.
  *
- * NOTE: these routines are not called directly but are instead called through TRAP#13
+ * NOTE: these routines are not called directly but are instead called through TRAP#15
  */
+
+
+#include "log_level.h"
+#ifndef DEFAULT_LOG_LEVEL
+    #define DEFAULT_LOG_LEVEL INFO
+#endif
 
 #include "log.h"
 #include "types.h"
@@ -10,22 +16,24 @@
 #include "interrupt.h"
 #include "memory.h"
 #include "proc.h"
+#include "variables.h"
 #include "dev/channel.h"
 #include "dev/block.h"
 #include "dev/fsys.h"
-#include "dev/rtc.h"
+#include "libfoenix/include/rtc.h"
 #include "sys_general.h"
 
 #if MODEL == MODEL_FOENIX_A2560K
-#include "dev/kbd_mo.h"
+#include "libfoenix/include/kbd_mo.h"
 #else
-#include "dev/ps2.h"
+#include "libfoenix/include/ps2.h"
 #endif
 
 /*
  * Determine the correct system function implementation and call it.
  */
-unsigned long syscall_dispatch(int32_t function, int32_t param0, int32_t param1, int32_t param2, int32_t param3, int32_t param4, int32_t param5) {
+uint32_t SYSTEMCALL syscall_dispatch(int32_t function, int32_t param0, int32_t param1, int32_t param2, int32_t param3, int32_t param4, int32_t param5) {
+    TRACE7("DISPATCH(0x%x,%x,%x,%x,%x,%x,%x)", function, param0, param1, param2, param3, param4, param5);
     switch (function & 0x00f0) {
         case 0x00:
             /* Core System Calls */
@@ -38,14 +46,14 @@ unsigned long syscall_dispatch(int32_t function, int32_t param0, int32_t param1,
                     break;
 
                 case KFN_INT_REGISTER:
-                    return (int32_t)int_register((unsigned short)param0, (p_int_handler)param1);
+                    return (int32_t)int_register((uint16_t)param0, (p_int_handler)param1);
 
                 case KFN_INT_ENABLE:
-                    int_enable((unsigned short)param0);
+                    int_enable((uint16_t)param0);
                     return 0;
 
                 case KFN_INT_DISABLE:
-                    int_disable((unsigned short)param0);
+                    int_disable((uint16_t)param0);
                     return 0;
 
                 case KFN_INT_ENABLE_ALL:
@@ -55,11 +63,11 @@ unsigned long syscall_dispatch(int32_t function, int32_t param0, int32_t param1,
                     return int_disable_all();
 
                 case KFN_INT_CLEAR:
-                    int_clear((unsigned short)param0);
+                    int_clear((uint16_t)param0);
                     return 0;
 
                 case KFN_INT_PENDING:
-                    return int_pending((unsigned short)param0);
+                    return int_pending((uint16_t)param0);
 
                 case KFN_SYS_GET_INFO:
                     sys_get_information((p_sys_info)param0);
@@ -83,10 +91,10 @@ unsigned long syscall_dispatch(int32_t function, int32_t param0, int32_t param1,
                     return chan_read_b((short)param0);
 
                 case KFN_CHAN_READ:
-                    return chan_read((short)param0, (uint8_t *)param1, (short)param2);
+                    return chan_read((short)param0, (unsigned char *)param1, (short)param2);
 
                 case KFN_CHAN_READ_LINE:
-                    return chan_readline((short)param0, (uint8_t *)param1, (short)param2);
+                    return chan_readline((short)param0, (unsigned char *)param1, (short)param2);
 
                 case KFN_CHAN_STATUS:
                     return chan_status((short)param0);
@@ -108,6 +116,12 @@ unsigned long syscall_dispatch(int32_t function, int32_t param0, int32_t param1,
 
                 case KFN_CHAN_REGISTER:
                     return cdev_register((p_dev_chan)param0);
+
+                case KFN_CHAN_SWAP:
+                    return chan_swap((short)param0, (short)param1);
+
+                case KFN_CHAN_DEVICE:
+                    return chan_device((short)param0);
 
                 default:
                     return ERR_GENERAL;
@@ -201,13 +215,19 @@ unsigned long syscall_dispatch(int32_t function, int32_t param0, int32_t param1,
             /* Process and Memory functions */
             switch (function) {
                 case KFN_RUN:
-                    return proc_run((char *)param0, (int)param1, (char *)param2);
+                    return proc_run((char *)param0, (int)param1, (char **)param2);
 
                 case KFN_MEM_GET_RAMTOP:
-                    return mem_get_ramtop();
+                    return (unsigned long)mem_get_ramtop();
 
                 case KFN_MEM_RESERVE:
                     return mem_reserve((unsigned long)param0);
+
+                case KFN_VAR_SET:
+                    return var_set((const char *)param0, (const char *)param1);
+
+                case KFN_VAR_GET:
+                    return (unsigned long)var_get((const char *)param0);
 
                 default:
                     return ERR_GENERAL;
@@ -229,17 +249,26 @@ unsigned long syscall_dispatch(int32_t function, int32_t param0, int32_t param1,
                     return 0;
 
                 case KFN_KBD_SCANCODE:
+#if MODEL == MODEL_FOENIX_A2560K
+                    return kbdmo_get_scancode();
+#else
                     return kbd_get_scancode();
+#endif
 
                 case KFN_ERR_MESSAGE:
                     return (unsigned long)err_message((short)param0);
 
                 case KFN_KBD_LAYOUT:
+#if MODEL == MODEL_FOENIX_A2560K
+                    return kbdmo_layout((const char *)param0);
+#else
                     return kbd_layout((const char *)param0);
+#endif
 
                 default:
                     return ERR_GENERAL;
             }
+            break;
 
         case 0x60:
             /* Text mode operations */
@@ -314,6 +343,23 @@ unsigned long syscall_dispatch(int32_t function, int32_t param0, int32_t param1,
                 case KFN_TXT_SCROLL:
                     /* Scroll the current region */
                     txt_scroll((short)param0, (short)param1, (short)param2);
+                    return 0;
+
+                default:
+                    return ERR_GENERAL;
+            }
+            break;
+
+        case 0x70:
+            /* Text calls #2 */
+            switch (function) {
+                case KFN_TXT_SET_CURSOR_VIS:
+                    /* Set the cursor visibility */
+                    txt_set_cursor_visible((short)param0, (short)param1);
+                    return 0;
+
+                case KFN_TXT_GET_SIZES:
+                    txt_get_sizes((short)param0, (p_extent)param1, (p_extent)param2);
                     return 0;
 
                 default:

@@ -1,156 +1,26 @@
-/*
- * Parallel port printer driver
- */
+/* MCP Parallel port device. For now it only supports writting to the serial port, not reading from it. */
 
+#include "features.h"
+#if HAS_PARALLEL_PORT
+
+#include <stdint.h>
+#include "channel.h"
 #include "errors.h"
-#include "log.h"
-#include "lpt_reg.h"
-#include "dev/lpt.h"
-#include "dev/txt_screen.h"
-#include "simpleio.h"
-#include "sys_general.h"
-#include "syscalls.h"
-
-#if MODEL == MODEL_FOENIX_A2560K
+#include "libfoenix/include/lpt.h"
+#include "libfoenix/include/rtc.h"
 
 #define MAX_LPT_JIFFIES     600
 
-/**
- * Wait a little bit...
- */
-void lpt_delay() {
-    long target_jiffies = sys_time_jiffies() + 1;
-    while (target_jiffies > sys_time_jiffies()) ;
-}
-
-/**
- * Initialize the printer... assert the INIT pin to trigger a reset on the printer
- */
-short lpt_initialize() {
-    int i;
-
-    /* Set the outputs to start the initialization process */
-    *LPT_CTRL_PORT = LPT_CTRL_SELECT;
-    lpt_delay();
-
-    /* Set the outputs to stop the initialization process */
-    *LPT_CTRL_PORT = LPT_CTRL_mINIT | LPT_CTRL_SELECT;
-
-    return 0;
-}
-
-/**
- * Open a connection to the printer... all we do is assert the SELECT pin
- */
-short lpt_open(t_channel * chan, const uint8_t * path, short mode) {
-    lpt_initialize();
-
-    *LPT_CTRL_PORT = LPT_CTRL_mINIT | LPT_CTRL_SELECT;
-
-    // Write a dummy character to kick everything off
-    lpt_write_b(0, "\x00", 0);
-
-    return 0;
-}
-
-/**
- * Close the connection to the printer... all we do is deassert the SELECT pin
- */
-short lpt_close(t_channel * chan) {
-    *LPT_CTRL_PORT = LPT_CTRL_mINIT;
-    return 0;
-}
-
-/**
- * Write a character to the parallel port
- */
-short lpt_write_b(p_channel chan, unsigned char b) {
-    /* This write routine is polled I/O. */
-    long target_jiffies = 0;
-
-    /* Wait until the printer is not busy */
-    target_jiffies = sys_time_jiffies() + MAX_LPT_JIFFIES;
-    while ((*LPT_STAT_PORT & LPT_STAT_nBUSY) != LPT_STAT_nBUSY) {
-        lpt_delay();
-        if (target_jiffies < sys_time_jiffies()) {
-            return DEV_TIMEOUT;
-        }
-    }
-
-    /* Send the byte */
-    *LPT_DATA_PORT = b;
-
-    /* Strobe the interface */
-    *LPT_CTRL_PORT = LPT_CTRL_mINIT | LPT_CTRL_SELECT;
-    lpt_delay();
-    *LPT_CTRL_PORT = LPT_CTRL_mINIT | LPT_CTRL_SELECT | LPT_CTRL_STROBE;
-
-    /* Wait until the printer is not busy */
-    target_jiffies = sys_time_jiffies() + MAX_LPT_JIFFIES;
-    while ((*LPT_STAT_PORT & LPT_STAT_nBUSY) != LPT_STAT_nBUSY) {
-        lpt_delay();
-        if (target_jiffies < sys_time_jiffies()) {
-            return DEV_TIMEOUT;
-        }
-    }
-
-    unsigned char status = *LPT_STAT_PORT;
-    if ((status & (LPT_STAT_nERROR | LPT_STAT_PO)) != LPT_STAT_nERROR ) {
-        // Online, there's paper, not busy, and not in error
-        if (status & LPT_STAT_PO) {
-            return DEV_NOMEDIA;
-        } else {
-            return ERR_GENERAL;
-        }
-    } else {
-        return 0;
-    }
-
-    return 0;
-}
-
-/*
- * Write a buffer of bytes to the parallel port
- */
-short lpt_write(p_channel chan, const uint8_t * buffer, short size) {
-    int i;
-    short result;
-
-    for (i = 0; i < size; i++) {
-        result = lpt_write_b(chan, buffer[i]);
-        if (result) {
-            return result;
-        }
-    }
-
-    return 0;
-}
-
-/**
- * Return the status of the printer
- */
-short lpt_status(p_channel chan) {
-    short result = 0;
-
-    // Get the status
-    unsigned char stat = *LPT_STAT_PORT;
-
-    // Conver the status bits to be consistent with channels
-    if ((stat & LPT_STAT_nERROR) == 0) result |= LPT_STATUS_ERROR;
-    if (stat & LPT_STAT_PO) result |= LPT_STATUS_PAPER;
-    if (stat & LPT_STAT_SELECT) result |= LPT_STATUS_ONLINE;
-    if ((stat & (LPT_STAT_nERROR | LPT_STAT_PO | LPT_STAT_nBUSY | LPT_STAT_SELECT)) == LPT_STAT_nERROR | LPT_STAT_nBUSY | LPT_STAT_SELECT) {
-        // Online, there's paper, not busy, and not in error
-        result |= LPT_STATUS_WRITABLE;
-    }
-
-    return result;
-}
+static int16_t lpt_open(t_channel * chan, const uint8_t * path, int16_t mode);
+static int16_t lpt_close(t_channel * chan);
+static int16_t lpt_get_status(p_channel chan);
+static int16_t lpt_write_b(p_channel chan, uint8_t b);
+static int16_t lpt_write(p_channel chan, const uint8_t * buffer, int16_t size);
 
 /**
  * Install the LPT driver
  */
-short lpt_install() {
+int16_t lpt_install() {
     t_dev_chan dev;
 
     dev.name = "LPT";
@@ -165,10 +35,103 @@ short lpt_install() {
     dev.write_b = lpt_write_b;
     dev.flush = 0;
     dev.seek = 0;
-    dev.status = lpt_status;
+    dev.status = lpt_get_status;
     dev.ioctrl = 0;
 
     return cdev_register(&dev);
+}
+
+/**
+ * Open a connection to the printer... all we do is assert the SELECT pin
+ */
+static int16_t lpt_open(t_channel * chan, const uint8_t * path, int16_t mode) {
+    lpt_init(MAX_LPT_JIFFIES);
+
+    lpt_select(true);
+
+    // Write a dummy character to kick everything off
+    lpt_write_b(0, '\0');
+
+    return E_OK;
+}
+
+/**
+ * Close the connection to the printer... all we do is deassert the SELECT pin
+ */
+static int16_t lpt_close(t_channel * chan) {
+    lpt_select(false);
+    return E_OK;
+}
+
+/**
+ * Return the status of the printer
+ */
+static int16_t lpt_get_status(p_channel chan) {
+    // Get the status
+    return lpt_status();
+}
+
+/**
+ * Write a character to the parallel port
+ */
+static int16_t lpt_write_b(p_channel chan, uint8_t b) {
+    /* This write routine is polled I/O. */
+    int32_t target_jiffies = 0;
+
+    /* Wait until the printer is not busy */
+    target_jiffies = rtc_get_jiffies() + MAX_LPT_JIFFIES;
+    while (lpt_busy()) {
+        lpt_delay();
+        if (target_jiffies < rtc_get_jiffies()) {
+            return DEV_TIMEOUT;
+        }
+    }
+
+    /* Send the byte */
+    lpt_data(b);
+
+    /* Strobe the interface */
+    lpt_strobe();
+
+    /* Wait until the printer is not busy */
+    target_jiffies = rtc_get_jiffies() + MAX_LPT_JIFFIES;
+    while (lpt_busy()) {
+        lpt_delay();
+        if (target_jiffies < rtc_get_jiffies()) {
+            return DEV_TIMEOUT;
+        }
+    }
+
+    uint8_t status = lpt_status();
+    if (status & (LPT_STATUS_ERROR | LPT_STATUS_PAPER)) {
+        // Online, there's paper, not busy, and not in error
+        if (status & LPT_STATUS_PAPER) {
+            return DEV_NOMEDIA;
+        } else {
+            return ERR_GENERAL;
+        }
+    } else {
+        return E_OK;
+    }
+
+    return E_OK;
+}
+
+/*
+ * Write a buffer of bytes to the parallel port
+ */
+static int16_t lpt_write(p_channel chan, const uint8_t * buffer, int16_t size) {
+    int i;
+    int16_t result;
+
+    for (i = 0; i < size; i++) {
+        result = lpt_write_b(chan, buffer[i]);
+        if (result) {
+            return result;
+        }
+    }
+
+    return E_OK;
 }
 
 #endif

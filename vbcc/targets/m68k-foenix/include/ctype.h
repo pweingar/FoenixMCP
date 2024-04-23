@@ -29,10 +29,10 @@ int isxdigit(int);
 #define isprint(x)  (__ctype[(x)+1] & 151)
 #define isgraph(x)  (__ctype[(x)+1] & 23)
 
+#ifdef __NOINLINE__
 int toupper(int);
 int tolower(int);
-
-#ifndef __NOINLINE__
+#else
 int toupper(__reg("d0") int) =
         "\tinline\n"
         "\txref\t___ctype\n"

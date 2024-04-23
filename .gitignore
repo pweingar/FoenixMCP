@@ -44,6 +44,10 @@ C256Mgr/__pycache__/
 *.idb
 *.pdb
 
+# Build results
+src/foenixmcp.s68
+src/mapfile
+
 # Kernel Module Compile Results
 *.mod*
 .tmp_versions/
@@ -70,3 +74,6 @@ src/bin/archive/foenixmcp_u_ram_20211206_02.bin
 src/bin/archive/foenixmcp_u_ram_20211206_01.bin
 src/bin/archive/foenixmcp_u_flash_20211206_02.bin
 src/bin/archive/foenixmcp_u_flash_20211206_01.bin
+
+# Calypsi list files
+*.lst
