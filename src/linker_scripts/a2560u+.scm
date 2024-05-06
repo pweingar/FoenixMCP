@@ -1,8 +1,11 @@
 (define memories
   '((memory VECTORS (address (#x0000 . #x03ff)) (section vectors))
-    (memory systemRAM (address (#x200000 . #x37ffff)) (type RAM)
-        (section stack sstack heap))
-    (memory flash (address (#x12000 . #x1fffff)) (type ROM))
+    (memory systemRAM (address (#x200000 . #x37ffff)) (type any)
+	(placement-group far-bits (section far cfar))
+	(placement-group far-nobits (section zfar stack sstack heap ))
+	)
+        ;(section reset stack sstack heap))
+   ; (memory flash (address (#x12000 . #x1fffff)) (type ROM))
 
     (memory palettes (address (#xb42000 . #xb43fff))
             (section (palette0 #xb42000) (palette1 #xb42400)
