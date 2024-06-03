@@ -25,6 +25,16 @@ extern void restart_cli();
 
 extern void call_user(long start, long stack, int argc, char * argv[]);
 
+#ifdef __CALYPSI_CORE_65816__
+typedef __attribute__((simple_call)) int (*user_proc)(int, char **);
+
+void call_user(long start, long stack, int argc, char * argv[]) {
+	user_proc start_point = (user_proc)start;
+	g_proc_result = start_point(argc, argv);
+	restart_cli();
+}
+#endif
+
 /*
  * Start a user mode process
  *

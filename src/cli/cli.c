@@ -85,6 +85,7 @@ typedef struct s_cli_command {
     char *name;
     char *help;
     cli_cmd_handler handler;
+	struct s_cli_command * next;
 } t_cli_command, *p_cli_command;
 
 extern short cmd_sysinfo(short channel, int argc, const char * argv[]);
@@ -110,49 +111,87 @@ short g_channels_swapped = 1;
 /** Flag to indicate that the current working directory has changed */
 short g_cwd_changed = 0;
 
+/** Pointer  to the first registered command */
+static p_cli_command first_command = 0;
+
 /** The history of previous commands issued */
 char cli_history[MAX_HISTORY_DEPTH][MAX_COMMAND_SIZE];
 
 /** Record of system information */
 t_sys_info cli_sys_info;
 
-/** The built-in commands supported */
-const t_cli_command g_cli_commands[] = {
-    { "?", "? : print this helpful message", cmd_help },
-    { "HELP", "HELP : print this helpful message", cmd_help },
-    { "CALL", "CALL <address> : execute code in supervisor mode at <address> ", mem_cmd_call },
-    { "CD", "CD <path> : sets the current directory", cmd_cd },
-    { "CLS", "CLS : clear the screen", cmd_cls },
-    { "COPY", "COPY <src path> <dst path> : Copies files to destination", cmd_copy },
-    { "CREDITS", "CREDITS : Print out the credits", cmd_credits },
-    { "DASM", "DASM <addr> [<count>] : print a memory disassembly", mem_cmd_dasm },
-    { "DEL", "DEL <path> : delete a file or directory", cmd_del },
-    { "DIR", "DIR <path> : print directory listing", cmd_dir },
-    { "DISKFILL", "DISKFILL <drive #> <sector #> <byte value>", cmd_diskfill },
-    { "DISKREAD", "DISKREAD <drive #> <sector #>", cmd_diskread },
-    { "DUMP", "DUMP <addr> [<count>] : print a memory dump", mem_cmd_dump},
-    { "GETJIFFIES", "GETJIFFIES : print the number of jiffies since bootup", cmd_getjiffies },
-    { "GETTICKS", "GETTICKS : print number of ticks since reset", cmd_get_ticks },
-    { "LABEL", "LABEL <drive#> <label> : set the label of a drive", cmd_label },
-    { "LOAD", "LOAD <path> : load a file into memory", cmd_load },
-    { "MKBOOT", "MKBOOT <drive #> -r | -b <boot sector path> | -s <start file path> : make a drive bootable", cmd_mkboot },
-    { "MKDIR", "MKDIR <path> : create a directory", cmd_mkdir },
-    { "PEEK8", "PEEK8 <addr> : print the byte at the address in memory", mem_cmd_peek8 },
-    { "PEEK16", "PEEK16 <addr> : print the 16-bit word at the address in memory", mem_cmd_peek16 },
-    { "PEEK32", "PEEK32 <addr> : print the 32-bit long word at the address in memory", mem_cmd_peek32 },
-    { "POKE8", "POKE8 <addr> <value> : write the byte value to the address in memory", mem_cmd_poke8 },
-    { "POKE16", "POKE16 <addr> <value> : write the 16-bit value to the address in memory", mem_cmd_poke16 },
-    { "POKE32", "POKE32 <addr> <value> : write the 32-bit value to the address in memory", mem_cmd_poke32 },
-    { "PWD", "PWD : prints the current directory", cmd_pwd },
-    { "REN", "REN <old path> <new path> : rename a file or directory", cmd_rename },
-    { "SET", "SET <name> <value> : set the value of a setting", cli_cmd_set },
-    { "GET", "GET <name> : get the value of a setting", cli_cmd_get },
-    { "SHOWINT", "SHOWINT : Show information about the interrupt registers", cmd_showint },
-    { "SYSINFO", "SYSINFO : prints information about the system", cmd_sysinfo },
-    { "TEST", "TEST <feature> : run a test about a feature", cmd_test },
-    { "TYPE", "TYPE <path> : print the contents of a text file", cmd_type },
-    { 0, 0 }
-};
+/*
+ * Command table
+ */
+
+/**
+ * @brief Get the first registered command
+ * 
+ * @return p_cli_command pointer to the first registered command
+ */
+p_cli_command cli_command_first() {
+	return first_command;
+}
+
+/**
+ * @brief Given the pointer to a command, return the pointer to the next command
+ * 
+ * @param command the current command
+ * @return p_cli_command pointer to the next command (0 if none)
+ */
+p_cli_command cli_command_next(p_cli_command command) {
+	if (command) {
+		return command->next;
+	} else {
+		return 0;
+	}
+}
+
+/**
+ * @brief Add a new command to the list of commands
+ * 
+ * @param name the name of the command to add
+ * @param help a simple helpful description for the command
+ * @param handler the code to run for the command
+ */
+void cli_command_register(char * name, char * help, cli_cmd_handler handler) {
+	p_cli_command new_command = (p_cli_command)malloc(sizeof(t_cli_command));
+	if (new_command) {
+		new_command->name = name;
+		new_command->help = help;
+		new_command->handler = handler;
+		new_command->next = 0;
+
+		if (first_command) {
+			// There is already at least one command... add it to the next available spot
+			p_cli_command current_command = first_command;
+			p_cli_command previous_command = 0;
+			
+			// Find the place to insert the command
+			while ((current_command) && (strcmp(current_command->name, name) < 0)) {
+				previous_command = current_command;
+				current_command = current_command->next;
+			}
+
+			if (previous_command) {
+				// We are inserting into the middle or end of the list
+				new_command->next = previous_command->next;
+				previous_command->next = new_command;
+
+			} else {
+				// We are inserting at the beginning of the list
+				new_command->next = first_command;
+				first_command = new_command;
+			}
+
+		} else {
+			// This is the first comnand added
+			first_command = new_command;
+		}
+	}
+}
+
+
 
 /**
  * Set the path of the command shell
@@ -228,12 +267,12 @@ short cli_txt_screen_get() {
 // List all the commands
 //
 short cmd_help(short channel, int argc, const char * argv[]) {
-    p_cli_command command;
+    for (p_cli_command command = cli_command_first(); command != 0; command = cli_command_next(command)) {
+		if ((command->name) && (command->help)) {
+			printf("%s\n", command->help);
+		}
+	}
 
-    for (command = (p_cli_command)g_cli_commands; (command != 0) && (command->name != 0); command++) {
-        sys_chan_write(channel, command->help, strlen(command->help));
-        sys_chan_write(channel, "\n", 2);
-    }
     return 0;
 }
 
@@ -337,21 +376,17 @@ short cmd_showint(short channel, int argc, const char * argv[]) {
 //  parameters = the string of parameters to be passed to the command
 //
 short cli_exec(short channel, char * command, int argc, const char * argv[]) {
-    p_cli_command commands = (p_cli_command)g_cli_commands;
-
     log3(LOG_INFO, "cli_exec: '", argv[0], "'");
     log_num(LOG_INFO, "argc = ", argc);
 
-    while ((commands != 0) && (commands->name != 0)) {
-        // Does the command match the name?
-        if (strcmp(commands->name, command) == 0) {
-            // Found it, execute the handler
-            return commands->handler(channel, argc, argv);
-        } else {
-            // No match, keep checking...
-            commands++;
-        }
-    }
+	for (p_cli_command command = cli_command_first(); command != 0; command = cli_command_next(command)) {
+		if (command->name) {
+			if (strcmp(command->name, command) == 0) {
+				// Found it, execute the handler
+            	return command->handler(channel, argc, argv);
+			}
+		}
+	}
 
     /* No built-in command that matched... try to run a binary file */
     return cmd_run(channel, argc, argv);
@@ -1192,6 +1227,58 @@ void cli_flag_cwd() {
     g_cwd_changed = 1;
 }
 
+/**
+ * @brief Initialize the table of commands
+ * 
+ */
+void cli_init_commands() {
+	cli_command_register("?", "? : print this helpful message", cmd_help);
+    cli_command_register("HELP", "HELP : print this helpful message", cmd_help);
+    cli_command_register("CALL", "CALL <address> : execute code in supervisor mode at <address> ", mem_cmd_call);
+    cli_command_register("CD", "CD <path> : sets the current directory", cmd_cd);
+    cli_command_register("CLS", "CLS : clear the screen", cmd_cls);
+    cli_command_register("COPY", "COPY <src path> <dst path> : Copies files to destination", cmd_copy);
+    cli_command_register("CREDITS", "CREDITS : Print out the credits", cmd_credits);
+    cli_command_register("DEL", "DEL <path> : delete a file or directory", cmd_del);
+    cli_command_register("DIR", "DIR <path> : print directory listing", cmd_dir);
+    cli_command_register("DISKFILL", "DISKFILL <drive #> <sector #> <byte value>", cmd_diskfill);
+    cli_command_register("DISKREAD", "DISKREAD <drive #> <sector #>", cmd_diskread);
+    cli_command_register("DUMP", "DUMP <addr> [<count>] : print a memory dump", mem_cmd_dump);
+    cli_command_register("GETJIFFIES", "GETJIFFIES : print the number of jiffies since bootup", cmd_getjiffies);
+    cli_command_register("GETTICKS", "GETTICKS : print number of ticks since reset", cmd_get_ticks);
+    cli_command_register("LABEL", "LABEL <drive#> <label> : set the label of a drive", cmd_label);
+    cli_command_register("LOAD", "LOAD <path> : load a file into memory", cmd_load);
+    cli_command_register("MKBOOT", "MKBOOT <drive #> -r | -b <boot sector path> | -s <start file path> : make a drive bootable", cmd_mkboot);
+    cli_command_register("MKDIR", "MKDIR <path> : create a directory", cmd_mkdir);
+    cli_command_register("PEEK8", "PEEK8 <addr> : print the byte at the address in memory", mem_cmd_peek8);
+    cli_command_register("PEEK16", "PEEK16 <addr> : print the 16-bit word at the address in memory", mem_cmd_peek16);
+    cli_command_register("PEEK32", "PEEK32 <addr> : print the 32-bit long word at the address in memory", mem_cmd_peek32);
+    cli_command_register("POKE8", "POKE8 <addr> <value> : write the byte value to the address in memory", mem_cmd_poke8);
+    cli_command_register("POKE16", "POKE16 <addr> <value> : write the 16-bit value to the address in memory", mem_cmd_poke16);
+    cli_command_register("POKE32", "POKE32 <addr> <value> : write the 32-bit value to the address in memory", mem_cmd_poke32);
+    cli_command_register("PWD", "PWD : prints the current directory", cmd_pwd);
+    cli_command_register("REN", "REN <old path> <new path> : rename a file or directory", cmd_rename);
+    cli_command_register("SET", "SET <name> <value> : set the value of a setting", cli_cmd_set);
+    cli_command_register("GET", "GET <name> : get the value of a setting", cli_cmd_get);
+    cli_command_register("SHOWINT", "SHOWINT : Show information about the interrupt registers", cmd_showint);
+    cli_command_register("SYSINFO", "SYSINFO : prints information about the system", cmd_sysinfo);
+    cli_command_register("TYPE", "TYPE <path> : print the contents of a text file", cmd_type);
+
+	// Register CPU specific commands
+	switch (cli_sys_info.cpu) {
+		case CPU_M68000:
+		case CPU_M68040:
+		case CPU_M68040V:
+		case CPU_M680EC40:
+			// Register commands used on 680x0 machines only
+			cli_command_register("DASM", "DASM <addr> [<count>] : print a memory disassembly", mem_cmd_dasm);
+			break;
+
+		default:
+			break;
+	}
+}
+
 //
 // Initialize the CLI
 //
@@ -1208,6 +1295,9 @@ short cli_init() {
 
     // Get the system information we'll use in several places
     sys_get_info(&cli_sys_info);
+
+	// Register commands
+	cli_init_commands();
 
     cli_set_init();
     return 0;

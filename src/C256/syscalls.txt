@@ -1,6 +1,6 @@
 #  A  list of system calls to be used to autogenerate the various jump tables and sys calls stubs\
 
-# proc_exit
+proc_exit
 int_enable_all
 int_disable_all
 int_disable
@@ -23,6 +23,7 @@ chan_open
 chan_close
 chan_swap
 chan_device
+chan_register
 
 bdev_register
 bdev_read
@@ -31,23 +32,23 @@ bdev_status
 bdev_flush
 bdev_ioctrl
 
-# fsys_open
-# fsys_close
-# fsys_opendir
-# fsys_closedir
-# fsys_readdir
-# fsys_findfirst
-# fsys_findnext
-# fsys_get_label
-# fsys_set_label
-# fsys_mkdir
-# fsys_delete
-# fsys_rename
-# fsys_set_cwd
-# fsys_get_cwd
-# fsys_load
-# fsys_register_loader
-# fsys_stat
+fsys_open
+fsys_close
+fsys_opendir
+fsys_closedir
+fsys_readdir
+fsys_findfirst
+fsys_findnext
+fsys_get_label
+fsys_set_label
+fsys_mkdir
+fsys_delete
+fsys_rename
+fsys_set_cwd
+fsys_get_cwd
+fsys_load
+fsys_register_loader
+fsys_stat
 
 mem_get_ramtop
 mem_reserve
@@ -57,7 +58,7 @@ rtc_get_time
 kbd_scancode
 err_message
 kbd_layout
-# proc_run
+proc_run
 var_set
 var_get
 

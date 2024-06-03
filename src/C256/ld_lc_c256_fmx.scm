@@ -14,7 +14,7 @@
     (memory FarRAM2 (address (#x030000 . #x03ffff))
             (section zfar zhuge ))
     (memory LoCODE (address (#x00f000 . #x00ffdf))
-            (section code cdata jumptable))
+            (section code cdata (jumptable #x00f000)))
     (memory Vector (address (#x00ffe0 . #x00ffff))
             (section (reset #xfffc)))
     (block stack (size #x1000))
