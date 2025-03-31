@@ -3,7 +3,7 @@
 # User may over-ride the UNIT and MEMORY parameters to specify target machine
 # and where the MCP will run (ram or flash)
 #
-UNIT := a2560k
+UNIT := a2560m
 MEMORY := flash
 
 # CPU_WDC65816                0x16  /* CPU code for the Western Design Center 65816 */
@@ -22,6 +22,7 @@ MEMORY := flash
 # MODEL_FOENIX_A2560X         8
 # MODEL_FOENIX_A2560U         9
 # MODEL_FOENIX_A2560K         11
+# MODEL_FOENIX_A2560M         12
 
 # Determine target CPU and MODEL based on the UNIT
 
@@ -31,6 +32,13 @@ export VASM_CPU = -m68040	# VASM CPU flag
 export VBCC_CPU = 68040		# VBCC CPU flag
 export MODEL_NUMBER = 11	# A2560K
 export cpu = m68040
+
+else ifeq ($(UNIT),a2560m)
+export CPU_NUMBER = 6		# M68060V
+export VASM_CPU = -m68060	# VASM CPU flag
+export VBCC_CPU = 68060		# VBCC CPU flag
+export MODEL_NUMBER = 11	# A2560K
+export cpu = m68060
 
 else ifeq ($(UNIT),genx)
 export CPU_NUMBER = 6		# M68040V
@@ -77,6 +85,8 @@ cpu_c_obj := $(subst .c,.o,$(cpu_c_src))
 dev_base_sources = dev/block.c dev/channel.c dev/console.c dev/fsys.c dev/pata.c dev/ps2.c dev/rtc.c dev/sdc.c dev/txt_screen.c dev/uart.c
 ifeq ($(UNIT),a2560k)
 dev_c_src := $(dev_base_sources) dev/fdc.c dev/kbd_mo.c dev/lpt.c dev/midi.c dev/txt_a2560k_a.o dev/txt_a2560k_b.o m68040/fdc_m68040.o
+else ifeq ($(UNIT),a2560m)
+dev_c_src := $(dev_base_sources) dev/fdc.c dev/kbd_mo.c dev/lpt.c dev/midi.c dev/txt_a2560k_a.o dev/txt_a2560k_b.o m68060/fdc_m68060.o
 else
 dev_c_src := $(dev_base_sources)
 endif
